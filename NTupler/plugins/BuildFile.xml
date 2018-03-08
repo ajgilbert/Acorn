@@ -1,0 +1,29 @@
+<library file="*.cc" name="AcornNTuplerplugins">
+<!--   <use name="UserCode/ICHiggsTauTau"/>
+  <use name="DataFormats/PatCandidates"/>
+  <use name="FWCore/ServiceRegistry"/>
+  <use name="MagneticField/Records"/>
+  <use name="MagneticField/Engine"/>
+  <use name="RecoEgamma/EgammaTools"/>
+  <use name="PhysicsTools/UtilAlgos"/>
+  <use name="PhysicsTools/PatAlgos"/>
+  <use name="PhysicsTools/PatUtils"/>
+  <use name="PhysicsTools/CandUtils"/>
+  <use name="EgammaAnalysis/ElectronTools"/>
+  <use name="RecoMET/METAlgorithms"/>
+  <use name="DataFormats/METReco"/>
+  <use name="RecoMET/METPUSubtraction"/>
+  <use name="JetMETCorrections/Objects"/>
+  <use name="PhysicsTools/HepMCCandAlgos"/>
+  <use name="HLTrigger/HLTcore"/>
+  <use name="clhep"/> -->
+  <use name="root"/>
+  <use name="clhep"/>
+  <use name="rootrflx"/>
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="DataFormats/HepMCCandidate"/>
+  <use name="DataFormats/PatCandidates"/>
+  <flags EDM_PLUGIN="1"/>
+  <!-- <flags CXXFLAGS="`printenv CMSSW_VERSION | sed 's/CMSSW_\([0-9]*\)_\([0-9]*\)_\([0-9]*\)*.*/-DCMSSW_MAJOR_VERSION=\1 -DCMSSW_MINOR_VERSION=\2 -DCMSSW_REVISION=\3/'`"/> -->
+</library>
