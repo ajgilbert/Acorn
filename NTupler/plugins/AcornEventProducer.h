@@ -1,5 +1,5 @@
-#ifndef UserCode_ICHiggsTauTau_ICEventProducer_h
-#define UserCode_ICHiggsTauTau_ICEventProducer_h
+#ifndef Acorn_NTupler_EventProducer_h
+#define Acorn_NTupler_EventProducer_h
 
 #include <memory>
 #include "TFile.h"
@@ -12,25 +12,16 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Concurrency/interface/SerialTaskQueue.h"
 
-/**
- * @brief Handles the creation of the ntuple output, and must always be included
- *after the other IC object producers.
- *
- * **Example usage**
- * @snippet python/default_producers_cfi.py Event
- */
-
-
 struct StreamProducer {
   TFile *f = nullptr;
   TTree *t = nullptr;
 };
 
 
-class ICEventProducer : public edm::global::EDProducer<edm::StreamCache<StreamProducer>> {
+class AcornEventProducer : public edm::global::EDProducer<edm::StreamCache<StreamProducer>> {
  public:
-  explicit ICEventProducer(const edm::ParameterSet&);
-  ~ICEventProducer();
+  explicit AcornEventProducer(const edm::ParameterSet&);
+  ~AcornEventProducer();
 
   std::unique_ptr<StreamProducer> beginStream(edm::StreamID id) const {
       auto streamProd = std::make_unique<StreamProducer>();

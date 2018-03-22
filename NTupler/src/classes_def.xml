@@ -1,0 +1,7 @@
+<lcgdict>
+  <class name="ac::Candidate"/>
+  <class name="std::vector<ac::Candidate>"/>
+  <class name="ac::GenParticle"/>
+  <class name="std::vector<ac::GenParticle>"/>
+  <class name="ac::EventInfo"/>
+</lcgdict>
