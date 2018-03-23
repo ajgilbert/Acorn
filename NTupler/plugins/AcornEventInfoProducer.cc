@@ -33,30 +33,32 @@
 
 AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<ac::EventInfo>(config),
-      lhe_collection_(config.getParameter<edm::InputTag>("lheProducer")),
+      lheTag_(config.getParameter<edm::InputTag>("lheProducer")),
+      lheToken_(consumes<LHEEventProduct>(config.getParameter<edm::InputTag>("lheProducer"))),
+      genToken_(consumes<GenEventInfoProduct>(config.getParameter<edm::InputTag>("generator"))),
+      includeLHEWeights_(config.getParameter<bool>("includeLHEWeights")),
+      includeGenWeights_(config.getParameter<bool>("includeGenWeights"))
       // do_jets_rho_(config.getParameter<bool>("includeJetRho")),
       // input_jets_rho_(config.getParameter<edm::InputTag>("inputJetRho")),
       // do_leptons_rho_(config.getParameter<bool>("includeLeptonRho")),
       // input_leptons_rho_(config.getParameter<edm::InputTag>("inputLeptonRho")),
       // do_vertex_count_(config.getParameter<bool>("includeVertexCount")),
       // input_vertices_(config.getParameter<edm::InputTag>("inputVertices")),
-      do_lhe_weights_(config.getParameter<bool>("includeLHEWeights"))
-      // do_embedding_weights_(config.getParameter<bool>("includeEmbeddingWeights")),
-      // do_ht_(config.getParameter<bool>("includeHT")),
-      // do_csc_filter_(config.getParameter<bool>("includeCSCFilter")),
-      // input_csc_filter_(config.getParameter<edm::InputTag>("inputCSCFilter")),
-      // do_filtersfromtrig_(config.getParameter<bool>("includeFiltersFromTrig")),
-      // filtersfromtrig_input_(config.getParameter<edm::InputTag>("inputfiltersfromtrig")),
-      // filtersfromtrig_(config.getParameter<std::vector<std::string> >("filtersfromtrig"))
+// do_embedding_weights_(config.getParameter<bool>("includeEmbeddingWeights")),
+// do_ht_(config.getParameter<bool>("includeHT")),
+// do_csc_filter_(config.getParameter<bool>("includeCSCFilter")),
+// input_csc_filter_(config.getParameter<edm::InputTag>("inputCSCFilter")),
+// do_filtersfromtrig_(config.getParameter<bool>("includeFiltersFromTrig")),
+// filtersfromtrig_input_(config.getParameter<edm::InputTag>("inputfiltersfromtrig")),
+// filtersfromtrig_(config.getParameter<std::vector<std::string> >("filtersfromtrig"))
 {
-      consumes<LHERunInfoProduct, edm::InRun>({lhe_collection_});
-      consumes<GenEventInfoProduct>({"generator"});
-      consumes<LHEEventProduct>(lhe_collection_);
-      // consumes<double>(input_leptons_rho_);
-      // consumes<double>(input_jets_rho_);
-      // consumes<edm::View<reco::Vertex>>(input_vertices_);
-      // consumes<reco::BeamHaloSummary>(input_csc_filter_);
-      // consumes<edm::TriggerResults>(filtersfromtrig_input_);
+  consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
+  consumes<GenEventInfoProduct>({"generator"});
+  // consumes<double>(input_leptons_rho_);
+  // consumes<double>(input_jets_rho_);
+  // consumes<edm::View<reco::Vertex>>(input_vertices_);
+  // consumes<reco::BeamHaloSummary>(input_csc_filter_);
+  // consumes<edm::TriggerResults>(filtersfromtrig_input_);
   // edm::ParameterSet filter_params =
   //     config.getParameter<edm::ParameterSet>("filters");
   // std::vector<std::string> filter_names =
@@ -121,10 +123,10 @@ AcornEventInfoProducer::~AcornEventInfoProducer() {
 
 void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup const &es) {
   AcornBaseProducer<ac::EventInfo>::beginRun(run, es);
-  if (!do_lhe_weights_) return;
-  if (lhe_weight_labels_.size()) return;
+  if (!includeLHEWeights_) return;
+  if (lheWeightLabels_.size()) return;
   edm::Handle<LHERunInfoProduct> lhe_info;
-  run.getByLabel(lhe_collection_, lhe_info);
+  run.getByLabel(lheTag_, lhe_info);
   bool record = false;
   std::regex rgx(R"(<weight id=\"(\d+)\">(.*)</weight>)");
   for (auto it = lhe_info->headers_begin(); it != lhe_info->headers_end();
@@ -133,19 +135,19 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
     for (; iLt != it->end(); ++iLt) {
       std::string const& line = *iLt;
       if (line.find("<weightgroup")  != std::string::npos) {
-        lhe_weight_labels_.push_back(line);
-        lhe_weight_was_kept_.push_back(false);
+        lheWeightLabels_.push_back(line);
+        lheWeightWasKept_.push_back(false);
         record = true;
         continue;
       }
       if (line.find("</weightgroup") != std::string::npos) {
-        lhe_weight_labels_.push_back(line);
-        lhe_weight_was_kept_.push_back(false);
+        lheWeightLabels_.push_back(line);
+        lheWeightWasKept_.push_back(false);
         record = false;
         continue;
       }
       if (record) {
-        lhe_weight_labels_.push_back(line);
+        lheWeightLabels_.push_back(line);
         std::smatch rgx_match;
         std::regex_search(line, rgx_match, rgx);
         if (rgx_match.size() == 3) {
@@ -153,19 +155,19 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
           boost::trim(label);
           std::vector<std::string> split_label;
           boost::split(split_label, label, boost::is_any_of(" \t"), boost::token_compress_on);
+
           bool keep = false;
           for (auto const& x : split_label) {
             auto rule = getVarRule("lheweights:" + x);
             if (!rule.zeroed) {
               unsigned id = boost::lexical_cast<int>(rgx_match[1]);
-              saved_lhe_weight_ids_[id] = rule;
+              savedLHEWeightIds[id] = rule;
               keep = true;
-              // std::cout << "Saving " << id << ": " << label << ", which matched rgx\n";
               break;
             }
           }
-          lhe_weight_was_kept_.push_back(keep);
-          // std::cout << "Matched: " << boost::lexical_cast<int>(rgx_match[1]) << " = " << rgx_match[2] << "\n";
+          lheWeightWasKept_.push_back(keep);
+
         } else {
             edm::LogWarning("LHEHeaderParsing") << "Line was not in the expected format: " << line << "\n";
         }
@@ -180,11 +182,11 @@ void AcornEventInfoProducer::endRun(edm::Run const& run, edm::EventSetup const& 
 void AcornEventInfoProducer::produce(edm::Event& event,
                                   const edm::EventSetup& setup) {
   ac::EventInfo * info = output();
-  info->set_is_data(event.isRealData());
-  info->set_run(event.run());
-  info->set_event(event.id().event());
-  info->set_lumi_block(event.luminosityBlock());
-  info->set_bunch_crossing(event.bunchCrossing());
+  info->setIsRealData(event.isRealData());
+  info->setRun(event.run());
+  info->setEvent(event.id().event());
+  info->setLuminosityBlock(event.luminosityBlock());
+  info->setBunchCrossing(event.bunchCrossing());
 
   // edm::Handle<double> jets_rho_handle;
   // if (do_jets_rho_) {
@@ -218,33 +220,44 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   //   info_->set_good_vertices(vtxs_handle->size());
   // }
 
-  edm::Handle<LHEEventProduct> lhe_handle;
-  event.getByLabel(lhe_collection_, lhe_handle);
-  double nominal_wt = lhe_handle->hepeup().XWGTUP;
-  for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
-    unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
-    auto it = saved_lhe_weight_ids_.find(id);
-    if (it != saved_lhe_weight_ids_.end()) {
-      double weight = lhe_handle->weights()[i].wgt / nominal_wt;
-      info->set_lheweight(id, processVar(weight, it->second));
+  if (includeLHEWeights_) {
+    edm::Handle<LHEEventProduct> lhe_handle;
+    event.getByToken(lheToken_, lhe_handle);
+    double nominalLHEWeight = lhe_handle->hepeup().XWGTUP;
+    info->setNominalLHEWeight(setVar("nominalLHEWeight", nominalLHEWeight));
+    for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
+      // Weight id is a string, assume it can always cast to an unsigned int
+      unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
+      auto it = savedLHEWeightIds.find(id);
+      if (it != savedLHEWeightIds.end()) {
+        double weight = lhe_handle->weights()[i].wgt / nominalLHEWeight;
+        info->setLHEWeight(id, processVar(weight, it->second));
+      }
     }
   }
 
-  // edm::Handle<GenEventInfoProduct> gen_info_handle;
-  // if(do_embedding_weights_){
-  //   event.getByLabel("generator",gen_info_handle);
-  //   info_->set_weight("wt_embedding", gen_info_handle->weight());
-  // }
-  // if(!event.isRealData()){
-  //   event.getByLabel("generator",gen_info_handle);
-  //   if(gen_info_handle.isValid()){
-  //     if(gen_info_handle->weight()>=0){
-  //       info_->set_weight("wt_mc_sign",1);
-  //     } else info_->set_weight("wt_mc_sign",-1);
-  //   }
-  // }
+  if (includeGenWeights_) {
+    edm::Handle<GenEventInfoProduct> gen_info_handle;
+    event.getByToken(genToken_, gen_info_handle);
+    if (gen_info_handle.isValid()) {
+      double nominal_gen_weight = gen_info_handle->weight();
+      info->setNominalGenWeight(setVar("nominalGenWeight", gen_info_handle->weight()));
+
+      // Insert the sign of the weight into the main weight calculator
+      info->setWeight("wt_mc_sign", (nominal_gen_weight >= 0.) ? 1.0 : -1.0);
+
+      std::vector<double> gen_weights(gen_info_handle->weights().size());
+      for (unsigned i = 0; i < gen_info_handle->weights().size(); ++i) {
+        gen_weights[i] = setVar("genWeights", gen_info_handle->weights()[i] / nominal_gen_weight);
+      }
+      info->setGenWeights(gen_weights);
+    }
+  }
+
+  // info->Print(1);
+
   // if(do_lhe_weights_ || do_ht_){
-  //   event.getByLabel(lhe_collection_, lhe_handle); 
+  //   event.getByLabel(lhe_collection_, lhe_handle);
   //  /* Accessing global evt weights directly from the LHEEventProduct
   //     disabled and replaced by taking them from the GenEventInfoProduct
   //     which should exist in all samples, independent of which generator was used
@@ -361,12 +374,12 @@ void AcornEventInfoProducer::endStream() {
   //     std::cout << boost::format("%-56s| %020i\n") % iter->first % iter->second;
   //   }
   // }
-  if (lhe_weight_labels_.size()) {
+  if (lheWeightLabels_.size()) {
     std::cout << "LHE event weights\n";
     std::cout << std::string(78, '-') << "\n";
-    for (unsigned l = 0; l < lhe_weight_labels_.size(); ++l) {
-      if (lhe_weight_was_kept_[l]) std::cout << "(*) ";
-      std::cout << lhe_weight_labels_[l];
+    for (unsigned l = 0; l < lheWeightLabels_.size(); ++l) {
+      if (lheWeightWasKept_[l]) std::cout << "(*) ";
+      std::cout << lheWeightLabels_[l];
     }
   }
 }

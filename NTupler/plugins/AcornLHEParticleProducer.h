@@ -1,5 +1,5 @@
-#ifndef Acorn_NTupler_AcornGenParticleProducer_h
-#define Acorn_NTupler_AcornGenParticleProducer_h
+#ifndef Acorn_NTupler_AcornLHEParticleProducer_h
+#define Acorn_NTupler_AcornLHEParticleProducer_h
 
 #include <memory>
 #include <vector>
@@ -18,17 +18,17 @@
 #include "Acorn/NTupler/plugins/AcornEventProducer.h"
 #include "Acorn/NTupler/plugins/AcornBaseProducer.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
-
-class AcornGenParticleProducer : public AcornBaseProducer<std::vector<ac::GenParticle>> {
+class AcornLHEParticleProducer : public AcornBaseProducer<std::vector<ac::GenParticle>> {
  public:
-  explicit AcornGenParticleProducer(const edm::ParameterSet &config);
-  ~AcornGenParticleProducer();
+  explicit AcornLHEParticleProducer(const edm::ParameterSet &config);
+  ~AcornLHEParticleProducer();
 
  private:
   virtual void produce(edm::Event &, const edm::EventSetup &);
 
-  edm::EDGetTokenT<edm::View<reco::GenParticle>> inputToken_;
+  edm::EDGetTokenT<LHEEventProduct> inputToken_;
 };
 
 

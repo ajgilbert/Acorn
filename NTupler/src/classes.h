@@ -11,6 +11,7 @@ namespace { struct dictionary {
   std::vector<ac::Candidate> dummy2;
   ac::GenParticle dummy8;
   std::vector<ac::GenParticle> dummy9;
+  std::map<std::string, std::pair<bool, double>> dummy3;
   ac::EventInfo dummy10;
 
 };

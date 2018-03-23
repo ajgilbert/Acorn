@@ -3,25 +3,38 @@
 
 namespace ac {
 EventInfo::EventInfo()
-    : is_data_(false),
+    : isRealData_(false),
       event_(0),
       run_(0),
-      lumi_block_(0),
-      bunch_crossing_(0) {}
-      // jet_rho_(0.),
-      // lepton_rho_(0.),
-      // gen_ht_(0.),
-      // n_outgoing_partons_(0),
-      // gen_mll_(0.),
-      // good_vertices_(0) {}
+      luminosityBlock_(0),
+      bunchCrossing_(0),
+      nominalGenWeight_(0.),
+      nominalLHEWeight_(0.) {}
 
 EventInfo::~EventInfo() {}
 
-void EventInfo::Print() const {
-  std::cout << boost::format("%s\n") % std::string(30, '=');
-  std::cout << boost::format("%-17s | %10i\n")   % "event"          % event_;
-  std::cout << boost::format("%-17s | %10i\n")   % "lumi_block"     % lumi_block_;
-  std::cout << boost::format("%-17s | %10i\n")   % "run"            % run_;
+void EventInfo::Print(unsigned detail) const {
+  using boost::format;
+  std::cout << format("%s\n") % std::string(30, '=');
+  std::cout << format("%-17s | %10i\n")   % "isRealData"       % isRealData();
+  std::cout << format("%-17s | %10i\n")   % "event"            % event();
+  std::cout << format("%-17s | %10i\n")   % "luminosityBlock"  % luminosityBlock();
+  std::cout << format("%-17s | %10i\n")   % "run"              % run();
+  std::cout << format("%-17s | %10i\n")   % "bunchCrossing"    % bunchCrossing();
+  std::cout << format("%-17s | %10f\n")   % "nominalGenWeight" % nominalGenWeight();
+  std::cout << format("%-17s | %10f\n")   % "nominalLHEWeight" % nominalLHEWeight();
+  std::cout << format("%-17s | %10i\n")   % "genWeights[n]"    % genWeights().size();
+  if (detail > 0) {
+    for (unsigned i = 0; i < genWeights().size(); ++i) {
+      std::cout << format("    %-13i | %10f\n") % i % genWeights()[i];
+    }
+  }
+  std::cout << boost::format("%-17s | %10i\n")   % "lheWeights[n]"    % lheWeights().size();
+  if (detail > 0) {
+    for (auto const& it : lheWeights()) {
+      std::cout << format("    %-13i | %10f\n") % it.first % it.second;
+    }
+  }
 //   std::cout << boost::format("%-17s | %10.3f\n") % "jet_rho"        % jet_rho_;
 //   std::cout << boost::format("%-17s | %10.3f\n") % "lepton_rho"     % lepton_rho_;
 //   std::cout << boost::format("%-17s | %10i\n")   % "good_vertices"  % good_vertices_;

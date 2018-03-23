@@ -78,8 +78,10 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ################################################################
 # Message Logging, summary, and number of events
 ################################################################
+isMC = True
+
 process.maxEvents = cms.untracked.PSet(
-    input=cms.untracked.int32(100)
+    input=cms.untracked.int32(100000)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
@@ -96,7 +98,8 @@ from CondCore.CondDB.CondDB_cfi import *
 
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
     # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/94X_mc2017_realistic_v10_ext1-v1/00000/0000BD66-99F4-E711-97DF-24BE05C33C22.root',
-    'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/001F8E98-4D05-E811-91A5-02163E019B9C.root'
+    # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/001F8E98-4D05-E811-91A5-02163E019B9C.root'
+    'root://cms-xrd-global.cern.ch//store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/70000/02FE572F-88DA-E611-8CAB-001E67792884.root'
 ))
 process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v10')
 
@@ -110,20 +113,29 @@ process.acGenParticleProducer = cms.EDProducer('AcornGenParticleProducer',
     select=cms.vstring('keep .* p4=12', 'drop mothers')
 )
 
+process.acLHEParticleProducer = cms.EDProducer('AcornLHEParticleProducer',
+    input=cms.InputTag("externalLHEProducer"),
+    branch=cms.string('lheParticles'),
+    select=cms.vstring('keep .* p4=12')
+)
+
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
-    includeLHEWeights=cms.bool(True),
+    generator=cms.InputTag("generator"),
+    includeLHEWeights=cms.bool(isMC),
+    includeGenWeights=cms.bool(isMC),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF).*=10',
-        'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10')
+        'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
+        'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10')
 )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
-process.p = cms.Path(process.acGenParticleProducer + process.acEventInfoProducer + process.acEventProducer)
+process.p = cms.Path(process.acLHEParticleProducer + process.acGenParticleProducer + process.acEventInfoProducer + process.acEventProducer)
 
 # process.schedule = cms.Schedule(process.patTriggerPath, process.p)
 process.schedule = cms.Schedule(process.p)

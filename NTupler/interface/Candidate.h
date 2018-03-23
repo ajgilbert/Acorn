@@ -60,36 +60,31 @@ class Candidate {
   /// @name Setters
   /**@{*/
   /// @copybrief vector()
-  inline void set_vector(Vector const& vector) { vector_ = vector; }
+  inline void setVector(Vector const& vector) { vector_ = vector; }
 
   /// @copybrief id()
-  inline void set_id(std::size_t const& id) { id_ = id; }
+  inline void setId(std::size_t const& id) { id_ = id; }
 
   /// @copybrief pt()
-  inline void set_pt(double const& pt) { vector_.SetPt(pt); }
+  inline void setPt(double const& pt) { vector_.SetPt(pt); }
 
   /// @copybrief eta()
-  inline void set_eta(double const& eta) { vector_.SetEta(eta); }
+  inline void setEta(double const& eta) { vector_.SetEta(eta); }
 
   /// @copybrief phi()
-  inline void set_phi(double const& phi) { vector_.SetPhi(phi); }
+  inline void setPhi(double const& phi) { vector_.SetPhi(phi); }
 
   /// @copybrief energy()
-  inline void set_M(double const& mass) { vector_.SetM(mass); }
+  inline void setM(double const& mass) { vector_.SetM(mass); }
 
   /// @copybrief charge()
-  inline void set_charge(int const& charge) { charge_ = charge; }
+  inline void setCharge(int const& charge) { charge_ = charge; }
   /**@}*/
 
  private:
   Vector vector_;
   std::size_t id_;
   int charge_;
-
- #ifndef SKIP_CINT_DICT
- public:
-  ClassDef(Candidate, 2);
- #endif
 };
 
 }
