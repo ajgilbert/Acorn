@@ -128,7 +128,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF).*=10',
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf).*=10',
         'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
         'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10')
 )
@@ -139,3 +139,4 @@ process.p = cms.Path(process.acLHEParticleProducer + process.acGenParticleProduc
 
 # process.schedule = cms.Schedule(process.patTriggerPath, process.p)
 process.schedule = cms.Schedule(process.p)
+# print process.dumpPython()
