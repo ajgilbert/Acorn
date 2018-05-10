@@ -3,6 +3,7 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/ServiceRegistry"/>
+<use name="FWCore/Concurrency"/>
 <use name="DataFormats/PatCandidates"/>
 <!-- <use name="PhysicsTools/UtilAlgos"/>
 <use name="RecoEcal/EgammaCoreTools"/>
