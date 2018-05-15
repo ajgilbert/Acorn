@@ -6,6 +6,7 @@
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
 #include "boost/format.hpp"
+#include "boost/algorithm/string.hpp"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -128,12 +129,17 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
   edm::Handle<LHERunInfoProduct> lhe_info;
   run.getByLabel(lheTag_, lhe_info);
   bool record = false;
-  std::regex rgx(R"(<weight id=\"(\d+)\">(.*)</weight>)");
+  // We need to be able to match something like:
+  // <weight id="rwgt_100004">set param_card dim6 1 1.6 # orig: 0.0\n</weight>
+  std::regex rgx(R"(<weight.*id=\"[^\d]*(\d+)\".*>([\s\S]*)</weight>)");
   for (auto it = lhe_info->headers_begin(); it != lhe_info->headers_end();
        ++it) {
     std::vector<std::string>::const_iterator iLt = it->begin();
     for (; iLt != it->end(); ++iLt) {
-      std::string const& line = *iLt;
+      std::string line = *iLt;
+      //boost::replace_all(line, "&lt;", "<");
+      //boost::replace_all(line, "&gt;", ">");
+      //std::cout << line;
       if (line.find("<weightgroup")  != std::string::npos) {
         lheWeightLabels_.push_back(line);
         lheWeightWasKept_.push_back(false);
@@ -147,6 +153,14 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         continue;
       }
       if (record) {
+        // For some entries madgraph adds a line break before the closing
+        // </weight>, this is a workaround
+        if (line.find("</weight>") == line.npos) {
+          line = line + "</weight>";
+        }
+        if (line.find("</weight>") == 0) {
+          continue;
+        }
         lheWeightLabels_.push_back(line);
         std::smatch rgx_match;
         std::regex_search(line, rgx_match, rgx);
@@ -169,7 +183,8 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
           lheWeightWasKept_.push_back(keep);
 
         } else {
-            edm::LogWarning("LHEHeaderParsing") << "Line was not in the expected format: " << line << "\n";
+          lheWeightWasKept_.push_back(false);
+          edm::LogWarning("LHEHeaderParsing") << "Line was not in the expected format: " << line << "\n";
         }
       }
     }
@@ -223,7 +238,8 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   if (includeLHEWeights_) {
     edm::Handle<LHEEventProduct> lhe_handle;
     event.getByToken(lheToken_, lhe_handle);
-    double nominalLHEWeight = lhe_handle->hepeup().XWGTUP;
+    //double nominalLHEWeight = lhe_handle->hepeup().XWGTUP;
+    double nominalLHEWeight = lhe_handle->weights()[0].wgt ;
     info->setNominalLHEWeight(setVar("nominalLHEWeight", nominalLHEWeight));
     for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
       // Weight id is a string, assume it can always cast to an unsigned int
