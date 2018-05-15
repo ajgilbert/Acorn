@@ -1,0 +1,32 @@
+[
+  {
+    "release": "CMSSW_7_1_17_patch1",
+    "SCRAM_ARCH": "slc6_amd64_gcc481",
+    "cfg": "gen-only-miniaod-2016/SMP-RunIIWinter15wmLHE-00025_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": ["gen-only-miniaod-2016/run_remote_tarball_7_1_17_patch1.sh"]
+  },
+  {
+    "release": "CMSSW_7_1_19",
+    "SCRAM_ARCH": "slc6_amd64_gcc481",
+    "cfg": "gen-only-miniaod-2016/SMP-RunIISummer15GS-00021_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": []
+  },
+  {
+    "release": "CMSSW_8_0_21",
+    "SCRAM_ARCH": "slc6_amd64_gcc530",
+    "cfg": "gen-only-miniaod-2016/SMP-RunIISummer16MiniAODv2-00084_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": []
+  },
+  {
+    "release": "local",
+    "SCRAM_ARCH": "slc6_amd64_gcc630",
+    "cfg": "test_cfg.py",
+    "local_files": [],
+    "cmssw_files": [],
+    "output_files": ["EventTree.root"]
+  }
+]
+
