@@ -27,6 +27,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 // #include "UserCode/ICHiggsTauTau/interface/StaticTree.hh"
 #include "Acorn/NTupler/interface/EventInfo.h"
+#include "Acorn/NTupler/interface/StringUtils.h"
 // #include "Acorn/NTupler/interface/city.h"
 // #include "Acorn/NTupler/plugins/PrintConfigTools.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -128,28 +129,33 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
   if (lheWeightLabels_.size()) return;
   edm::Handle<LHERunInfoProduct> lhe_info;
   run.getByLabel(lheTag_, lhe_info);
-  bool record = false;
+  int record = 0;
   // We need to be able to match something like:
   // <weight id="rwgt_100004">set param_card dim6 1 1.6 # orig: 0.0\n</weight>
-  std::regex rgx(R"(<weight.*id=\"[^\d]*(\d+)\".*>([\s\S]*)</weight>)");
+  // Also need to catch id='X' (MG2.6.X) and id="X"
+  std::regex rgx(R"(<weight.*id=[\"\'][^\d]*(\d+)[\"\'].*>([\s\S]*)</weight>)");
   for (auto it = lhe_info->headers_begin(); it != lhe_info->headers_end();
        ++it) {
     std::vector<std::string>::const_iterator iLt = it->begin();
     for (; iLt != it->end(); ++iLt) {
       std::string line = *iLt;
-      //boost::replace_all(line, "&lt;", "<");
-      //boost::replace_all(line, "&gt;", ">");
-      //std::cout << line;
+      // Fix for some headers produced with MG 2.6.X, the < and >
+      // have been replaced with &lt; and &gt; everywhere
+      boost::replace_all(line, "&lt;", "<");
+      boost::replace_all(line, "&gt;", ">");
       if (line.find("<weightgroup")  != std::string::npos) {
         lheWeightLabels_.push_back(line);
         lheWeightWasKept_.push_back(false);
-        record = true;
+        // Have seen in MG2.6.X that a new weight group can start before the closing tag
+        // therefore record is now an int, incremented for each <weightgroup> and
+        // decremented for each </weightgroup>.
+        record += 1;
         continue;
       }
       if (line.find("</weightgroup") != std::string::npos) {
         lheWeightLabels_.push_back(line);
         lheWeightWasKept_.push_back(false);
-        record = false;
+        if (record > 0) record -= 1;
         continue;
       }
       if (record) {
@@ -158,6 +164,8 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         if (line.find("</weight>") == line.npos) {
           line = line + "</weight>";
         }
+        // If this line contains "</weight>" at the beginning, it's just
+        // overflow from the last line - we can skip it
         if (line.find("</weight>") == 0) {
           continue;
         }
@@ -165,10 +173,7 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         std::smatch rgx_match;
         std::regex_search(line, rgx_match, rgx);
         if (rgx_match.size() == 3) {
-          std::string label = rgx_match[2];
-          boost::trim(label);
-          std::vector<std::string> split_label;
-          boost::split(split_label, label, boost::is_any_of(" \t"), boost::token_compress_on);
+          std::vector<std::string> split_label = ac::TrimAndSplitString(rgx_match[2]);
 
           bool keep = false;
           for (auto const& x : split_label) {
@@ -181,9 +186,13 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
             }
           }
           lheWeightWasKept_.push_back(keep);
-
         } else {
           lheWeightWasKept_.push_back(false);
+          // Seen cases for madgraph 2.6.X where comment lines appear instead a <weightgroup>
+          // block. If the string doesn't contain "<weight" we will just silently skip it
+          if (line.find("<weight") == line.npos) {
+            continue;
+          }
           edm::LogWarning("LHEHeaderParsing") << "Line was not in the expected format: " << line << "\n";
         }
       }

@@ -81,7 +81,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 isMC = True
 
 process.maxEvents = cms.untracked.PSet(
-    input=cms.untracked.int32(100000)
+    input=cms.untracked.int32(1000)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
@@ -99,7 +99,7 @@ from CondCore.CondDB.CondDB_cfi import *
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
     # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/94X_mc2017_realistic_v10_ext1-v1/00000/0000BD66-99F4-E711-97DF-24BE05C33C22.root',
     # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/001F8E98-4D05-E811-91A5-02163E019B9C.root'
-    # '/store/mc/RunIIFall17MiniAODv2/Z1JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8/MINIAODSIM    /PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/00430106-6B42-E811-BA09-001F29089F7E.root'
+    # '/store/mc/RunIIFall17MiniAODv2/Z1JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/00430106-6B42-E811-BA09-001F29089F7E.root'
    opts.input 
 ))
 process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v10')
@@ -129,8 +129,9 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf).*=10',
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
         'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
+        'keep lheweights:PDF.306000=10',
         'keep lheweights:dim6=10',
         'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10')
 )
