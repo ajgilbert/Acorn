@@ -52,7 +52,7 @@ Each block gives the basic information needed to run the job - the CMSSW release
 
 Note that the input cmsRun configs do have to be modified slightly compared to what is retrieved from McM:
 
- * A placeholder (`#{EDITS}`) for injected additional parameter settings should be added just after the end of the customize part:
+ * A placeholder (`#{EDITS}`) for injecting additional parameter settings should be added just after the end of the customize part:
 
 ```py
 #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
