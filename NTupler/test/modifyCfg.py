@@ -3,6 +3,8 @@ import os
 import json
 import sys
 
+edits = []
+
 class Visitor:
     def __init__(self, modtype):
         self.modtype = modtype
@@ -15,14 +17,15 @@ class Visitor:
     def leave(self, obj):
         pass
 
-def UpdateModuleIfExists(mod, attrName, newVal):
+def UpdateModuleIfExists(mod, attrName, newVal, prefix='process.'):
     if hasattr(mod, attrName):
         attr = getattr(mod, attrName)
         prev = '%s' % attr
         attr.setValue(newVal)
         print 'Updating %s from %s to %s' % (attrName, prev, getattr(mod, attrName))
+        edits.append('%s%s.%s = %s' % (prefix, mod, attrName, getattr(mod, attrName)))
 
-def UpdateIfExists(process, modName, attrName, newVal):
+def UpdateIfExists(process, modName, attrName, newVal, prefix='process.'):
     if hasattr(process, modName):
         mod = getattr(process, modName)
         if hasattr(mod, attrName):
@@ -31,13 +34,14 @@ def UpdateIfExists(process, modName, attrName, newVal):
             newArg = type(attr)(newVal)
             attr.setValue(newVal)
             print 'Updating %s.%s from %s to %s' % (modName, attrName, prev, getattr(mod, attrName))
+            edits.append('%s%s.%s = %s' % (prefix, modName, attrName, getattr(mod, attrName)))
 
 def SetRandomSeeds(process, newSeed):
     if not hasattr(process, 'RandomNumberGeneratorService'):
         return
     mod = getattr(process, 'RandomNumberGeneratorService')
     for par in mod.parameterNames_():
-        UpdateIfExists(mod, par, 'initialSeed', newSeed)
+        UpdateIfExists(mod, par, 'initialSeed', newSeed, prefix='process.RandomNumberGeneratorService.')
 
 def SetEvents(process, nEvents):
     UpdateIfExists(process, 'externalLHEProducer', 'nEvents', nEvents)
@@ -49,15 +53,19 @@ def FindOutputModule(process):
         schd.visit(visitor)
     if len(visitor.results) == 1:
         return visitor.results[0]
+    else:
+        raise RuntimeError('Too many OutputModules!')
 
-def SetOutputFileName(process, newName):
-    UpdateModuleIfExists(FindOutputModule(process), 'fileName', 'file:%s' % newName)
-
+def SetOutputFileName(process, newName, namedModule=None):
+    if namedModule is not None:
+        UpdateModuleIfExists(getattr(process, namedModule), 'fileName', 'file:%s' % newName)
+    else:
+        UpdateModuleIfExists(FindOutputModule(process), 'fileName', 'file:%s' % newName)
 def SetInputFileName(process, newName):
     UpdateIfExists(process, 'source', 'fileNames', ['file:%s' % newName])
 
 
-def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=None, outputFile=None):
+def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=None, outputFile=None, outputModule=None):
     # Have to reset sys.argv here in case the inputCfg will do its own VarParsing
     # => this is a bit of a hack!
     sys.argv = [inputCfg]
@@ -69,11 +77,22 @@ def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=N
     if inputFile is not None:
         SetInputFileName(process, str(inputFile))
     if outputFile is not None:
-        SetOutputFileName(process, str(outputFile))
+        SetOutputFileName(process, str(outputFile), namedModule=outputModule)
 
-    outFile = open(outputCfg, "w")
-    outFile.write(process.dumpPython())
-    outFile.close()
+    if args.strategy == 0:
+        outFile = open(outputCfg, "w")
+        outFile.write(process.dumpPython())
+        outFile.close()
+    elif args.strategy == 1:
+        os.system('cp %s %s' % (inputCfg, outputCfg))
+        with open(outputCfg) as ofile:
+            cfg = ofile.read()
+        cfg = cfg.replace('#{EDITS}', '\n'.join(edits))
+        outFile = open(outputCfg, "w")
+        outFile.write(cfg)
+        outFile.close()
+
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('io', nargs=2,
@@ -82,8 +101,12 @@ parser.add_argument('--events', type=int, default=None, help='Number of events t
 parser.add_argument('--randomSeeds', type=int, default=None, help='Set random seeds')
 parser.add_argument('--inputFile', type=str, default=None, help='Set input file')
 parser.add_argument('--outputFile', type=str, default=None, help='Set output file')
+parser.add_argument('--strategy', type=int, default=1, help='Patching strategy')
+parser.add_argument('--outputModule', type=str, default=None, help='Output module to modify')
 
 args = parser.parse_args()
 
 
-UpdateConfig(args.io[0], args.io[1], events=args.events, randomSeeds=args.randomSeeds, inputFile=args.inputFile, outputFile=args.outputFile)
+UpdateConfig(args.io[0], args.io[1], events=args.events, randomSeeds=args.randomSeeds, inputFile=args.inputFile, outputFile=args.outputFile, outputModule=args.outputModule)
+
+print edits

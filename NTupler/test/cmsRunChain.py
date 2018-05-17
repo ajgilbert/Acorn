@@ -59,8 +59,10 @@ parser.add_argument('config', default='config.json',
                     help='Specify the sequence to run')
 parser.add_argument('--run', action='store_true',
                     help='Actually runt the sequence')
-parser.add_argument('--events', default=100,
+parser.add_argument('--events', default=100, type=int,
                     help='Specify the number of events to generate')
+parser.add_argument('--crab', action='store_true',
+                    help='Prepare for running with crab')
 
 args = parser.parse_args()
 
@@ -80,9 +82,13 @@ for i, seq in enumerate(sequence):
 
     run_script = seq['cfg']
 
-    copy_arg = '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/%s' % (x, x) for x in seq['local_files']])
+    if args.crab:
+        seq['local_files'] = [os.path.basename(x) for x in seq['local_files']]
+        seq['cmssw_files'] = [os.path.basename(x) for x in seq['cmssw_files']]
+
+    copy_arg = '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/%s' % (x, os.path.basename(x)) for x in seq['local_files']])
     copy_arg += '\n'
-    copy_arg += '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/${CMSSW_RELEASE}/src/%s' % (x, x) for x in seq['cmssw_files']])
+    copy_arg += '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/${CMSSW_RELEASE}/src/%s' % (x, os.path.basename(x)) for x in seq['cmssw_files']])
 
     events = -1
     inputFileArg = '--inputFile=step_%i.root' % (i - 1)
@@ -90,15 +96,23 @@ for i, seq in enumerate(sequence):
     if i == 0:
         events = args.events
         inputFileArg = ''
+    if args.crab:
+        run_script = os.path.basename(run_script)
     inputScript = os.path.join('${RUN_DIR}', run_script)
     outputScript = os.path.join('${CHAIN_DIR}', 'step_%i_cfg.py' % i)
-
-    mod_arg = 'python ${RUN_DIR}/modifyCfg.py %s %s --events=%i --randomSeeds=${SEED} %s %s' % (inputScript, outputScript, events, inputFileArg, outputFileArg)
+    if 'output_module' in seq:
+        outputModuleArg = '--outputModule %s' % seq['output_module']
+    else:
+        outputModuleArg = ''
+    mod_arg = 'python ${RUN_DIR}/modifyCfg.py %s %s --events=%i --randomSeeds=${SEED} %s %s %s' % (inputScript, outputScript, events, inputFileArg, outputFileArg, outputModuleArg)
 
     return_files_arg = ''
     if 'output_files' in seq:
         return_files_arg = '\n'.join(['cp ${CHAIN_DIR}/%s ${RUN_DIR}/%s' % (x, x) for x in seq['output_files']])
-        
+    
+    jobreport_name = 'JobReport_%i.xml' % i
+    if 'save' in seq and seq['save'] == True:
+        jobreport_name = 'FrameworkJobReport.xml'
     gen_script = JOB_SCRIPT % ({
         'SCRAM_ARCH': scram_arch,
         'CMSSW_RELEASE': release,
@@ -106,7 +120,7 @@ for i, seq in enumerate(sequence):
         'FILE_COPY': copy_arg,
         'MOD_SCRIPT': mod_arg,
         'RETURN_FILES': return_files_arg,
-        'JOB_REPORT': 'JobReport_%i.xml' % i
+        'JOB_REPORT': jobreport_name 
         })
     #print gen_script
     script_name = 'chain_step_%i.sh' % i
@@ -122,5 +136,6 @@ master_script = MASTER_JOB % ({
 
 with open('run_chain.sh', "w") as text_file:
     text_file.write(master_script)
+os.system('chmod +x run_chain.sh')
 
     #os.system('chmod +x %s; ./%s' % (script_name, script_name))

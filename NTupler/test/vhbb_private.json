@@ -1,0 +1,33 @@
+[
+  {
+    "release": "CMSSW_9_3_6_patch1",
+    "SCRAM_ARCH": "slc6_amd64_gcc630",
+    "cfg": "vhbb-miniaod-2017/HIG-RunIIFall17wmLHEGS-00620_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": [],
+    "output_module": "RAWSIMoutput"
+  },
+  {
+    "release": "CMSSW_9_4_0_patch1",
+    "SCRAM_ARCH": "slc6_amd64_gcc630",
+    "cfg": "vhbb-miniaod-2017/HIG-RunIIFall17DRPremix-00742_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": []
+  },
+  {
+    "release": "CMSSW_9_4_0_patch1",
+    "SCRAM_ARCH": "slc6_amd64_gcc630",
+    "cfg": "vhbb-miniaod-2017/HIG-RunIIFall17DRPremix-00742_2_cfg.py",
+    "local_files": [],
+    "cmssw_files": []
+  },
+  {
+    "release": "CMSSW_9_4_6_patch1",
+    "SCRAM_ARCH": "slc6_amd64_gcc630",
+    "cfg": "vhbb-miniaod-2017/HIG-RunIIFall17MiniAODv2-00605_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": [],
+    "save": true,
+    "output_files": ["step_3.root", "FrameworkJobReport.xml"]
+  }
+]
