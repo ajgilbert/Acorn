@@ -22,7 +22,7 @@
 
 class AcornGenParticleProducer : public AcornBaseProducer<std::vector<ac::GenParticle>> {
  public:
-  explicit AcornGenParticleProducer(const edm::ParameterSet &config);
+  explicit AcornGenParticleProducer(edm::ParameterSet const &config);
   ~AcornGenParticleProducer();
 
  private:

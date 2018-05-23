@@ -1,5 +1,5 @@
-#ifndef Acorn_GenParticle_hh
-#define Acorn_GenParticle_hh
+#ifndef Acorn_GenParticle_h
+#define Acorn_GenParticle_h
 #include <vector>
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
