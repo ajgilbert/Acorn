@@ -112,3 +112,14 @@ ROOT::Math::PtEtaPhiMVector Reduce(const ROOT::Math::PtEtaPhiMVector &v, int bit
   }
 }
 
+template <>
+ROOT::Math::XYZPoint Reduce(const ROOT::Math::XYZPoint &v, int bits) {
+  if (bits > 0) {
+    return ROOT::Math::XYZPoint(reduceMantissaToNbitsRounding<double>(v.x(), bits),
+                                reduceMantissaToNbitsRounding<double>(v.y(), bits),
+                                reduceMantissaToNbitsRounding<double>(v.z(), bits));
+  } else {
+    return v;
+  }
+}
+

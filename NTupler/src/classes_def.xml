@@ -1,8 +1,14 @@
 <lcgdict>
   <class name="ac::Candidate"/>
   <class name="std::vector<ac::Candidate>"/>
+  <class name="ac::Muon"/>
+  <class name="std::vector<ac::Muon>"/>
+  <class name="ac::Photon"/>
+  <class name="std::vector<ac::Photon>"/>
   <class name="ac::GenParticle"/>
   <class name="std::vector<ac::GenParticle>"/>
   <class name="std::map<std::string, std::pair<bool, double>>"/>
   <class name="ac::EventInfo"/>
+  <class name="ac::PileupInfo"/>
+  <class name="std::vector<ac::PileupInfo>"/>
 </lcgdict>

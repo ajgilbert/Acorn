@@ -4,6 +4,8 @@
 #include <memory>
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
+#include "Math/Point3D.h"
+#include "Math/Point3Dfwd.h"
 #include "DataFormats/PatCandidates/interface/libminifloat.h"
 
 template <typename T>
@@ -39,5 +41,8 @@ float Reduce(const float &f, int bits);
 
 template <>
 ROOT::Math::PtEtaPhiMVector Reduce(const ROOT::Math::PtEtaPhiMVector &v, int bits);
+
+template <>
+ROOT::Math::XYZPoint Reduce(const ROOT::Math::XYZPoint &v, int bits);
 
 #endif
