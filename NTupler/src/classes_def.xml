@@ -11,4 +11,6 @@
   <class name="ac::EventInfo"/>
   <class name="ac::PileupInfo"/>
   <class name="std::vector<ac::PileupInfo>"/>
+  <class name="ac::TriggerObject"/>
+  <class name="std::vector<ac::TriggerObject>"/>
 </lcgdict>

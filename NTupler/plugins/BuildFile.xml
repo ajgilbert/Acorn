@@ -15,8 +15,8 @@
   <use name="RecoMET/METPUSubtraction"/>
   <use name="JetMETCorrections/Objects"/>
   <use name="PhysicsTools/HepMCCandAlgos"/>
-  <use name="HLTrigger/HLTcore"/>
   <use name="clhep"/> -->
+  <use name="HLTrigger/HLTcore"/>
   <use name="root"/>
   <use name="clhep"/>
   <use name="rootrflx"/>

@@ -163,6 +163,40 @@ process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
     select=cms.vstring('keep .*')
 )
 
+process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
+    input=cms.InputTag("slimmedAddPileupInfo"),
+    branch=cms.string('pileupInfo'),
+    select=cms.vstring('keep .*')
+)
+
+
+hlt_paths = [
+    'HLT_IsoMu22_v',
+    'HLT_IsoTkMu22_v',
+    'HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v',
+    'HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v',
+    'HLT_IsoMu21_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v',
+    'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v'
+]
+
+process.acTriggerObjectSequence = cms.Sequence(
+    # process.icTriggerPathProducer
+)
+
+for path in hlt_paths:
+    shortname = path[4:-2]  # drop the HLT_ and _v parts
+    setattr(process, 'ac_%s_ObjectProducer' % shortname, cms.EDProducer('AcornTriggerObjectProducer',
+        input=cms.InputTag('selectedPatTrigger'),
+        triggerResults=cms.InputTag('TriggerResults', '', 'HLT'),
+        hltConfigProcess=cms.string('HLT'),
+        branch=cms.string('triggerObjects_%s' % shortname),
+        hltPath= cms.string(path),
+        storeIfFired=cms.bool(True),
+        select=cms.vstring('keep .* p4=12')
+    ))
+    process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
+
+
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
@@ -188,6 +222,7 @@ process.p = cms.Path(
     process.acLHEParticleProducer +
     process.acGenParticleProducer +
     process.acPileupInfoProducer +
+    process.acTriggerObjectSequence +
     process.acEventInfoProducer +
     process.acEventProducer)
 

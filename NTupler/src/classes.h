@@ -8,6 +8,7 @@
 #include "Acorn/NTupler/interface/GenParticle.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/PileupInfo.h"
+#include "Acorn/NTupler/interface/TriggerObject.h"
 
 namespace { struct dictionary {
   ac::Candidate dummy1;
@@ -22,6 +23,8 @@ namespace { struct dictionary {
   ac::EventInfo dummy10;
   ac::PileupInfo dummy11;
   std::vector<ac::PileupInfo> dummy12;
+  ac::TriggerObject dummy13;
+  std::vector<ac::TriggerObject> dummy14;
 };
 }
 
