@@ -11,9 +11,8 @@ opts = parser.VarParsing ('analysis')
 # opts.register('globalTag', '80X_mcRun2_asymptotic_2016_TrancheIV_v7', parser.VarParsing.multiplicity.singleton,
 # #opts.register('globalTag', '80X_dataRun2_2016SeptRepro_v7', parser.VarParsing.multiplicity.singleton,
 #     parser.VarParsing.varType.string, "global tag")
-# opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.int, "Process as data?")
-
+opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Process as data?")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -29,33 +28,9 @@ opts.register('year', '2016', parser.VarParsing.multiplicity.singleton,
 #     parser.VarParsing.varType.string, "Input tag for LHE weights")
 
 
-
 opts.parseArguments()
-# infile      = opts.file
-# if not infile: infile = "file:/tmp/file.root"
-# isData      = opts.isData
-# tag         = opts.globalTag
-# release     = opts.release
-# doLHEWeights = opts.LHEWeights
-# if not isData:
-#   doHT     = opts.doHT
-#   isReHLT  = opts.isReHLT
-# else:
-#   doHT     = 0
-#   isReHLT  = 0
-# #isEmbedded  = opts.isEmbedded
-# #isTandP     = opts.isTandP
-# #isZStudy    = opts.isZStudy
-# #isPhys14    = opts.isPhys14
-
-# if not release in ["76X", "80XMINIAOD"]:
-#   print 'Release not recognised, exiting!'
-#   sys.exit(1)
-# print 'release     : '+release
-# print 'isData      : '+str(isData)
-# print 'globalTag   : '+str(tag)
-# print 'doHT        : '+str(doHT)
-# print 'isReHLT     : '+str(isReHLT)
+isData = bool(opts.isData)
+isMC = not isData
 
 ################################################################
 # Standard setup
@@ -68,8 +43,6 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ################################################################
 # Message Logging, summary, and number of events
 ################################################################
-isMC = True
-
 process.maxEvents = cms.untracked.PSet(
     input=cms.untracked.int32(1000)
 )
@@ -86,11 +59,13 @@ process.options = cms.untracked.PSet(
 process.load("CondCore.CondDB.CondDB_cfi")
 from CondCore.CondDB.CondDB_cfi import *
 
+# Example files:
+# 2016 MC: /store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FEB2F873-C1D8-E611-8AAC-02163E012A61.root
+# 2017 MC: /store/mc/RunIIFall17MiniAODv2/Z1JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/00430106-6B42-E811-BA09-001F29089F7E.root
+# 2018 MC: /store/mc/RunIISpring18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/100X_upgrade2018_realistic_v10_ext1-v1/30000/00F3DB63-1D25-E811-B003-0025901D08B2.root
+# 2017 data: /store/data/Run2017E/SingleMuon/MINIAOD/31Mar2018-v1/00000/000D53C5-9D39-E811-A39C-0025905B85A0.root
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-    # /store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FEB2F873-C1D8-E611-8AAC-02163E012A61.root 
-    # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/94X_mc2017_realistic_v10_ext1-v1/00000/0000BD66-99F4-E711-97DF-24BE05C33C22.root',
-    # 'root://cms-xrd-global.cern.ch//store/mc/RunIIFall17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/001F8E98-4D05-E811-91A5-02163E019B9C.root'
-    # '/store/mc/RunIIFall17MiniAODv2/Z1JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/00430106-6B42-E811-BA09-001F29089F7E.root'
+
    opts.input
 ))
 
@@ -142,6 +117,10 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     # phoMediumIdFullInfoMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium")
 )
 
+
+process.acMCSequence = cms.Sequence(
+)
+
 process.acGenParticleProducer = cms.EDProducer('AcornGenParticleProducer',
     input=cms.InputTag("prunedGenParticles"),
     branch=cms.string('genParticles'),
@@ -160,12 +139,12 @@ process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
     select=cms.vstring('keep .*')
 )
 
-process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
-    input=cms.InputTag("slimmedAddPileupInfo"),
-    branch=cms.string('pileupInfo'),
-    select=cms.vstring('keep .*')
-)
-
+if isMC:
+    process.acMCSequence += cms.Sequence(
+        process.acGenParticleProducer +
+        process.acLHEParticleProducer +
+        process.acPileupInfoProducer
+    )
 
 hlt_paths = [
     'HLT_IsoMu22_v',
@@ -219,9 +198,7 @@ process.p = cms.Path(
     process.egmPhotonIDSequence +
     process.acMuonProducer +
     process.acPhotonProducer +
-    process.acLHEParticleProducer +
-    process.acGenParticleProducer +
-    process.acPileupInfoProducer +
+    process.acMCSequence +
     process.acTriggerObjectSequence +
     process.acEventInfoProducer +
     process.acEventProducer)
