@@ -93,6 +93,10 @@ void AcornTriggerObjectProducer::produce(edm::Event& event, const edm::EventSetu
     dest.setVector(setVar("p4", src.polarP4()));
 
     // Get the filters this object was used in
+// From 9_X_Y onwards have to unpack the labels too
+#if CMSSW_MAJOR_VERSION >= 9
+    src.unpackFilterLabels(event, *trigres_handle);
+#endif
     std::vector<std::string> const& filters = src.filterLabels();
     std::vector<uint64_t> filter_labels;
     for (unsigned k = 0; k < filters.size(); ++k) {
