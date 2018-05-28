@@ -7,10 +7,8 @@ process = cms.Process("MAIN")
 # ################################################################
 import FWCore.ParameterSet.VarParsing as parser
 opts = parser.VarParsing ('analysis')
-# parser.VarParsing.varType.string, "input file")
-# opts.register('globalTag', '80X_mcRun2_asymptotic_2016_TrancheIV_v7', parser.VarParsing.multiplicity.singleton,
-# #opts.register('globalTag', '80X_dataRun2_2016SeptRepro_v7', parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.string, "global tag")
+opts.register('globalTag', '80X_dataRun2_2016SeptRepro_v7', parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.string, "global tag")
 opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
 opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
@@ -20,15 +18,6 @@ opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 opts.register('year', '2016', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "Year label")
-# opts.register('doHT', 0, parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.int, "Store HT and number of outgoing partons?")
-# opts.register('isReHLT', 1, parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.int, "Process as reHLT sample?")
-# opts.register('LHEWeights', False, parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.bool, "Produce LHE weights for sample")
-# opts.register('LHETag', 'externalLHEProducer', parser.VarParsing.multiplicity.singleton,
-#     parser.VarParsing.varType.string, "Input tag for LHE weights")
-
 
 opts.parseArguments()
 isData = bool(opts.isData)
@@ -68,13 +57,10 @@ from CondCore.CondDB.CondDB_cfi import *
 # 2017 data: /store/data/Run2017E/SingleMuon/MINIAOD/31Mar2018-v1/00000/000D53C5-9D39-E811-A39C-0025905B85A0.root
 # 2018 data: /store/data/Run2018A/SingleMuon/MINIAOD/PromptReco-v2/000/316/239/00000/06C61F62-3759-E811-A213-02163E017F4E.root
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-
    opts.input
 ))
 
-# 80X_mcRun2_asymptotic_2016_TrancheIV_v8
-# 94X_mc2017_realistic_v10
-process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v8')
+process.GlobalTag.globaltag = cms.string(opts.globalTag)
 
 
 process.options.numberOfThreads = cms.untracked.uint32(opts.cores)
@@ -173,9 +159,10 @@ if isMC:
     )
 
 hlt_paths = [
-    'HLT_IsoMu22_v',
-    'HLT_IsoTkMu22_v',
+    # 'HLT_IsoMu22_v',
+    # 'HLT_IsoTkMu22_v',
     'HLT_IsoMu24_v',
+    'HLT_IsoTkMu24_v',
     'HLT_IsoMu27_v'
 ]
 
