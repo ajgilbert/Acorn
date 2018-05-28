@@ -11,6 +11,8 @@ opts = parser.VarParsing ('analysis')
 # opts.register('globalTag', '80X_mcRun2_asymptotic_2016_TrancheIV_v7', parser.VarParsing.multiplicity.singleton,
 # #opts.register('globalTag', '80X_dataRun2_2016SeptRepro_v7', parser.VarParsing.multiplicity.singleton,
 #     parser.VarParsing.varType.string, "global tag")
+opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Number of events")
 opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
@@ -44,7 +46,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # Message Logging, summary, and number of events
 ################################################################
 process.maxEvents = cms.untracked.PSet(
-    input=cms.untracked.int32(1000)
+    input=cms.untracked.int32(opts.events)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
@@ -79,8 +81,18 @@ process.options.numberOfThreads = cms.untracked.uint32(opts.cores)
 process.options.numberOfStreams = cms.untracked.uint32(opts.cores)
 
 
+process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
+    src = cms.InputTag("slimmedMuons"),
+    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+)
+
+process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
+    src = cms.InputTag("slimmedPhotons"),
+    cut = cms.string("pt > 20 & abs(eta) < 3.5")
+)
+
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
-    input=cms.InputTag("slimmedMuons"),
+    input=cms.InputTag("selectedMuons"),
     branch=cms.string('muons'),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
     select=cms.vstring('keep .* p4=12 pfIso.*=12')
@@ -109,7 +121,7 @@ for idmod in my_id_modules:
     setupAllVIDIdsInModule(process, idmod, setupVIDPhotonSelection)
 
 process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
-    input=cms.InputTag("slimmedPhotons"),
+    input=cms.InputTag("selectedPhotons"),
     branch=cms.string('photons'),
     select=cms.vstring('keep .* p4=12'),
     phoLooseIdMap=cms.InputTag(photon_loose_id),
@@ -197,6 +209,8 @@ process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
 process.p = cms.Path(
     process.egmPhotonIDSequence +
+    process.selectedMuons +
+    process.selectedPhotons +
     process.acMuonProducer +
     process.acPhotonProducer +
     process.acMCSequence +
