@@ -20,6 +20,8 @@ parser.add_argument('--label', '-l', default='production',
                     help='Production label')
 parser.add_argument('--verbosity', '-v', type=int, default=0,
                     help='Level of verbosity')
+parser.add_argument('--attribute', '-a', default='submit',
+                    help='Submit samples having this attribute')
 args = parser.parse_args()
 
 config = Configuration()
@@ -68,15 +70,18 @@ with open(args.config) as jsonfile:
 #############################################################################################
 ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
 #############################################################################################
-for sample in samples['samples']:
+for sample in sorted(samples['samples']):
     info = samples['samples'][sample]
-    if 'submit' in info['attributes']:
-        print '>> Will submit sample %s: %s' % (sample, info['dataset'])
+    if args.attribute in info['attributes']:
+        print '>> Will submit: %-40s: %s' % (sample, info['dataset'])
     else:
-        print '>> Skipping sample %s: %s' % (sample, info['dataset'])
+        if args.verbosity >= 1:
+            print '>> Skipping: %-40s: %s' % (sample, info['dataset'])
+        continue
     config.General.requestName = sample
     config.Data.inputDataset = info['dataset']
-    config.JobType.pyCfgParams = samples['configs'][info['config']]
-    print config
+    config.JobType.pyCfgParams = [str(x) for x in samples['configs'][info['config']]]
+    if args.verbosity >= 1:
+        print config
     if (args.submit):
         submit(config)
