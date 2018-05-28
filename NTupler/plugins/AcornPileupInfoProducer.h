@@ -24,6 +24,8 @@ class AcornPileupInfoProducer : public AcornBaseProducer<std::vector<ac::PileupI
   virtual void produce(edm::Event&, edm::EventSetup const&);
 
   edm::EDGetTokenT<edm::View<PileupSummaryInfo>> inputToken_;
+  int minBx_;
+  int maxBx_;
 };
 
 #endif

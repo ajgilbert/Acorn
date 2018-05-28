@@ -14,7 +14,9 @@
 AcornPileupInfoProducer::AcornPileupInfoProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::PileupInfo>>(config),
       inputToken_(
-          consumes<edm::View<PileupSummaryInfo>>(config.getParameter<edm::InputTag>("input"))) {}
+          consumes<edm::View<PileupSummaryInfo>>(config.getParameter<edm::InputTag>("input"))),
+      minBx_(config.getParameter<int>("minBx")),
+      maxBx_(config.getParameter<int>("maxBx")) {}
 
 AcornPileupInfoProducer::~AcornPileupInfoProducer() { ; }
 
@@ -23,15 +25,17 @@ void AcornPileupInfoProducer::produce(edm::Event& event, const edm::EventSetup& 
   event.getByToken(inputToken_, info_handle);
 
   output()->clear();
-  output()->resize(info_handle->size(), ac::PileupInfo());
 
   for (unsigned i = 0; i < info_handle->size(); ++i) {
     PileupSummaryInfo const& src = info_handle->at(i);
-    ac::PileupInfo& dest = output()->at(i);
 
-    dest.setNumInteractions(setVar("numInteractions", src.getPU_NumInteractions()));
-    dest.setBunchCrossing(setVar("bunchCrossing", src.getBunchCrossing()));
-    dest.setTrueNumInteractions(setVar("trueNumInteractions", src.getTrueNumInteractions()));
+    if (src.getBunchCrossing() >= minBx_ && src.getBunchCrossing() <= maxBx_) {
+      output()->push_back(ac::PileupInfo());
+      ac::PileupInfo& dest = output()->back();
+      dest.setNumInteractions(setVar("numInteractions", src.getPU_NumInteractions()));
+      dest.setBunchCrossing(setVar("bunchCrossing", src.getBunchCrossing()));
+      dest.setTrueNumInteractions(setVar("trueNumInteractions", src.getTrueNumInteractions()));
+    }
   }
 }
 

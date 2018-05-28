@@ -2,11 +2,24 @@
 #define Acorn_NTupler_Reduction_h
 
 #include <memory>
+#include <bitset>
+#include <climits>
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
 #include "DataFormats/PatCandidates/interface/libminifloat.h"
+
+template<typename T> std::string toBinaryString(const T& a) {
+    const char* beg = reinterpret_cast<const char*>(&a);
+    const char* end = beg + sizeof(a);
+    std::string result = "";
+    while(beg != end) {
+      result += std::bitset<CHAR_BIT>(*--end).to_string();
+      if (end != beg) result += " ";
+    }
+    return result;
+}
 
 template <typename T>
 T reduceMantissaToNbitsRounding(const T &f, int bits);

@@ -134,8 +134,18 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
 process.acMCSequence = cms.Sequence(
 )
 
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.selectedGenParticles = cms.EDProducer("GenParticlePruner",
+    src=cms.InputTag("prunedGenParticles"),
+    select=cms.vstring(
+        "drop  *",
+        "keep isPromptFinalState()",
+        "keep++ abs(pdgId) == 15 && statusFlags().isPrompt()"
+    )
+)
+
 process.acGenParticleProducer = cms.EDProducer('AcornGenParticleProducer',
-    input=cms.InputTag("prunedGenParticles"),
+    input=cms.InputTag("selectedGenParticles"),
     branch=cms.string('genParticles'),
     select=cms.vstring('keep .* p4=12', 'drop mothers')
 )
@@ -149,11 +159,14 @@ process.acLHEParticleProducer = cms.EDProducer('AcornLHEParticleProducer',
 process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
     input=cms.InputTag("slimmedAddPileupInfo"),
     branch=cms.string('pileupInfo'),
-    select=cms.vstring('keep .*')
+    select=cms.vstring('keep .*'),
+    minBx=cms.int32(0),
+    maxBx=cms.int32(0)
 )
 
 if isMC:
     process.acMCSequence += cms.Sequence(
+        process.selectedGenParticles +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
         process.acPileupInfoProducer
