@@ -41,32 +41,38 @@
     "DYJetsToLL_M-50-madgraphMLM": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit", "submitpilot"],
-      "events": 48675378
+      "events": 48675378,
+      "config": "mc"
     },
     "DYJetsToLL_M-50-madgraphMLM-ext1": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
       "attributes": ["submit"],
-      "events": 49125561
+      "events": 49125561,
+      "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": [],
-      "events": 27413121
+      "events": 27413121,
+      "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX-ext1": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
       "attributes": [],
-      "events": 182359906
+      "events": 182359906,
+      "config": "mc"
     },
     "WJetsToLNu-madgraphMLM": {
       "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/MINIAODSIM",
       "attributes": [],
-      "events": 23550516
+      "events": 23550516,
+      "config": "mc"
     },
     "TTTo2L2Nu-powheg": {
       "dataset": "/TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
-      "events": 66979742
+      "events": 66979742,
+      "config": "mc"
     }
   },
   "configs": {
