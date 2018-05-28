@@ -82,7 +82,7 @@ for sample in sorted(samples['samples']):
     config.Data.inputDataset = info['dataset']
     config.JobType.pyCfgParams = [str(x) for x in samples['configs'][info['config']]]
     if 'runRange' in info:
-        config.JobType.Data.runRange = str(info['runRange'])
+        config.Data.runRange = str(info['runRange'])
     if args.verbosity >= 1:
         print config
     if (args.submit):

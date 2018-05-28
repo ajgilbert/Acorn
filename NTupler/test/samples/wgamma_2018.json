@@ -8,7 +8,7 @@
     },
     "SingleMuon-2018A-v2": {
       "dataset": "/SingleMuon/Run2018A-PromptReco-v2/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["submit", "submitpilot"],
       "events": 85232027,
       "config": "data",
       "runRange": "314472-316271"
@@ -16,17 +16,20 @@
     "DYJetsToLL_M-50-madgraphMLM": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISpring18MiniAOD-100X_upgrade2018_realistic_v10-v2/MINIAODSIM",
       "attributes": ["submit", "submitpilot"],
-      "events": 49932600
+      "events": 49932600,
+      "config": "mc"
     },
     "WJetsToLNu-madgraphMLM": {
       "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISpring18MiniAOD-100X_upgrade2018_realistic_v10_ext1-v1/MINIAODSIM",
       "attributes": [],
-      "events": 31318066
+      "events": 31318066,
+      "config": "mc"
     },
     "TTTo2L2Nu-powheg": {
       "dataset": "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISpring18MiniAOD-pilot_100X_upgrade2018_realistic_v10-v2/MINIAODSIM",
       "attributes": ["submit"],
-      "events": 1000000
+      "events": 1000000,
+      "config": "mc"
     }
   },
   "configs": {
