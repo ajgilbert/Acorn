@@ -1,40 +1,77 @@
 {
-  "WGToLNuG-madgraphMLM": {
-    "dataset": "",
-    "attributes": []
+  "samples": {
+    "SingleMuon-2017B": {
+      "dataset": "/SingleMuon/Run2017B-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": 136300266,
+      "config": "data"
+    },
+    "SingleMuon-2017C": {
+      "dataset": "/SingleMuon/Run2017C-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": 165551950,
+      "config": "data"
+    },
+    "SingleMuon-2017D": {
+      "dataset": "/SingleMuon/Run2017D-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit", "submitpilot"],
+      "events": 70361660,
+      "config": "data"
+    },
+    "SingleMuon-2017E": {
+      "dataset": "/SingleMuon/Run2017E-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": 154630534,
+      "config": "data"
+    },
+    "SingleMuon-2017F": {
+      "dataset": "/SingleMuon/Run2017F-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": 242135500,
+      "config": "data"
+    },
+    "WGToLNuG-madgraphMLM": {
+      "dataset": "",
+      "attributes": []
+    },
+    "WGToLNuG-amcatnloFXFX": {
+      "dataset": "",
+      "attributes": []
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes": ["submit", "submitpilot"],
+      "events": 48675378
+    },
+    "DYJetsToLL_M-50-madgraphMLM-ext1": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 49125561
+    },
+    "DYJetsToLL_M-50-amcatnloFXFX": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes": [],
+      "events": 27413121
+    },
+    "DYJetsToLL_M-50-amcatnloFXFX-ext1": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
+      "attributes": [],
+      "events": 182359906
+    },
+    "WJetsToLNu-madgraphMLM": {
+      "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/MINIAODSIM",
+      "attributes": [],
+      "events": 23550516
+    },
+    "TTTo2L2Nu-powheg": {
+      "dataset": "/TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 66979742
+    }
   },
-  "WGToLNuG-amcatnloFXFX": {
-    "dataset": "",
-    "attributes": []
-  },
-  "DYJetsToLL_M-50-madgraphMLM": {
-    "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-    "attributes": ["submit"],
-    "events": 48675378
-  },
-  "DYJetsToLL_M-50-madgraphMLM-ext1": {
-    "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
-    "attributes": ["submit"],
-    "events": 49125561
-  },
-  "DYJetsToLL_M-50-amcatnloFXFX": {
-    "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-    "attributes": [],
-    "events": 27413121
-  },
-  "DYJetsToLL_M-50-amcatnloFXFX-ext1": {
-    "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
-    "attributes": [],
-    "events": 182359906
-  },
-  "WJetsToLNu-madgraphMLM": {
-    "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/MINIAODSIM",
-    "attributes": [],
-    "events": 23550516
-  },
-  "TTTo2L2Nu-powheg": {
-    "dataset": "/TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-    "attributes": ["submit"],
-    "events": 66979742
+  "configs": {
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=1"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=1"]
   }
+
 }
