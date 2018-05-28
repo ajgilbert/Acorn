@@ -199,10 +199,11 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep .*',
         'drop lheweights:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
-        'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
-        'keep lheweights:PDF.306000=10',
-        'keep lheweights:dim6=10',
-        'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10')
+        #'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
+        #'keep lheweights:PDF.306000=10',
+        #'keep lheweights:dim6=10',
+        #'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10'
+        )
 )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
