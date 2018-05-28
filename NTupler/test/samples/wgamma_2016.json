@@ -1,0 +1,44 @@
+{
+  "WGToLNuG-madgraphMLM": {
+    "dataset": "/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+    "attributes": ["submit"],
+    "events": 6103817
+  },
+  "WGToLNuG-amcatnloFXFX-ext1": {
+    "dataset": "/WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
+    "attributes": []
+  },
+  "WGToLNuG-amcatnloFXFX-ext2": {
+    "dataset": "/WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",
+    "attributes": []
+  },
+  "WGToLNuG-amcatnloFXFX-ext3": {
+    "dataset": "/WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext3-v1/MINIAODSIM",
+    "attributes": []
+  },
+  "DYJetsToLL_M-50-madgraphMLM-ext1": {
+    "dataset": "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/MINIAODSIM",
+    "attributes": ["submit"],
+    "events": 49144274
+  },
+  "DYJetsToLL_M-50-madgraphMLM-ext2": {
+    "dataset": "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",
+    "attributes": [],
+    "events": 96658943
+  },
+  "WJetsToLNu-madgraphMLM": {
+    "dataset": "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+    "attributes": [],
+    "events": 29705748
+  },
+  "WJetsToLNu-madgraphMLM-ext2": {
+    "dataset": "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",
+    "attributes": [],
+    "events": 57026058
+  }
+  "TT-powheg": {
+    "dataset": "/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+    "attributes": ["submit"],
+    "events": 77081156
+  }
+}
