@@ -78,12 +78,22 @@ for sample in sorted(samples['samples']):
         if args.verbosity >= 1:
             print '>> Skipping: %-40s: %s' % (sample, info['dataset'])
         continue
-    config.General.requestName = sample
-    config.Data.inputDataset = info['dataset']
-    config.JobType.pyCfgParams = [str(x) for x in samples['configs'][info['config']]]
+    # Want to make a copy of the configuration to modify freely
+    # Apparently this is the way to do it...
+    config2 = Configuration()
+    config2 += config
+
+    config2.General.requestName = '%s_%s' % (args.label, sample)
+    config2.Data.outputDatasetTag = sample
+    config2.Data.inputDataset = info['dataset']
+    config2.JobType.pyCfgParams = [str(x) for x in samples['configs'][info['config']]]
     if 'runRange' in info:
-        config.Data.runRange = str(info['runRange'])
+        config2.Data.runRange = str(info['runRange'])
+    if 'useFileSplitting' in info:
+        config2.Data.splitting = 'FileBased'
+        config2.Data.unitsPerJob = info['useFileSplitting']
+        config2.General.instance = 'preprod' # temporary - see https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/3623/1/1.html
     if args.verbosity >= 1:
-        print config
+        print config2
     if (args.submit):
-        submit(config)
+        submit(config2)
