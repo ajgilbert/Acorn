@@ -23,6 +23,10 @@ parser.add_argument('--filename', default='EventTree.root',
 args = parser.parse_args()
 
 taskname = args.dir.replace('crab_','')
+filelist_name = '%s%s.txt' % (args.prefix, taskname)
+if os.path.isfile(filelist_name):
+    print '>> Filelist %s already exists' % filelist_name
+    sys.exit(0)
 print '>> Processing directory %s' % args.dir
 res = crabCommand('status', dir=args.dir)
 done_ids = set()
@@ -76,7 +80,6 @@ for subdir in subdirs:
             all_matched_files.append('/'.join([xrootd_dir, subdir, f]))
 
 missing_files = done_ids - file_ids
-filelist_name = '%s%s.txt' % (args.prefix, taskname)
 
 if len(missing_files):
     print '>> ERROR: the following jobids are reported as finished by crab, but no output file was found'
