@@ -1,2 +1,4 @@
 output
 examples
+__init__.py
+*.pyc

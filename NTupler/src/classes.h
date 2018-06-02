@@ -9,6 +9,7 @@
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/PileupInfo.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
+#include "Acorn/NTupler/interface/RunLumiMap.h"
 
 namespace { struct dictionary {
   ac::Candidate dummy1;
@@ -25,6 +26,9 @@ namespace { struct dictionary {
   std::vector<ac::PileupInfo> dummy12;
   ac::TriggerObject dummy13;
   std::vector<ac::TriggerObject> dummy14;
+  RunLumiMap dummy15;
+  std::map<unsigned, std::set<unsigned>> dummy16;
+
 };
 }
 
