@@ -28,9 +28,9 @@ cd %(PWD)s
 
 CONDOR_TEMPLATE = """executable = %(EXE)s
 arguments = $(ProcId)
-output                = %(TASK)s.$(ClusterId).$(ProcId).out
-error                 = %(TASK)s.$(ClusterId).$(ProcId).err
-log                   = %(TASK)s.$(ClusterId).log
+output                = %(TASKDIR)s%(TASK)s.$(ClusterId).$(ProcId).out
+error                 = %(TASKDIR)s%(TASK)s.$(ClusterId).$(ProcId).err
+log                   = %(TASKDIR)s%(TASK)s.$(ClusterId).log
 
 # Send the job to Held state on failure.
 on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
@@ -252,6 +252,9 @@ class Jobs:
         if self.job_mode == 'condor':
             outscriptname = 'condor_%s.sh' % self.task_name
             subfilename = 'condor_%s.sub' % self.task_name
+            if self.task_dir is not '':
+                outscriptname = os.path.join(self.task_dir, outscriptname)
+                subfilename = os.path.join(self.task_dir, subfilename)
             print '>> condor job script will be %s' % outscriptname
             outscript = open(outscriptname, "w")
             DO_JOB_PREFIX = JOB_PREFIX % ({
@@ -273,6 +276,7 @@ class Jobs:
             condor_settings = CONDOR_TEMPLATE % {
               'EXE': outscriptname,
               'TASK': self.task_name,
+              'TASKDIR': os.path.join(self.task_dir, ''),
               'EXTRA': self.bopts.decode('string_escape'),
               'NUMBER': jobs
             }
