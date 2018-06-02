@@ -1,0 +1,23 @@
+{
+  "samples": {
+    "SingleMuon": {
+      "attributes": ["default"],
+      "inputs": ["SingleMuon-2016B-ver2", "SingleMuon-2016C", "SingleMuon-2016D", "SingleMuon-2016E", "SingleMuon-2016F", "SingleMuon-2016G", "SingleMuon-2016H-ver2", "SingleMuon-2016H-ver3"]
+    },
+    "WGToLNuG-madgraphMLM": {
+      "attributes": ["default"],
+      "inputs": ["WGToLNuG-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "attributes": ["default"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1"],
+      "xsec": 5765.4
+    },
+    "TT-powheg": {
+      "attributes": ["default"],
+      "inputs": ["TT-powheg"],
+      "xsec": 831.76
+    }
+  }
+}
