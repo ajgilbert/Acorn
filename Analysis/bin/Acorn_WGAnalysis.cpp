@@ -51,6 +51,12 @@ std::vector<std::string> GetFilesForJob(std::vector<std::string> const& filelist
   return do_files;
 }
 
+template<typename T, typename Range>
+bool contains(Range const& r, T const& value)
+{
+  return std::find(r.begin(), r.end(), value) != r.end();
+}
+
 
 
 int main(int argc, char* argv[]) {
@@ -78,10 +84,12 @@ int main(int argc, char* argv[]) {
 
   ac::Sequence main_seq;
   main_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Main").get()));
-  main_seq.BuildModule(
-      ac::LumiMask("LumiMask")
-          .set_fs(fs.at("Main").get())
-          .set_input_file("input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt"));
+  if (contains(jsc["attributes"], "data")) {
+    main_seq.BuildModule(
+        ac::LumiMask("LumiMask")
+            .set_fs(fs.at("Main").get())
+            .set_input_file(jsc["data_json"]));
+  }
   // main_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("Main").get()));
   main_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis").set_fs(fs.at("Main").get()));
 

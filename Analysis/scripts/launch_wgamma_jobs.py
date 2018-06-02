@@ -22,7 +22,7 @@ args = parser.parse_args()
 job_mgr.set_args(args)
 
 with open(args.config) as jsonfile:
-    cfg = json.load(jsonfile)
+    incfg = json.load(jsonfile)
 
 full_outdir = os.path.join(args.outdir, args.production)
 sequences = ['Main']
@@ -33,7 +33,7 @@ for seq in sequences:
     if not args.dry_run:
         os.system('mkdir -p %s' % makedir)
 
-SAMPLES = cfg['samples']
+SAMPLES = incfg['samples']
 
 task = job_mgr.task_name
 
@@ -43,8 +43,10 @@ for sample in SAMPLES:
     cfg = {
         'filelists': ['filelists/%s_%s.txt' % (args.production, x) for x in SAMPLES[sample]['inputs']],
         'output': '%s.root' % sample,
-        'outdir': full_outdir
+        'outdir': full_outdir,
+        'attributes': SAMPLES[sample]['attributes']
     }
+    cfg.update(incfg['config'])
 
     job_mgr.add_filelist_split_jobs(
         prog='Acorn_WGAnalysis',

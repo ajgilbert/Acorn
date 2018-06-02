@@ -1,16 +1,16 @@
 {
   "samples": {
     "SingleMuon": {
-      "attributes": ["default"],
+      "attributes": ["default", "data"],
       "inputs": ["SingleMuon-2018A-v1", "SingleMuon-2018A-v2"]
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["default"],
+      "attributes": ["default", "mc"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM"],
       "xsec": 5765.4
     },
     "TTTo2L2Nu-powheg": {
-      "attributes": ["default"],
+      "attributes": ["default", "mc"],
       "inputs": ["TTTo2L2Nu-powheg"],
       "xsec": 88.29
     },
@@ -18,5 +18,8 @@
       "attributes": ["test"],
       "inputs": ["SingleMuon-2018A-v2_test"]
     }
+  },
+  "config": {
+    "data_json": "input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt"
   }
 }
