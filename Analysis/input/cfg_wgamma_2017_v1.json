@@ -2,7 +2,8 @@
   "samples": {
     "SingleMuon": {
       "attributes": ["default", "data"],
-      "inputs": ["SingleMuon-2017B", "SingleMuon-2017C", "SingleMuon-2017D", "SingleMuon-2017E", "SingleMuon-2017F"]
+      "inputs": ["SingleMuon-2017B", "SingleMuon-2017C", "SingleMuon-2017D", "SingleMuon-2017E", "SingleMuon-2017F"],
+      "lumi": 41519.180032466
     },
     "DYJetsToLL_M-50-madgraphMLM": {
       "attributes": ["default", "mc"],

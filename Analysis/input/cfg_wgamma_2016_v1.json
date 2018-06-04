@@ -2,7 +2,8 @@
   "samples": {
     "SingleMuon": {
       "attributes": ["default", "data"],
-      "inputs": ["SingleMuon-2016B-ver2", "SingleMuon-2016C", "SingleMuon-2016D", "SingleMuon-2016E", "SingleMuon-2016F", "SingleMuon-2016G", "SingleMuon-2016H-ver2", "SingleMuon-2016H-ver3"]
+      "inputs": ["SingleMuon-2016B-ver2", "SingleMuon-2016C", "SingleMuon-2016D", "SingleMuon-2016E", "SingleMuon-2016F", "SingleMuon-2016G", "SingleMuon-2016H-ver2", "SingleMuon-2016H-ver3"],
+      "lumi": 35858.453042
     },
     "WGToLNuG-madgraphMLM": {
       "attributes": ["default", "mc"],
