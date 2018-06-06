@@ -16,11 +16,12 @@
       "xsec": 88.29
     },
     "SingleMuonTest": {
-      "attributes": ["test"],
+      "attributes": ["test", "data"],
       "inputs": ["SingleMuon-2018A-v2_test"]
     }
   },
   "config": {
-    "data_json": "input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt"
+    "data_json": "input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt",
+    "year": 2018
   }
 }

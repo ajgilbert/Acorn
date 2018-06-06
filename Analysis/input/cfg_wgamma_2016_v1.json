@@ -19,9 +19,20 @@
       "attributes": ["default", "mc"],
       "inputs": ["TT-powheg"],
       "xsec": 831.76
+    },
+    "SingleMuon-Test": {
+      "attributes": ["test", "data"],
+      "inputs": ["SingleMuon-2016G_test"],
+      "lumi": 35858.453042
+    },
+    "DYJetsToLL_M-50-madgraphMLM-Test": {
+      "attributes": ["test", "mc"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1_test"],
+      "xsec": 5765.4
     }
   },
   "config": {
-    "data_json": "input/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"
+    "data_json": "input/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt",
+    "year": 2016
   }
 }

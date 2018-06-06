@@ -81,17 +81,23 @@ int main(int argc, char* argv[]) {
   analysis.RetryFileAfterFailure(7, 3);
   analysis.CalculateTimings(false);
 
+  bool is_data = contains(jsc["attributes"], "data");
 
   ac::Sequence main_seq;
   main_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Main").get()));
-  if (contains(jsc["attributes"], "data")) {
+  if (is_data) {
     main_seq.BuildModule(
         ac::LumiMask("LumiMask")
             .set_fs(fs.at("Main").get())
             .set_input_file(jsc["data_json"]));
   }
   // main_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("Main").get()));
-  main_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis").set_fs(fs.at("Main").get()));
+  main_seq.BuildModule(
+      ac::DiMuonAnalysis("DiMuonAnalysis")
+        .set_fs(fs.at("Main").get())
+        .set_year(jsc["year"])
+        .set_corrections("input/wgamma_corrections_2016_v1.root")
+        .set_is_data(is_data));
 
   main_seq.InsertSequence("Main", analysis);
 

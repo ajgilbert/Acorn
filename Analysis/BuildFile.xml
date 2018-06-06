@@ -16,6 +16,7 @@
 <use name="L1Trigger/L1TNtuples"/> -->
 <use name=""/>
 <use name="root"/>
+<use name="roofit"/>
 <use name="clhep"/>
 <use name="rootrflx"/>
 <export>

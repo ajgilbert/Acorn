@@ -17,6 +17,7 @@
     }
   },
   "config": {
-    "data_json": "input/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"
+    "data_json": "input/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt",
+    "year": 2017
   }
 }
