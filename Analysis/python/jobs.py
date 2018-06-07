@@ -10,6 +10,7 @@ from multiprocessing import Pool
 JOB_PREFIX = """#!/bin/sh
 export INITIALDIR=${PWD}
 set -o pipefail
+set -e
 cd %(CMSSW_BASE)s/src
 export SCRAM_ARCH=%(SCRAM_ARCH)s
 eval `scramv1 runtime -sh`
@@ -36,7 +37,7 @@ log                   = %(TASKDIR)s%(TASK)s.$(ClusterId).log
 on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 
 # Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.
-periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)
+# periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)
 
 %(EXTRA)s
 queue %(NUMBER)s
