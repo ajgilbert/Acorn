@@ -137,4 +137,6 @@ from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
 #call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
 process = customisePostLS1(process)
 
+#{EDITS}
+
 # End of customisation functions

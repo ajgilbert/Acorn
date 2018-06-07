@@ -60,6 +60,7 @@ process.MINIAODSIMoutput = cms.OutputModule("PoolOutputModule",
       'drop *',
       'keep *_prunedGenParticles_*_*',
       'keep *_ak4GenJetsNoNu_*_*',
+      'keep *_genMetTrue_*_*',
       'keep LHERunInfoProduct_*_*_*', 
       'keep GenRunInfoProduct_*_*_*', 
       'keep LHEEventProduct_*_*_*', 
@@ -118,6 +119,7 @@ from Configuration.DataProcessing.Utils import addMonitoring
 #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
 process = addMonitoring(process)
 
+#{EDITS}
 # End of customisation functions
 #do not add changes to your config after this point (unless you know what you are doing)
 from FWCore.ParameterSet.Utilities import convertToUnscheduled

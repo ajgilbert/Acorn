@@ -2,6 +2,7 @@ import argparse
 import os
 import json
 import sys
+import math
 
 edits = []
 
@@ -36,6 +37,13 @@ def UpdateIfExists(process, modName, attrName, newVal, prefix='process.'):
             print 'Updating %s.%s from %s to %s' % (modName, attrName, prev, getattr(mod, attrName))
             edits.append('%s%s.%s = %s' % (prefix, modName, attrName, getattr(mod, attrName)))
 
+def Update(process, modName, attrName, newVal, prefix='process.'):
+    if hasattr(process, modName):
+        mod = getattr(process, modName)
+        setattr(mod, attrName, newVal)
+        print 'Updating %s.%s to %s' % (modName, attrName, getattr(mod, attrName))
+        edits.append('%s%s.%s = %s' % (prefix, modName, attrName, getattr(mod, attrName)))
+
 def SetRandomSeeds(process, newSeed):
     if not hasattr(process, 'RandomNumberGeneratorService'):
         return
@@ -65,7 +73,7 @@ def SetInputFileName(process, newName):
     UpdateIfExists(process, 'source', 'fileNames', ['file:%s' % newName])
 
 
-def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=None, outputFile=None, outputModule=None):
+def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=None, outputFile=None, outputModule=None, setLumiOffsets=None):
     # Have to reset sys.argv here in case the inputCfg will do its own VarParsing
     # => this is a bit of a hack!
     sys.argv = [inputCfg]
@@ -78,6 +86,12 @@ def UpdateConfig(inputCfg, outputCfg, events=None, randomSeeds=None, inputFile=N
         SetInputFileName(process, str(inputFile))
     if outputFile is not None:
         SetOutputFileName(process, str(outputFile), namedModule=outputModule)
+
+    if setLumiOffsets is not None: 
+        eventsPerLumi = int(setLumiOffsets)
+        firstLumi = 1 + (int(randomSeeds) - 1) * int(math.ceil(float(events) / float(eventsPerLumi)))
+        Update(process, 'source', 'numberEventsInLuminosityBlock', cms.untracked.uint32(eventsPerLumi))
+        Update(process, 'source', 'firstLuminosityBlock', cms.untracked.uint32(firstLumi))
 
     if args.strategy == 0:
         outFile = open(outputCfg, "w")
@@ -102,11 +116,11 @@ parser.add_argument('--randomSeeds', type=int, default=None, help='Set random se
 parser.add_argument('--inputFile', type=str, default=None, help='Set input file')
 parser.add_argument('--outputFile', type=str, default=None, help='Set output file')
 parser.add_argument('--strategy', type=int, default=1, help='Patching strategy')
+parser.add_argument('--setLumiOffsets', type=int, default=None, help='Set this many events per lumiBlock')
 parser.add_argument('--outputModule', type=str, default=None, help='Output module to modify')
 
 args = parser.parse_args()
 
 
-UpdateConfig(args.io[0], args.io[1], events=args.events, randomSeeds=args.randomSeeds, inputFile=args.inputFile, outputFile=args.outputFile, outputModule=args.outputModule)
+UpdateConfig(args.io[0], args.io[1], events=args.events, randomSeeds=args.randomSeeds, inputFile=args.inputFile, outputFile=args.outputFile, outputModule=args.outputModule, setLumiOffsets=args.setLumiOffsets)
 
-print edits
