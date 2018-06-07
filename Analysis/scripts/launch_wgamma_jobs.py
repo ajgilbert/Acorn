@@ -30,8 +30,7 @@ sequences = ['Main']
 for seq in sequences:
     makedir = os.path.join(full_outdir, seq)
     print '>> Creating directory %s' % makedir
-    if not args.dry_run:
-        os.system('mkdir -p %s' % makedir)
+    os.system('mkdir -p %s' % makedir)
 
 SAMPLES = incfg['samples']
 
