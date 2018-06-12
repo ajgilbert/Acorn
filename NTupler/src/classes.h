@@ -5,6 +5,7 @@
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/Muon.h"
 #include "Acorn/NTupler/interface/Photon.h"
+#include "Acorn/NTupler/interface/Met.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/PileupInfo.h"
@@ -28,7 +29,8 @@ namespace { struct dictionary {
   std::vector<ac::TriggerObject> dummy14;
   RunLumiMap dummy15;
   std::map<unsigned, std::set<unsigned>> dummy16;
-
+  ac::Met dummy17;
+  std::vector<ac::Met> dummy18;
 };
 }
 

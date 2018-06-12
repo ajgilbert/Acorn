@@ -13,6 +13,8 @@
   <class name="std::vector<ac::PileupInfo>"/>
   <class name="ac::TriggerObject"/>
   <class name="std::vector<ac::TriggerObject>"/>
+  <class name="ac::Met"/>
+  <class name="std::vector<ac::Met>"/>
   <class name="std::map<unsigned, std::set<unsigned>>"/>
   <class name="RunLumiMap"/>
 </lcgdict>
