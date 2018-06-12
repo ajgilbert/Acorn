@@ -13,6 +13,8 @@ opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
 opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
+opts.register('genOnly', 0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Process as genOnly")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -22,6 +24,7 @@ opts.register('year', '2016', parser.VarParsing.multiplicity.singleton,
 opts.parseArguments()
 isData = bool(opts.isData)
 isMC = not isData
+genOnly = bool(opts.genOnly)
 
 ################################################################
 # Standard setup
@@ -150,6 +153,12 @@ process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
     maxBx=cms.int32(0)
 )
 
+process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag("genMetTrue"),
+    branch=cms.string('genMet'),
+    select=cms.vstring('keep .* p4=12')
+)
+
 if isMC:
     process.acMCSequence += cms.Sequence(
         process.selectedGenParticles +
@@ -201,23 +210,33 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
         #'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
         #'keep lheweights:PDF.306000=10',
-        #'keep lheweights:dim6=10',
+        'keep lheweights:dim6=10',
         #'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10'
         )
 )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
-process.p = cms.Path(
-    process.egmPhotonIDSequence +
-    process.selectedMuons +
-    process.selectedPhotons +
-    process.acMuonProducer +
-    process.acPhotonProducer +
-    process.acMCSequence +
-    process.acTriggerObjectSequence +
-    process.acEventInfoProducer +
-    process.acEventProducer)
+if genOnly:
+    # Take the full collection for now
+    process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
+    process.p = cms.Path(
+        process.acGenMetProducer +
+        process.acGenParticleProducer +
+        process.acLHEParticleProducer +
+        process.acEventInfoProducer +
+        process.acEventProducer)
+else:
+    process.p = cms.Path(
+        process.egmPhotonIDSequence +
+        process.selectedMuons +
+        process.selectedPhotons +
+        process.acMuonProducer +
+        process.acPhotonProducer +
+        process.acMCSequence +
+        process.acTriggerObjectSequence +
+        process.acEventInfoProducer +
+        process.acEventProducer)
 
 # process.schedule = cms.Schedule(process.patTriggerPath, process.p)
 process.schedule = cms.Schedule(process.p)

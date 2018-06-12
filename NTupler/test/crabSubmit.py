@@ -93,6 +93,8 @@ for sample in sorted(samples['samples']):
         config2.Data.splitting = 'FileBased'
         config2.Data.unitsPerJob = info['useFileSplitting']
         config2.General.instance = 'preprod' # temporary - see https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/3623/1/1.html
+    if 'inputDBS' in info:
+        config2.Data.inputDBS = str(info['inputDBS'])
     if args.verbosity >= 1:
         print config2
     if (args.submit):
