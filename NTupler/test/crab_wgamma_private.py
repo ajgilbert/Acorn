@@ -6,7 +6,7 @@ PROD='wgamma-genonly-miniaod'
 
 config.section_('General')
 config.General.workArea=PROD
-config.General.requestName='wgamma-genonly-miniaod-test1'
+config.General.requestName='wgamma-genonly-miniaod-test3'
 
 config.section_('JobType')
 config.JobType.scriptExe = ''
@@ -19,8 +19,8 @@ config.JobType.maxMemoryMB = 2000
 config.JobType.numCores = 1
 
 config.section_('Data')
-config.Data.unitsPerJob = 2000
-config.Data.totalUnits = 2000
+config.Data.unitsPerJob = 10000
+config.Data.totalUnits = 5000000
 config.Data.splitting = 'EventBased'
 config.Data.publication = True
 #config.Data.ignoreLocality = True
