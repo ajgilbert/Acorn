@@ -43,7 +43,7 @@ namespace ac {
     nparts_ = lhe_parts.size();
 
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
-    weight_100004_ = info->lheWeights().at(100001);
+    weight_100004_ = info->lheWeights().at(100004);
 
     ROOT::Math::PxPyPzEVector wg_system;
     ROOT::Math::PxPyPzEVector w_system;

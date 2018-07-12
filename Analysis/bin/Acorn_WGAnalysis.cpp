@@ -69,8 +69,10 @@ int main(int argc, char* argv[]) {
   std::string outname = jsc["output"];
   vector<string> do_files = GetFilesForJob(jsc["filelists"], "", jsc["file_offset"], jsc["file_step"]);
   std::string outputdir = jsc["outdir"];
+
+  std::set<std::string> sequences = jsc["sequences"];
   std::map<std::string, std::shared_ptr<fwlite::TFileService>> fs;
-  for (auto const& seq : {"Main"}) {
+  for (auto const& seq : sequences) {
     fs[seq] = std::make_shared<fwlite::TFileService>(
         outputdir + "/" + seq + "/" + outname);
   }
@@ -84,22 +86,27 @@ int main(int argc, char* argv[]) {
   bool is_data = contains(jsc["attributes"], "data");
 
   ac::Sequence main_seq;
-  main_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Main").get()));
-  if (is_data) {
-    main_seq.BuildModule(
-        ac::LumiMask("LumiMask")
-            .set_fs(fs.at("Main").get())
-            .set_input_file(jsc["data_json"]));
-  }
-  // main_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("Main").get()));
-  main_seq.BuildModule(
-      ac::DiMuonAnalysis("DiMuonAnalysis")
-        .set_fs(fs.at("Main").get())
-        .set_year(jsc["year"])
-        .set_corrections("input/wgamma_corrections_2016_v1.root")
-        .set_is_data(is_data));
+  if (sequences.count("Main")) {
+    main_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Main").get()));
+    if (is_data) {
+      main_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(fs.at("Main").get()).set_input_file(jsc["data_json"]));
+    }
+    main_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis")
+                             .set_fs(fs.at("Main").get())
+                             .set_year(jsc["year"])
+                             .set_corrections("input/wgamma_corrections_2016_v1.root")
+                             .set_is_data(is_data));
 
-  main_seq.InsertSequence("Main", analysis);
+    main_seq.InsertSequence("Main", analysis);
+  }
+
+  ac::Sequence wg_gen_seq;
+
+  if (sequences.count("wg_gen")) {
+    wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("wg_gen").get()));
+    wg_gen_seq.InsertSequence("wg_gen", analysis);
+  }
 
   analysis.RunAnalysis();
 }

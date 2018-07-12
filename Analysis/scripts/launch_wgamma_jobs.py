@@ -25,7 +25,7 @@ with open(args.config) as jsonfile:
     incfg = json.load(jsonfile)
 
 full_outdir = os.path.join(args.outdir, args.production)
-sequences = ['Main']
+sequences = ['wg_gen']
 
 for seq in sequences:
     makedir = os.path.join(full_outdir, seq)
@@ -40,6 +40,7 @@ for sample in SAMPLES:
     if args.attributes not in SAMPLES[sample]['attributes']:
         continue
     cfg = {
+        'sequences': sequences,
         'filelists': ['filelists/%s_%s.txt' % (args.production, x) for x in SAMPLES[sample]['inputs']],
         'output': '%s.root' % sample,
         'outdir': full_outdir,
@@ -54,4 +55,3 @@ for sample in SAMPLES:
         output_cfgs=['output'])
     job_mgr.task_name = task + '-' + sample
     job_mgr.flush_queue()
-

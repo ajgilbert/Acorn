@@ -29,6 +29,11 @@
       "attributes": ["test", "mc"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1_test"],
       "xsec": 5765.4
+    },
+    "WGToLNuG-EFT-madgraphMLM": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WGToLNuG-EFT-madgraphMLM"],
+      "xsec": 510.6
     }
   },
   "config": {
