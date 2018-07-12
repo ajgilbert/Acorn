@@ -27,6 +27,7 @@ class AcornMetProducer : public AcornBaseProducer<std::vector<ac::Met>> {
   virtual void produce(edm::Event&, edm::EventSetup const&);
 
   edm::EDGetTokenT<edm::View<reco::MET>> inputToken_;
+  bool saveGenMetFromPat_;
 };
 
 

@@ -119,6 +119,12 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     # phoMediumIdFullInfoMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium")
 )
 
+process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag("slimmedMETs"),
+    branch=cms.string('pfType1Met'),
+    select=cms.vstring('keep .* p4=12'),
+    saveGenMetFromPat=cms.bool(False)
+)
 
 process.acMCSequence = cms.Sequence(
 )
@@ -156,14 +162,24 @@ process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
 process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("genMetTrue"),
     branch=cms.string('genMet'),
-    select=cms.vstring('keep .* p4=12')
+    select=cms.vstring('keep .* p4=12'),
+    saveGenMetFromPat=cms.bool(False)
 )
+
+process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag("slimmedMETs"),
+    branch=cms.string('genMet'),
+    select=cms.vstring('keep .* p4=12'),
+    saveGenMetFromPat=cms.bool(True)
+)
+
 
 if isMC:
     process.acMCSequence += cms.Sequence(
         process.selectedGenParticles +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
+        process.acGenMetFromPatProducer +
         process.acPileupInfoProducer
     )
 
@@ -233,6 +249,7 @@ else:
         process.selectedPhotons +
         process.acMuonProducer +
         process.acPhotonProducer +
+        process.acPFType1MetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
         process.acEventInfoProducer +

@@ -14,8 +14,8 @@
 
 AcornMetProducer::AcornMetProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::Met>>(config),
-      inputToken_(
-          consumes<edm::View<reco::MET>>(config.getParameter<edm::InputTag>("input"))) {}
+      inputToken_(consumes<edm::View<reco::MET>>(config.getParameter<edm::InputTag>("input"))),
+      saveGenMetFromPat_(config.getParameter<bool>("saveGenMetFromPat")) {}
 
 AcornMetProducer::~AcornMetProducer() { ; }
 
@@ -28,10 +28,28 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   for (unsigned i = 0; i < met_handle->size(); ++i) {
     reco::MET const& src = met_handle->at(i);
+
+    // Below we will use a pointer to access the MET properties. This pointer might be changed to a
+    // different reco::MET object first however, e.g. if the user wants to save the genMET that is
+    // embedded in the pat::MET object
+    reco::MET const* srcptr = &src;
+
+
+    if (saveGenMetFromPat_) {
+      pat::MET const* patsrc = dynamic_cast<pat::MET const*>(&src);
+      if (!patsrc) {
+        throw cms::Exception("DynamicCastFailed") << "Failed to dynamic cast reco::MET object to pat::MET\n";
+      }
+      srcptr = patsrc->genMET();
+      if (!srcptr) {
+        throw cms::Exception("NoGenMETAvailable") << "pat::MET object did not contain the genMET\n";
+      }
+    }
+
     ac::Met & dest = output()->at(i);
 
-    dest.setVector(setVar("p4", src.polarP4()));
-    dest.setSumEt(setVar("sumEt", src.sumEt()));
+    dest.setVector(setVar("p4", srcptr->polarP4()));
+    dest.setSumEt(setVar("sumEt", srcptr->sumEt()));
   }
 }
 
