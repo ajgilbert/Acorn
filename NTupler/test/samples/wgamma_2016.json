@@ -56,8 +56,15 @@
     },
     "WGToLNuG-EFT-madgraphMLM": {
       "dataset": "/WGToLNuG-EFT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-genonly-miniaod-test4-291c870cd83e92ac71bfc90cecb74cc4/USER",
-      "attributes": ["submit", "submitgenonly"],
+      "attributes": [],
       "events": 2019403,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
+    "WGToLNuG-EFT_pTA_300_inf-madgraphMLM": {
+      "dataset": "/WGToLNuG-EFT_pTA_300_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-pTA-300-genonly-miniaod-291c870cd83e92ac71bfc90cecb74cc4/USER",
+      "attributes": ["submit", "submitgenonly"],
+      "events": 580255,
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },

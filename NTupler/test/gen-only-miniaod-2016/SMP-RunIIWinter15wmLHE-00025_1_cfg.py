@@ -60,7 +60,9 @@ process.externalLHEProducer = cms.EDProducer("ExternalLHEProducer",
     outputFile = cms.string('cmsgrid_final.lhe'),
     scriptName = cms.FileInPath('run_remote_tarball_7_1_17_patch1.sh'),
     numberOfParameters = cms.uint32(1),
-    args = cms.vstring('root://eoscms.cern.ch//store/user/agilbert/WAToLNuA0123j_5f_LO_MLM_EFT_slc6_amd64_gcc481_CMSSW_7_1_30_tarball_testfix.tar.xz')
+    #args = cms.vstring('root://eoscms.cern.ch//store/user/agilbert/WAToLNuA0123j_5f_LO_MLM_EFT_slc6_amd64_gcc481_CMSSW_7_1_30_tarball_testfix.tar.xz')
+    args = cms.vstring('root://eoscms.cern.ch//store/user/agilbert/WAToLNuA0123j_5f_LO_MLM_EFT_pTA_300_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz')
+    
 )
 
 
