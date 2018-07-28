@@ -34,6 +34,21 @@
       "attributes": ["wg_gen"],
       "inputs": ["WGToLNuG-EFT-madgraphMLM"],
       "xsec": 510.6
+    },
+    "WGToLNuG-EFT_pTA_300_inf-madgraphMLM": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WGToLNuG-EFT_pTA_300_inf-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "WGToLNuG-EFT_pTA_300_inf_test1-madgraphMLM": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WGToLNuG-EFT_pTA_300_inf_test1-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "WGToLNuG-EFT_pTA_300_inf_test2-madgraphMLM": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WGToLNuG-EFT_pTA_300_inf_test2-madgraphMLM"],
+      "xsec": 510.6
     }
   },
   "config": {
