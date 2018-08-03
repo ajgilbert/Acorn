@@ -23,12 +23,30 @@ class Photon : public Candidate {
   inline bool passElectronVeto() const { return passElectronVeto_; }
   inline bool hasPixelSeed() const { return hasPixelSeed_; }
 
+  inline double scEta() const { return scEta_; }
+  inline float hadTowOverEm() const { return hadTowOverEm_; }
+  inline float full5x5SigmaIetaIeta() const { return full5x5SigmaIetaIeta_; }
+
+  inline double chargedIso() const { return chargedIso_; }
+  inline double neutralHadronIso() const { return neutralHadronIso_; }
+  inline double photonIso() const { return photonIso_; }
+
+
   inline void setIsLooseIdPhoton(bool const& isLooseIdPhoton) { isLooseIdPhoton_ = isLooseIdPhoton; }
   inline void setIsMediumIdPhoton(bool const& isMediumIdPhoton) { isMediumIdPhoton_ = isMediumIdPhoton; }
   inline void setIsTightIdPhoton(bool const& isTightIdPhoton) { isTightIdPhoton_ = isTightIdPhoton; }
 
   inline void setPassElectronVeto(bool const& passElectronVeto) { passElectronVeto_ = passElectronVeto; }
   inline void setHasPixelSeed(bool const& hasPixelSeed) { hasPixelSeed_ = hasPixelSeed; }
+
+  inline void setScEta(double const& scEta) { scEta_ = scEta; }
+  inline void setHadTowOverEm(float const& hadTowOverEm) { hadTowOverEm_ = hadTowOverEm; }
+  inline void setFull5x5SigmaIetaIeta(float const& full5x5SigmaIetaIeta) { full5x5SigmaIetaIeta_ = full5x5SigmaIetaIeta; }
+
+  inline void setChargedIso(double const& chargedIso) { chargedIso_ = chargedIso; }
+  inline void setNeutralHadronIso(double const& neutralHadronIso) { neutralHadronIso_ = neutralHadronIso; }
+  inline void setPhotonIso(double const& photonIso) { photonIso_ = photonIso; }
+
 
  private:
   bool isLooseIdPhoton_;
@@ -37,6 +55,14 @@ class Photon : public Candidate {
 
   bool passElectronVeto_;
   bool hasPixelSeed_;
+
+  double scEta_;
+  float hadTowOverEm_;
+  float full5x5SigmaIetaIeta_;
+
+  double chargedIso_;
+  double neutralHadronIso_;
+  double photonIso_;
 };
 }
 #endif

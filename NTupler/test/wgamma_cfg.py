@@ -115,8 +115,11 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     select=cms.vstring('keep .* p4=12'),
     phoLooseIdMap=cms.InputTag(photon_loose_id),
     phoMediumIdMap=cms.InputTag(photon_medium_id),
-    phoTightIdMap=cms.InputTag(photon_tight_id)
-    # phoMediumIdFullInfoMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium")
+    phoTightIdMap=cms.InputTag(photon_tight_id),
+    phoCutFlow=cms.InputTag(photon_medium_id),
+    chargedIsolation=cms.string('PhoAnyPFIsoWithEACut_0'),
+    neutralHadronIsolation=cms.string('PhoAnyPFIsoWithEAAndQuadScalingCut_0'),
+    photonIsolation=cms.string('PhoAnyPFIsoWithEACut_1')
 )
 
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',

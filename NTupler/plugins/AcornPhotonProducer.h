@@ -30,20 +30,13 @@ class AcornPhotonProducer : public AcornBaseProducer<std::vector<ac::Photon>> {
   edm::EDGetTokenT<edm::ValueMap<bool>> phoMediumIdMapToken_;
   edm::EDGetTokenT<edm::ValueMap<bool>> phoTightIdMapToken_;
 
-  // edm::EDGetTokenT<edm::ValueMap<vid::CutFlowResult> > phoMediumIdFullInfoMapToken_;
-  // void printCutFlowResult(vid::CutFlowResult &cutflow) {
-  //   printf("    CutFlow name= %s    decision is %d\n", cutflow.cutFlowName().c_str(),
-  //          (int)cutflow.cutFlowPassed());
-  //   int ncuts = cutflow.cutFlowSize();
-  //   printf(
-  //       " Index                               cut name              isMasked    value-cut-upon     "
-  //       "pass?\n");
-  //   for (int icut = 0; icut < ncuts; icut++) {
-  //     printf("  %d       %50s    %d        %f          %d\n", icut,
-  //            cutflow.getNameAtIndex(icut).c_str(), (int)cutflow.isCutMasked(icut),
-  //            cutflow.getValueCutUpon(icut), (int)cutflow.getCutResultByIndex(icut));
-  //   }
-  // }
+  edm::EDGetTokenT<edm::ValueMap<vid::CutFlowResult> > phoCutFlowToken_;
+
+  std::string chargedIsolationLabel_;
+  std::string neutralHadronIsolationLabel_;
+  std::string photonIsolationLabel_;
+
+  void printCutFlowResult(vid::CutFlowResult &cutflow);
 };
 
 #endif

@@ -23,9 +23,12 @@ AcornPhotonProducer::AcornPhotonProducer(const edm::ParameterSet& config)
       phoMediumIdMapToken_(
           consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("phoMediumIdMap"))),
       phoTightIdMapToken_(
-          consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("phoTightIdMap"))) {}
-// phoMediumIdFullInfoMapToken_(consumes<edm::ValueMap<vid::CutFlowResult>>(
-//     config.getParameter<edm::InputTag>("phoMediumIdFullInfoMap")))
+          consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("phoTightIdMap"))),
+      phoCutFlowToken_(consumes<edm::ValueMap<vid::CutFlowResult>>(
+          config.getParameter<edm::InputTag>("phoCutFlow"))),
+      chargedIsolationLabel_(config.getParameter<std::string>("chargedIsolation")),
+      neutralHadronIsolationLabel_(config.getParameter<std::string>("neutralHadronIsolation")),
+      photonIsolationLabel_(config.getParameter<std::string>("photonIsolation")) {}
 
 AcornPhotonProducer::~AcornPhotonProducer() { ;}
 
@@ -38,11 +41,12 @@ void AcornPhotonProducer::produce(edm::Event& event,
   edm::Handle<edm::ValueMap<bool>> looseIdDecisions;
   edm::Handle<edm::ValueMap<bool>> mediumIdDecisions;
   edm::Handle<edm::ValueMap<bool>> tightIdDecisions;
+  edm::Handle<edm::ValueMap<vid::CutFlowResult>> cutflow;
+
   event.getByToken(phoLooseIdMapToken_, looseIdDecisions);
   event.getByToken(phoMediumIdMapToken_, mediumIdDecisions);
   event.getByToken(phoTightIdMapToken_, tightIdDecisions);
-  // edm::Handle<edm::ValueMap<vid::CutFlowResult> > medium_id_cutflow_data;
-  // event.getByToken(phoMediumIdFullInfoMapToken_,medium_id_cutflow_data);
+  event.getByToken(phoCutFlowToken_, cutflow);
 
   output()->clear();
   output()->resize(photons_handle->size(), ac::Photon());
@@ -65,16 +69,36 @@ void AcornPhotonProducer::produce(edm::Event& event,
       dest.setHasPixelSeed(setVar("hasPixelSeed", pat_src->hasPixelSeed()));
     }
 
+    dest.setScEta(setVar("scEta", src.superCluster()->eta()));
+    dest.setHadTowOverEm(setVar("hadTowOverEm", src.hadTowOverEm()));
+    dest.setFull5x5SigmaIetaIeta(setVar("full5x5SigmaIetaIeta", src.full5x5_sigmaIetaIeta()));
 
     // This is how to print the full cut flow later if desired.
     // See this message for details of what the cryptic cut names are:
     // https://hypernews.cern.ch/HyperNews/CMS/get/met/506/2.html
-    // vid::CutFlowResult fullCutFlowData = (*medium_id_cutflow_data)[photons_handle->ptrAt(i)];
+    vid::CutFlowResult fullCutFlowData = (*cutflow)[photons_handle->ptrAt(i)];
     // printCutFlowResult(fullCutFlowData);
 
+    dest.setChargedIso(setVar("chargedIso", fullCutFlowData.getValueCutUpon(chargedIsolationLabel_)));
+    dest.setNeutralHadronIso(setVar("neutralHadronIso", fullCutFlowData.getValueCutUpon(neutralHadronIsolationLabel_)));
+    dest.setPhotonIso(setVar("photonIso", fullCutFlowData.getValueCutUpon(photonIsolationLabel_)));
 
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
+  }
+}
+
+void AcornPhotonProducer::printCutFlowResult(vid::CutFlowResult& cutflow) {
+  printf("    CutFlow name= %s    decision is %d\n", cutflow.cutFlowName().c_str(),
+         (int)cutflow.cutFlowPassed());
+  int ncuts = cutflow.cutFlowSize();
+  printf(
+      " Index                               cut name              isMasked    value-cut-upon     "
+      "pass?\n");
+  for (int icut = 0; icut < ncuts; icut++) {
+    printf("  %d       %50s    %d        %f          %d\n", icut,
+           cutflow.getNameAtIndex(icut).c_str(), (int)cutflow.isCutMasked(icut),
+           cutflow.getValueCutUpon(icut), (int)cutflow.getCutResultByIndex(icut));
   }
 }
 
