@@ -33,6 +33,7 @@ for s in samples:
     runargs = ['cmsRun'] + passthru
     runargs.extend(cfg['configs'][info['config']])
     runargs.append('events=1000')
+    #infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s instance=prod/phys03' % dataset, '-limit', '1']).strip()
     infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s' % dataset, '-limit', '1']).strip()
     runargs.append('input=%s' % infile)
     print ' '.join(runargs)

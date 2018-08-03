@@ -68,6 +68,20 @@
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },
+    "WGToLNuG-EFT_pTA_300_inf_test1-madgraphMLM": {
+      "dataset": "/WGToLNuG-EFT_pTA_300_inf_test1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-pTA-300-test1-genonly-miniaod-291c870cd83e92ac71bfc90cecb74cc4/USER",
+      "attributes": ["submit", "submitgenonlytest"],
+      "events": 476057,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
+    "WGToLNuG-EFT_pTA_300_inf_test2-madgraphMLM": {
+      "dataset": "/WGToLNuG-EFT_pTA_300_inf_test2_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-pTA-300-test2-genonly-miniaod-291c870cd83e92ac71bfc90cecb74cc4/USER",
+      "attributes": ["submit", "submitgenonlytest"],
+      "events": 478388,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
     "WGToLNuG-amcatnloFXFX-ext1": {
       "dataset": "/WGToLNuG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
       "attributes": []
