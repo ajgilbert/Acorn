@@ -55,6 +55,7 @@ class WGAnalysis : public ModuleBase {
   float n_pt_;
   float l_pt_;
   float l_eta_;
+  int l_charge_;
   float l_g_dr_;
   unsigned nparts_;
   bool valid_mt_;

@@ -32,6 +32,7 @@ namespace ac {
       tree_->Branch("n_pt", &n_pt_);
       tree_->Branch("l_pt", &l_pt_);
       tree_->Branch("l_eta", &l_eta_);
+      tree_->Branch("l_charge", &l_charge_);
       tree_->Branch("l_g_dr", &l_g_dr_);
       tree_->Branch("type", &type_);
       tree_->Branch("nparts", &nparts_);
@@ -147,7 +148,7 @@ namespace ac {
     auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
     auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
     auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
-    nparts_ = lhe_parts.size();
+    nparts_ = 0;
 
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
     if (!info->lheWeights().count(100000)) return 1;
@@ -163,6 +164,7 @@ namespace ac {
     ac::GenParticle const* lhe_neu = nullptr;
     ac::GenParticle const* lhe_pho = nullptr;
     for (auto const& part : lhe_parts) {
+      if (part->status() == 1) ++nparts_;
       if (IsChargedLepton(*part)) {
         lhe_lep = part;
       }
@@ -231,6 +233,7 @@ namespace ac {
     g_eta_ = gen_sys.photon.eta();
     l_pt_  = gen_sys.charged_lepton.pt();
     l_eta_ = gen_sys.charged_lepton.eta();
+    l_charge_ = lhe_lep->pdgId() / std::abs(lhe_lep->pdgId());
     n_pt_  = gen_sys.neutrino.pt();
     l_g_dr_ = ROOT::Math::VectorUtil::DeltaR(gen_sys.charged_lepton, gen_sys.photon);
 
