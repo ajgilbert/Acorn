@@ -63,7 +63,7 @@
     },
     "WGToLNuG-EFT_pTA_300_inf-madgraphMLM": {
       "dataset": "/WGToLNuG-EFT_pTA_300_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-pTA-300-genonly-miniaod-291c870cd83e92ac71bfc90cecb74cc4/USER",
-      "attributes": ["submit", "submitgenonly"],
+      "attributes": ["submitgenonly"],
       "events": 580255,
       "config": "mc_genonly",
       "inputDBS": "phys03"
@@ -102,19 +102,19 @@
     },
     "DYJetsToLL_M-50-madgraphMLM-ext2": {
       "dataset": "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",
-      "attributes": [],
+      "attributes": ["submit"],
       "events": 96658943,
       "config": "mc"
     },
     "WJetsToLNu-madgraphMLM": {
       "dataset": "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
-      "attributes": [],
+      "attributes": ["submit"],
       "events": 29705748,
       "config": "mc"
     },
     "WJetsToLNu-madgraphMLM-ext2": {
       "dataset": "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",
-      "attributes": [],
+      "attributes": ["submit"],
       "events": 57026058,
       "config": "mc"
     },
@@ -122,6 +122,60 @@
       "dataset": "/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 77081156,
+      "config": "mc"
+    },
+    "VVTo2L2Nu-amcatnloFXFX": {
+      "dataset": "/VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "VVTo2L2Nu-amcatnloFXFX-ext1": {
+      "dataset": "/VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
+      "attributes": [],
+      "events": 1,
+      "config": "mc"
+    },
+    "WWTo1L1Nu2Q-amcatnloFXFX": {
+      "dataset": "/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "WZTo2L2Q-amcatnloFXFX": {
+      "dataset": "/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "WZTo1L3Nu-amcatnloFXFX": {
+      "dataset": "/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "WZTo1L1Nu2Q-amcatnloFXFX": {
+      "dataset": "/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "WZTo3LNu-amcatnloFXFX": {
+      "dataset": "/WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "ZZTo4L-amcatnloFXFX": {
+      "dataset": "/ZZTo4L_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
+      "config": "mc"
+    },
+    "ZZTo2L2Q-amcatnloFXFX": {
+      "dataset": "/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 1,
       "config": "mc"
     }
   },
