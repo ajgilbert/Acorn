@@ -6,6 +6,9 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('analysis')
+options.register('events', -1, VarParsing.multiplicity.singleton,
+    VarParsing.varType.int, "Number of events")
+options.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "input file")
 options.parseArguments()
 
 process = cms.Process('ANA')
@@ -27,7 +30,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:mc', '')
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(options.maxEvents)
+    input = cms.untracked.int32(options.events)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
