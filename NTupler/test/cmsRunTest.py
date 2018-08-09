@@ -15,6 +15,8 @@ parser.add_argument('config', default='config.json',
                     help='Specifies the sample config json')
 parser.add_argument('--samples', '-s', default=None,
                     help='Specifies the samples to run')
+parser.add_argument('--no-cfg', default='store_true',
+                    help='Do not add the preset config arguments')
 
 args, passthru = parser.parse_known_args()
 
@@ -31,8 +33,8 @@ for s in samples:
     info = cfg['samples'][s]
     dataset = info['dataset']
     runargs = ['cmsRun'] + passthru
-    runargs.extend(cfg['configs'][info['config']])
-    runargs.append('events=1000')
+    if not args.no_cfg:
+        runargs.extend(cfg['configs'][info['config']])
     #infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s instance=prod/phys03' % dataset, '-limit', '1']).strip()
     infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s' % dataset, '-limit', '1']).strip()
     runargs.append('input=%s' % infile)
