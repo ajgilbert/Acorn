@@ -10,6 +10,7 @@
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
+#include "Acorn/Analysis/interface/WGDataAnalysis.h"
 #include "Acorn/Analysis/interface/DiMuonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
         outputdir + "/" + seq + "/" + outname);
   }
 
-  ac::AnalysisBase analysis("DiMuonAnalysis", do_files, "EventTree", -1);
+  ac::AnalysisBase analysis("WGammaAnalysis", do_files, "EventTree", jsc.count("events") ? int(jsc["events"]) : -1);
   analysis.SetTTreeCaching(true);
   analysis.StopOnFileFailure(true);
   analysis.RetryFileAfterFailure(7, 3);
@@ -85,21 +86,40 @@ int main(int argc, char* argv[]) {
 
   bool is_data = contains(jsc["attributes"], "data");
 
-  ac::Sequence main_seq;
-  if (sequences.count("Main")) {
-    main_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Main").get()));
+  ac::Sequence dimuon_seq;
+  if (sequences.count("DiMuon")) {
+    dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("DiMuon").get()));
     if (is_data) {
-      main_seq.BuildModule(
-          ac::LumiMask("LumiMask").set_fs(fs.at("Main").get()).set_input_file(jsc["data_json"]));
+      dimuon_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(fs.at("DiMuon").get()).set_input_file(jsc["data_json"]));
     }
-    main_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis")
-                             .set_fs(fs.at("Main").get())
+    dimuon_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis")
+                             .set_fs(fs.at("DiMuon").get())
                              .set_year(jsc["year"])
                              .set_corrections("input/wgamma_corrections_2016_v1.root")
                              .set_is_data(is_data));
 
-    main_seq.InsertSequence("Main", analysis);
+    dimuon_seq.InsertSequence("DiMuon", analysis);
   }
+
+  ac::Sequence wgamma_seq;
+  std::string wgamma_label = "WGamma";
+  if (sequences.count(wgamma_label)) {
+    auto wgamma_fs = fs.at(wgamma_label).get();
+    wgamma_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(wgamma_fs));
+    if (is_data) {
+      wgamma_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
+    }
+    wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
+                             .set_fs(wgamma_fs)
+                             .set_year(jsc["year"])
+                             .set_corrections("input/wgamma_corrections_2016_v1.root")
+                             .set_is_data(is_data));
+
+    wgamma_seq.InsertSequence(wgamma_label, analysis);
+  }
+
 
   ac::Sequence wg_gen_seq;
 

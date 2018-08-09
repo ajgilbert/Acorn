@@ -62,5 +62,7 @@ private:
 // Muon isolation
 double MuonPFIso(ac::Muon const* mu);
 
+// Transverse mass
+double MT(Candidate const* cand1, Candidate const* cand2);
 }  // namespace ac
 #endif

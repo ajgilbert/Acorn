@@ -25,7 +25,7 @@ with open(args.config) as jsonfile:
     incfg = json.load(jsonfile)
 
 full_outdir = os.path.join(args.outdir, args.production)
-sequences = ['wg_gen']
+sequences = ['WGamma']
 
 for seq in sequences:
     makedir = os.path.join(full_outdir, seq)
