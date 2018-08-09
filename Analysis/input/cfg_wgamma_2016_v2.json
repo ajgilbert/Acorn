@@ -1,0 +1,73 @@
+{
+  "samples": {
+    "SingleMuon": {
+      "attributes": ["default", "data"],
+      "inputs": ["SingleMuon-2016B-ver2", "SingleMuon-2016C", "SingleMuon-2016D", "SingleMuon-2016E", "SingleMuon-2016F", "SingleMuon-2016G", "SingleMuon-2016H-ver2", "SingleMuon-2016H-ver3"],
+      "lumi": 35858.453042
+    },
+    "WGToLNuG-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
+      "xsec": 5765.4
+    },
+    "WJetsToLNu-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext2"],
+      "xsec": 61526.7
+    },
+    "TT-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TT-powheg"],
+      "xsec": 831.76
+    },
+    "VVTo2L2Nu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["VVTo2L2Nu-amcatnloFXFX"],
+      "xsec": 1.197e+01
+    },
+    "WWTo1L1Nu2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WWTo1L1Nu2Q-amcatnloFXFX"],
+      "xsec": 4.548e+01
+    },
+    "WZTo1L1Nu2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo1L1Nu2Q-amcatnloFXFX"],
+      "xsec": 1.076e+01
+    },
+    "WZTo1L3Nu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo1L3Nu-amcatnloFXFX"],
+      "xsec": 3.052e+00
+    },
+    "WZTo2L2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo2L2Q-amcatnloFXFX"],
+      "xsec": 5.595e+00
+    },
+    "WZTo3LNu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo3LNu-amcatnloFXFX"],
+      "xsec": 4.698e+00
+    },
+    "ZZTo2L2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZTo2L2Q-amcatnloFXFX"],
+      "xsec": 3.220e+00
+    },
+    "ZZTo4L-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZTo4L-amcatnloFXFX"],
+      "xsec": 1.213e+00
+    }
+  },
+  "config": {
+    "data_json": "input/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt",
+    "year": 2016
+  }
+}
