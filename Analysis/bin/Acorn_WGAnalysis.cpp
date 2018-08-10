@@ -115,7 +115,8 @@ int main(int argc, char* argv[]) {
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
                              .set_corrections("input/wgamma_corrections_2016_v1.root")
-                             .set_is_data(is_data));
+                             .set_is_data(is_data)
+                             .set_gen_classify(""));
 
     wgamma_seq.InsertSequence(wgamma_label, analysis);
   }

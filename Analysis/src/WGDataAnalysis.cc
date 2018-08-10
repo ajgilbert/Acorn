@@ -27,16 +27,36 @@ WGDataAnalysis::~WGDataAnalysis() { ; }
 int WGDataAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
-    tree_->Branch("pt_m", &pt_m_);
-    tree_->Branch("pt_p", &pt_p_);
-    tree_->Branch("eta_m", &eta_m_);
-    tree_->Branch("eta_p", &eta_p_);
-    tree_->Branch("pt_met", &pt_met_);
-    tree_->Branch("mt", &mt_);
-    tree_->Branch("trg_m", &trg_m_);
+    tree_->Branch("gen_proc", &gen_proc_);
+    tree_->Branch("n_m", &n_m_);
+    tree_->Branch("m0_pt", &m0_pt_);
+    tree_->Branch("m0_eta", &m0_eta_);
+    tree_->Branch("m0_phi", &m0_phi_);
+    tree_->Branch("m0_trg", &m0_trg_);
+    tree_->Branch("m1_pt", &m1_pt_);
+    tree_->Branch("m1_eta", &m1_eta_);
+    tree_->Branch("m1_phi", &m1_phi_);
+    tree_->Branch("m0m1_M", &m0m1_M_);
+    tree_->Branch("m0m1_dr", &m0m1_dr_);
+    tree_->Branch("m0m1_os", &m0m1_os_);
+    tree_->Branch("n_p", &n_p_);
+    tree_->Branch("p0_pt", &p0_pt_);
+    tree_->Branch("p0_eta", &p0_eta_);
+    tree_->Branch("p0_phi", &p0_phi_);
+    tree_->Branch("p0_tight", &p0_tight_);
+    tree_->Branch("met", &met_);
+    tree_->Branch("met_phi", &met_phi_);
+    tree_->Branch("m0met_mt", &m0met_mt_);
+    tree_->Branch("m0p0_dr", &m0p0_dr_);
+    tree_->Branch("m0p0_dphi", &m0p0_dphi_);
+    tree_->Branch("m0p0_M", &m0p0_M_);
+    tree_->Branch("n_vm", &n_vm_);
+    tree_->Branch("vm_p0_dr", &vm_p0_dr_);
+    tree_->Branch("wt_def", &wt_def_);
     tree_->Branch("wt_pu", &wt_pu_);
-    tree_->Branch("wt_m", &wt_m_);
-    tree_->Branch("wt_trg_m", &wt_trg_m_);
+    tree_->Branch("wt_m0", &wt_m0_);
+    tree_->Branch("wt_trg_m0", &wt_trg_m0_);
+    tree_->Branch("wt_m1", &wt_m1_);
     tree_->Print();
   }
 
@@ -82,14 +102,43 @@ int WGDataAnalysis::PreAnalysis() {
 
   int WGDataAnalysis::Execute(TreeEvent* event) {
 
+    SetDefaults();
+
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
     auto muons = event->GetPtrVec<ac::Muon>("muons");
     auto photons = event->GetPtrVec<ac::Photon>("photons");
-    auto met = event->GetPtrVec<ac::Met>("pfType1Met");
+    auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
 
-    // Apply pT and ID cuts
-    // The medium ID already includes iso?
+
+    // Sub-process classification - maybe move this into a separate module
+    if (gen_classify_ == "DY") {
+      auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
+      unsigned n_ele = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
+        return std::abs(p->pdgId()) == 11;
+      });
+      unsigned n_muo = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
+        return std::abs(p->pdgId()) == 13;
+      });
+      unsigned n_tau = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
+        return std::abs(p->pdgId()) == 15;
+      });
+      if (n_ele == 2) {
+        gen_proc_ = 1;
+      }
+      if (n_muo == 2) {
+        gen_proc_ = 2;
+      }
+      if (n_tau == 2) {
+        gen_proc_ = 3;
+      }
+    }
+
+    auto veto_muons = muons;
+    ac::keep_if(veto_muons, [](ac::Muon const* m) {
+      return m->pt() > 10. && fabs(m->eta()) < 2.4;
+    });
+
     ac::keep_if(muons, [](ac::Muon const* m) {
       return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
     });
@@ -101,61 +150,133 @@ int WGDataAnalysis::PreAnalysis() {
     boost::range::sort(muons, DescendingPt);
     boost::range::sort(photons, DescendingPt);
 
-    if (!(muons.size() == 1 && photons.size() == 1)) {
+    if (muons.size() == 0) {
       return 1;
     }
+    ac::Muon* m0 = muons[0];
 
-    double dr_m_p = ac::DeltaR(muons[0], photons[0]);
+    ac::keep_if(veto_muons, [&](ac::Muon *m) {
+      return m != m0;
+    });
 
-    if (!(dr_m_p > 0.5)) {
-      return 1;
+    n_m_ = muons.size();
+    n_vm_ = veto_muons.size();
+
+    m0_pt_ = m0->pt();
+    m0_eta_ = m0->eta();
+    m0_phi_ = m0->phi();
+
+    ac::Met* met = mets.at(0);
+    met_ = met->pt();
+    met_phi_ = met->phi();
+    m0met_mt_ = ac::MT(m0, met);
+
+    unsigned trg_lookup = is_data_ ? info->run() : year_;
+    if (year_ == 2016) {
+      auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
+      auto const& trg_objs_tk = event->GetPtrVec<TriggerObject>("triggerObjects_IsoTkMu24");
+      m0_trg_ =
+          IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
+          IsFilterMatchedDR(muons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+    } else {
+      auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu27");
+      m0_trg_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
     }
 
-    if (muons.size() == 1 && photons.size() == 1) {
+    if (muons.size() >= 2) {
+      ac::Muon* m1 = muons[1];
+      m1_pt_ = m1->pt();
+      m1_eta_ = m1->eta();
+      m1_phi_ = m1->phi();
 
-      pt_m_ = muons[0]->pt();
-      eta_m_ = muons[0]->eta();
+      m0m1_M_ = (m0->vector() + m1->vector()).M();
+      m0m1_dr_ = DeltaR(m0, m1);
+      m0m1_os_ = m0->charge() != m1->charge();
+    }
 
-      pt_p_ = photons[0]->pt();
-      eta_p_ = photons[0]->eta();
+    n_p_ = photons.size();
 
-      pt_met_ = met[0]->pt();
+    if (n_p_ >= 1) {
+      ac::Photon* p0 = photons[0];
+      p0_pt_ = p0->pt();
+      p0_eta_ = p0->eta();
+      p0_phi_ = p0->phi();
+      p0_tight_ = p0->isTightIdPhoton();
 
-      mt_ = ac::MT(muons[0], met[0]);
+      m0p0_dr_ =  ac::DeltaR(m0, p0);
+      m0p0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(m0->vector(), p0->vector());
+      m0p0_M_ = (m0->vector() + p0->vector()).M();
 
-      unsigned trg_lookup = is_data_ ? info->run() : year_;
-      if (year_ == 2016) {
-        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
-        auto const& trg_objs_tk = event->GetPtrVec<TriggerObject>("triggerObjects_IsoTkMu24");
-        trg_m_ =
-            IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(muons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
-      } else {
-        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu27");
-        trg_m_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
+      if (n_vm_ >= 1 && n_p_ >= 1) {
+        boost::range::sort(veto_muons, [&](ac::Muon *x1, ac::Muon *x2) {
+          return DeltaR(x1, p0) < DeltaR(x2, p0);
+        });
+
+        vm_p0_dr_ = ac::DeltaR(veto_muons[0], p0);
       }
+    }
 
-      wt_pu_ = 1.;
-      wt_m_ = 1.;
-      wt_trg_m_ = 1.;
-
-      if (!is_data_) {
-        auto const& pu_info = event->GetPtrVec<PileupInfo>("pileupInfo");
-        for (PileupInfo const* pu : pu_info) {
-          if (pu->bunchCrossing() == 0) {
-            wt_pu_ = RooFunc(fns_["pileup_ratio"], {pu->trueNumInteractions()});
-            break;
-          }
+    if (!is_data_) {
+      wt_def_ = info->nominalGenWeight() >= 0. ? +1. : -1.; // temporary until new ntuples fix EventInfo bug
+      auto const& pu_info = event->GetPtrVec<PileupInfo>("pileupInfo");
+      for (PileupInfo const* pu : pu_info) {
+        if (pu->bunchCrossing() == 0) {
+          wt_pu_ = RooFunc(fns_["pileup_ratio"], {pu->trueNumInteractions()});
+          break;
         }
-        wt_m_ = RooFunc(fns_["m_idisotrk_ratio"], {pt_m_, eta_m_});
-        wt_trg_m_ = RooFunc(fns_["m_trg_ratio"], {pt_m_, eta_m_});
       }
-      tree_->Fill();
+      wt_m0_ = RooFunc(fns_["m_idisotrk_ratio"], {m0_pt_, m0_eta_});
+      wt_trg_m0_ = RooFunc(fns_["m_trg_ratio"], {m0_pt_, m0_eta_});
+      if (muons.size() >= 2) {
+        wt_m1_ = RooFunc(fns_["m_idisotrk_ratio"], {m1_pt_, m1_eta_});
+      }
     }
+
+    // std::cout << "----\n";
+    // auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
+    // for (auto p : genparts) {
+    //   p->Print();
+    // }
+    tree_->Fill();
+
 
 
     return 0;
   }
+
+  void WGDataAnalysis::SetDefaults() {
+    gen_proc_ = 0;
+    n_m_ = 0;
+    m0_pt_ = 0.;
+    m0_eta_ = 0.;
+    m0_phi_ = 0.;
+    m0_trg_ = false;
+    m1_pt_ = 0.;
+    m1_eta_ = 0.;
+    m1_phi_ = 0.;
+    m0m1_M_ = 0.;
+    m0m1_dr_ = 0.;
+    m0m1_os_ = false;
+    n_p_ = 0;
+    p0_pt_ = 0.;
+    p0_eta_ = 0.;
+    p0_phi_ = 0.;
+    p0_tight_ = false;
+    met_ = 0.;
+    met_phi_ = 0.;
+    m0met_mt_ = 0.;
+    m0p0_dr_ = 0.;
+    m0p0_dphi_ = 0.;
+    m0p0_M_ = 0.;
+    n_vm_ = 0;
+    vm_p0_dr_ = 0.;
+    wt_def_ = 1.;
+    wt_pu_ = 1.;
+    wt_m0_ = 1.;
+    wt_trg_m0_ = 1.;
+    wt_m1_ = 1.;
+  }
+
   int WGDataAnalysis::PostAnalysis() {
     return 0;
   }

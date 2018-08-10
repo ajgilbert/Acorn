@@ -29,28 +29,29 @@ CHANNELS = {
 
 LAYOUTS = {
     "wgamma": [
-        # ('QCD', {
-        #     'entries': ['QCD'],
-        #     'legend': 'QCD multijet',
-        #     'color': ROOT.TColor.GetColor(250, 202, 255)
-        # }
-        # ),
-        # ('WG', {
-        #     'entries': ['WG'],
-        #     'legend': 'W#gamma',
-        #     'color': ROOT.TColor.GetColor(222, 90, 106)
-        # }
-        # ),
+        ('DY', {
+            'entries': ['DY'],
+            'legend': 'Z#rightarrowll',
+            'color': ROOT.TColor.GetColor(100, 192, 232)
+        }
+        ),
         ('TT', {
             'entries': ['TT'],
             'legend': 't#bar{t}',
             'color': ROOT.TColor.GetColor(155, 152, 204)
         }
         ),
-        ('DY', {
-            'entries': ['DY'],
-            'legend': 'Z#rightarrow#mu#mu',
-            'color': ROOT.TColor.GetColor(100, 192, 232)
+        ('W', {
+            'entries': ['W'],
+            'legend': 'W#rightarrowl#nu',
+            'color': ROOT.TColor.GetColor(222, 90, 106)
+        }
+        ),
+        ('WG', {
+            'entries': ['WG'],
+            'legend': 'W#rightarrowl#nu+#gamma',
+            'color': ROOT.TColor.GetColor(119, 213, 217)
+
         }
         ),
         # ('ZTT', {
