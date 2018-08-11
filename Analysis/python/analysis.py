@@ -78,14 +78,21 @@ def Hist(classname, binning, sample, var, wt='1.0', sel='1'):
     return res
 
 
-def GenTreeCode(tree, objlist):
+def GenTreeCode(tree, objlist, multithread=True):
     fname = 'RunTree%i' % GenTreeCode.counter
     # static variable to keep ensure we can give
     # each function a unique name
     GenTreeCode.counter += 1
     res = []
     res.append('void %s(TTree *tree, TObjArray *hists) {' % fname)
-    res.append('  TTreeReader reader(tree);')
+    if multithread:
+        res.append('  ROOT::EnableImplicitMT(2);')
+        for i, obj in enumerate(objlist):
+            res.append('  ROOT::TThreadedObject<%s> hist%i(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (obj.classname, i, obj.classname, i))
+            res.append('  ROOT::TTreeProcessorMT tp(*tree);')
+        res.append('  auto myFunction = [&](TTreeReader &reader) {')
+    else:
+        res.append('  TTreeReader reader(tree);')
     branches = tree.GetListOfBranches()
     binfos = []
     for i in range(branches.GetEntriesFast()):
@@ -94,14 +101,26 @@ def GenTreeCode(tree, objlist):
         btype = branch.GetListOfLeaves().UncheckedAt(0).GetTypeName()
         binfos.append((bname, btype))
         res.append('  TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
+    if multithread:
+        for i, obj in enumerate(objlist):
+            res.append('    auto t_hist%i = hist%i.Get();' % (i, i))
     res.append('  while (reader.Next()) {')
     for bname, btype in binfos:
         res.append('    %s %s = *%s_;' % (btype, bname, bname))
     for i, obj in enumerate(objlist):
-        res.append('    if (%s) static_cast<%s*>(hists->UncheckedAt(%i))->Fill(%s, %s);' % (obj.sel, obj.classname, i, ', '.join(obj.var), obj.wt))
+        if multithread:
+            res.append('    if (%s) t_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
+        else:
+            res.append('    if (%s) static_cast<%s*>(hists->UncheckedAt(%i))->Fill(%s, %s);' % (obj.sel, obj.classname, i, ', '.join(obj.var), obj.wt))
+
     res.append('  }')
+    if multithread:
+        res.append('  };')
+        res.append('  tp.Process(myFunction);')
+        for i, obj in enumerate(objlist):
+            res.append('  hist%i.Merge()->Copy(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (i, obj.classname, i))
     res.append('}')
-    # print '\n'.join(res)
+    print '\n'.join(res)
     start = time.time()
     ROOT.gInterpreter.Declare('\n'.join(res))
     end = time.time()
