@@ -79,21 +79,35 @@ def Hist(classname, binning, sample, var, wt='1.0', sel='1'):
     return res
 
 
-def GenTreeCode(tree, objlist, multithread=True):
+class CodeLines:
+    def __init__(self):
+        self.res = []
+        self.idlevel = 0
+
+    def Add(self, line):
+        self.res.append('  ' * self.idlevel + line)
+
+
+def GenTreeCode(tree, objlist, multithread=None):
     fname = 'RunTree%i' % GenTreeCode.counter
     # static variable to keep ensure we can give
     # each function a unique name
     GenTreeCode.counter += 1
-    res = []
-    res.append('void %s(TTree *tree, TObjArray *hists) {' % fname)
+    code = CodeLines()
     if multithread:
-        res.append('  ROOT::EnableImplicitMT(2);')
+        code.Add('R__LOAD_LIBRARY(libTreePlayer)')
+    code.Add('void %s(TTree *tree, TObjArray *hists) {' % fname)
+    code.idlevel += 1
+    if multithread:
+        code.Add('ROOT::EnableImplicitMT(%i);' % multithread)
         for i, obj in enumerate(objlist):
-            res.append('  ROOT::TThreadedObject<%s> hist%i(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (obj.classname, i, obj.classname, i))
-            res.append('  ROOT::TTreeProcessorMT tp(*tree);')
-        res.append('  auto myFunction = [&](TTreeReader &reader) {')
+            code.Add('ROOT::TThreadedObject<%s> hist%i(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (obj.classname, i, obj.classname, i))
+            code.Add('ROOT::TTreeProcessorMT tp(*tree);')
+        code.Add('auto myFunction = [&](TTreeReader &reader) {')
+        code.idlevel += 1
     else:
-        res.append('  TTreeReader reader(tree);')
+        code.Add('TTreeReader reader(tree);')
+
     branches = tree.GetListOfBranches()
     binfos = []
     for i in range(branches.GetEntriesFast()):
@@ -101,29 +115,35 @@ def GenTreeCode(tree, objlist, multithread=True):
         bname = branch.GetName()
         btype = branch.GetListOfLeaves().UncheckedAt(0).GetTypeName()
         binfos.append((bname, btype))
-        res.append('  TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
+        code.Add('TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
     if multithread:
         for i, obj in enumerate(objlist):
-            res.append('    auto t_hist%i = hist%i.Get();' % (i, i))
-    res.append('  while (reader.Next()) {')
+            code.Add('auto t_hist%i = hist%i.Get();' % (i, i))
+    code.Add('while (reader.Next()) {')
+    code.idlevel += 1
     for bname, btype in binfos:
-        res.append('    %s %s = *%s_;' % (btype, bname, bname))
+        code.Add('%s %s = *%s_;' % (btype, bname, bname))
     for i, obj in enumerate(objlist):
         if multithread:
-            res.append('    if (%s) t_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
+            code.Add('if (%s) t_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
         else:
-            res.append('    if (%s) static_cast<%s*>(hists->UncheckedAt(%i))->Fill(%s, %s);' % (obj.sel, obj.classname, i, ', '.join(obj.var), obj.wt))
+            code.Add('if (%s) static_cast<%s*>(hists->UncheckedAt(%i))->Fill(%s, %s);' % (obj.sel, obj.classname, i, ', '.join(obj.var), obj.wt))
 
-    res.append('  }')
+    code.idlevel -= 1
+    code.Add('}')
     if multithread:
-        res.append('  };')
-        res.append('  tp.Process(myFunction);')
+        code.idlevel -= 1
+        code.Add('};')
+        code.Add('tp.Process(myFunction);')
         for i, obj in enumerate(objlist):
-            res.append('  hist%i.Merge()->Copy(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (i, obj.classname, i))
-    res.append('}')
-    print '\n'.join(res)
+            code.Add('hist%i.Merge()->Copy(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (i, obj.classname, i))
+        code.Add('ROOT::DisableImplicitMT();')
+    code.idlevel -= 1
+    code.Add('}')
+    fullcode = '\n'.join(code.res)
+    print fullcode
     start = time.time()
-    ROOT.gInterpreter.Declare('\n'.join(res))
+    ROOT.gInterpreter.Declare(fullcode)
     end = time.time()
     print '>> JIT compiled function %s in %.2g seconds' % (fname, (end - start))
     return fname
