@@ -14,6 +14,7 @@
 #include "Acorn/Analysis/interface/DiMuonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
+#include "Compression.h"
 using std::string;
 using std::vector;
 using std::set;
@@ -76,6 +77,7 @@ int main(int argc, char* argv[]) {
   for (auto const& seq : sequences) {
     fs[seq] = std::make_shared<fwlite::TFileService>(
         outputdir + "/" + seq + "/" + outname);
+    fs[seq]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kLZMA, 5));
   }
 
   ac::AnalysisBase analysis("WGammaAnalysis", do_files, "EventTree", jsc.count("events") ? int(jsc["events"]) : -1);

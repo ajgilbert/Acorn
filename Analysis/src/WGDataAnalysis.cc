@@ -16,6 +16,7 @@
 #include "Acorn/NTupler/interface/Met.h"
 #include "Acorn/NTupler/interface/PileupInfo.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
+#include "Acorn/NTupler/interface/Reduction.h"
 
 namespace ac {
 
@@ -163,6 +164,8 @@ int WGDataAnalysis::PreAnalysis() {
     n_vm_ = veto_muons.size();
 
     m0_pt_ = m0->pt();
+    m0_pt_ = reduceMantissaToNbits(m0_pt_, 12);
+
     m0_eta_ = m0->eta();
     m0_phi_ = m0->phi();
 
@@ -170,6 +173,7 @@ int WGDataAnalysis::PreAnalysis() {
     met_ = met->pt();
     met_phi_ = met->phi();
     m0met_mt_ = ac::MT(m0, met);
+    m0met_mt_ = reduceMantissaToNbits(m0met_mt_, 12);
 
     unsigned trg_lookup = is_data_ ? info->run() : year_;
     if (year_ == 2016) {
