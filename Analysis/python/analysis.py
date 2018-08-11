@@ -7,6 +7,7 @@ from collections import defaultdict, OrderedDict
 
 ROOT.TH1.AddDirectory(False)
 
+
 class Node:
     def __init__(self):
         self.d = OrderedDict()
@@ -159,5 +160,5 @@ def MultiDraw(node, sample_to_file_dict, tree_name):
     print '>> Total evaluation time: %.2g seconds' % draw_time
 
 
-def NormaliseTo(hist, val):
-    hist.Scale(1. / hist.Integral())
+def NormaliseTo(hist, val=1.0):
+    hist.Scale(val / hist.Integral())
