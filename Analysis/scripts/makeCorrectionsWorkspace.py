@@ -187,6 +187,21 @@ if era == '2016':
 
     w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
 
+###############################################################################
+## Photons
+###############################################################################
+loc = 'input/photons/%s' % era
+
+if era == '2016':
+    histsToWrap = [
+        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'p_id_ratio')
+    ]
+
+    for task in histsToWrap:
+        SafeWrapHist(w, ['p_eta', 'p_pt'],
+                              GetFromTFile(task[0]), name=task[1])
+
 w.Print()
 w.writeToFile('wgamma_corrections_%s_v1.root' % era)
 w.Delete()
+
