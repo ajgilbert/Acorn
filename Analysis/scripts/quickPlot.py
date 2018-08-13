@@ -17,7 +17,7 @@ def Getter(file, hist, width=False):
         return None
     if width and len(h.GetXaxis().GetXbins()) > 0:
         h.Scale(1., 'width')
-    h.Rebin(4)
+    # h.Rebin(5)
     return h
 
 

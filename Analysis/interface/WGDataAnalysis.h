@@ -54,7 +54,7 @@ class WGDataAnalysis : public ModuleBase {
   float m0m1_dr_;
   bool m0m1_os_;
 
-  // number of medium photons
+  // number of reco'd photons (no ID/Iso beyond miniaod presel)
   unsigned n_p_;
 
   // p0: Main photon variables, defined if n_p >= 1
@@ -62,6 +62,12 @@ class WGDataAnalysis : public ModuleBase {
   float p0_eta_;
   float p0_phi_;
   float p0_chiso_;
+  float p0_neiso_;
+  float p0_phiso_;
+  float p0_hovere_;
+  float p0_sigma_;
+  bool p0_haspix_;
+  bool p0_medium_noch_;
   bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
 

@@ -45,6 +45,12 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_eta", &p0_eta_);
     tree_->Branch("p0_phi", &p0_phi_);
     tree_->Branch("p0_chiso", &p0_chiso_);
+    tree_->Branch("p0_neiso", &p0_neiso_);
+    tree_->Branch("p0_phiso", &p0_phiso_);
+    tree_->Branch("p0_hovere", &p0_hovere_);
+    tree_->Branch("p0_sigma", &p0_sigma_);
+    tree_->Branch("p0_haspix", &p0_haspix_);
+    tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
     tree_->Branch("met", &met_);
@@ -151,14 +157,13 @@ int WGDataAnalysis::PreAnalysis() {
     // At this stage apply the medium Photon ID without the charged is cut
     ac::keep_if(photons, [](ac::Photon const* p) {
       return p->pt() > 30. && fabs(p->scEta()) < 2.5 &&
-             (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) &&
-             ac::PhotonIDIso(p, 2016, 1, false) && !p->hasPixelSeed();
+             (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566);
     });
 
     boost::range::sort(muons, DescendingPt);
     boost::range::sort(photons, DescendingPt);
 
-    if (muons.size() == 0) {
+    if (muons.size() == 0 || photons.size() == 0) {
       return 1;
     }
     ac::Muon* m0 = muons[0];
@@ -213,6 +218,12 @@ int WGDataAnalysis::PreAnalysis() {
       p0_eta_ = p0->eta();
       p0_phi_ = p0->phi();
       p0_chiso_ = p0->chargedIso();
+      p0_neiso_ = p0->neutralHadronIso();
+      p0_phiso_ = p0->photonIso();
+      p0_hovere_ = p0->hadTowOverEm();
+      p0_sigma_ = p0->full5x5SigmaIetaIeta();
+      p0_haspix_ = p0->hasPixelSeed();
+      p0_medium_noch_ = ac::PhotonIDIso(p0, 2016, 1, false);
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
 
@@ -278,6 +289,12 @@ int WGDataAnalysis::PreAnalysis() {
     p0_eta_ = 0.;
     p0_phi_ = 0.;
     p0_chiso_ = 0.;
+    p0_neiso_ = 0.;
+    p0_phiso_ = 0.;
+    p0_hovere_ = 0.;
+    p0_sigma_ = 0.;
+    p0_haspix_ = false;
+    p0_medium_noch_ = false;
     p0_medium_ = false;
     p0_tight_ = false;
     met_ = 0.;
