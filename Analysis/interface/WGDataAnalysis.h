@@ -61,6 +61,8 @@ class WGDataAnalysis : public ModuleBase {
   float p0_pt_;
   float p0_eta_;
   float p0_phi_;
+  float p0_chiso_;
+  bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
 
   // met
@@ -85,6 +87,7 @@ class WGDataAnalysis : public ModuleBase {
   float wt_m0_; // trk/ID/Iso weight for m0
   float wt_trg_m0_; // trigger weight for m0
   float wt_m1_; // trk/ID/Iso weight for m1
+  float wt_p0_; // ID/iso weight for p0
 
  public:
   WGDataAnalysis(std::string const& name);

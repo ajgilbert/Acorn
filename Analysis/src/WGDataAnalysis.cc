@@ -44,6 +44,8 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_pt", &p0_pt_);
     tree_->Branch("p0_eta", &p0_eta_);
     tree_->Branch("p0_phi", &p0_phi_);
+    tree_->Branch("p0_chiso", &p0_chiso_);
+    tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
@@ -58,6 +60,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_m0", &wt_m0_);
     tree_->Branch("wt_trg_m0", &wt_trg_m0_);
     tree_->Branch("wt_m1", &wt_m1_);
+    tree_->Branch("wt_p0", &wt_p0_);
     tree_->Print();
   }
 
@@ -97,7 +100,8 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_trg24_ratio")->functor(ws_->argSet("m_pt,m_eta")));
-
+  fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   return 0;
   }
 
@@ -144,8 +148,11 @@ int WGDataAnalysis::PreAnalysis() {
       return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
     });
 
+    // At this stage apply the medium Photon ID without the charged is cut
     ac::keep_if(photons, [](ac::Photon const* p) {
-      return p->pt() > 30. && fabs(p->eta()) < 2.5 && p->isMediumIdPhoton() && !p->hasPixelSeed();
+      return p->pt() > 30. && fabs(p->scEta()) < 2.5 &&
+             (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) &&
+             ac::PhotonIDIso(p, 2016, 1, false) && !p->hasPixelSeed();
     });
 
     boost::range::sort(muons, DescendingPt);
@@ -205,6 +212,8 @@ int WGDataAnalysis::PreAnalysis() {
       p0_pt_ = p0->pt();
       p0_eta_ = p0->eta();
       p0_phi_ = p0->phi();
+      p0_chiso_ = p0->chargedIso();
+      p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
 
       m0p0_dr_ =  ac::DeltaR(m0, p0);
@@ -233,6 +242,9 @@ int WGDataAnalysis::PreAnalysis() {
       wt_trg_m0_ = RooFunc(fns_["m_trg_ratio"], {m0_pt_, m0_eta_});
       if (muons.size() >= 2) {
         wt_m1_ = RooFunc(fns_["m_idisotrk_ratio"], {m1_pt_, m1_eta_});
+      }
+      if (n_p_ >= 1) {
+        wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, photons[0]->scEta()});
       }
     }
 
@@ -265,6 +277,8 @@ int WGDataAnalysis::PreAnalysis() {
     p0_pt_ = 0.;
     p0_eta_ = 0.;
     p0_phi_ = 0.;
+    p0_chiso_ = 0.;
+    p0_medium_ = false;
     p0_tight_ = false;
     met_ = 0.;
     met_phi_ = 0.;
@@ -279,6 +293,7 @@ int WGDataAnalysis::PreAnalysis() {
     wt_m0_ = 1.;
     wt_trg_m0_ = 1.;
     wt_m1_ = 1.;
+    wt_p0_ = 1.;
   }
 
   int WGDataAnalysis::PostAnalysis() {
