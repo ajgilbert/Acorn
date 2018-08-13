@@ -17,7 +17,9 @@ def Getter(file, hist, width=False):
         return None
     if width and len(h.GetXaxis().GetXbins()) > 0:
         h.Scale(1., 'width')
+    h.Rebin(4)
     return h
+
 
 CHANNELS = {
     'et': 'e_{}#tau_{h}',
@@ -26,9 +28,14 @@ CHANNELS = {
     'tt': '#tau_{h}#tau_{h}',
     'mm': '#mu#mu'
 }
-
 LAYOUTS = {
     "wgamma": [
+        ('VV', {
+            'entries': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L'],
+            'legend': 'Diboson',
+            'color': ROOT.TColor.GetColor(248, 206, 104)
+        }
+        ),
         ('DY', {
             'entries': ['DY'],
             'legend': 'Z#rightarrowll',

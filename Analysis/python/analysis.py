@@ -1,5 +1,6 @@
 import ROOT
 import time
+import re
 # import json
 from array import array
 from pprint import pprint
@@ -49,6 +50,41 @@ class Node:
             action(obj)
 
 
+class SelectionManager:
+    def __init__(self):
+        self.storage = OrderedDict()
+        self.varregex = re.compile('\$[_a-zA-Z][_a-zA-Z0-9]*')
+        self.idx = 0
+
+    def Set(self, label, sel='1', wt='1.'):
+        self.storage[label] = (sel, wt)
+
+    def Derive(self, label, base, sel='1', wt=None):
+        if wt is None:
+            new_wt = self.storage[base][1]
+        else:
+            new_wt = '$%s * (%s)' % (base, wt)
+        self.Set(label, sel='$%s && (%s)' % (base, sel), wt=new_wt)
+
+    def _getreplacement(self, matchgroup, idx):
+        label = matchgroup.group(0)[1:]
+        return '(' + self.storage[label][idx] + ')'
+
+    def _doreplacement(self, pattern, expr, idx=0):
+        newexpr = pattern.sub(lambda x: self._getreplacement(x, idx), expr)
+        # print '%s --> %s' % (expr, newexpr)
+        if newexpr == expr:
+            return newexpr
+        else:
+            return self._doreplacement(pattern, newexpr, idx)
+
+    def sel(self, expr):
+        return self._doreplacement(self.varregex, expr, 0)
+
+    def wt(self, expr):
+        return self._doreplacement(self.varregex, expr, 1)
+
+
 def WriteToTFile(obj, filedir, path, name):
     filedir.cd()
     startdir = ROOT.gDirectory.GetPath()
@@ -88,21 +124,33 @@ class CodeLines:
         self.res.append('  ' * self.idlevel + line)
 
 
-def GenTreeCode(tree, objlist, multithread=None):
+def GenTreeCode(tree, objlist, multithread=4):
     fname = 'RunTree%i' % GenTreeCode.counter
     # static variable to keep ensure we can give
     # each function a unique name
     GenTreeCode.counter += 1
+
+    # Figure out the list of variable names
+    varnames = set()
+    varregex = re.compile('[_a-zA-Z][_a-zA-Z0-9]*')
+    for obj in objlist:
+        varnames.update(varregex.findall(obj.sel))
+        for var in obj.var:
+            varnames.update(varregex.findall(var))
+        varnames.update(varregex.findall(obj.wt))
+
     code = CodeLines()
     if multithread:
         code.Add('R__LOAD_LIBRARY(libTreePlayer)')
     code.Add('void %s(TTree *tree, TObjArray *hists) {' % fname)
     code.idlevel += 1
+    for i, obj in enumerate(objlist):
+        code.Add('%s* hist%i = static_cast<%s*>(hists->UncheckedAt(%i));' % (obj.classname, i, obj.classname, i))
     if multithread:
         code.Add('ROOT::EnableImplicitMT(%i);' % multithread)
         for i, obj in enumerate(objlist):
-            code.Add('ROOT::TThreadedObject<%s> hist%i(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (obj.classname, i, obj.classname, i))
-            code.Add('ROOT::TTreeProcessorMT tp(*tree);')
+            code.Add('ROOT::TThreadedObject<%s> t_hist%i(*hist%i);' % (obj.classname, i, i))
+        code.Add('ROOT::TTreeProcessorMT tp(*tree);')
         code.Add('auto myFunction = [&](TTreeReader &reader) {')
         code.idlevel += 1
     else:
@@ -115,19 +163,21 @@ def GenTreeCode(tree, objlist, multithread=None):
         bname = branch.GetName()
         btype = branch.GetListOfLeaves().UncheckedAt(0).GetTypeName()
         binfos.append((bname, btype))
-        code.Add('TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
+        if bname in varnames:
+            code.Add('TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
     if multithread:
         for i, obj in enumerate(objlist):
-            code.Add('auto t_hist%i = hist%i.Get();' % (i, i))
+            code.Add('auto l_hist%i = t_hist%i.Get();' % (i, i))
     code.Add('while (reader.Next()) {')
     code.idlevel += 1
     for bname, btype in binfos:
-        code.Add('%s %s = *%s_;' % (btype, bname, bname))
+        if bname in varnames:
+            code.Add('%s %s = *%s_;' % (btype, bname, bname))
     for i, obj in enumerate(objlist):
         if multithread:
-            code.Add('if (%s) t_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
+            code.Add('if (%s) l_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
         else:
-            code.Add('if (%s) static_cast<%s*>(hists->UncheckedAt(%i))->Fill(%s, %s);' % (obj.sel, obj.classname, i, ', '.join(obj.var), obj.wt))
+            code.Add('if (%s) hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
 
     code.idlevel -= 1
     code.Add('}')
@@ -136,12 +186,12 @@ def GenTreeCode(tree, objlist, multithread=None):
         code.Add('};')
         code.Add('tp.Process(myFunction);')
         for i, obj in enumerate(objlist):
-            code.Add('hist%i.Merge()->Copy(*(static_cast<%s*>(hists->UncheckedAt(%i))));' % (i, obj.classname, i))
+            code.Add('t_hist%i.Merge()->Copy(*hist%i);' % (i, i))
         code.Add('ROOT::DisableImplicitMT();')
     code.idlevel -= 1
     code.Add('}')
     fullcode = '\n'.join(code.res)
-    print fullcode
+    # print fullcode
     start = time.time()
     ROOT.gInterpreter.Declare(fullcode)
     end = time.time()
