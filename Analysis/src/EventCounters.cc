@@ -21,7 +21,8 @@ int EventCounters::Execute(TreeEvent* event) {
   // unweighted
   out->Fill(0.5, 1.0);
   // weighted
-  double w = info->totalWeight();
+  // double w = info->totalWeight();
+  double w = info->nominalGenWeight() >= 0. ? +1. : -1.;
   out->Fill(1.5, w);
   if (w >= 0.) {
     // pos
