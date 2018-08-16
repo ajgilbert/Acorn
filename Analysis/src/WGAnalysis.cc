@@ -30,6 +30,7 @@ namespace ac {
       tree_->Branch("g_pt", &g_pt_);
       tree_->Branch("g_eta", &g_eta_);
       tree_->Branch("n_pt", &n_pt_);
+      tree_->Branch("n_eta", &n_eta_);
       tree_->Branch("l_pt", &l_pt_);
       tree_->Branch("l_eta", &l_eta_);
       tree_->Branch("l_charge", &l_charge_);
@@ -49,12 +50,13 @@ namespace ac {
   }
 
   WGSystem WGAnalysis::ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
-                                       ac::Candidate const& pho, bool reconstruct) const {
+                                       ac::Candidate const& pho, bool reconstruct, bool verbose) const {
     WGSystem sys;
 
     sys.charged_lepton += lep.vector();
     sys.true_neutrino += neu.vector();
     sys.photon += pho.vector();
+
 
     if (reconstruct) {
       // Interpret neu as the MET
@@ -70,7 +72,7 @@ namespace ac {
       if (mt < w_mass) {
         double delta2 = (w_mass * w_mass - mt * mt) / (2. * lep.pt() * met.pt());
         double delta = std::sqrt(delta2);
-        double delta_eta = std::log(1. + (delta * std::sqrt(2 + delta2)) + delta2);
+        double delta_eta = std::log(1. + (delta * std::sqrt(2. + delta2)) + delta2);
         if (rng.Uniform() > 0.5) {
           delta_eta *= -1.;
         }
@@ -99,7 +101,7 @@ namespace ac {
     sys.wg_system += sys.photon;
 
     sys.w_system += sys.charged_lepton;
-    sys.w_system += sys.photon;
+    sys.w_system += sys.neutrino;
 
 
 
@@ -140,25 +142,58 @@ namespace ac {
     sys.r_photon = sys.c_photon;
     sys.r_photon.setVector(rotator(sys.r_photon.vector()));
 
+    if (verbose) {
+      std::cout << "================================\n";
+      std::cout << "Lab frame (pt, eta, phi, M) / (px, py, pz, E):\n";
+      std::cout << "Electron:" << ROOT::Math::PtEtaPhiMVector(sys.charged_lepton) << " / " << ROOT::Math::PxPyPzEVector(sys.charged_lepton) << "\n";
+      std::cout << "Neutrino:" << ROOT::Math::PtEtaPhiMVector(sys.neutrino) << " / " << ROOT::Math::PxPyPzEVector(sys.neutrino) << "\n";
+      std::cout << "W boson: " << ROOT::Math::PtEtaPhiMVector(sys.w_system) << " / " << ROOT::Math::PxPyPzEVector(sys.w_system) << "\n";
+      std::cout << "Photon:  " << ROOT::Math::PtEtaPhiMVector(sys.photon) << " / " << ROOT::Math::PxPyPzEVector(sys.photon) << "\n";
+      std::cout << "---------------------------------\n";
+      std::cout << "Boosted to WG system (pt, eta, phi, M) / (px, py, pz, E):\n";
+      std::cout << "Electron:" << ROOT::Math::PtEtaPhiMVector(sys.c_charged_lepton.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.c_charged_lepton.vector())  << "\n";
+      std::cout << "Neutrino:" << ROOT::Math::PtEtaPhiMVector(sys.c_neutrino.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.c_neutrino.vector())  << "\n";
+      std::cout << "W boson: " << ROOT::Math::PtEtaPhiMVector(sys.c_w_boson.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.c_w_boson.vector()) << "\n";
+      std::cout << "Photon:  " << ROOT::Math::PtEtaPhiMVector(sys.c_photon.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.c_photon.vector())  << "\n";
+      std::cout << "---------------------------------\n";
+      std::cout << "After rotation (pt, eta, phi, M) / (px, py, pz, E):\n";
+      std::cout << "Electron:" << ROOT::Math::PtEtaPhiMVector(sys.r_charged_lepton.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.r_charged_lepton.vector())  << "\n";
+      std::cout << "Neutrino:" << ROOT::Math::PtEtaPhiMVector(sys.r_neutrino.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.r_neutrino.vector())  << "\n";
+      std::cout << "W boson: " << ROOT::Math::PtEtaPhiMVector(sys.r_w_boson.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.r_w_boson.vector()) << "\n";
+      std::cout << "Photon:  " << ROOT::Math::PtEtaPhiMVector(sys.r_photon.vector()) << " / " << ROOT::Math::PxPyPzEVector(sys.r_photon.vector())  << "\n";
+      std::cout << "---------------------------------\n";
+    }
     return sys;
   }
 
   int WGAnalysis::Execute(TreeEvent* event) {
+    bool lhe_only = true;
 
     auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
-    auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
-    auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
+    std::vector<GenParticle *> gen_parts;
+    Met* gen_met;
+    if (!lhe_only) {
+      gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
+      gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
+    }
     nparts_ = 0;
 
+    weight_C3w_0p1_ = 1.0;
+    weight_C3w_0p2_ = 1.0;
+    weight_C3w_0p4_ = 1.0;
+    weight_C3w_0p8_ = 1.0;
+    weight_C3w_1p6_ = 1.0;
+
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
-    if (!info->lheWeights().count(100000)) return 1;
-    weight_C3w_0p1_ = info->lheWeights().at(100000);
+    if (info->lheWeights().count(100000)) {
+      weight_C3w_0p1_ = info->lheWeights().at(100000);
+      weight_C3w_0p4_ = info->lheWeights().at(100002);
+      weight_C3w_0p8_ = info->lheWeights().at(100003);
+      weight_C3w_1p6_ = info->lheWeights().at(100004);
+    };
     if (info->lheWeights().count(100001)) {
       weight_C3w_0p2_ = info->lheWeights().at(100001);
     }
-    weight_C3w_0p4_ = info->lheWeights().at(100002);
-    weight_C3w_0p8_ = info->lheWeights().at(100003);
-    weight_C3w_1p6_ = info->lheWeights().at(100004);
 
     ac::GenParticle const* lhe_lep = nullptr;
     ac::GenParticle const* lhe_neu = nullptr;
@@ -176,7 +211,7 @@ namespace ac {
       }
     }
 
-    if (std::abs(lhe_lep->pdgId()) == 15) {
+    if (std::abs(lhe_lep->pdgId()) == 15 && !lhe_only) {
       return 1;
     }
 
@@ -210,33 +245,29 @@ namespace ac {
     if (viable_leptons.size() && viable_photons.size()) {
       gen_lep = viable_leptons[0];
       gen_pho = viable_photons[0];
-    } else {
+    } else if (!lhe_only) {
       std::cout << "No viable\n";
       return 1;
     }
 
-    WGSystem lhe_sys = ProduceWGSystem(*lhe_lep, *lhe_neu, *lhe_pho, false);
-    WGSystem gen_sys = ProduceWGSystem(*gen_lep, *gen_met, *gen_pho, true);
-
-    // std::cout << "-----\n";
-    // std::cout << "Lepton LHE: " << lhe_lep->vector() << "\n";
-    // std::cout << "Lepton GEN: " << gen_lep->vector() << "\n";
-    // std::cout << "MET LHE:    " << lhe_neu->vector() << "\n";
-    // std::cout << "MET GEN:    " << gen_met->vector() << "\n";
-    // std::cout << "Photon LHE: " << lhe_pho->vector() << "\n";
-    // std::cout << "Photon GEN: " << gen_pho->vector() << "\n";
-    // std::cout << "Phi LHE:    " << lhe_sys_x.r_charged_lepton.phi() << "\n";
-    // std::cout << "Phi GEN:    " << lhe_sys.r_charged_lepton.phi() << "\n";
+    WGSystem lhe_sys = ProduceWGSystem(*lhe_lep, *lhe_neu, *lhe_pho, false, false);
+    WGSystem gen_sys;
+    if (lhe_only) {
+      gen_sys = ProduceWGSystem(*lhe_lep, *lhe_neu, *lhe_pho, true, false);
+    } else{
+      gen_sys = ProduceWGSystem(*gen_lep, *gen_met, *gen_pho, true, false);
+    }
 
     w_pt_  = gen_sys.w_system.pt();
     g_pt_  = gen_sys.photon.pt();
     g_eta_ = gen_sys.photon.eta();
     l_pt_  = gen_sys.charged_lepton.pt();
     l_eta_ = gen_sys.charged_lepton.eta();
-    l_charge_ = lhe_lep->pdgId() / std::abs(lhe_lep->pdgId());
+    l_charge_ = -1 * (lhe_lep->pdgId() / std::abs(lhe_lep->pdgId()));
     n_pt_  = gen_sys.neutrino.pt();
+    n_eta_  = gen_sys.neutrino.eta();
     l_g_dr_ = ROOT::Math::VectorUtil::DeltaR(gen_sys.charged_lepton, gen_sys.photon);
-
+    type_ = (lhe_lep->spin() * lhe_neu->spin()) > 0.;
     // std::cout << ">>>> Event\n";
     // lhe_lep->Print();
     // lhe_neu->Print();
@@ -252,6 +283,9 @@ namespace ac {
 
     lhe_phi1_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
         lhe_lep->pdgId() < 0 ? (lep_phi_lhe) : (lep_phi_lhe + ROOT::Math::Pi()));
+    // std::cout << "Lepton charge is: " << l_charge_ << "\n";
+    // std::cout << "phi_true = " << lhe_phi1_ << "\n";
+
     tree_->Fill();
 
     return 0;

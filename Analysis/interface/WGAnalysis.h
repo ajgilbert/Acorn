@@ -53,6 +53,7 @@ class WGAnalysis : public ModuleBase {
   float g_pt_;
   float g_eta_;
   float n_pt_;
+  float n_eta_;
   float l_pt_;
   float l_eta_;
   int l_charge_;
@@ -76,7 +77,7 @@ class WGAnalysis : public ModuleBase {
   bool IsPhoton(ac::GenParticle const& p) const;
 
   WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
-                           ac::Candidate const& pho, bool reconstruct) const;
+                           ac::Candidate const& pho, bool reconstruct, bool verbose) const;
 };
 }
 

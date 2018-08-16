@@ -231,4 +231,8 @@ def MultiDraw(node, sample_to_file_dict, tree_name):
 
 
 def NormaliseTo(hist, val=1.0):
-    hist.Scale(val / hist.Integral())
+    if hist.Integral() != 0.0:
+        hist.Scale(val / hist.Integral())
+
+def WidthDivide(hist):
+        hist.Scale(1., 'width')

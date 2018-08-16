@@ -64,6 +64,26 @@
       "attributes": ["default", "mc"],
       "inputs": ["ZZTo4L-amcatnloFXFX"],
       "xsec": 1.213e+00
+    },
+    "WGToLNuG-EFT_pTA_300_inf-madgraphMLM": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WGToLNuG-EFT_pTA_300_inf-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "WpAToLNuA0j_5f_LO_MLM_pTA_300": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WpAToLNuA0j_5f_LO_MLM_pTA_300"],
+      "xsec": 510.6
+    },
+    "WpAToLNuA0j_5f_LO_MLM_EFT_pTA_300": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WpAToLNuA0j_5f_LO_MLM_EFT_pTA_300"],
+      "xsec": 510.6
+    },
+    "Theorists": {
+      "attributes": ["wg_gen"],
+      "inputs": ["Theorists"],
+      "xsec": 510.6
     }
   },
   "config": {
