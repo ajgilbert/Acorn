@@ -24,7 +24,7 @@ opts.register('year', '2016', parser.VarParsing.multiplicity.singleton,
 opts.parseArguments()
 isData = bool(opts.isData)
 isMC = not isData
-genOnly = bool(opts.genOnly)
+genOnly = int(opts.genOnly)
 
 ################################################################
 # Standard setup
@@ -236,12 +236,18 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
-if genOnly:
+if genOnly == 1:
     # Take the full collection for now
     process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
     process.p = cms.Path(
         process.acGenMetProducer +
         process.acGenParticleProducer +
+        process.acLHEParticleProducer +
+        process.acEventInfoProducer +
+        process.acEventProducer)
+if genOnly == 2:
+    # Take the full collection for now
+    process.p = cms.Path(
         process.acLHEParticleProducer +
         process.acEventInfoProducer +
         process.acEventProducer)
