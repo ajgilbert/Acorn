@@ -17,6 +17,8 @@ parser.add_argument('--outdir', '-o', default='output',
                     help='Main output directory')
 parser.add_argument('--production', '-p', default='wgamma_2018_v1',
                     help='Production tag, used as filelist prefix and output path')
+parser.add_argument('--sequences', '-s', default='WGamma',
+                    help='List of sequences to run')
 
 args = parser.parse_args()
 job_mgr.set_args(args)
@@ -25,7 +27,7 @@ with open(args.config) as jsonfile:
     incfg = json.load(jsonfile)
 
 full_outdir = os.path.join(args.outdir, args.production)
-sequences = ['WGamma']
+sequences = args.sequences.split(',')
 
 for seq in sequences:
     makedir = os.path.join(full_outdir, seq)

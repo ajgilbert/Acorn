@@ -12,7 +12,7 @@ ROOT.TH1.AddDirectory(False)
 
 tname = 'WGDataAnalysis'
 
-prefix = 'output/130818/wgamma_2016_v2/WGamma/'
+prefix = 'output/130818-reduced/wgamma_2016_v2/WGamma/'
 
 samples = {
     'DY': 'DYJetsToLL_M-50-madgraphMLM.root',
@@ -56,9 +56,9 @@ X.Set('baseline', sel='m0_trg && n_m >= 1', wt='wt_def*wt_pu*wt_m0*wt_trg_m0')
 X.Derive('w_inc', 'baseline', sel='n_m==1')
 X.Derive('z_inc', 'baseline', sel='n_m==2 && m0m1_os && m0m1_dr>0.5', wt='wt_m1')
 X.Derive('w_highmt', 'w_inc', sel='m0met_mt>60 && met>40')
-X.Derive('w_highmt_pho_nminus1', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7')
-X.Derive('w_highmt_pho', 'w_highmt', sel='n_p==1 && p0_medium && m0p0_dr>0.7')
-X.Derive('w_highmt_invch', 'w_highmt', sel='n_p==1 && p0_chiso > 2. && p0_chiso < 8. && m0p0_dr>0.7')
+X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7')
+X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium')
+X.Derive('w_highmt_invch', 'w_highmt_pho_rec', sel='p0_medium_noch && p0_chiso > 2. && p0_chiso < 8.')
 
 
 drawvars = [
@@ -74,10 +74,15 @@ drawvars = [
     ('p0_eta', (20, -3.0, 3.0)),
     ('m0p0_dr', (20, 0., 5.)),
     ('m0p0_M', (40, 60, 120)),
-    ('p0_chiso', (25, 0, 5.0))
+    ('p0_chiso', (40, 0, 20.0)),
+    ('p0_neiso', (40, 0, 20.0)),
+    ('p0_phiso', (40, 0, 20.0)),
+    ('p0_hovere', (20, 0., 0.5)),
+    ('p0_sigma', (20, 0., 1.)),
+    ('p0_haspix', (2, -0.5, 1.5)),
 ]
 
-for sel in ['baseline', 'w_inc', 'z_inc', 'w_highmt', 'w_highmt_pho', 'w_highmt_pho_nminus1', 'w_highmt_invch']:
+for sel in ['baseline', 'w_inc', 'z_inc', 'w_highmt', 'w_highmt_pho_rec', 'w_highmt_pho', 'w_highmt_invch']:
     for var, binning in drawvars:
         for sample in samples:
             hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.sel('$'+sel), wt=X.wt('$'+sel))

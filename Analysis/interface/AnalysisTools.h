@@ -64,10 +64,10 @@ private:
 double MuonPFIso(ac::Muon const* mu);
 
 // Photon ID/Iso
-//  - Option to apply the cut-based photon ID without the charged iso WP so we can invert it
+//  - Option to apply the cut-based photon ID without the charged iso WP or sigmaIetaIeta so we can invert them
 //  - year: 2016/2017/2018
 //  - wp: 0=loose, 1=medium, 2=tight
-bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged);
+bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged, bool apply_sigma);
 
 // Transverse mass
 double MT(Candidate const* cand1, Candidate const* cand2);

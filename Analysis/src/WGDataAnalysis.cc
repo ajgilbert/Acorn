@@ -53,6 +53,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
+    tree_->Branch("p0_isprompt", &p0_isprompt_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
     tree_->Branch("m0met_mt", &m0met_mt_);
@@ -223,7 +224,7 @@ int WGDataAnalysis::PreAnalysis() {
       p0_hovere_ = p0->hadTowOverEm();
       p0_sigma_ = p0->full5x5SigmaIetaIeta();
       p0_haspix_ = p0->hasPixelSeed();
-      p0_medium_noch_ = ac::PhotonIDIso(p0, 2016, 1, false);
+      p0_medium_noch_ = ac::PhotonIDIso(p0, 2016, 1, false, false);
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
 
@@ -254,9 +255,31 @@ int WGDataAnalysis::PreAnalysis() {
       if (muons.size() >= 2) {
         wt_m1_ = RooFunc(fns_["m_idisotrk_ratio"], {m1_pt_, m1_eta_});
       }
+      auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
       if (n_p_ >= 1) {
         wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, photons[0]->scEta()});
+        auto prompt_gen_photons = ac::keep_if(genparts, [&](ac::GenParticle *p) {
+          return p->pt() > 10. && p->pdgId() == 22 && p->status() == 1 && p->statusFlags().isPrompt() && DeltaR(p, photons[0]) < 0.3;
+        });
+        if (prompt_gen_photons.size()) {
+          // photons[0]->Print();
+          // prompt_gen_photons[0]->Print();
+          p0_isprompt_ = true;
+          // std::cout << "------------\n";
+          // auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
+          // for (auto p : genparts) {
+          //   p->Print();
+          // }
+          // std::cout << "----\n";
+          // auto lheparts = event->GetPtrVec<ac::GenParticle>("lheParticles");
+          // for (auto p : lheparts) {
+          //   p->Print();
+          // }
+        }
       }
+
+
+
     }
 
     // std::cout << "----\n";
@@ -297,6 +320,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_medium_noch_ = false;
     p0_medium_ = false;
     p0_tight_ = false;
+    p0_isprompt_ = false;
     met_ = 0.;
     met_phi_ = 0.;
     m0met_mt_ = 0.;

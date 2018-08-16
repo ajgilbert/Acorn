@@ -71,7 +71,7 @@ double MT(Candidate const* cand1, Candidate const* cand2) {
   return 0.0;
 }
 
-bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged) {
+bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged, bool apply_sigma) {
   double pt = p->pt();
   bool eb = std::abs(p->scEta()) < 1.4442;
   double hovere = 0.;
@@ -123,7 +123,7 @@ bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_cha
       photon = 2.617 + 0.0034 * pt;
     }
   }
-  return p->hadTowOverEm() < hovere && p->full5x5SigmaIetaIeta() < sigma &&
+  return p->hadTowOverEm() < hovere && (apply_sigma ? (p->full5x5SigmaIetaIeta() < sigma) : true) &&
          (apply_charged ? (p->chargedIso() < charged) : true) && p->neutralHadronIso() < neutral &&
          p->photonIso() < photon;
 }
