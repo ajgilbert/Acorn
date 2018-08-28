@@ -245,7 +245,7 @@ if genOnly == 1:
         process.acLHEParticleProducer +
         process.acEventInfoProducer +
         process.acEventProducer)
-if genOnly == 2:
+elif genOnly == 2:
     # Take the full collection for now
     process.p = cms.Path(
         process.acLHEParticleProducer +

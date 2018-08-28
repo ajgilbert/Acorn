@@ -139,5 +139,10 @@ from PhysicsTools.PatAlgos.slimming.miniAOD_tools import miniAOD_customizeAllMC
 process = miniAOD_customizeAllMC(process)
 
 
-
+process.genParticlesRemade = cms.EDProducer("GenParticleProducer",
+    abortOnUnknownPDGCode = cms.untracked.bool(False),
+    saveBarCodes = cms.untracked.bool(True),
+    src = cms.InputTag("generator")
+)
+process.prunedGenParticlesWithStatusOne.src = cms.InputTag("genParticlesRemade")
 # End of customisation functions
