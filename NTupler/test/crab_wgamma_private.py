@@ -6,7 +6,7 @@ PROD='wgamma-genonly-miniaod'
 
 config.section_('General')
 config.General.workArea=PROD
-config.General.requestName='wgamma-pTA-300-genonly-miniaod'
+config.General.requestName='wgamma-ptA-300-inf-genonly-miniaod'
 
 config.section_('JobType')
 config.JobType.scriptExe = ''
@@ -24,7 +24,7 @@ config.Data.totalUnits = 5000000
 config.Data.splitting = 'EventBased'
 config.Data.publication = True
 #config.Data.ignoreLocality = True
-config.Data.outputPrimaryDataset = 'WGToLNuG-EFT_pTA_300_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8'
+config.Data.outputPrimaryDataset = 'WGToMuNuG-EFT_pTA_300_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8'
 config.Data.outLFNDirBase = '/store/group/cmst3/group/htautau/wgamma-testprod'
 #config.Data.inputDBS = 'phys03'
 
