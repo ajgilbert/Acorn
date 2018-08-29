@@ -37,8 +37,13 @@ for s in samples:
     runargs = ['cmsRun'] + passthru
     if not args.no_cfg:
         runargs.extend(cfg['configs'][info['config']])
-    #infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s instance=prod/phys03' % dataset, '-limit', '1']).strip()
-    infile = subprocess.check_output(['dasgoclient', '-query', 'file dataset=%s' % dataset, '-limit', '%i' % args.nfiles]).strip()
+    dbs_instance = 'global'
+    if 'inputDBS' in info:
+        dbs_instance = info['inputDBS']
+        print dbs_instance
+        das_args = ['dasgoclient', '-query', 'file dataset=%s instance=prod/%s' % (dataset,  dbs_instance), '-limit', '%i' % args.nfiles]
+        print ' '.join(das_args)
+    infile = subprocess.check_output(das_args).strip()
     infile = ','.join([x.strip() for x in infile.split('\n')])
     runargs.append('input=%s' % infile)
     print ' '.join(runargs)
