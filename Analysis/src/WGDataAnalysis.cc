@@ -11,6 +11,7 @@
 #include "RooWorkspace.h"
 #include "Acorn/Analysis/interface/WGDataAnalysis.h"
 #include "Acorn/Analysis/interface/AnalysisTools.h"
+#include "Acorn/Analysis/interface/WGAnalysisTools.h"
 #include "Acorn/NTupler/interface/Muon.h"
 #include "Acorn/NTupler/interface/Photon.h"
 #include "Acorn/NTupler/interface/Met.h"
@@ -33,10 +34,12 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("m0_pt", &m0_pt_);
     tree_->Branch("m0_eta", &m0_eta_);
     tree_->Branch("m0_phi", &m0_phi_);
+    tree_->Branch("m0_iso", &m0_iso_);
     tree_->Branch("m0_trg", &m0_trg_);
     tree_->Branch("m1_pt", &m1_pt_);
     tree_->Branch("m1_eta", &m1_eta_);
     tree_->Branch("m1_phi", &m1_phi_);
+    tree_->Branch("m1_iso", &m1_iso_);
     tree_->Branch("m0m1_M", &m0m1_M_);
     tree_->Branch("m0m1_dr", &m0m1_dr_);
     tree_->Branch("m0m1_os", &m0m1_os_);
@@ -60,6 +63,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("m0p0_dr", &m0p0_dr_);
     tree_->Branch("m0p0_dphi", &m0p0_dphi_);
     tree_->Branch("m0p0_M", &m0p0_M_);
+    tree_->Branch("reco_phi", &reco_phi_);
     tree_->Branch("n_vm", &n_vm_);
     tree_->Branch("vm_p0_dr", &vm_p0_dr_);
     tree_->Branch("wt_def", &wt_def_);
@@ -152,7 +156,7 @@ int WGDataAnalysis::PreAnalysis() {
     });
 
     ac::keep_if(muons, [](ac::Muon const* m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
+      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon()/* && MuonPFIso(m) < 0.15*/;
     });
 
     // At this stage apply the medium Photon ID without the charged is cut
@@ -177,10 +181,9 @@ int WGDataAnalysis::PreAnalysis() {
     n_vm_ = veto_muons.size();
 
     m0_pt_ = m0->pt();
-    m0_pt_ = reduceMantissaToNbits(m0_pt_, 12);
-
     m0_eta_ = m0->eta();
     m0_phi_ = m0->phi();
+    m0_iso_ = MuonPFIso(m0);
 
     ac::Met* met = mets.at(0);
     met_ = met->pt();
@@ -205,6 +208,7 @@ int WGDataAnalysis::PreAnalysis() {
       m1_pt_ = m1->pt();
       m1_eta_ = m1->eta();
       m1_phi_ = m1->phi();
+      m1_iso_ = MuonPFIso(m1);
 
       m0m1_M_ = (m0->vector() + m1->vector()).M();
       m0m1_dr_ = DeltaR(m0, m1);
@@ -239,6 +243,11 @@ int WGDataAnalysis::PreAnalysis() {
 
         vm_p0_dr_ = ac::DeltaR(veto_muons[0], p0);
       }
+
+      WGSystem reco_sys = ProduceWGSystem(*m0, *met, *p0, true, rng, false);
+      double lep_phi = reco_sys.r_charged_lepton.phi();
+      reco_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
+          m0->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
     }
 
     if (!is_data_) {
@@ -300,10 +309,12 @@ int WGDataAnalysis::PreAnalysis() {
     m0_pt_ = 0.;
     m0_eta_ = 0.;
     m0_phi_ = 0.;
+    m0_iso_ = 0.;
     m0_trg_ = false;
     m1_pt_ = 0.;
     m1_eta_ = 0.;
     m1_phi_ = 0.;
+    m1_iso_ = 0.;
     m0m1_M_ = 0.;
     m0m1_dr_ = 0.;
     m0m1_os_ = false;
@@ -327,6 +338,7 @@ int WGDataAnalysis::PreAnalysis() {
     m0p0_dr_ = 0.;
     m0p0_dphi_ = 0.;
     m0p0_M_ = 0.;
+    reco_phi_ = 0.;
     n_vm_ = 0;
     vm_p0_dr_ = 0.;
     wt_def_ = 1.;

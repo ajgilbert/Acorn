@@ -42,12 +42,14 @@ class WGDataAnalysis : public ModuleBase {
   float m0_pt_;
   float m0_eta_;
   float m0_phi_;
+  float m0_iso_;
   bool m0_trg_; // trigger fired and object matched
 
   // m1: Second muon variables
   float m1_pt_;
   float m1_eta_;
   float m1_phi_;
+  float m1_iso_;
 
   // di-muon variables
   float m0m1_M_;
@@ -83,6 +85,7 @@ class WGDataAnalysis : public ModuleBase {
   float m0p0_dr_;
   float m0p0_dphi_;
   float m0p0_M_;
+  float reco_phi_;
 
   // vetos
   unsigned n_vm_; // number of additional veto muons
@@ -95,6 +98,9 @@ class WGDataAnalysis : public ModuleBase {
   float wt_trg_m0_; // trigger weight for m0
   float wt_m1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
+
+  mutable TRandom3 rng;
+
 
  public:
   WGDataAnalysis(std::string const& name);

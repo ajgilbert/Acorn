@@ -14,28 +14,6 @@
 
 namespace ac {
 
-struct WGSystem {
-  ROOT::Math::PxPyPzEVector wg_system;
-  ROOT::Math::PxPyPzEVector w_system;
-  ROOT::Math::PxPyPzEVector charged_lepton;
-  ROOT::Math::PxPyPzEVector true_neutrino;
-  ROOT::Math::PxPyPzEVector neutrino;
-  ROOT::Math::PxPyPzEVector photon;
-
-  // Particles boosted into the CoM frame
-  ac::Candidate c_charged_lepton;
-  ac::Candidate c_neutrino;
-  ac::Candidate c_photon;
-  ac::Candidate c_w_boson;
-
-  ac::Candidate r_w_boson;
-  ac::Candidate r_charged_lepton;
-  ac::Candidate r_neutrino;
-  ac::Candidate r_photon;
-
-  bool valid_mt;
-};
-
 class WGAnalysis : public ModuleBase {
  private:
   CLASS_MEMBER(WGAnalysis, fwlite::TFileService*, fs)
@@ -75,9 +53,6 @@ class WGAnalysis : public ModuleBase {
   bool IsNeutrino(ac::GenParticle const& p) const;
   bool IsLepton(ac::GenParticle const& p) const;
   bool IsPhoton(ac::GenParticle const& p) const;
-
-  WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
-                           ac::Candidate const& pho, bool reconstruct, bool verbose) const;
 };
 }
 

@@ -80,6 +80,11 @@
       "inputs": ["WpAToLNuA0j_5f_LO_MLM_EFT_pTA_300"],
       "xsec": 510.6
     },
+    "WpAToLNuA0j_5f_LO_MLM_EFT_pTA_300_inv": {
+      "attributes": ["wg_gen"],
+      "inputs": ["WpAToLNuA0j_5f_LO_MLM_EFT_pTA_300_inv"],
+      "xsec": 510.6
+    },
     "Theorists": {
       "attributes": ["wg_gen"],
       "inputs": ["Theorists"],
