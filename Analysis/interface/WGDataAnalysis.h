@@ -43,6 +43,7 @@ class WGDataAnalysis : public ModuleBase {
   float m0_eta_;
   float m0_phi_;
   float m0_iso_;
+  bool m0_tight_;
   bool m0_trg_; // trigger fired and object matched
 
   // m1: Second muon variables

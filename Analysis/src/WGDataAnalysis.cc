@@ -35,6 +35,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("m0_eta", &m0_eta_);
     tree_->Branch("m0_phi", &m0_phi_);
     tree_->Branch("m0_iso", &m0_iso_);
+    tree_->Branch("m0_tight", &m0_tight_);
     tree_->Branch("m0_trg", &m0_trg_);
     tree_->Branch("m1_pt", &m1_pt_);
     tree_->Branch("m1_eta", &m1_eta_);
@@ -184,6 +185,7 @@ int WGDataAnalysis::PreAnalysis() {
     m0_eta_ = m0->eta();
     m0_phi_ = m0->phi();
     m0_iso_ = MuonPFIso(m0);
+    m0_tight_ = m0->isTightMuon();
 
     ac::Met* met = mets.at(0);
     met_ = met->pt();
@@ -310,6 +312,7 @@ int WGDataAnalysis::PreAnalysis() {
     m0_eta_ = 0.;
     m0_phi_ = 0.;
     m0_iso_ = 0.;
+    m0_tight_ = false;
     m0_trg_ = false;
     m1_pt_ = 0.;
     m1_eta_ = 0.;
