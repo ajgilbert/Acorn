@@ -22,11 +22,11 @@ class WGAnalysis : public ModuleBase {
   float phi1_;
   float lhe_phi1_;
   unsigned type_;
-  float weight_C3w_0p1_;
-  float weight_C3w_0p2_;
-  float weight_C3w_0p4_;
-  float weight_C3w_0p8_;
-  float weight_C3w_1p6_;
+  float wt_C3w_0p0_;
+  float wt_C3w_0p1_;
+  float wt_C3w_0p2_;
+  float wt_C3w_0p4_;
+  float wt_C3w_1p0_;
   float w_pt_;
   float g_pt_;
   float g_eta_;

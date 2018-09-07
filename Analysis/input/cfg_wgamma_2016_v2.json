@@ -8,7 +8,7 @@
     "WGToLNuG-madgraphMLM": {
       "attributes": ["default", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM"],
-      "xsec": 510.6
+      "xsec": 612.72
     },
     "DYJetsToLL_M-50-madgraphMLM": {
       "attributes": ["default", "mc"],
@@ -88,6 +88,16 @@
     "Theorists": {
       "attributes": ["wg_gen"],
       "inputs": ["Theorists"],
+      "xsec": 510.6
+    },
+    "WGToMuNuG-EFT-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT-madgraphMLM"],
+      "xsec": 510.6
+    },
+    "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
       "xsec": 510.6
     }
   },

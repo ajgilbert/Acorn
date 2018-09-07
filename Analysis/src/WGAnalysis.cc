@@ -39,11 +39,11 @@ namespace ac {
       tree_->Branch("type", &type_);
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
-      tree_->Branch("weight_C3w_0p1", &weight_C3w_0p1_);
-      tree_->Branch("weight_C3w_0p2", &weight_C3w_0p2_);
-      tree_->Branch("weight_C3w_0p4", &weight_C3w_0p4_);
-      tree_->Branch("weight_C3w_0p8", &weight_C3w_0p8_);
-      tree_->Branch("weight_C3w_1p6", &weight_C3w_1p6_);
+      tree_->Branch("wt_C3w_0p0_", &wt_C3w_0p0_);
+      tree_->Branch("wt_C3w_0p1_", &wt_C3w_0p1_);
+      tree_->Branch("wt_C3w_0p2_", &wt_C3w_0p2_);
+      tree_->Branch("wt_C3w_0p4_", &wt_C3w_0p4_);
+      tree_->Branch("wt_C3w_1p0_", &wt_C3w_1p0_);
       // tree_->Branch("wt", &wt_);
       // tree_->Branch("n_jets", &n_jets_);
     }
@@ -62,24 +62,18 @@ namespace ac {
     }
     nparts_ = 0;
 
-    weight_C3w_0p1_ = 1.0;
-    weight_C3w_0p2_ = 1.0;
-    weight_C3w_0p4_ = 1.0;
-    weight_C3w_0p8_ = 1.0;
-    weight_C3w_1p6_ = 1.0;
+    wt_C3w_0p0_ = 1.0;
+    wt_C3w_0p1_ = 1.0;
+    wt_C3w_0p2_ = 1.0;
+    wt_C3w_0p4_ = 1.0;
+    wt_C3w_1p0_ = 1.0;
 
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
-    if (info->lheWeights().count(100000)) {
-      weight_C3w_0p1_ = info->lheWeights().at(100000);
-      weight_C3w_0p4_ = info->lheWeights().at(100002);
-      weight_C3w_0p8_ = info->lheWeights().at(100003);
-    };
-    if (info->lheWeights().count(100004)) {
-      weight_C3w_1p6_ = info->lheWeights().at(100004);
-    }
-    if (info->lheWeights().count(100001)) {
-      weight_C3w_0p2_ = info->lheWeights().at(100001);
-    }
+
+    wt_C3w_0p0_ = info->lheWeights().at(100000);
+    wt_C3w_0p1_ = info->lheWeights().at(100001);
+    wt_C3w_0p2_ = info->lheWeights().at(100002);
+    wt_C3w_0p4_ = info->lheWeights().at(100003);
 
     ac::GenParticle const* lhe_lep = nullptr;
     ac::GenParticle const* lhe_neu = nullptr;
