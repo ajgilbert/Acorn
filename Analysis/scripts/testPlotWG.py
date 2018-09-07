@@ -54,17 +54,39 @@ hists = Node()
 X = SelectionManager()
 X.Set('baseline', sel='m0_trg && n_m >= 1', wt='wt_def*wt_pu*wt_m0*wt_trg_m0')
 X.Derive('w_inc', base='baseline', sel='n_m==1')
-X.Derive('z_inc', 'baseline', sel='n_m==2 && m0m1_os && m0m1_dr>0.5', wt='wt_m1')
-X.Derive('w_highmt', 'w_inc', sel='m0met_mt>60 && met>40')
-X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7')
+X.Derive('w_inc_iso_m', base='w_inc', sel='m0_iso < 0.15')
+# X.Derive('w_inc_aiso_m', base='w_inc', sel='m0_iso > 0.2 && m0_iso < 0.5')
+# X.Derive('z_inc', 'baseline', sel='n_m==2 && m0m1_os && m0m1_dr>0.5', wt='wt_m1')
+
+# X.Derive('w_lowmt', 'w_inc_iso_m', sel='m0met_mt<30')
+# X.Derive('w_lowmt_aiso_m', 'w_inc_aiso_m', sel='m0met_mt<30')
+
+# X.Derive('w_lowmt_pho_rec', 'w_lowmt', sel='n_p==1 && m0p0_dr>0.7')
+# X.Derive('w_lowmt_pho_rec_aiso_m', 'w_lowmt_aiso_m', sel='n_p==1 && m0p0_dr>0.7')
+
+X.Derive('w_highmt', 'w_inc_iso_m', sel='m0met_mt>60 && met>40')
+# X.Derive('w_highmt_aiso_m', 'w_inc_aiso_m', sel='m0met_mt>60 && met>40')
+
+X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7 && abs(p0_eta) < 1.4442')
+# X.Derive('w_highmt_pho_rec_aiso_m', 'w_highmt_aiso_m', sel='n_p==1 && m0p0_dr>0.7')
+
 X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium && !p0_haspix', wt='wt_p0')
-X.Derive('w_highmt_invch', 'w_highmt_pho_rec', sel='p0_medium_noch && p0_chiso > 2. && p0_chiso < 8.')
+# X.Derive('w_highmt_pho_aiso_m', 'w_highmt_pho_rec_aiso_m', sel='p0_medium && !p0_haspix', wt='wt_p0')
+
+
+X.Derive('w_hmt_pho_pre', 'w_highmt_pho_rec', sel='p0_medium_noch && !p0_haspix', wt='wt_p0')
+X.Derive('w_hmt_pho_iso_l', 'w_hmt_pho_pre', sel='p0_chiso > 2.5 && p0_chiso < 7', wt='wt_p0')
+X.Derive('w_hmt_pho_sig_l', 'w_hmt_pho_pre', sel='p0_sigma > 0.01022', wt='wt_p0')
+X.Derive('w_hmt_pho_iso_l_sig_t', 'w_hmt_pho_pre', sel='p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma < 0.01022', wt='wt_p0')
+X.Derive('w_hmt_pho_iso_l_sig_l', 'w_hmt_pho_pre', sel='p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma > 0.01022', wt='wt_p0')
+X.Derive('w_hmt_pho_iso_t_sig_l', 'w_hmt_pho_pre', sel='p0_chiso < 0.441 && p0_sigma > 0.01022', wt='wt_p0')
 
 
 drawvars = [
     ('m0met_mt', (30, 0., 200.)),
     ('m0_pt', (40, 0., 150.)),
     ('m0_eta', (20, -3.0, 3.0)),
+    ('m0_iso', (40, 0, 2.0)),
     ('m1_pt', (40, 0., 150.)),
     ('m1_eta', (20, -3.0, 3.0)),
     ('m0m1_M', (40, 60, 120)),
@@ -82,12 +104,16 @@ drawvars = [
     ('p0_haspix', (2, -0.5, 1.5)),
 ]
 
-for sel in ['baseline', 'w_inc', 'z_inc', 'w_highmt', 'w_highmt_pho_rec', 'w_highmt_pho', 'w_highmt_invch']:
+for sel in X.storage.keys():
     for var, binning in drawvars:
         for sample in samples:
             hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.sel('$'+sel), wt=X.wt('$'+sel))
         hists[sel][var]['W_R'] = Hist('TH1D', sample='W', var=[var], binning=binning, sel=X.sel('$'+sel + ' && p0_isprompt'), wt=X.wt('$'+sel))
         hists[sel][var]['W_F'] = Hist('TH1D', sample='W', var=[var], binning=binning, sel=X.sel('$'+sel + ' && !p0_isprompt'), wt=X.wt('$'+sel))
+        hists[sel][var]['DY_R'] = Hist('TH1D', sample='DY', var=[var], binning=binning, sel=X.sel('$'+sel + ' && p0_isprompt'), wt=X.wt('$'+sel))
+        hists[sel][var]['DY_F'] = Hist('TH1D', sample='DY', var=[var], binning=binning, sel=X.sel('$'+sel + ' && !p0_isprompt'), wt=X.wt('$'+sel))
+        hists[sel][var]['TT_R'] = Hist('TH1D', sample='TT', var=[var], binning=binning, sel=X.sel('$'+sel + ' && p0_isprompt'), wt=X.wt('$'+sel))
+        hists[sel][var]['TT_F'] = Hist('TH1D', sample='TT', var=[var], binning=binning, sel=X.sel('$'+sel + ' && !p0_isprompt'), wt=X.wt('$'+sel))
 
 MultiDraw(hists, samples, tname)
 

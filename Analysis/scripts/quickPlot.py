@@ -52,19 +52,31 @@ LAYOUTS = {
         }
         ),
         ('DY', {
-            'entries': ['DY'],
+            'entries': ['DY_R'],
             'legend': 'Z#rightarrowll',
             'color': ROOT.TColor.GetColor(100, 192, 232)
         }
         ),
+        ('DY_F', {
+            'entries': ['DY_F'],
+            'legend': 'Z#rightarrowll (F)',
+            'color': 2
+        }
+        ),
         ('TT', {
-            'entries': ['TT'],
+            'entries': ['TT_R'],
             'legend': 't#bar{t}',
             'color': ROOT.TColor.GetColor(155, 152, 204)
         }
         ),
+        ('TT_F', {
+            'entries': ['TT_F'],
+            'legend': 't#bar{t}',
+            'color': 4
+        }
+        ),
         ('W', {
-            'entries': ['W_F'],
+            'entries': ['W_DAT'],
             'legend': 'W#rightarrowl#nu',
             'color': ROOT.TColor.GetColor(222, 90, 106)
         }
@@ -91,6 +103,7 @@ config_by_setting = {
         '*/m0met_mt': ('m_{T}(#mu,p_{T}^{miss})', 'GeV'),
         '*/m0_pt': ('Muon p_{T}', 'GeV'),
         '*/m0_eta': ('Muon #eta', ''),
+        '*/m0_iso': ('Muon Iso', 'GeV'),
         '*/m1_pt': ('Subleading muon p_{T}', 'GeV'),
         '*/m1_eta': ('Subleading muon #eta', ''),
         '*/m0m1_M': ('m_{#mu^{+}#mu^{-}}', 'GeV'),
@@ -121,6 +134,47 @@ variants_by_path = {
         "range": (0, 200)
     }
 }
+
+# Derive fake template as A = B * (C / D) from data
+
+
+def Subtracted(hists, target, subtract, zero=True):
+    res = hists[target].Clone()
+    for sub in subtract:
+        res.Add(hists[sub], -1.)
+    for i in xrange(1, res.GetNbinsX() + 1):
+        if res.GetBinContent(i) < 0.:
+            res.SetBinContent(i, 0.)
+    return res
+
+
+def SafeDivide(h1, h2):
+    res = h1.Clone()
+    for i in xrange(1, res.GetNbinsX() + 1):
+        if h2.GetBinContent(i) == 0.:
+            res.SetBinContent(i, 0.)
+        else:
+            res.SetBinContent(i, h1.GetBinContent(i) / h2.GetBinContent(i))
+    return res
+
+
+def Multiply(h1, h2):
+    res = h1.Clone()
+    for i in xrange(1, res.GetNbinsX() + 1):
+        res.SetBinContent(i, h1.GetBinContent(i) * h2.GetBinContent(i))
+    return res
+
+
+def DoPhotonFakes(file, b, c, d):
+    h_b = GetHistsInDir(file, b)
+    h_b['data_sub'] = Subtracted(h_b, 'data_obs', ['DY', 'WG'])
+    h_c = GetHistsInDir(file, c)
+    h_c['data_sub'] = Subtracted(h_c, 'data_obs', ['DY', 'WG'])
+    h_d = GetHistsInDir(file, d)
+    h_d['data_sub'] = Subtracted(h_d, 'data_obs', ['DY', 'WG'])
+    h_div = SafeDivide(h_c['data_sub'], h_d['data_sub'])
+    h_res = Multiply(h_b['data_sub'], h_div)
+    return h_res
 
 
 def MakePlot(name, outdir, hists, cfg):
@@ -230,7 +284,7 @@ def MakePlot(name, outdir, hists, cfg):
 
     plot.SetupTwoPadSplitAsRatio(
         pads, plot.GetAxisHist(
-            pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.39)
+            pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
 
     # Go back and tidy up the axes and frame
     pads[0].cd()
@@ -293,6 +347,9 @@ for path in filtered_list:
     target_dir = os.path.join(args.output, *split_path)
     os.system('mkdir -p %s' % target_dir)
     hists = GetHistsInDir(file, path)
+    if 'w_highmt_pho' in path:
+        hists['W_DAT'] = DoPhotonFakes(file, 'w_hmt_pho_iso_l_sig_t/%s' % name, 'w_hmt_pho_iso_t_sig_l/%s' % name, 'w_hmt_pho_iso_l_sig_l/%s' % name)
+
     # print hists
 
     plotcfg = dict(default_cfg)
