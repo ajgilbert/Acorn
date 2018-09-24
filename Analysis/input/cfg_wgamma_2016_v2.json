@@ -10,6 +10,16 @@
       "inputs": ["WGToLNuG-madgraphMLM"],
       "xsec": 612.72
     },
+    "WGToLNuG-madgraphMLM-PtG-130": {
+      "attributes": ["default", "mc", "mcnew"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-130"],
+      "xsec": 612.72
+    },
+    "WGToLNuG-madgraphMLM-PtG-500": {
+      "attributes": ["default", "mc", "mcnew"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-500"],
+      "xsec": 612.72
+    },
     "DYJetsToLL_M-50-madgraphMLM": {
       "attributes": ["default", "mc"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
