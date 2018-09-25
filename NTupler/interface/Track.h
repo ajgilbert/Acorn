@@ -46,8 +46,17 @@ class Track {
   inline double vz() const { return ref_point_.z(); }
   inline double normalized_chi2() const { return normalized_chi2_; }
   inline int hits() const { return pixel_hits_;}
-  //inline double dxy(Point const& point) const {}
-  //inline double dz(Point const& point) const {}
+  inline double dxy(Point const& point) const {
+    return (-(vx() - point.x()) * momentum().y() +
+            (vy() - point.y()) * momentum().z()) /
+           pt();
+  }
+  inline double dz(Point const& point) const {
+    return (vz() - point.z()) -
+           ((vx() - point.x()) * momentum().x() +
+            (vy() - point.y()) * momentum().y()) /
+               pt() * momentum().z() / pt();
+  }
   inline int charge() const { return charge_; }
   inline int16_t algorithm() const { return algorithm_; }
   inline double pt_err() const { return pt_err_; }
