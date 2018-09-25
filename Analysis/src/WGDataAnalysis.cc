@@ -254,6 +254,7 @@ int WGDataAnalysis::PreAnalysis() {
 
     if (!is_data_) {
       wt_def_ = info->nominalGenWeight() >= 0. ? +1. : -1.; // temporary until new ntuples fix EventInfo bug
+      wt_def_ *= info->totalWeight();
       auto const& pu_info = event->GetPtrVec<PileupInfo>("pileupInfo");
       for (PileupInfo const* pu : pu_info) {
         if (pu->bunchCrossing() == 0) {

@@ -76,9 +76,22 @@ for name, sa, wt in [
 
 MultiDraw(hists, samples, tname)
 
+rel_mode = True
+if rel_mode:
+    for hname in ['nominal_2D', 'C3w_0p1_2D', 'C3w_0p2_2D', 'C3w_0p4_2D', 'C3w_1p0_2D']:
+        htmp = hists[hname]
+        for jb in xrange(1, htmp.GetNbinsY() + 1):
+            tot = 0.
+            for ib in xrange(1, htmp.GetNbinsX() + 1):
+                tot += htmp.GetBinContent(ib, jb)
+            for ib in xrange(1, htmp.GetNbinsX() + 1):
+                htmp.SetBinContent(ib, jb, htmp.GetBinContent(ib, jb) / tot)
+
+
 for ib in xrange(1, hists['nominal_2D'].GetNbinsX() + 1):
     xmin = hists['nominal_2D'].GetXaxis().GetBinLowEdge(ib)
     xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
+
     for jb in xrange(1, hists['nominal_2D'].GetNbinsY() + 1):
         ymin = hists['nominal_2D'].GetYaxis().GetBinLowEdge(jb)
         ymax = hists['nominal_2D'].GetYaxis().GetBinUpEdge(jb)

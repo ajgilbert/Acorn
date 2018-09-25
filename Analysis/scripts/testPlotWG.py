@@ -19,6 +19,9 @@ samples = {
     'data_obs': 'SingleMuon.root',
     'TT': 'TT-powheg.root',
     'WG': 'WGToLNuG-madgraphMLM.root',
+    'WG-St': 'WGToLNuG-madgraphMLM-stitched.root',
+    'WG-PtG-130': 'WGToLNuG-madgraphMLM-PtG-130.root',
+    'WG-PtG-500': 'WGToLNuG-madgraphMLM-PtG-500.root',
     'W': 'WJetsToLNu-madgraphMLM.root',
     'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX.root',
     'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX.root',
@@ -38,6 +41,9 @@ remap = {
     'data_obs': 'SingleMuon',
     'TT': 'TT-powheg',
     'WG': 'WGToLNuG-madgraphMLM',
+    'WG-St': 'WGToLNuG-madgraphMLM-stitched',
+    'WG-PtG-130': 'WGToLNuG-madgraphMLM-PtG-130',
+    'WG-PtG-500': 'WGToLNuG-madgraphMLM-PtG-500',
     'W': 'WJetsToLNu-madgraphMLM',
     'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
     'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -64,13 +70,24 @@ X.Derive('w_inc_iso_m', base='w_inc', sel='m0_iso < 0.15')
 # X.Derive('w_lowmt_pho_rec', 'w_lowmt', sel='n_p==1 && m0p0_dr>0.7')
 # X.Derive('w_lowmt_pho_rec_aiso_m', 'w_lowmt_aiso_m', sel='n_p==1 && m0p0_dr>0.7')
 
-X.Derive('w_highmt', 'w_inc_iso_m', sel='m0met_mt>60 && met>40')
+X.Derive('w_highmt', 'w_inc_iso_m', sel='met>40')
 # X.Derive('w_highmt_aiso_m', 'w_inc_aiso_m', sel='m0met_mt>60 && met>40')
 
-X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7 && abs(p0_eta) < 1.4442')
+X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7')
+# X.Derive('w_highmt_pho_rec', 'w_highmt', sel='n_p==1 && m0p0_dr>0.7 && abs(p0_eta) < 1.4442')
 # X.Derive('w_highmt_pho_rec_aiso_m', 'w_highmt_aiso_m', sel='n_p==1 && m0p0_dr>0.7')
 
-X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium && !p0_haspix', wt='wt_p0')
+# X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium && !p0_haspix', wt='wt_p0')
+X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium && !p0_haspix && m0_pt>80 && met>80 && p0_pt>150 && m0p0_dr>3.0', wt='wt_p0')
+X.Derive('w_highmt_pho_b1', 'w_highmt_pho', sel='p0_pt>150 && p0_pt<210', wt='wt_p0')
+X.Derive('w_highmt_pho_b2', 'w_highmt_pho', sel='p0_pt>210 && p0_pt<300', wt='wt_p0')
+X.Derive('w_highmt_pho_b3', 'w_highmt_pho', sel='p0_pt>300 && p0_pt<420', wt='wt_p0')
+X.Derive('w_highmt_pho_b4', 'w_highmt_pho', sel='p0_pt>420 && p0_pt<1200', wt='wt_p0')
+# X.Derive('w_highmt_pho_b4', 'w_highmt_pho', sel='p0_pt>420 && p0_pt<600', wt='wt_p0')
+# X.Derive('w_highmt_pho_b4', 'w_highmt_pho', sel='p0_pt>600 && p0_pt<850', wt='wt_p0')
+# X.Derive('w_highmt_pho_b5', 'w_highmt_pho', sel='p0_pt>850 && p0_pt<1200', wt='wt_p0')
+# X.Derive('w_highmt_pho', 'w_highmt_pho_rec', sel='p0_medium && !p0_haspix && m0_pt>80 && met>80 && p0_pt>300 && m0p0_dr>3.0', wt='wt_p0')
+
 # X.Derive('w_highmt_pho_aiso_m', 'w_highmt_pho_rec_aiso_m', sel='p0_medium && !p0_haspix', wt='wt_p0')
 
 
@@ -83,25 +100,26 @@ X.Derive('w_hmt_pho_iso_t_sig_l', 'w_hmt_pho_pre', sel='p0_chiso < 0.441 && p0_s
 
 
 drawvars = [
-    ('m0met_mt', (30, 0., 200.)),
+    # ('m0met_mt', (30, 0., 200.)),
     ('m0_pt', (40, 0., 150.)),
-    ('m0_eta', (20, -3.0, 3.0)),
-    ('m0_iso', (40, 0, 2.0)),
-    ('m1_pt', (40, 0., 150.)),
-    ('m1_eta', (20, -3.0, 3.0)),
-    ('m0m1_M', (40, 60, 120)),
-    ('m0m1_dr', (20, 0., 5.)),
+    # ('m0_eta', (20, -3.0, 3.0)),
+    # ('m0_iso', (40, 0, 2.0)),
+    # ('m1_pt', (40, 0., 150.)),
+    # ('m1_eta', (20, -3.0, 3.0)),
+    # ('m0m1_M', (40, 60, 120)),
+    # ('m0m1_dr', (20, 0., 5.)),
     ('met', (20, 0., 200.)),
-    ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 150, 200, 300, 400, 600, 1000, 2000]),
-    ('p0_eta', (20, -3.0, 3.0)),
+    ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 150, 210, 300, 420, 600, 850, 1200]),
+    # ('p0_eta', (20, -3.0, 3.0)),
     ('m0p0_dr', (20, 0., 5.)),
-    ('m0p0_M', (40, 60, 120)),
-    ('p0_chiso', (40, 0, 20.0)),
-    ('p0_neiso', (40, 0, 20.0)),
-    ('p0_phiso', (40, 0, 20.0)),
-    ('p0_hovere', (20, 0., 0.5)),
-    ('p0_sigma', (40, 0., 0.050)),
-    ('p0_haspix', (2, -0.5, 1.5)),
+    # ('m0p0_M', (40, 60, 120)),
+    # ('p0_chiso', (40, 0, 20.0)),
+    # ('p0_neiso', (40, 0, 20.0)),
+    # ('p0_phiso', (40, 0, 20.0)),
+    # ('p0_hovere', (20, 0., 0.5)),
+    # ('p0_sigma', (40, 0., 0.050)),
+    # ('p0_haspix', (2, -0.5, 1.5)),
+    ('abs(reco_phi)', (5, 0, 3.15)),
 ]
 
 for sel in X.storage.keys():

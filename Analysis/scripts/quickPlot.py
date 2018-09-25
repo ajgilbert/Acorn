@@ -76,13 +76,13 @@ LAYOUTS = {
         }
         ),
         ('W', {
-            'entries': ['W_DAT'],
+            'entries': ['W_F'],
             'legend': 'W#rightarrowl#nu',
             'color': ROOT.TColor.GetColor(222, 90, 106)
         }
         ),
         ('WG', {
-            'entries': ['WG'],
+            'entries': ['WG-St'],
             'legend': 'W#rightarrowl#nu+#gamma',
             'color': ROOT.TColor.GetColor(119, 213, 217)
 
@@ -118,7 +118,8 @@ config_by_setting = {
         '*/p0_phiso': ('Photon I_{photon}', 'GeV'),
         '*/p0_hovere': ('Photon H/E', ''),
         '*/p0_sigma': ('Photon #sigma_{I#etaI#eta}^{full 5x5}', ''),
-        '*/p0_haspix': ('Photon hasPixelSeed', '')
+        '*/p0_haspix': ('Photon hasPixelSeed', ''),
+        '*/abs(reco_phi)': ('Reconstructed #phi', ''),
     }
 }
 

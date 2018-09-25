@@ -49,6 +49,8 @@ for sample in SAMPLES:
         'attributes': SAMPLES[sample]['attributes']
     }
     cfg.update(incfg['config'])
+    if 'stitching' in SAMPLES[sample]:
+        cfg['stitching'] = SAMPLES[sample]['stitching']
 
     job_mgr.add_filelist_split_jobs(
         prog='Acorn_WGAnalysis',

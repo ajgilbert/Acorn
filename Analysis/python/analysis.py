@@ -124,7 +124,7 @@ class CodeLines:
         self.res.append('  ' * self.idlevel + line)
 
 
-def GenTreeCode(tree, objlist, multithread=4):
+def GenTreeCode(tree, objlist, multithread=0):
     fname = 'RunTree%i' % GenTreeCode.counter
     # static variable to keep ensure we can give
     # each function a unique name

@@ -14,6 +14,7 @@
 #include "Acorn/Analysis/interface/DiMuonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
+#include "Acorn/Analysis/interface/SampleStitching.h"
 #include "Compression.h"
 using std::string;
 using std::vector;
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
   for (auto const& seq : sequences) {
     fs[seq] = std::make_shared<fwlite::TFileService>(
         outputdir + "/" + seq + "/" + outname);
-    fs[seq]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kLZMA, 5));
+    fs[seq]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 5));
   }
 
   ac::AnalysisBase analysis("WGammaAnalysis", do_files, "EventTree", jsc.count("events") ? int(jsc["events"]) : -1);
@@ -113,6 +114,11 @@ int main(int argc, char* argv[]) {
       wgamma_seq.BuildModule(
           ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
     }
+
+    if (jsc.count("stitching")) {
+      wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+    }
+
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
