@@ -81,7 +81,7 @@ class EventInfo {
   inline void setLHEWeight(unsigned const& id, double const& weight) { lheWeights_[id] = weight; }
 
   inline void setWeight(std::string const& label, double const& wt, bool const& enabled = true) {
-    weights_[label] = std::make_pair(wt, enabled);
+    weights_[label] = std::make_pair(enabled, wt);
   }
 
   inline double totalWeight() const {
