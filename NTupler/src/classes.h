@@ -11,6 +11,7 @@
 #include "Acorn/NTupler/interface/PileupInfo.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
 #include "Acorn/NTupler/interface/RunLumiMap.h"
+#include "Acorn/NTupler/interface/Track.h"
 
 namespace { struct dictionary {
   ac::Candidate dummy1;
@@ -31,6 +32,8 @@ namespace { struct dictionary {
   std::map<unsigned, std::set<unsigned>> dummy16;
   ac::Met dummy17;
   std::vector<ac::Met> dummy18;
+  ac::Track dummy19;
+  std::vector<ac::Track> dummy20;
 };
 }
 
