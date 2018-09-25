@@ -23,6 +23,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, bool, is_data)
   CLASS_MEMBER(WGDataAnalysis, std::string, corrections)
   CLASS_MEMBER(WGDataAnalysis, std::string, gen_classify)
+  CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
 
   LookupFilter filters_IsoMu24_;
   LookupFilter filters_IsoTkMu24_;
@@ -45,6 +46,7 @@ class WGDataAnalysis : public ModuleBase {
   float m0_iso_;
   bool m0_tight_;
   bool m0_trg_; // trigger fired and object matched
+  int m0_q_;
 
   // m1: Second muon variables
   float m1_pt_;
@@ -99,6 +101,14 @@ class WGDataAnalysis : public ModuleBase {
   float wt_trg_m0_; // trigger weight for m0
   float wt_m1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
+
+  // truth variables
+  float gen_m0_pt_;
+  float gen_p0_pt_;
+  float gen_reco_phi_;
+  int gen_m0_q_;
+  float gen_met_;
+  float gen_m0p0_dr_;
 
   mutable TRandom3 rng;
 

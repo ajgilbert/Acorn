@@ -175,19 +175,4 @@ namespace ac {
   }
 
   void WGAnalysis::PrintInfo() {}
-
-  bool WGAnalysis::IsChargedLepton(ac::GenParticle const& p) const {
-    return std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15;
-  }
-  bool WGAnalysis::IsNeutrino(ac::GenParticle const& p) const {
-    return std::abs(p.pdgId()) == 12 || std::abs(p.pdgId()) == 14 || std::abs(p.pdgId()) == 16;
-  }
-  bool WGAnalysis::IsLepton(ac::GenParticle const& p) const {
-    return IsChargedLepton(p) || IsNeutrino(p);
-  }
-
-  bool WGAnalysis::IsPhoton(ac::GenParticle const& p) const {
-    return p.pdgId() == 22;
-  }
-
 }

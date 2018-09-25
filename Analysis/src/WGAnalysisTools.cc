@@ -130,4 +130,29 @@ namespace ac {
     return sys;
   }
 
+  bool IsElectron(ac::GenParticle const& p) {
+    return  std::abs(p.pdgId()) == 11;
+  }
+
+  bool IsMuon(ac::GenParticle const& p) {
+    return  std::abs(p.pdgId()) == 13;
+  }
+  bool IsTau(ac::GenParticle const& p) {
+    return  std::abs(p.pdgId()) == 15;
+  }
+
+  bool IsChargedLepton(ac::GenParticle const& p) {
+    return std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15;
+  }
+  bool IsNeutrino(ac::GenParticle const& p) {
+    return std::abs(p.pdgId()) == 12 || std::abs(p.pdgId()) == 14 || std::abs(p.pdgId()) == 16;
+  }
+  bool IsLepton(ac::GenParticle const& p) {
+    return IsChargedLepton(p) || IsNeutrino(p);
+  }
+
+  bool IsPhoton(ac::GenParticle const& p) {
+    return p.pdgId() == 22;
+  }
+
 }  // namespace ac

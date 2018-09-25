@@ -6,22 +6,22 @@
       "lumi": 35858.453042
     },
     "WGToLNuG-madgraphMLM": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM"],
       "xsec": 612.72
     },
     "WGToLNuG-madgraphMLM-PtG-130": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM-PtG-130"],
       "xsec": 0.946586226
     },
     "WGToLNuG-madgraphMLM-PtG-500": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 0.017822799
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "mc", "mcnew"],
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 612.72,
       "stitching": {
@@ -51,7 +51,7 @@
       }
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "mcnew"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
       "xsec": 5765.4
     },

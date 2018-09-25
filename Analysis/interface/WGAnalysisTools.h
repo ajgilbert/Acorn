@@ -45,5 +45,14 @@ struct WGSystem {
 WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
                          ac::Candidate const& pho, bool reconstruct, TRandom3 & rng, bool verbose);
 
+bool IsElectron(ac::GenParticle const& p);
+bool IsMuon(ac::GenParticle const& p);
+bool IsTau(ac::GenParticle const& p);
+bool IsChargedLepton(ac::GenParticle const& p);
+bool IsNeutrino(ac::GenParticle const& p);
+bool IsLepton(ac::GenParticle const& p);
+bool IsPhoton(ac::GenParticle const& p);
+
+
 }
 #endif

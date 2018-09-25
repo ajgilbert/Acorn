@@ -48,11 +48,6 @@ class WGAnalysis : public ModuleBase {
   virtual int Execute(TreeEvent *event);
   virtual int PostAnalysis();
   virtual void PrintInfo();
-
-  bool IsChargedLepton(ac::GenParticle const& p) const;
-  bool IsNeutrino(ac::GenParticle const& p) const;
-  bool IsLepton(ac::GenParticle const& p) const;
-  bool IsPhoton(ac::GenParticle const& p) const;
 };
 }
 

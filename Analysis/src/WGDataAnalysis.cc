@@ -22,7 +22,7 @@
 namespace ac {
 
 WGDataAnalysis::WGDataAnalysis(std::string const& name)
-    : ModuleBase(name), fs_(nullptr), year_(2016), is_data_(true) {}
+    : ModuleBase(name), fs_(nullptr), year_(2016), is_data_(true), do_wg_gen_vars_(false) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
 
@@ -37,6 +37,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("m0_iso", &m0_iso_);
     tree_->Branch("m0_tight", &m0_tight_);
     tree_->Branch("m0_trg", &m0_trg_);
+    tree_->Branch("m0_q", &m0_q_);
     tree_->Branch("m1_pt", &m1_pt_);
     tree_->Branch("m1_eta", &m1_eta_);
     tree_->Branch("m1_phi", &m1_phi_);
@@ -73,6 +74,12 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_trg_m0", &wt_trg_m0_);
     tree_->Branch("wt_m1", &wt_m1_);
     tree_->Branch("wt_p0", &wt_p0_);
+    tree_->Branch("gen_p0_pt", &gen_p0_pt_);
+    tree_->Branch("gen_reco_phi", &gen_reco_phi_);
+    tree_->Branch("gen_m0_q", &gen_m0_q_);
+    tree_->Branch("gen_m0_pt", &gen_m0_pt_);
+    tree_->Branch("gen_met", &gen_met_);
+    tree_->Branch("gen_m0p0_dr", &gen_m0p0_dr_);
     tree_->Print();
   }
 
@@ -186,6 +193,7 @@ int WGDataAnalysis::PreAnalysis() {
     m0_phi_ = m0->phi();
     m0_iso_ = MuonPFIso(m0);
     m0_tight_ = m0->isTightMuon();
+    m0_q_ = m0->charge();
 
     ac::Met* met = mets.at(0);
     met_ = met->pt();
@@ -270,7 +278,7 @@ int WGDataAnalysis::PreAnalysis() {
       auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
       if (n_p_ >= 1) {
         wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, photons[0]->scEta()});
-        auto prompt_gen_photons = ac::keep_if(genparts, [&](ac::GenParticle *p) {
+        auto prompt_gen_photons = ac::copy_keep_if(genparts, [&](ac::GenParticle *p) {
           return p->pt() > 10. && p->pdgId() == 22 && p->status() == 1 && p->statusFlags().isPrompt() && DeltaR(p, photons[0]) < 0.3;
         });
         if (prompt_gen_photons.size()) {
@@ -290,19 +298,49 @@ int WGDataAnalysis::PreAnalysis() {
         }
       }
 
+      // Calculate the truth vars for W+g events
+      if (do_wg_gen_vars_) {
+        ac::GenParticle const* gen_lep = nullptr;
+        // ac::GenParticle const* gen_neu = nullptr;
+        ac::GenParticle const* gen_pho = nullptr;
 
+        std::vector<ac::GenParticle const*> viable_leptons;
+        std::vector<ac::GenParticle const*> viable_photons;
+
+        for (auto const& part : genparts) {
+          if (IsChargedLepton(*part) && part->statusFlags().isPrompt() && part->statusFlags().isLastCopy()) {
+            if (IsTau(*part)) {
+              viable_leptons.push_back(part);
+            } else if (part->status() == 1) {
+              viable_leptons.push_back(part);
+            }
+          }
+          if (IsPhoton(*part) && part->status() == 1 && part->statusFlags().isPrompt()) {
+            viable_photons.push_back(part);
+          }
+        }
+
+        boost::range::sort(viable_leptons, DescendingPt);
+        boost::range::sort(viable_photons, DescendingPt);
+        if (viable_leptons.size() && viable_photons.size()) {
+          gen_lep = viable_leptons[0];
+          gen_pho = viable_photons[0];
+          auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
+          WGSystem gen_sys = ProduceWGSystem(*gen_lep, *gen_met, *gen_pho, true, rng, false);
+          gen_p0_pt_ = gen_pho->pt();
+          gen_m0_q_ = gen_lep->charge();
+          double lep_phi = gen_sys.r_charged_lepton.phi();
+          gen_reco_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
+              gen_lep->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
+          gen_m0_pt_ = gen_lep->pt();
+          gen_met_ = gen_met->pt();
+          gen_m0p0_dr_ = ac::DeltaR(gen_lep, gen_pho);
+        }
+
+      }
 
     }
-
-    // std::cout << "----\n";
-    // auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
-    // for (auto p : genparts) {
-    //   p->Print();
-    // }
     tree_->Fill();
-
-
-
     return 0;
   }
 
@@ -351,6 +389,12 @@ int WGDataAnalysis::PreAnalysis() {
     wt_trg_m0_ = 1.;
     wt_m1_ = 1.;
     wt_p0_ = 1.;
+    gen_p0_pt_ = 0.;
+    gen_reco_phi_ = 0.;
+    gen_m0_q_ = 0;
+    gen_m0_pt_ = 0.;
+    gen_met_ = 0.;
+    gen_m0p0_dr_ = 0.;
   }
 
   int WGDataAnalysis::PostAnalysis() {
