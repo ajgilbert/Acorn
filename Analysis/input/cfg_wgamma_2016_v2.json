@@ -21,7 +21,7 @@
       "xsec": 0.017822799
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "mcnew"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 612.72,
       "stitching": {
@@ -31,14 +31,14 @@
           "min": [],
           "max": [],
           "events": 6103817,
-          "xsec": 311.16399999999999
+          "xsec": 373.7
         },
         "WGToLNuG-madgraphMLM-PtG-130": {
           "target": false,
           "min": [130.0],
           "max": [],
           "events": 1645059,
-          "xsec": 0.6260999999999999
+          "xsec": 0.7343
         }
         ,
         "WGToLNuG-madgraphMLM-PtG-500": {
@@ -46,12 +46,12 @@
           "min": [500.0],
           "max": [],
           "events": 1393505,
-          "xsec": 0.011788699999999999
+          "xsec": 0.008196 
         }
       }
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["default", "mc", "mcnew"],
+      "attributes": ["default", "mc"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
       "xsec": 5765.4
     },
