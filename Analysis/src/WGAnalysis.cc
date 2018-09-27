@@ -39,19 +39,17 @@ namespace ac {
       tree_->Branch("type", &type_);
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
-      tree_->Branch("wt_C3w_0p0_", &wt_C3w_0p0_);
-      tree_->Branch("wt_C3w_0p1_", &wt_C3w_0p1_);
-      tree_->Branch("wt_C3w_0p2_", &wt_C3w_0p2_);
-      tree_->Branch("wt_C3w_0p4_", &wt_C3w_0p4_);
-      tree_->Branch("wt_C3w_1p0_", &wt_C3w_1p0_);
-      // tree_->Branch("wt", &wt_);
-      // tree_->Branch("n_jets", &n_jets_);
+      tree_->Branch("wt_C3w_0p0", &wt_C3w_0p0_);
+      tree_->Branch("wt_C3w_0p1", &wt_C3w_0p1_);
+      tree_->Branch("wt_C3w_0p2", &wt_C3w_0p2_);
+      tree_->Branch("wt_C3w_0p4", &wt_C3w_0p4_);
+      tree_->Branch("wt_C3w_1p0", &wt_C3w_1p0_);
     }
     return 0;
   }
 
   int WGAnalysis::Execute(TreeEvent* event) {
-    bool lhe_only = true;
+    bool lhe_only = false;
 
     auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
     std::vector<GenParticle *> gen_parts;

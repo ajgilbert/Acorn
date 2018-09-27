@@ -82,10 +82,17 @@ LAYOUTS = {
         }
         ),
         ('WG', {
-            'entries': ['WG-St'],
-            'legend': 'W#rightarrowl#nu+#gamma',
+            # 'entries': ['WG'],
+            'entries': ['WG_p_acc', 'WG_n_acc'],
+            'legend': 'W#rightarrowl#nu+#gamma (in)',
             'color': ROOT.TColor.GetColor(119, 213, 217)
 
+        }
+        ),
+        ('WG_OOA', {
+            'entries': ['WG_p_ooa', 'WG_n_ooa'],
+            'legend': 'W#rightarrowl#nu+#gamma (out)',
+            'color': 12
         }
         ),
         # ('ZTT', {
@@ -348,8 +355,8 @@ for path in filtered_list:
     target_dir = os.path.join(args.output, *split_path)
     os.system('mkdir -p %s' % target_dir)
     hists = GetHistsInDir(file, path)
-    if 'w_highmt_pho' in path:
-        hists['W_DAT'] = DoPhotonFakes(file, 'w_hmt_pho_iso_l_sig_t/%s' % name, 'w_hmt_pho_iso_t_sig_l/%s' % name, 'w_hmt_pho_iso_l_sig_l/%s' % name)
+    # if 'w_highmt_pho' in path:
+    #     hists['W_DAT'] = DoPhotonFakes(file, 'w_hmt_pho_iso_l_sig_t/%s' % name, 'w_hmt_pho_iso_t_sig_l/%s' % name, 'w_hmt_pho_iso_l_sig_l/%s' % name)
 
     # print hists
 

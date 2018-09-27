@@ -72,7 +72,7 @@ class SelectionManager:
 
     def _doreplacement(self, pattern, expr, idx=0):
         newexpr = pattern.sub(lambda x: self._getreplacement(x, idx), expr)
-        # print '%s --> %s' % (expr, newexpr)
+        print '%s --> %s' % (expr, newexpr)
         if newexpr == expr:
             return newexpr
         else:
