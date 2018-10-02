@@ -15,6 +15,8 @@
   <class name="std::vector<ac::TriggerObject>"/>
   <class name="ac::Met"/>
   <class name="std::vector<ac::Met>"/>
+  <class name="ac::Track"/>
+  <class name="std::vector<ac::Track>"/>
   <class name="std::map<unsigned, std::set<unsigned>>"/>
   <class name="RunLumiMap"/>
 </lcgdict>
