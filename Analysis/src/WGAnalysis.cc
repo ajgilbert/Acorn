@@ -39,6 +39,7 @@ namespace ac {
       tree_->Branch("type", &type_);
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
+      tree_->Branch("wt_def", &wt_def_);
       tree_->Branch("wt_C3w_0p0", &wt_C3w_0p0_);
       tree_->Branch("wt_C3w_0p1", &wt_C3w_0p1_);
       tree_->Branch("wt_C3w_0p2", &wt_C3w_0p2_);
@@ -67,6 +68,8 @@ namespace ac {
     wt_C3w_1p0_ = 1.0;
 
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
+
+    wt_def_ = info->totalWeight();
 
     wt_C3w_0p0_ = info->lheWeights().at(100000);
     wt_C3w_0p1_ = info->lheWeights().at(100001);
@@ -124,7 +127,7 @@ namespace ac {
       gen_lep = viable_leptons[0];
       gen_pho = viable_photons[0];
     } else if (!lhe_only) {
-      std::cout << "No viable\n";
+      // std::cout << "No viable\n";
       return 1;
     }
 

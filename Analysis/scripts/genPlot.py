@@ -15,7 +15,7 @@ tname = 'WGAnalysis'
 samples = {
     'WGSM': 'output/100718/wgamma_2016_v2/wg_gen/WpAToLNuA0j_5f_LO_MLM_pTA_300_0.root',
     'WGTH': 'output/100718/wgamma_2016_v2/wg_gen/Theorists_0.root',
-    'WG': 'output/100718/wgamma_2016_v2/wg_gen/WGToMuNuG-EFT_pTA_300_inf-madgraphMLM_0.root'
+    'WG': 'output/100718/wgamma_2016_v2/wg_gen/WGToMuNuG-EFT-madgraphMLM-stitched_0.root'
 }
 
 remap = {
@@ -29,6 +29,7 @@ parser.add_argument('--abs', action='store_true')
 parser.add_argument('--unit-norm', action='store_true')
 parser.add_argument('--charge', default='+1')
 parser.add_argument('--g_pt', default='300.')
+parser.add_argument('--g_pt_max', default='9999999999.')
 parser.add_argument('--g_eta', default='3.')
 parser.add_argument('--l_pt', default='80.')
 parser.add_argument('--l_eta', default='2.4')
@@ -36,9 +37,12 @@ parser.add_argument('--n_pt', default='80.')
 parser.add_argument('--n_eta', default='9999.')
 parser.add_argument('--dr', default='3.0')
 parser.add_argument('--output', '-o', default='gen_plot')
+parser.add_argument('--save-scalings', type=int, default=0, help="1: save absolute 2: save relative")
 # parser.add_argument('--ratio', '-o', default='gen_plot')
-
 args = parser.parse_args()
+
+fout = ROOT.TFile('output_gen.root', 'RECREATE')
+
 
 
 hists = Node()
@@ -52,23 +56,23 @@ else:
     drawvar = '%s' % args.draw
     binning = (10, -3.15, 3.15)
 
-pt_bins = [300, 400, 600, 800, 1200]
+pt_bins = [150, 210, 300, 420, 1200]
 
 for name, sa, wt in [
-        ('nominal', 'WG', 'wt_C3w_0p0_'),
-        ('C3w_0p1', 'WG', 'wt_C3w_0p1_'),
-        ('C3w_0p2', 'WG', 'wt_C3w_0p2_'),
-        ('C3w_0p4', 'WG', 'wt_C3w_0p4_'),
-        ('C3w_1p0', 'WG', 'wt_C3w_1p0_'),
-        ('SM', 'WGSM', '1.0'),
-        ('TH', 'WGTH', '1.0')
+        ('nominal', 'WG', 'wt_C3w_0p0*wt_def'),
+        ('C3w_0p1', 'WG', 'wt_C3w_0p1*wt_def'),
+        ('C3w_0p2', 'WG', 'wt_C3w_0p2*wt_def'),
+        ('C3w_0p4', 'WG', 'wt_C3w_0p4*wt_def'),
+        ('C3w_1p0', 'WG', 'wt_C3w_1p0*wt_def'),
+        # ('SM', 'WGSM', '1.0'),
+        # ('TH', 'WGTH', '1.0')
 ]:
     if args.charge == '0':
         charge_sel = '1'
     else:
         charge_sel = 'l_charge==%s' % args.charge
-    sel = '%s && nparts>=3 && nparts <=10 && g_pt>%s && l_pt>%s && n_pt>%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
-        charge_sel, args.g_pt, args.l_pt, args.n_pt, args.l_eta, args.n_eta, args.g_eta, args.dr)
+    sel = '%s && nparts>=3 && nparts <=10 && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
+        charge_sel, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.l_eta, args.n_eta, args.g_eta, args.dr)
     print sel
     hists[name] = Hist('TH1D', binning, sa, [drawvar],
                        sel=sel, wt=wt)
@@ -76,40 +80,52 @@ for name, sa, wt in [
 
 MultiDraw(hists, samples, tname)
 
-rel_mode = True
-if rel_mode:
-    for hname in ['nominal_2D', 'C3w_0p1_2D', 'C3w_0p2_2D', 'C3w_0p4_2D', 'C3w_1p0_2D']:
-        htmp = hists[hname]
-        for jb in xrange(1, htmp.GetNbinsY() + 1):
-            tot = 0.
-            for ib in xrange(1, htmp.GetNbinsX() + 1):
-                tot += htmp.GetBinContent(ib, jb)
-            for ib in xrange(1, htmp.GetNbinsX() + 1):
-                htmp.SetBinContent(ib, jb, htmp.GetBinContent(ib, jb) / tot)
+
+save_scalings = args.save_scalings
 
 
-for ib in xrange(1, hists['nominal_2D'].GetNbinsX() + 1):
-    xmin = hists['nominal_2D'].GetXaxis().GetBinLowEdge(ib)
-    xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
+if save_scalings >= 1:
+    pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
+    if save_scalings == 2:
+        for hname in ['nominal_2D', 'C3w_0p1_2D', 'C3w_0p2_2D', 'C3w_0p4_2D', 'C3w_1p0_2D']:
+            htmp = hists[hname]
+            for jb in xrange(1, htmp.GetNbinsY() + 1):
+                tot = 0.
+                for ib in xrange(1, htmp.GetNbinsX() + 1):
+                    tot += htmp.GetBinContent(ib, jb)
+                for ib in xrange(1, htmp.GetNbinsX() + 1):
+                    htmp.SetBinContent(ib, jb, htmp.GetBinContent(ib, jb) / tot)
+                    htmp.SetBinError(ib, jb, htmp.GetBinError(ib, jb) / tot)
 
     for jb in xrange(1, hists['nominal_2D'].GetNbinsY() + 1):
         ymin = hists['nominal_2D'].GetYaxis().GetBinLowEdge(jb)
         ymax = hists['nominal_2D'].GetYaxis().GetBinUpEdge(jb)
-        npoints = 5
-        gr = ROOT.TGraph(npoints)
-        nom =  hists['nominal_2D'].GetBinContent(ib, jb)
-        gr.SetPoint(0, 0.0, hists['nominal_2D'].GetBinContent(ib, jb) / nom)
-        gr.SetPoint(1, 0.1, hists['C3w_0p1_2D'].GetBinContent(ib, jb) / nom)
-        gr.SetPoint(2, 0.2, hists['C3w_0p2_2D'].GetBinContent(ib, jb) / nom)
-        gr.SetPoint(3, 0.4, hists['C3w_0p4_2D'].GetBinContent(ib, jb) / nom)
-        gr.SetPoint(4, 1.0, hists['C3w_1p0_2D'].GetBinContent(ib, jb) / nom)
-        canv = ROOT.TCanvas('w_gen_bin_%i_%i' % (ib, jb), 'w_gen_bin_%i_%i' % (ib, jb))
-        pads = plot.OnePad()
-        gr.Draw('APC')
-        gr.Print()
-        plot.DrawTitle(pads[0], '[%g,%g],[%g,%g]' % (xmin, xmax, ymin, ymax), 3)
-        canv.Print('.png')
-        canv.Print('.pdf')
+
+        for ib in xrange(1, hists['nominal_2D'].GetNbinsX() + 1):
+            xmin = hists['nominal_2D'].GetXaxis().GetBinLowEdge(ib)
+            xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
+            npoints = 5
+            gr = ROOT.TGraphErrors(npoints)
+            nom =  hists['nominal_2D'].GetBinContent(ib, jb)
+            if nom != 0.:
+                gr.SetPoint(0, 0.0, hists['nominal_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(1, 0.1, hists['C3w_0p1_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(2, 0.2, hists['C3w_0p2_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(3, 0.4, hists['C3w_0p4_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(4, 1.0, hists['C3w_1p0_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPointError(0, 0., hists['nominal_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(1, 0., hists['C3w_0p1_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(2, 0., hists['C3w_0p2_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(3, 0., hists['C3w_0p4_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(4, 0., hists['C3w_1p0_2D'].GetBinError(ib, jb) / nom)
+            canv = ROOT.TCanvas('w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1), 'w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1))
+            pads = plot.OnePad()
+            gr.Draw('APC')
+            gr.Print()
+            WriteToTFile(gr, fout, '', 'w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1))
+            plot.DrawTitle(pads[0], '[%g,%g],[%g,%g]' % (ymin, ymax, xmin, xmax), 3)
+            canv.Print('.png')
+            canv.Print('.pdf')
 
 if args.unit_norm:
     hists.ForEach(lambda x: NormaliseTo(x, 1.0))
@@ -120,8 +136,8 @@ pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
 
 # Get the data and create axis hist
 h_nominal = hists['nominal']
-h_sm = hists['SM']
-h_th = hists['TH']
+# h_sm = hists['SM']
+# h_th = hists['TH']
 h_0p1 = hists['C3w_0p1']
 h_0p2 = hists['C3w_0p2']
 h_0p4 = hists['C3w_0p4']
@@ -147,15 +163,15 @@ h_axes[0].Draw()
 legend = ROOT.TLegend(0.67, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
 
 legend.AddEntry(h_nominal, 'EWDim6', 'L')
-legend.AddEntry(h_sm, 'SM', 'L')
-legend.AddEntry(h_th, 'Reference', 'L')
+# legend.AddEntry(h_sm, 'SM', 'L')
+# legend.AddEntry(h_th, 'Reference', 'L')
 legend.AddEntry(h_0p1, 'C_{3W} = 0.1', 'L')
 legend.AddEntry(h_0p2, 'C_{3W} = 0.2', 'L')
 legend.AddEntry(h_0p4, 'C_{3W} = 0.4', 'L')
 legend.AddEntry(h_1p0, 'C_{3W} = 1.0', 'L')
 
-plot.Set(h_sm, LineColor=2, LineWidth=2, MarkerColor=2)
-plot.Set(h_th, LineColor=4, LineWidth=2, MarkerColor=4)
+# plot.Set(h_sm, LineColor=2, LineWidth=2, MarkerColor=2)
+# plot.Set(h_th, LineColor=4, LineWidth=2, MarkerColor=4)
 plot.Set(h_0p1, LineColor=6, LineWidth=1)
 plot.Set(h_0p2, LineColor=7, LineWidth=1)
 plot.Set(h_0p4, LineColor=9, LineWidth=1)
@@ -224,8 +240,6 @@ pt_l.Draw()
 # ... and we're done
 canv.Print('.png')
 canv.Print('.pdf')
-
-fout = ROOT.TFile('output_gen.root', 'RECREATE')
 
 for path, name, obj in hists.ListObjects():
     print (path, name, obj)

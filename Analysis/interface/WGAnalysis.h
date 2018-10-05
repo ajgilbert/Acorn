@@ -22,6 +22,7 @@ class WGAnalysis : public ModuleBase {
   float phi1_;
   float lhe_phi1_;
   unsigned type_;
+  float wt_def_;
   float wt_C3w_0p0_;
   float wt_C3w_0p1_;
   float wt_C3w_0p2_;

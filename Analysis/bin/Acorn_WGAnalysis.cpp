@@ -134,6 +134,9 @@ int main(int argc, char* argv[]) {
   ac::Sequence wg_gen_seq;
 
   if (sequences.count("wg_gen")) {
+    if (jsc.count("stitching")) {
+      wg_gen_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+    }
     wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("wg_gen").get()));
     wg_gen_seq.InsertSequence("wg_gen", analysis);
   }

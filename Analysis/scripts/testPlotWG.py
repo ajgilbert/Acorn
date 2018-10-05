@@ -136,6 +136,7 @@ drawvars = [
     # ('p0_sigma', (40, 0., 0.050)),
     # ('p0_haspix', (2, -0.5, 1.5)),
     ('abs(reco_phi)', (5, 0, 3.15)),
+    ('abs(gen_reco_phi)', (5, 0, 3.15)),
 ]
 
 for sel in do_cats:

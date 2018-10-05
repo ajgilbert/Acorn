@@ -80,7 +80,6 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("gen_m0_pt", &gen_m0_pt_);
     tree_->Branch("gen_met", &gen_met_);
     tree_->Branch("gen_m0p0_dr", &gen_m0p0_dr_);
-    tree_->Print();
   }
 
   if (is_data_) {

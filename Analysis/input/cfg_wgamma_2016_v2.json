@@ -133,12 +133,34 @@
     "WGToMuNuG-EFT-madgraphMLM": {
       "attributes": ["wg_gen_v2"],
       "inputs": ["WGToMuNuG-EFT-madgraphMLM"],
-      "xsec": 510.6
+      "xsec": 232.9
     },
     "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
       "attributes": ["wg_gen_v2"],
       "inputs": ["WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
       "xsec": 510.6
+    },
+    "WGToMuNuG-EFT-madgraphMLM-stitched": {
+      "attributes": ["wg_gen_v3"],
+      "inputs": ["WGToMuNuG-EFT-madgraphMLM", "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
+      "xsec": 232.9,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToMuNuG-EFT-madgraphMLM": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 2091072,
+          "xsec": 232.9
+        },
+        "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
+          "target": false,
+          "min": [300.0],
+          "max": [],
+          "events": 787537,
+          "xsec": 0.09792
+        }
+      }
     }
   },
   "config": {
