@@ -35,16 +35,17 @@ parser.add_argument('--l_pt', default='80.')
 parser.add_argument('--l_eta', default='2.4')
 parser.add_argument('--n_pt', default='80.')
 parser.add_argument('--n_eta', default='9999.')
+parser.add_argument('--nparts_max', default='10')
 parser.add_argument('--dr', default='3.0')
 parser.add_argument('--output', '-o', default='gen_plot')
 parser.add_argument('--save-scalings', type=int, default=0, help="1: save absolute 2: save relative")
 # parser.add_argument('--ratio', '-o', default='gen_plot')
 args = parser.parse_args()
 
-fout = ROOT.TFile('output_gen.root', 'RECREATE')
+pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
 
 
-
+fout = ROOT.TFile('%s_w_%s.root' % (args.output, pm_label), 'RECREATE')
 hists = Node()
 
 # drawabs = True
@@ -71,8 +72,8 @@ for name, sa, wt in [
         charge_sel = '1'
     else:
         charge_sel = 'l_charge==%s' % args.charge
-    sel = '%s && nparts>=3 && nparts <=10 && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
-        charge_sel, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.l_eta, args.n_eta, args.g_eta, args.dr)
+    sel = '%s && nparts>=3 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
+        charge_sel, args.nparts_max, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.l_eta, args.n_eta, args.g_eta, args.dr)
     print sel
     hists[name] = Hist('TH1D', binning, sa, [drawvar],
                        sel=sel, wt=wt)
@@ -85,7 +86,6 @@ save_scalings = args.save_scalings
 
 
 if save_scalings >= 1:
-    pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
     if save_scalings == 2:
         for hname in ['nominal_2D', 'C3w_0p1_2D', 'C3w_0p2_2D', 'C3w_0p4_2D', 'C3w_1p0_2D']:
             htmp = hists[hname]
@@ -118,7 +118,7 @@ if save_scalings >= 1:
                 gr.SetPointError(2, 0., hists['C3w_0p2_2D'].GetBinError(ib, jb) / nom)
                 gr.SetPointError(3, 0., hists['C3w_0p4_2D'].GetBinError(ib, jb) / nom)
                 gr.SetPointError(4, 0., hists['C3w_1p0_2D'].GetBinError(ib, jb) / nom)
-            canv = ROOT.TCanvas('w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1), 'w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1))
+            canv = ROOT.TCanvas('%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1), '%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1))
             pads = plot.OnePad()
             gr.Draw('APC')
             gr.Print()
@@ -131,7 +131,7 @@ if args.unit_norm:
     hists.ForEach(lambda x: NormaliseTo(x, 1.0))
 # hists.ForEach(lambda x: WidthDivide(x))
 
-canv = ROOT.TCanvas(args.output, args.output)
+canv = ROOT.TCanvas('%s_w_%s' % (args.output, pm_label), '%s_w_%s' % (args.output, pm_label))
 pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
 
 # Get the data and create axis hist

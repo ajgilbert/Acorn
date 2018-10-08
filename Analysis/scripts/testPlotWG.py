@@ -95,6 +95,9 @@ for i in range(len(pt_bins_min)):
     X.Derive('w_highmt_pho_p_%i' % i, 'w_highmt_pho', sel='m0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
     X.Derive('w_highmt_pho_n_%i' % i, 'w_highmt_pho', sel='m0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
     do_cats.extend(['w_highmt_pho_p_%i' % i, 'w_highmt_pho_n_%i' % i])
+    X.Derive('w_highmt_pho_p_gen_%i' % (i), 'w_highmt_pho_p_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
+    X.Derive('w_highmt_pho_n_gen_%i' % (i), 'w_highmt_pho_n_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
+
     for j in range(len(phi_bins_min)):
         X.Derive('w_highmt_pho_p_gen_%i_%i' % (i, j), 'w_highmt_pho_p_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j]))
         X.Derive('w_highmt_pho_n_gen_%i_%i' % (i, j), 'w_highmt_pho_n_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j]))
@@ -154,11 +157,12 @@ for sel in do_cats:
         hists[sel][var]['WG_p_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_p_gen_acc'), wt=X.wt('$'+sel))
         hists[sel][var]['WG_n_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_n_gen_acc'), wt=X.wt('$'+sel))
         for i in range(len(pt_bins_min)):
+            hists[sel][var]['WG_p_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_p_gen_%i' % (i)), wt=X.wt('$'+sel))
+            hists[sel][var]['WG_n_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_n_gen_%i' % (i)), wt=X.wt('$'+sel))
             for j in range(len(phi_bins_min)):
                 hists[sel][var]['WG_p_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_p_gen_%i_%i' % (i, j)), wt=X.wt('$'+sel))
                 hists[sel][var]['WG_n_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$'+sel + ' && $w_highmt_pho_n_gen_%i_%i' % (i, j)), wt=X.wt('$'+sel))
 
-print 'here1'
 MultiDraw(hists, samples, tname)
 
 with open('input/cfg_wgamma_2016_v2.json') as jsonfile:
