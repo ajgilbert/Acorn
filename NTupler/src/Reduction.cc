@@ -5,7 +5,7 @@
 #include "Acorn/NTupler/interface/Reduction.h"
 
 template <>
-double reduceMantissaToNbitsRounding(const double &f, int bits) {
+float reduceMantissaToNbitsRounding(const float &f, int bits) {
   uint32_t shift = 23 - bits;
   uint32_t mask = (0xFFFFFFFF >> (shift)) << (shift);
   uint32_t test = 1 << (shift - 1);
@@ -28,13 +28,13 @@ double reduceMantissaToNbitsRounding(const double &f, int bits) {
 }
 
 template <>
-float reduceMantissaToNbitsRounding(const float &f, int bits) {
+double reduceMantissaToNbitsRounding(const double &f, int bits) {
   uint64_t shift = 52 - bits;
   uint64_t mask = (0xFFFFFFFFFFFFFFFF >> (shift)) << (shift);
   uint64_t test = 1 << (shift - 1);
   uint64_t maxn = (1 << bits) - 2;
-  constexpr uint64_t low52 = (0x000FFFFFFFFFFFFF);  // mask to keep lowest 23 bits = mantissa
-  constexpr uint64_t hi12 = (0xFFF0000000000000);   // mask to keep highest 9 bits = the rest
+  constexpr uint64_t low52 = (0x000FFFFFFFFFFFFF);  // mask to keep lowest 52 bits = mantissa
+  constexpr uint64_t hi12 = (0xFFF0000000000000);   // mask to keep highest 12 bits = the rest
   union {
     double flt;
     uint64_t i64;
