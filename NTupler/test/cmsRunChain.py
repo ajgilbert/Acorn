@@ -67,8 +67,7 @@ process.output = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string('file:%(FILENAME)s')
 )
-#process.options.numberOfThreads=cms.untracked.uint32(4)
-#process.options.numberOfStreams=cms.untracked.uint32(0)
+%(OTHER_SETTINGS)s
 
 process.output_step = cms.EndPath(process.output)
 
@@ -180,14 +179,8 @@ with open(master_script_name, "w") as text_file:
 os.system('chmod +x %s ' % (master_script_name))
 files_to_ship.append(master_script_name)
 
-if args.crab:
-    real_cfg = DO_NOTHING_CFG % ({
-        'FILENAME': saved_file
-        })
-    real_cfg_name ='do_nothing_%s_cfg.py' % args.label 
-    with open(real_cfg_name, "w") as ofile:
-        ofile.write(real_cfg)
-        ofile.close()
+cfg_other_settings = ''
+real_cfg_name ='do_nothing_%s_cfg.py' % args.label
 
 if args.crab and (args.crab_cfg is not None):
     d = {}
@@ -197,12 +190,29 @@ if args.crab and (args.crab_cfg is not None):
     config.JobType.outputFiles = [saved_file]
     #config.JobType.numCores = 4
     #config.JobType.maxMemoryMB = 6000
-    config.JobType.scriptExe = master_script_name 
+    config.JobType.scriptExe = master_script_name
     config.JobType.psetName = real_cfg_name
-    config.JobType.inputFiles = files_to_ship 
+    config.JobType.inputFiles = files_to_ship
     config.Data.unitsPerJob = args.events
+
+    # Figure out if numCores has been set, and if so make sure
+    # the same value is set in do_nothing_X_cfg.py,
+    # otherwise crab will complain and refuse to submit
+    if hasattr(config.JobType, 'numCores'):
+        numCores = config.JobType.numCores
+        cfg_other_settings = 'process.options.numberOfThreads=cms.untracked.uint32(%i)\nprocess.options.numberOfStreams=cms.untracked.uint32(0)' % numCores
+
     print config.__str__()
     with open('crab_generated_%s_cfg.py' % args.label, "w") as ofile:
         ofile.write(config.__str__())
         ofile.close()
     #os.system('chmod +x %s; ./%s' % (script_name, script_name))
+
+if args.crab:
+    real_cfg = DO_NOTHING_CFG % ({
+        'FILENAME': saved_file,
+        'OTHER_SETTINGS': cfg_other_settings
+        })
+    with open(real_cfg_name, "w") as ofile:
+        ofile.write(real_cfg)
+        ofile.close()
