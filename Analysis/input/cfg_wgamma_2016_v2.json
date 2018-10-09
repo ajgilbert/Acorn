@@ -46,7 +46,7 @@
           "min": [500.0],
           "max": [],
           "events": 1393505,
-          "xsec": 0.008196 
+          "xsec": 0.008196
         }
       }
     },
@@ -135,14 +135,24 @@
       "inputs": ["WGToMuNuG-EFT-madgraphMLM"],
       "xsec": 232.9
     },
+    "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_130_inf-madgraphMLM"],
+      "xsec": 0.3791
+    },
     "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
       "attributes": ["wg_gen_v2"],
       "inputs": ["WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
-      "xsec": 510.6
+      "xsec": 0.09792
+    },
+    "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_500_inf-madgraphMLM"],
+      "xsec": 0.05124
     },
     "WGToMuNuG-EFT-madgraphMLM-stitched": {
       "attributes": ["wg_gen_v3"],
-      "inputs": ["WGToMuNuG-EFT-madgraphMLM", "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
+      "inputs": ["WGToMuNuG-EFT-madgraphMLM", "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM"],
       "xsec": 232.9,
       "stitching": {
         "binned": ["photon_pt"],
@@ -153,12 +163,26 @@
           "events": 2091072,
           "xsec": 232.9
         },
+        "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 801699,
+          "xsec": 0.3791
+        },
         "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
           "target": false,
           "min": [300.0],
           "max": [],
           "events": 787537,
           "xsec": 0.09792
+        },
+        "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 768786,
+          "xsec": 0.05124
         }
       }
     }
