@@ -82,7 +82,6 @@
   "crabSettings": {
     "storageSite": "T2_DE_DESY",
     "voGroup": "dcms",
-    "outputDir" : "/store/user/adewit/HVMData/",
-    "whiteList" : ""
+    "outputDir" : "/store/user/adewit/HVMData/"
   }
 }

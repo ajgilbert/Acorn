@@ -49,16 +49,16 @@ config.Data.unitsPerJob = args.unitsPerJob
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.publication = False
 config.Data.ignoreLocality = False
-if crab_settings['outputDir']:
+if 'outputDir' in crab_settings:
   config.Data.outLFNDirBase = '%s%s' % (crab_settings['outputDir'],args.label)
 
 config.section_('User')
-if crab_settings['voGroup'] :
+if 'voGroup' in crab_settings :
   config.User.voGroup = crab_settings['voGroup']
 
 config.section_('Site')
 config.Site.storageSite = crab_settings['storageSite']
-if crab_settings['whiteList']:
+if 'whiteList' in crab_settings:
   config.Site.whitelist = crab_settings['whiteList']
 #config.Site.whitelist = ['T2_UK_London_IC', 'T2_CH_CERN', 'T2_FR_GRIF_LLR', 'T2_UK_SGrid_Bristol', 'T3_US_FNALLPC', 'T2_DE_DESY', 'T2_IT_Bari', 'T2_BE_IIHE', 'T2_US_UCSD', 'T2_US_MIT', 'T2_IT_Pisa', 'T2_US_Wisconsin', 'T2_US_Florida', 'T2_IT_Rome','T2_FR_IPHC']
 

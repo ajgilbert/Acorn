@@ -87,9 +87,7 @@
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
-    "voGroup": "",
-    "outputDir" : "/store/group/cmst3/group/htautau/",
-    "whiteList" : ""
+    "outputDir" : "/store/group/cmst3/group/htautau/"
   }
 
 }
