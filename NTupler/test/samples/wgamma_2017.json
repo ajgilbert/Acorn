@@ -84,6 +84,10 @@
   "configs": {
     "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=1"],
     "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=1"]
+  },
+  "crabSettings": {
+    "storageSite": "T2_CH_CERN",
+    "outputDir" : "/store/group/cmst3/group/htautau/"
   }
 
 }

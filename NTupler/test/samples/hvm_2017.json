@@ -30,6 +30,36 @@
       "events": -1,
       "config": "data"
     },
+    "SingleMuon-2017B": {
+      "dataset": "/SingleMuon/Run2017B-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2017C": {
+      "dataset": "/SingleMuon/Run2017C-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2017D": {
+      "dataset": "/SingleMuon/Run2017D-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit", "submitpilot"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2017E": {
+      "dataset": "/SingleMuon/Run2017E-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2017F": {
+      "dataset": "/SingleMuon/Run2017F-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
     "HZrho": {
       "dataset": "/hvm-miniaod/adewit-crab_hvm-miniaod-rho-692976c2d086f569d9a779b5701b870f/USER",
       "attributes": ["submit"],
@@ -44,11 +74,14 @@
       "config": "mc",
       "inputDBS": "phys03"
     }
-
   },
   "configs": {
     "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=1"],
     "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=1"]
+  },
+  "crabSettings": {
+    "storageSite": "T2_DE_DESY",
+    "voGroup": "dcms",
+    "outputDir" : "/store/user/adewit/HVMData/"
   }
-
 }
