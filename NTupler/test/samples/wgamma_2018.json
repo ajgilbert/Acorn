@@ -36,5 +36,12 @@
   "configs": {
     "data": ["year=2018", "isData=1", "globalTag=101X_dataRun2_Prompt_v9", "cores=1"],
     "mc":  ["year=2018", "isData=0", "globalTag=100X_upgrade2018_realistic_v10", "cores=1"]
+  },
+  "crabSettings": {
+    "storageSite": "T2_CH_CERN",
+    "voGroup": "",
+    "outputDir" : "/store/group/cmst3/group/htautau/",
+    "whiteList" : ""
   }
+
 }
