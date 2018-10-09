@@ -57,7 +57,7 @@ else:
     drawvar = '%s' % args.draw
     binning = (10, -3.15, 3.15)
 
-pt_bins = [150, 210, 300, 420, 1200]
+pt_bins = [150, 210, 300, 420, 600]
 
 for name, sa, wt in [
         ('nominal', 'WG', 'wt_C3w_0p0*wt_def'),

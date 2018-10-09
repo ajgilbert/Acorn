@@ -127,6 +127,7 @@ config_by_setting = {
         '*/p0_sigma': ('Photon #sigma_{I#etaI#eta}^{full 5x5}', ''),
         '*/p0_haspix': ('Photon hasPixelSeed', ''),
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
+        '*/abs(gen_reco_phi)': ('Gen. Reconstructed #phi', ''),
     }
 }
 
