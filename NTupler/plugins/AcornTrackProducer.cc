@@ -30,26 +30,22 @@ void AcornTrackProducer::produce(edm::Event& event, const edm::EventSetup& setup
     reco::Track const& src = tracks_handle->at(i);
     ac::Track& dest = output()->at(i);
 
-    dest.setId(track_hasher_(&src));
-    dest.setPt(src.pt());
-    dest.setEta(src.eta());
-    dest.setPhi(src.phi());
-    dest.setCharge(src.charge());
-    dest.setVx(src.vx());
-    dest.setVy(src.vy());
-    dest.setVz(src.vz());
-    dest.setNormalized_chi2(src.normalizedChi2());
-    dest.setHits(src.hitPattern().numberOfValidHits());
-    dest.setPixel_hits(src.hitPattern().numberOfValidPixelHits());
-    dest.setAlgorithm(src.algo());
-    dest.setPt_err(src.ptError());
-    dest.setQuality(src.qualityMask());
+    dest.setPt(setVar("pt",src.pt()));
+    dest.setEta(setVar("eta",src.eta()));
+    dest.setPhi(setVar("phi",src.phi()));
+    dest.setCharge(setVar("charge",src.charge()));
+    dest.setVx(setVar("vx",src.vx()));
+    dest.setVy(setVar("vy",src.vy()));
+    dest.setVz(setVar("vz",src.vz()));
+    dest.setHits(setVar("hits",src.hitPattern().numberOfValidHits()));
+    dest.setPixel_hits(setVar("pixelhits",src.hitPattern().numberOfValidPixelHits()));
+    dest.setQuality(setVar("qual",src.qualityMask()));
     #if CMSSW_MAJOR_VERSION >= 9
-    dest.setHits_miss_inner(
-      src.hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS));
+    dest.setHits_miss_inner(setVar("missinghits",
+      src.hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS)));
     #else 
-    dest.setHits_miss_inner(
-      src.hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS));
+    dest.setHits_miss_inner(setVar("missinghits",
+      src.hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)));
     #endif
   }
 }
