@@ -11,6 +11,7 @@ JOB_PREFIX = """#!/bin/sh
 export INITIALDIR=${PWD}
 set -o pipefail
 set -e
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 cd %(CMSSW_BASE)s/src
 export SCRAM_ARCH=%(SCRAM_ARCH)s
 eval `scramv1 runtime -sh`
@@ -120,7 +121,7 @@ class Jobs:
                 pass
             return i + 1
 
-    def add_filelist_split_jobs(self, prog, cfg, files_per_job, output_cfgs):
+    def add_filelist_split_jobs(self, prog, cfg, files_per_job, output_cfgs, tempdir=''):
         if 'filelist' in cfg:
             filelist = cfg['filelist']
             nfiles = self.file_len(filelist)
@@ -137,9 +138,14 @@ class Jobs:
             for item in output_cfgs:
                 filename, extension = os.path.splitext(cfg[item])
                 final_cfg[item] = filename + ('_%i' % n) + extension
+            if tempdir:
+                copy_cmd="""cp %s/%s %s/%s""" % (tempdir,final_cfg['output'],final_cfg['outdir'],final_cfg['output'])
+                final_cfg['outdir']=tempdir
             final_cfg['file_offset'] = n
             final_cfg['file_step'] = njobs
             cmd = """%s '%s'""" % (prog, json.dumps(final_cfg))
+            if tempdir:
+                cmd = """%s '%s'\n %s""" % (prog, json.dumps(final_cfg), copy_cmd)
             self.job_queue.append(cmd)
             # print cmd
 
@@ -273,6 +279,8 @@ class Jobs:
                     outscript.write('  ' + newline + '\n')
                 outscript.write('fi')
             outscript.close()
+            st = os.stat(outscriptname)
+            os.chmod(outscriptname, st.st_mode | stat.S_IEXEC |stat.S_IXGRP | stat.S_IXOTH)
             subfile = open(subfilename, "w")
             condor_settings = CONDOR_TEMPLATE % {
               'EXE': outscriptname,
