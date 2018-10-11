@@ -79,16 +79,17 @@ int main(int argc, char* argv[]) {
   
 
   std::set<std::string> sequences = jsc["sequences"];
-  std::map<std::string, std::shared_ptr<fwlite::TFileService>> fs;
+  std::shared_ptr<fwlite::TFileService> fs;
+  //std::map<std::string, std::shared_ptr<fwlite::TFileService>> fs;
  // fs["HVMGen"] = std::make_shared<fwlite::TFileService>(
   //    outputdir + "/" + "HVMGen" + "/" + outname);
   //fs["HVMGen"]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 5));
-  for (auto const& seq : sequences) {
-    system(("mkdir -p "+outputdir+"/"+seq).c_str());
-    fs[seq] = std::make_shared<fwlite::TFileService>(
-        outputdir + "/" + seq + "/" + outname);
-    fs[seq]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 5));
-  }
+  //for (auto const& seq : sequences) {
+  system(("mkdir -p "+outputdir).c_str());
+  fs = std::make_shared<fwlite::TFileService>(
+      outputdir + "/" + outname);
+  fs->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 5));
+  //}
 
 
   //ac::AnalysisBase analysis("HVMAnalysis", do_files, "EventTree", 1000);
@@ -102,11 +103,11 @@ int main(int argc, char* argv[]) {
 
   ac::Sequence hvmgen_seq;
   if (sequences.count("HVMGen")) {
-    auto hvmgen_fs = fs.at("HVMGen").get();
-    hvmgen_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(hvmgen_fs));
+    //auto hvmgen_fs = fs.at("HVMGen").get();
+    hvmgen_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
  
     hvmgen_seq.BuildModule(ac::HVMGenAnalysis("HVMGenAnalysis")
-                             .set_fs(hvmgen_fs));
+                             .set_fs(fs.get()));
 
     hvmgen_seq.InsertSequence("HVMGen", analysis);
   }
