@@ -6,12 +6,19 @@
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
+#include "Acorn/Analysis/interface/AnalysisTools.h"
 #include "Acorn/NTupler/interface/city.h"
 #include "Math/GenVector/VectorUtil.h"
 #include "TMath.h"
 #include "boost/lexical_cast.hpp"
 
 namespace ac {
+
+double WGSystem::Phi(unsigned lepton_charge) {
+  double lep_phi = r_charged_lepton.phi();
+  return ROOT::Math::VectorUtil::Phi_mpi_pi(lepton_charge > 0 ? (lep_phi)
+                                                              : (lep_phi + ROOT::Math::Pi()));
+}
 
   WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
                                        ac::Candidate const& pho, bool reconstruct, TRandom3 & rng, bool verbose) {
@@ -128,6 +135,63 @@ namespace ac {
       std::cout << "---------------------------------\n";
     }
     return sys;
+  }
+
+  WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
+                                       std::vector<GenParticle*> const& gen_parts) {
+    WGGenParticles info;
+
+    for (auto const& part : lhe_parts) {
+      if (part->status() == 1) ++info.nparts;
+      if (IsChargedLepton(*part)) {
+        info.lhe_lep = part;
+      }
+      if (IsNeutrino(*part)) {
+        info.lhe_neu = part;
+      }
+      if (IsPhoton(*part)) {
+        info.lhe_pho = part;
+      }
+    }
+
+    if (std::abs(info.lhe_lep->pdgId()) == 15) {
+      info.ok = false;
+      return info;
+    }
+
+    for (auto const& part : gen_parts) {
+      if (IsChargedLepton(*part) && part->statusFlags().isPrompt() && part->status() == 1) {
+        info.viable_leptons.push_back(part);
+        // gen_lep = part;
+      }
+      if (IsNeutrino(*part) && part->statusFlags().isPrompt() && part->status() == 1) {
+        if (info.gen_neu) {
+          std::cout << "Found more than one neutrino!\n";
+          info.gen_neu->Print();
+          part->Print();
+        }
+        info.gen_neu = part;
+      }
+      if (IsPhoton(*part) && part->statusFlags().isPrompt() && part->status() == 1) {
+        info.viable_photons.push_back(part);
+      }
+    }
+
+    std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
+      return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
+    });
+    std::sort(info.viable_photons.begin(), info.viable_photons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
+      return ac::DeltaR(c1, info.lhe_pho) < ac::DeltaR(c2, info.lhe_pho);
+    });
+    if (info.viable_leptons.size() && info.viable_photons.size() && info.gen_neu) {
+      info.gen_lep = info.viable_leptons[0];
+      info.gen_pho = info.viable_photons[0];
+    } else {
+      // std::cout << "Not viable:" << info.viable_leptons.size() << "\t" << info.viable_photons.size() << "\t" << info.gen_neu << "\n";
+      info.ok = false;
+    }
+
+    return info;
   }
 
   bool IsElectron(ac::GenParticle const& p) {

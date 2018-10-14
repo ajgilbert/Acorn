@@ -19,8 +19,9 @@ class WGAnalysis : public ModuleBase {
   CLASS_MEMBER(WGAnalysis, fwlite::TFileService*, fs)
 
   TTree * tree_;
-  float phi1_;
-  float lhe_phi1_;
+  float gen_phi_;
+  float true_phi_;
+  float lhe_true_phi_;
   unsigned type_;
   float wt_def_;
   float wt_C3w_0p0_;

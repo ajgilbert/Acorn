@@ -75,7 +75,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_m1", &wt_m1_);
     tree_->Branch("wt_p0", &wt_p0_);
     tree_->Branch("gen_p0_pt", &gen_p0_pt_);
-    tree_->Branch("gen_reco_phi", &gen_reco_phi_);
+    tree_->Branch("gen_phi", &gen_phi_);
     tree_->Branch("gen_m0_q", &gen_m0_q_);
     tree_->Branch("gen_m0_pt", &gen_m0_pt_);
     tree_->Branch("gen_met", &gen_met_);
@@ -329,7 +329,7 @@ int WGDataAnalysis::PreAnalysis() {
           gen_p0_pt_ = gen_pho->pt();
           gen_m0_q_ = gen_lep->charge();
           double lep_phi = gen_sys.r_charged_lepton.phi();
-          gen_reco_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
+          gen_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
               gen_lep->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
           gen_m0_pt_ = gen_lep->pt();
           gen_met_ = gen_met->pt();
@@ -389,7 +389,7 @@ int WGDataAnalysis::PreAnalysis() {
     wt_m1_ = 1.;
     wt_p0_ = 1.;
     gen_p0_pt_ = 0.;
-    gen_reco_phi_ = 0.;
+    gen_phi_ = 0.;
     gen_m0_q_ = 0;
     gen_m0_pt_ = 0.;
     gen_met_ = 0.;

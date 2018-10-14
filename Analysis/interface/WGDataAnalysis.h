@@ -105,9 +105,11 @@ class WGDataAnalysis : public ModuleBase {
   // truth variables
   float gen_m0_pt_;
   float gen_p0_pt_;
-  float gen_reco_phi_;
+  float gen_phi_;
+  float true_phi_;
   int gen_m0_q_;
   float gen_met_;
+  float gen_met_phi_;
   float gen_m0p0_dr_;
 
   mutable TRandom3 rng;

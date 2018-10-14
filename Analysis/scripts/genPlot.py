@@ -24,7 +24,7 @@ remap = {
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--draw', default='phi1')
+parser.add_argument('--draw', default='gen_phi')
 parser.add_argument('--abs', action='store_true')
 parser.add_argument('--unit-norm', action='store_true')
 parser.add_argument('--charge', default='+1')
@@ -78,7 +78,7 @@ for name, sa, wt in [
     hists[name] = Hist('TH1D', binning, sa, [drawvar],
                        sel=sel, wt=wt)
     hists[name + '_2D'] = Hist('TH2D', binning + (len(pt_bins) - 1, array('d', pt_bins)), sa, [drawvar, 'g_pt'], sel=sel, wt=wt)
-
+    hists[name + '_phi_reco'] = Hist('TH2D', (40, -3.15, 3.15, 40, -3.15, 3.15), sa, ['true_phi', 'gen_phi'], sel=sel, wt=wt)
 MultiDraw(hists, samples, tname)
 
 
@@ -106,7 +106,7 @@ if save_scalings >= 1:
             xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
             npoints = 5
             gr = ROOT.TGraphErrors(npoints)
-            nom =  hists['nominal_2D'].GetBinContent(ib, jb)
+            nom = hists['nominal_2D'].GetBinContent(ib, jb)
             if nom != 0.:
                 gr.SetPoint(0, 0.0, hists['nominal_2D'].GetBinContent(ib, jb) / nom)
                 gr.SetPoint(1, 0.1, hists['C3w_0p1_2D'].GetBinContent(ib, jb) / nom)
@@ -148,10 +148,10 @@ for h in h_axes:
     h.Reset()
 
 
-if 'lhe_phi1' in drawvar:
+if 'true_phi' in drawvar:
     labelvar = '#varphi_{true}'
 else:
-    labelvar = '#varphi_{reco}'
+    labelvar = '#varphi_{gen}'
 if args.abs:
     labelvar = '|%s|' % labelvar
 h_axes[1].GetXaxis().SetTitle(labelvar)

@@ -40,10 +40,30 @@ struct WGSystem {
   ac::Candidate r_photon;
 
   bool valid_mt;
+
+  double Phi(unsigned lepton_charge);
 };
 
 WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
                          ac::Candidate const& pho, bool reconstruct, TRandom3 & rng, bool verbose);
+
+struct WGGenParticles {
+  bool ok = true;
+  unsigned nparts = 0;
+
+  ac::GenParticle const* lhe_lep = nullptr;
+  ac::GenParticle const* lhe_neu = nullptr;
+  ac::GenParticle const* lhe_pho = nullptr;
+  ac::GenParticle const* gen_lep = nullptr;
+  ac::GenParticle const* gen_neu = nullptr;
+  ac::GenParticle const* gen_pho = nullptr;
+
+  std::vector<ac::GenParticle const*> viable_leptons;
+  std::vector<ac::GenParticle const*> viable_photons;
+};
+
+WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
+                                     std::vector<GenParticle*> const& gen_parts);
 
 bool IsElectron(ac::GenParticle const& p);
 bool IsMuon(ac::GenParticle const& p);

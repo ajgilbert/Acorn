@@ -25,8 +25,9 @@ namespace ac {
   int WGAnalysis::PreAnalysis() {
     if (fs_) {
       tree_ = fs_->make<TTree>("WGAnalysis", "WGAnalysis");
-      tree_->Branch("phi1", &phi1_);
-      tree_->Branch("lhe_phi1", &lhe_phi1_);
+      tree_->Branch("gen_phi", &gen_phi_);
+      tree_->Branch("true_phi", &true_phi_);
+      tree_->Branch("lhe_true_phi", &lhe_true_phi_);
       tree_->Branch("w_pt", &w_pt_);
       tree_->Branch("g_pt", &g_pt_);
       tree_->Branch("g_eta", &g_eta_);
@@ -76,96 +77,43 @@ namespace ac {
     wt_C3w_0p2_ = info->lheWeights().at(100002);
     wt_C3w_0p4_ = info->lheWeights().at(100003);
 
-    ac::GenParticle const* lhe_lep = nullptr;
-    ac::GenParticle const* lhe_neu = nullptr;
-    ac::GenParticle const* lhe_pho = nullptr;
-    for (auto const& part : lhe_parts) {
-      if (part->status() == 1) ++nparts_;
-      if (IsChargedLepton(*part)) {
-        lhe_lep = part;
-      }
-      if (IsNeutrino(*part)) {
-        lhe_neu = part;
-      }
-      if (IsPhoton(*part)) {
-        lhe_pho = part;
-      }
-    }
+    WGGenParticles parts = ProduceWGGenParticles(lhe_parts, gen_parts);
+    nparts_ = parts.nparts;
 
-    if (std::abs(lhe_lep->pdgId()) == 15 && !lhe_only) {
+    if (!parts.ok) {
       return 1;
     }
 
-    ac::GenParticle const* gen_lep = nullptr;
-    // ac::GenParticle const* gen_neu = nullptr;
-    ac::GenParticle const* gen_pho = nullptr;
-
-    std::vector<ac::GenParticle const*> viable_leptons;
-    std::vector<ac::GenParticle const*> viable_photons;
-
-    for (auto const& part : gen_parts) {
-      // part->Print();
-      if (IsChargedLepton(*part) && part->status() == 1) {
-        viable_leptons.push_back(part);
-        // gen_lep = part;
-      }
-      // if (IsNeutrino(*part)) {
-      //   gen_neu = part;
-      // }
-      if (IsPhoton(*part) && part->status() == 1) {
-        viable_photons.push_back(part);
-      }
-    }
-
-    std::sort(viable_leptons.begin(), viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
-      return ac::DeltaR(c1, lhe_lep) < ac::DeltaR(c2, lhe_lep);
-    });
-    std::sort(viable_photons.begin(), viable_photons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
-      return ac::DeltaR(c1, lhe_pho) < ac::DeltaR(c2, lhe_pho);
-    });
-    if (viable_leptons.size() && viable_photons.size()) {
-      gen_lep = viable_leptons[0];
-      gen_pho = viable_photons[0];
-    } else if (!lhe_only) {
-      // std::cout << "No viable\n";
-      return 1;
-    }
-
-    WGSystem lhe_sys = ProduceWGSystem(*lhe_lep, *lhe_neu, *lhe_pho, false, rng, false);
+    WGSystem lhe_sys = ProduceWGSystem(*parts.lhe_lep, *parts.lhe_neu, *parts.lhe_pho, false, rng, false);
     WGSystem gen_sys;
     if (lhe_only) {
-      gen_sys = ProduceWGSystem(*lhe_lep, *lhe_neu, *lhe_pho, true, rng, false);
+      gen_sys = ProduceWGSystem(*parts.lhe_lep, *parts.lhe_neu, *parts.lhe_pho, true, rng, false);
     } else{
-      gen_sys = ProduceWGSystem(*gen_lep, *gen_met, *gen_pho, true, rng, false);
+      gen_sys = ProduceWGSystem(*parts.gen_lep, *gen_met, *parts.gen_pho, true, rng, false);
     }
+    WGSystem gen_true_sys = ProduceWGSystem(*parts.gen_lep, *parts.gen_neu, *parts.gen_pho, false, rng, false);
 
     w_pt_  = gen_sys.w_system.pt();
     g_pt_  = gen_sys.photon.pt();
     g_eta_ = gen_sys.photon.eta();
     l_pt_  = gen_sys.charged_lepton.pt();
     l_eta_ = gen_sys.charged_lepton.eta();
-    l_charge_ = -1 * (lhe_lep->pdgId() / std::abs(lhe_lep->pdgId()));
+    l_charge_ = -1 * (parts.lhe_lep->pdgId() / std::abs(parts.lhe_lep->pdgId()));
     n_pt_  = gen_sys.neutrino.pt();
     n_eta_  = gen_sys.neutrino.eta();
     l_g_dr_ = ROOT::Math::VectorUtil::DeltaR(gen_sys.charged_lepton, gen_sys.photon);
-    type_ = (lhe_lep->spin() * lhe_neu->spin()) > 0.;
-    // std::cout << ">>>> Event\n";
-    // lhe_lep->Print();
-    // lhe_neu->Print();
+    type_ = (parts.lhe_lep->spin() * parts.lhe_neu->spin()) > 0.;
 
-    double lep_phi = gen_sys.r_charged_lepton.phi();
-    // LHE particles don't have a charge assigned, use pdgid instead
-    phi1_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
-        lhe_lep->pdgId() < 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
+    // Define the gen_phi (using final state GenParticles + MET)
+    gen_phi_ = gen_sys.Phi(parts.gen_lep->pdgId() < 0);
+
+    // Define the the true_phi (using final state GenParticles)
+    true_phi_ = gen_true_sys.Phi(parts.gen_lep->pdgId() < 0);
 
     valid_mt_ = gen_sys.valid_mt;
 
-    double lep_phi_lhe = lhe_sys.r_charged_lepton.phi();
-
-    lhe_phi1_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
-        lhe_lep->pdgId() < 0 ? (lep_phi_lhe) : (lep_phi_lhe + ROOT::Math::Pi()));
-    // std::cout << "Lepton charge is: " << l_charge_ << "\n";
-    // std::cout << "phi_true = " << lhe_phi1_ << "\n";
+    // Define the lhe_true_phi (using LHE particles)
+    lhe_true_phi_ = lhe_sys.Phi(parts.lhe_lep->pdgId() < 0);
 
     tree_->Fill();
 
