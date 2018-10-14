@@ -72,7 +72,7 @@ class SelectionManager:
 
     def _doreplacement(self, pattern, expr, idx=0):
         newexpr = pattern.sub(lambda x: self._getreplacement(x, idx), expr)
-        print '%s --> %s' % (expr, newexpr)
+        # print '%s --> %s' % (expr, newexpr)
         if newexpr == expr:
             return newexpr
         else:
@@ -125,27 +125,45 @@ class CodeLines:
 
 
 def GenTreeCode(tree, objlist, multithread=0):
+    """
+    Args:
+        tree (TTree): TTree to process
+        objlist (list): List of histograms (TH1, TH2 etc) to fill
+        multithread (int): Number of threads to use (0 = no multithreading)
+
+    Returns:
+        str: Name of the function that was generated
+    """
     fname = 'RunTree%i' % GenTreeCode.counter
     # static variable to keep ensure we can give
     # each function a unique name
     GenTreeCode.counter += 1
 
+    objs_by_sel = defaultdict(list)
+    indexed_wts = OrderedDict()
+
     # Figure out the list of variable names
     varnames = set()
     varregex = re.compile('[_a-zA-Z][_a-zA-Z0-9]*')
-    for obj in objlist:
+    for i, obj in enumerate(objlist):
+        obj._draw_idx = i
         varnames.update(varregex.findall(obj.sel))
         for var in obj.var:
             varnames.update(varregex.findall(var))
         varnames.update(varregex.findall(obj.wt))
+        objs_by_sel[obj.sel].append(obj)
+        # Give each object an index for the weight expression
+        if obj.wt not in indexed_wts:
+            indexed_wts[obj.wt] = len(indexed_wts)
+        obj._wt_idx = indexed_wts[obj.wt]
 
     code = CodeLines()
     if multithread:
         code.Add('R__LOAD_LIBRARY(libTreePlayer)')
     code.Add('void %s(TTree *tree, TObjArray *hists) {' % fname)
     code.idlevel += 1
-    for i, obj in enumerate(objlist):
-        code.Add('%s* hist%i = static_cast<%s*>(hists->UncheckedAt(%i));' % (obj.classname, i, obj.classname, i))
+    for obj in objlist:
+        code.Add('%s* hist%i = static_cast<%s*>(hists->UncheckedAt(%i));' % (obj.classname, obj._draw_idx, obj.classname, obj._draw_idx))
     if multithread:
         code.Add('ROOT::EnableImplicitMT(%i);' % multithread)
         for i, obj in enumerate(objlist):
@@ -173,20 +191,26 @@ def GenTreeCode(tree, objlist, multithread=0):
     for bname, btype in binfos:
         if bname in varnames:
             code.Add('%s %s = *%s_;' % (btype, bname, bname))
-    for i, obj in enumerate(objlist):
-        if multithread:
-            code.Add('if (%s) l_hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
-        else:
-            code.Add('if (%s) hist%i->Fill(%s, %s);' % (obj.sel, i, ', '.join(obj.var), obj.wt))
-
+    for wt_expr, wt_idx in indexed_wts.iteritems():
+        code.Add('double weightexpr_%i_ = %s;' % (wt_idx, wt_expr))
+    for sel, objs in objs_by_sel.iteritems():
+        code.Add('if (%s) {' % sel)
+        code.idlevel += 1
+        for obj in objs:
+            if multithread:
+                code.Add('l_hist%i->Fill(%s, weightexpr_%i_);' % (obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
+            else:
+                code.Add('hist%i->Fill(%s, weightexpr_%i_);' % (obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
+        code.idlevel -= 1
+        code.Add('}')
     code.idlevel -= 1
     code.Add('}')
     if multithread:
         code.idlevel -= 1
         code.Add('};')
         code.Add('tp.Process(myFunction);')
-        for i, obj in enumerate(objlist):
-            code.Add('t_hist%i.Merge()->Copy(*hist%i);' % (i, i))
+        for obj in objlist:
+            code.Add('t_hist%i.Merge()->Copy(*hist%i);' % (obj._draw_idx, obj._draw_idx))
         code.Add('ROOT::DisableImplicitMT();')
     code.idlevel -= 1
     code.Add('}')
@@ -195,7 +219,7 @@ def GenTreeCode(tree, objlist, multithread=0):
     start = time.time()
     ROOT.gInterpreter.Declare(fullcode)
     end = time.time()
-    print '>> JIT compiled function %s in %.2g seconds' % (fname, (end - start))
+    print '>> JIT compiled function %s with %i objects in %.2g seconds' % (fname, len(objlist), (end - start))
     return fname
 
 
