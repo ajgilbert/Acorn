@@ -23,15 +23,24 @@ class Node:
     def __setitem__(self, key, val):
         self.d[key] = val
 
-    def ListNodes(self, depth=9999999, res=None, dirname=''):
+    def ListNodes(self, depth=9999999, res=None, dirname='', withObjects=False):
         if res is None:
             res = []
         pre = '/' if dirname is not '' else ''
-        res.append((dirname, self))
+        if withObjects:
+            hasObjects = False
+            for key, val in self.d.iteritems():
+                if not isinstance(val, Node):
+                    hasObjects = True
+                    break
+            if hasObjects:
+                res.append((dirname, self))
+        else:
+            res.append((dirname, self))
         if depth > 0:
             for key, val in self.d.iteritems():
                 if isinstance(val, Node):
-                    val.ListNodes(depth - 1, res, dirname + pre + key)
+                    val.ListNodes(depth - 1, res, dirname + pre + key, withObjects)
         return res
 
     def ListObjects(self, depth=9999999, res=None, dirname=''):
@@ -49,6 +58,70 @@ class Node:
         for path, name, obj in objs:
             action(obj)
 
+
+def TDirToNode(file, startdir='', node=None, onlyDirs=False):
+    if node is None:
+        node = Node()
+    file.cd()
+    ROOT.gDirectory.cd(startdir + '/')
+    dirs_to_proc = []
+    for key in ROOT.gDirectory.GetListOfKeys():
+        if key.GetClassName() == 'TDirectoryFile':
+            dirs_to_proc.append(key.GetName())
+        elif not onlyDirs:
+            obj = key.ReadObj()
+            node[obj.GetName()] = obj
+    for dirname in dirs_to_proc:
+        TDirToNode(file, startdir + '/' + dirname, node[dirname], onlyDirs)
+    return node
+
+
+def NodeToTDir(file, node):
+    startdir = ROOT.gDirectory.GetPath()
+    for path, subnode in node.ListNodes():
+        file.cd()
+        as_vec = path.split('/')
+        if len(as_vec) >= 1:
+            for i in xrange(0, len(as_vec)):
+                if not ROOT.gDirectory.GetDirectory(as_vec[i]):
+                    ROOT.gDirectory.mkdir(as_vec[i])
+                ROOT.gDirectory.cd(as_vec[i])
+        for opath, name, obj in subnode.ListObjects(depth=0):
+            if not ROOT.gDirectory.FindKey(name):
+                obj.SetName(name)
+                ROOT.gDirectory.WriteTObject(obj, name)
+        ROOT.gDirectory.cd(startdir)
+
+
+def GetListOfDirectories(file, dirlist=None, curr=[]):
+    if dirlist is None:
+        dirlist = list()
+        file.cd()
+    ROOT.gDirectory.cd('/' + '/'.join(curr))
+    dirs_to_proc = []
+    has_other_objects = False
+    for key in ROOT.gDirectory.GetListOfKeys():
+        if key.GetClassName() == 'TDirectoryFile':
+            dirs_to_proc.append(key.GetName())
+        else:
+            has_other_objects = True
+    if has_other_objects:
+        # This directory should be added to the list
+        dirlist.append('/' + '/'.join(curr))
+    for dirname in dirs_to_proc:
+        GetListOfDirectories(file, dirlist, curr + [dirname])
+    return dirlist
+
+
+def GetHistsInDir(file, dir):
+    res = {}
+    file.cd()
+    ROOT.gDirectory.cd(dir)
+    for key in ROOT.gDirectory.GetListOfKeys():
+        if key.GetClassName() != 'TDirectoryFile':
+            obj = key.ReadObj()
+            res[obj.GetName()] = obj
+    return res
 
 class SelectionManager:
     def __init__(self):

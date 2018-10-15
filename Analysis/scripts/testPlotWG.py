@@ -1,6 +1,6 @@
 import ROOT
 import json
-import sys
+# import sys
 from pprint import pprint
 from collections import defaultdict
 import argparse
@@ -174,7 +174,9 @@ for path, hname, obj in hists.ListObjects():
 
 fout = ROOT.TFile('output_2016_%s.root' % args.task, 'RECREATE')
 
-for path, name, obj in hists.ListObjects():
-    WriteToTFile(obj, fout, path, name)
+for path, node in hists.ListNodes(withObjects=True):
+    node['Total_R'] = node['WG'] + node['TT_R'] + node['DY_R']
+
+NodeToTDir(fout, hists)
 
 fout.Close()

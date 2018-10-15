@@ -1,4 +1,5 @@
 import CombineHarvester.CombineTools.plotting as plot
+from Acorn.Analysis.analysis import *
 import ROOT
 import argparse
 import sys
@@ -10,37 +11,6 @@ ROOT.TH1.SetDefaultSumw2(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
-
-
-def GetListOfDirectories(file, dirlist=None, curr=[]):
-    if dirlist is None:
-        dirlist = list()
-        file.cd()
-    ROOT.gDirectory.cd('/' + '/'.join(curr))
-    dirs_to_proc = []
-    has_other_objects = False
-    for key in ROOT.gDirectory.GetListOfKeys():
-        if key.GetClassName() == 'TDirectoryFile':
-            dirs_to_proc.append(key.GetName())
-        else:
-            has_other_objects = True
-    if has_other_objects:
-        # This directory should be added to the list
-        dirlist.append('/' + '/'.join(curr))
-    for dirname in dirs_to_proc:
-        GetListOfDirectories(file, dirlist, curr + [dirname])
-    return dirlist
-
-
-def GetHistsInDir(file, dir):
-    res = {}
-    file.cd()
-    ROOT.gDirectory.cd(dir)
-    for key in ROOT.gDirectory.GetListOfKeys():
-        if key.GetClassName() != 'TDirectoryFile':
-            obj = key.ReadObj()
-            res[obj.GetName()] = obj
-    return res
 
 
 LAYOUTS = {
@@ -82,19 +52,19 @@ LAYOUTS = {
         }
         ),
         ('WG', {
-            # 'entries': ['WG'],
-            'entries': ['WG_p_acc', 'WG_n_acc'],
+            'entries': ['WG'],
+            # 'entries': ['WG_p_acc', 'WG_n_acc'],
             'legend': 'W#rightarrowl#nu+#gamma (in)',
             'color': ROOT.TColor.GetColor(119, 213, 217)
 
         }
         ),
-        ('WG_OOA', {
-            'entries': ['WG_p_ooa', 'WG_n_ooa'],
-            'legend': 'W#rightarrowl#nu+#gamma (out)',
-            'color': 12
-        }
-        ),
+        # ('WG_OOA', {
+        #     'entries': ['WG_p_ooa', 'WG_n_ooa'],
+        #     'legend': 'W#rightarrowl#nu+#gamma (out)',
+        #     'color': 12
+        # }
+        # ),
         # ('ZTT', {
         #     'entries': ['ZTT'],
         #     'legend': 'Z#rightarrow#tau#tau',
@@ -341,21 +311,18 @@ filename, dirfilter = args.input.split(':')
 print filename
 file = ROOT.TFile(filename)
 
-target_list = GetListOfDirectories(file)
-print target_list
+node = TDirToNode(file)
 
-filtered_list = [x for x in target_list if fnmatch.fnmatch(x, dirfilter)]
-print filtered_list
-
-draw_list = []
-
-for path in filtered_list:
+for path, subnode in node.ListNodes(withObjects=True):
+    print path
     # for now work on the assumption that the last component of the path will be the actual filename
     split_path = path.split('/')[:-1]
     name = path.split('/')[-1]
     target_dir = os.path.join(args.output, *split_path)
     os.system('mkdir -p %s' % target_dir)
-    hists = GetHistsInDir(file, path)
+    hists = {}
+    for opath, name, obj in subnode.ListObjects(depth=0):
+        hists[name] = obj
     # if 'w_highmt_pho' in path:
     #     hists['W_DAT'] = DoPhotonFakes(file, 'w_hmt_pho_iso_l_sig_t/%s' % name, 'w_hmt_pho_iso_t_sig_l/%s' % name, 'w_hmt_pho_iso_l_sig_l/%s' % name)
 
