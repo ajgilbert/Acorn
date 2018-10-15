@@ -53,36 +53,60 @@ class Node:
 class SelectionManager:
     def __init__(self):
         self.storage = OrderedDict()
-        self.varregex = re.compile('\$[_a-zA-Z][_a-zA-Z0-9]*')
-        self.idx = 0
+        self.varregex = re.compile('\\$[_a-zA-Z][_a-zA-Z0-9]*')
 
-    def Set(self, label, sel='1', wt='1.'):
-        self.storage[label] = (sel, wt)
-
-    def Derive(self, label, base, sel='1', wt=None):
-        if wt is None:
-            new_wt = self.storage[base][1]
+    def __getitem__(self, key):
+        if key in self.d:
+            return self.d[key]
         else:
-            new_wt = '$%s * (%s)' % (base, wt)
-        self.Set(label, sel='$%s && (%s)' % (base, sel), wt=new_wt)
+            self.d[key] = Node()
+            return self.d[key]
 
-    def _getreplacement(self, matchgroup, idx):
+    def __setitem__(self, key, val):
+        self.storage[key] = val
+
+    def _getreplacement(self, matchgroup, override):
         label = matchgroup.group(0)[1:]
-        return '(' + self.storage[label][idx] + ')'
+        if label in override:
+            result = override[label]
+        else:
+            result = self.storage[label]
+        result = '(' + result + ')'
+        return result
 
-    def _doreplacement(self, pattern, expr, idx=0):
-        newexpr = pattern.sub(lambda x: self._getreplacement(x, idx), expr)
-        # print '%s --> %s' % (expr, newexpr)
+    def _printMarkers(self, pattern, expr, override):
+        verbpositions = []
+        substrings = []
+        verb_line = ''
+        for match in pattern.finditer(expr):
+            substrings.append(self._getreplacement(match, override))
+            verb_line += ' ' * (match.start(0) - len(verb_line))
+            verbpositions.append(len(verb_line))
+            verb_line += '^' + '~' * (match.end(0) - match.start(0) - 1)
+        if verb_line != '':
+            print '\033[1;32;40m' + verb_line + '\033[m'
+        for pos, substr in zip(verbpositions, substrings):
+            newline = (' ' * pos) + '|' + substr
+            printed_newline = (' ' * pos) + '\033[1;32;40m|\033[m'+ substr
+            print printed_newline
+            self._printMarkers(pattern, newline, override)
+
+    def _doreplacement(self, pattern, expr, override):
+        newexpr = pattern.sub(lambda x: self._getreplacement(x, override), expr)
         if newexpr == expr:
             return newexpr
         else:
-            return self._doreplacement(pattern, newexpr, idx)
+            return self._doreplacement(pattern, newexpr, override)
 
-    def sel(self, expr):
-        return self._doreplacement(self.varregex, expr, 0)
-
-    def wt(self, expr):
-        return self._doreplacement(self.varregex, expr, 1)
+    def get(self, expr, override={}, printlevel=0):
+        res = self._doreplacement(self.varregex, expr, override)
+        if printlevel == 1:
+            print '%s --> %s' % (expr, res)
+        if printlevel == 2:
+            print '%s --> %s' % (expr, res)
+            print expr
+            self._printMarkers(self.varregex, expr, override)
+        return res
 
 
 def WriteToTFile(obj, filedir, path, name):
@@ -124,7 +148,7 @@ class CodeLines:
         self.res.append('  ' * self.idlevel + line)
 
 
-def GenTreeCode(tree, objlist, multithread=0):
+def GenTreeCode(tree, objlist, multithread=4):
     """
     Args:
         tree (TTree): TTree to process
@@ -185,7 +209,7 @@ def GenTreeCode(tree, objlist, multithread=0):
             code.Add('TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
     if multithread:
         for i, obj in enumerate(objlist):
-            code.Add('auto l_hist%i = t_hist%i.Get();' % (i, i))
+            code.Add('std::shared_ptr<%s> l_hist%i = t_hist%i.Get();' % (obj.classname, i, i))
     code.Add('while (reader.Next()) {')
     code.idlevel += 1
     for bname, btype in binfos:
@@ -219,14 +243,14 @@ def GenTreeCode(tree, objlist, multithread=0):
     start = time.time()
     ROOT.gInterpreter.Declare(fullcode)
     end = time.time()
-    print '>> JIT compiled function %s with %i objects in %.2g seconds' % (fname, len(objlist), (end - start))
+    print '>> JIT compiled function %s with %i objects in %.2g seconds (%i cores)' % (fname, len(objlist), (end - start), multithread)
     return fname
 
 
 GenTreeCode.counter = 0
 
 
-def MultiDraw(node, sample_to_file_dict, tree_name):
+def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
     drawtree = defaultdict(list)
     codegen_time = 0
     draw_time = 0
@@ -236,8 +260,12 @@ def MultiDraw(node, sample_to_file_dict, tree_name):
     for sample, drawobjs in drawtree.iteritems():
         f = ROOT.TFile(sample_to_file_dict[sample])
         t = f.Get(tree_name)
+        entries = t.GetEntriesFast()
+        use_cores = 0
+        if mt_cores > 0 and entries > mt_thresh:
+            use_cores = mt_cores
         start = time.time()
-        fname = GenTreeCode(t, drawobjs)
+        fname = GenTreeCode(t, drawobjs, use_cores)
         end = time.time()
         codegen_time += (end - start)
         histarr = ROOT.TObjArray(len(drawobjs))

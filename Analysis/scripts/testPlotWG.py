@@ -1,6 +1,6 @@
 import ROOT
 import json
-# import sys
+import sys
 from pprint import pprint
 from collections import defaultdict
 import argparse
@@ -14,7 +14,7 @@ ROOT.TH1.AddDirectory(False)
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--task', default='eft_region', choices=['eft_region', 'photon_fakes'])
-parser.add_argument('--indir', default='output/130818-reduced/wgamma_2016_v2/WGamma/')
+parser.add_argument('--indir', default='output/130818-reduced/wgamma_2016_v2/WGamma-opt/')
 
 args = parser.parse_args()
 
@@ -46,7 +46,6 @@ for sa in remap:
 hists = Node()
 do_cats = []
 
-
 X = SelectionManager()
 
 if args.task == 'eft_region':
@@ -55,28 +54,29 @@ if args.task == 'eft_region':
     phi_bins_min = [0.00, 0.63, 1.26, 1.89, 2.52]
     phi_bins_max = [0.63, 1.26, 1.89, 2.52, 3.15]
 
-    X.Set('baseline', sel='m0_trg && n_m==1 && m0_iso<0.15 && n_p==1 && p0_medium && !p0_haspix && m0_pt>80 && met>80 && p0_pt>150 && m0p0_dr>3.0', wt='wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0')
+    X['baseline'] ='m0_trg && n_m==1 && m0_iso<0.15 && n_p==1 && p0_medium && !p0_haspix && m0_pt>80 && met>80 && p0_pt>150 && m0p0_dr>3.0'
+    X['baseline_wt'] = 'wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0'
     do_cats.extend(['baseline'])
 
-    X.Set('p_gen_ooa', sel='gen_m0_q==+1 && !(gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0)')
-    X.Set('n_gen_ooa', sel='gen_m0_q==-1 && !(gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0)')
+    X['p_gen_ooa'] = 'gen_m0_q==+1 && !(gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0)'
+    X['n_gen_ooa'] = 'gen_m0_q==-1 && !(gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0)'
 
-    X.Set('p_gen_acc', sel='gen_m0_q==+1 && gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0')
-    X.Set('n_gen_acc', sel='gen_m0_q==-1 && gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0')
+    X['p_gen_acc'] = 'gen_m0_q==+1 && gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0'
+    X['n_gen_acc'] = 'gen_m0_q==-1 && gen_m0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_m0p0_dr>3.0'
 
     for i in range(len(pt_bins_min)):
         # Reconstructed categories
-        X.Derive('p_%i' % i, 'baseline', sel='m0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
-        X.Derive('n_%i' % i, 'baseline', sel='m0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
+        X['p_%i' % i] = '$baseline && m0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_%i' % i] = '$baseline && m0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         do_cats.extend(['p_%i' % i, 'n_%i' % i])
 
         # Gen level selections
-        X.Derive('p_gen_%i' % (i), 'p_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
-        X.Derive('n_gen_%i' % (i), 'n_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i]))
+        X['p_gen_%i' % (i)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_gen_%i' % (i)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
 
         for j in range(len(phi_bins_min)):
-            X.Derive('p_gen_%i_%i' % (i, j), 'p_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j]))
-            X.Derive('n_gen_%i_%i' % (i, j), 'n_gen_acc', sel='gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j]))
+            X['p_gen_%i_%i' % (i, j)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
+            X['n_gen_%i_%i' % (i, j)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && abs(gen_reco_phi) >= %f && abs(gen_reco_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
 
     drawvars = [
         ('p0_pt', pt_bins_min + [pt_bins_max[-1]]),
@@ -87,37 +87,38 @@ if args.task == 'eft_region':
     for sel in do_cats:
         for var, binning in drawvars:
             for sample in samples:
-                hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.sel('$' + sel), wt=X.wt('$' + sel))
+                hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
             for P in ['W', 'DY', 'TT']:
-                hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.sel('$' + sel + ' && p0_isprompt'), wt=X.wt('$' + sel))
-                hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.sel('$' + sel + ' && !p0_isprompt'), wt=X.wt('$' + sel))
-            hists[sel][var]['WG_p_ooa'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $p_gen_ooa'), wt=X.wt('$' + sel))
-            hists[sel][var]['WG_n_ooa'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $n_gen_ooa'), wt=X.wt('$' + sel))
-            hists[sel][var]['WG_p_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $p_gen_acc'), wt=X.wt('$' + sel))
-            hists[sel][var]['WG_n_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $n_gen_acc'), wt=X.wt('$' + sel))
+                hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && p0_isprompt'), wt=X.get('$baseline_wt'))
+                hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !p0_isprompt'), wt=X.get('$baseline_wt'))
+            hists[sel][var]['WG_p_ooa'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_ooa'), wt=X.get('$baseline_wt'))
+            hists[sel][var]['WG_n_ooa'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_ooa'), wt=X.get('$baseline_wt'))
+            hists[sel][var]['WG_p_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc'), wt=X.get('$baseline_wt'))
+            hists[sel][var]['WG_n_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
             for i in range(len(pt_bins_min)):
-                hists[sel][var]['WG_p_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $p_gen_%i' % (i)), wt=X.wt('$' + sel))
-                hists[sel][var]['WG_n_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $n_gen_%i' % (i)), wt=X.wt('$' + sel))
+                hists[sel][var]['WG_p_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i' % (i)), wt=X.get('$baseline_wt'))
+                hists[sel][var]['WG_n_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i' % (i)), wt=X.get('$baseline_wt'))
                 for j in range(len(phi_bins_min)):
-                    hists[sel][var]['WG_p_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $pho_p_gen_%i_%i' % (i, j)), wt=X.wt('$' + sel))
-                    hists[sel][var]['WG_n_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.sel('$' + sel + ' && $pho_n_gen_%i_%i' % (i, j)), wt=X.wt('$' + sel))
+                    hists[sel][var]['WG_p_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+                    hists[sel][var]['WG_n_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
 
 
 if args.task == 'photon_fakes':
-    X.Set('baseline', sel='m0_trg && n_m==1 && m0_iso<0.15 && m0met_mt>60 && n_p==1 && m0p0_dr>0.7 && p0_medium_noch && !p0_haspix', wt='wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0')
-    X.Derive('barrel', 'baseline', sel='abs(p0_eta) < 1.4442')
-    X.Derive('endcap', 'baseline', sel='abs(p0_eta) > 1.4442')
+    X['baseline'] = 'm0_trg && n_m==1 && m0_iso<0.15 && m0met_mt>60 && n_p==1 && m0p0_dr>0.7 && p0_medium_noch && !p0_haspix'
+    X['baseline_wt'] = 'wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0'
+    X['barrel'] = '$baseline && abs(p0_eta) < 1.4442'
+    X['endcap'] = '$baseline && abs(p0_eta) > 1.4442'
     do_cats.extend(['baseline', 'barrel', 'endcap'])
     sdb = {
         'barrel': '0.01022',
         'endcap': '0.03001'
     }
     for S in ['barrel', 'endcap']:
-        X.Derive('%s_iso_l' % S, S, sel='p0_chiso > 2.5 && p0_chiso < 7')
-        X.Derive('%s_sig_l' % S, S, sel='p0_sigma > %s' % sdb[S])
-        X.Derive('%s_iso_l_sig_t' % S, S, sel='p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma < %s' % sdb[S])
-        X.Derive('%s_iso_l_sig_l' % S, S, sel='p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma > %s' % sdb[S])
-        X.Derive('%s_iso_t_sig_l' % S, S, sel='p0_chiso < 0.441 && p0_sigma > %s' % sdb[S])
+        X['%s_iso_l' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7' % (S)
+        X['%s_sig_l' % S] = '$%s && p0_sigma > %s' % (S, sdb[S])
+        X['%s_iso_l_sig_t' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma < %s' % (S, sdb[S])
+        X['%s_iso_l_sig_l' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma > %s' % (S, sdb[S])
+        X['%s_iso_t_sig_l' % S] = '$%s && p0_chiso < 0.441 && p0_sigma > %s' % (S, sdb[S])
         do_cats.extend(['%s_iso_l' % S, '%s_sig_l' % S, '%s_iso_l_sig_t' % S, '%s_iso_l_sig_l' % S, '%s_iso_t_sig_l' % S])
 
     drawvars = [
@@ -145,13 +146,13 @@ if args.task == 'photon_fakes':
     for sel in do_cats:
         for var, binning in drawvars:
             for sample in samples:
-                hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.sel('$'+sel), wt=X.wt('$'+sel))
+                hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 for P in ['W', 'DY', 'TT']:
-                    hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.sel('$' + sel + ' && p0_isprompt'), wt=X.wt('$' + sel))
-                    hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.sel('$' + sel + ' && !p0_isprompt'), wt=X.wt('$' + sel))
+                    hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && p0_isprompt'), wt=X.get('$baseline_wt'))
+                    hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !p0_isprompt'), wt=X.get('$baseline_wt'))
 
 
-MultiDraw(hists, samples, tname)
+MultiDraw(hists, samples, tname, mt_cores=4)
 
 with open('input/cfg_wgamma_2016_v2.json') as jsonfile:
     cfg = json.load(jsonfile)
