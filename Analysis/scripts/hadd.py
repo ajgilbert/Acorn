@@ -32,7 +32,7 @@ for root, dirs, files in os.walk(args.dir):
 # print hadddict
 
 for target, inputs in hadddict.items():
-    job = 'hadd -ff %s %s' % (target, ' '.join(inputs))
+    job = 'hadd -O -f6 %s %s' % (target, ' '.join(inputs))
     if args.clean:
         job += '; if [ $? == "0" ]; then rm %s; fi' % (' '.join(inputs))
     job_mgr.job_queue.append(job)
