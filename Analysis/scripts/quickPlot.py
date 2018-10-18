@@ -116,46 +116,6 @@ variants_by_path = {
 
 # Derive fake template as A = B * (C / D) from data
 
-
-def Subtracted(hists, target, subtract, zero=True):
-    res = hists[target].Clone()
-    for sub in subtract:
-        res.Add(hists[sub], -1.)
-    for i in xrange(1, res.GetNbinsX() + 1):
-        if res.GetBinContent(i) < 0.:
-            res.SetBinContent(i, 0.)
-    return res
-
-
-def SafeDivide(h1, h2):
-    res = h1.Clone()
-    for i in xrange(1, res.GetNbinsX() + 1):
-        if h2.GetBinContent(i) == 0.:
-            res.SetBinContent(i, 0.)
-        else:
-            res.SetBinContent(i, h1.GetBinContent(i) / h2.GetBinContent(i))
-    return res
-
-
-def Multiply(h1, h2):
-    res = h1.Clone()
-    for i in xrange(1, res.GetNbinsX() + 1):
-        res.SetBinContent(i, h1.GetBinContent(i) * h2.GetBinContent(i))
-    return res
-
-
-def DoPhotonFakes(file, b, c, d):
-    h_b = GetHistsInDir(file, b)
-    h_b['data_sub'] = Subtracted(h_b, 'data_obs', ['DY', 'WG'])
-    h_c = GetHistsInDir(file, c)
-    h_c['data_sub'] = Subtracted(h_c, 'data_obs', ['DY', 'WG'])
-    h_d = GetHistsInDir(file, d)
-    h_d['data_sub'] = Subtracted(h_d, 'data_obs', ['DY', 'WG'])
-    h_div = SafeDivide(h_c['data_sub'], h_d['data_sub'])
-    h_res = Multiply(h_b['data_sub'], h_div)
-    return h_res
-
-
 def MakePlot(name, outdir, hists, cfg):
     copyhists = {}
     for hname, h in hists.iteritems():
@@ -321,12 +281,8 @@ for path, subnode in node.ListNodes(withObjects=True):
     target_dir = os.path.join(args.output, *split_path)
     os.system('mkdir -p %s' % target_dir)
     hists = {}
-    for opath, name, obj in subnode.ListObjects(depth=0):
-        hists[name] = obj
-    # if 'w_highmt_pho' in path:
-    #     hists['W_DAT'] = DoPhotonFakes(file, 'w_hmt_pho_iso_l_sig_t/%s' % name, 'w_hmt_pho_iso_t_sig_l/%s' % name, 'w_hmt_pho_iso_l_sig_l/%s' % name)
-
-    # print hists
+    for opath, objname, obj in subnode.ListObjects(depth=0):
+        hists[objname] = obj
 
     plotcfg = dict(default_cfg)
     for setting, vardict in config_by_setting.iteritems():

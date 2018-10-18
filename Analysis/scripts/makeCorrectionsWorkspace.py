@@ -201,6 +201,22 @@ if era == '2016':
         SafeWrapHist(w, ['p_eta', 'p_pt'],
                               GetFromTFile(task[0]), name=task[1])
 
+
+###############################################################################
+## Photon fakes
+###############################################################################
+loc = 'input/photons/%s' % era
+
+if era == '2016':
+    histsToWrap = [
+        (loc + '/output_2016_photon_fakes_ratios.root:photon_fakes', 'p_fake_ratio')
+    ]
+
+    for task in histsToWrap:
+        SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'],
+                              GetFromTFile(task[0]), name=task[1])
+
+
 w.Print()
 w.writeToFile('wgamma_corrections_%s_v1.root' % era)
 w.Delete()

@@ -74,6 +74,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_trg_m0", &wt_trg_m0_);
     tree_->Branch("wt_m1", &wt_m1_);
     tree_->Branch("wt_p0", &wt_p0_);
+    tree_->Branch("wt_p0_fake", &wt_p0_fake_);
     tree_->Branch("gen_p0_pt", &gen_p0_pt_);
     tree_->Branch("gen_phi", &gen_phi_);
     tree_->Branch("gen_m0_q", &gen_m0_q_);
@@ -120,6 +121,8 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("m_trg24_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   return 0;
   }
 
@@ -257,7 +260,9 @@ int WGDataAnalysis::PreAnalysis() {
       double lep_phi = reco_sys.r_charged_lepton.phi();
       reco_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
           m0->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
+      wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, photons[0]->scEta()});
     }
+
 
     if (!is_data_) {
       wt_def_ = info->nominalGenWeight() >= 0. ? +1. : -1.; // temporary until new ntuples fix EventInfo bug
@@ -299,45 +304,21 @@ int WGDataAnalysis::PreAnalysis() {
 
       // Calculate the truth vars for W+g events
       if (do_wg_gen_vars_) {
-        ac::GenParticle const* gen_lep = nullptr;
-        // ac::GenParticle const* gen_neu = nullptr;
-        ac::GenParticle const* gen_pho = nullptr;
+        auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
+        auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
+        auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
+        WGGenParticles parts = ProduceWGGenParticles(lhe_parts, gen_parts);
 
-        std::vector<ac::GenParticle const*> viable_leptons;
-        std::vector<ac::GenParticle const*> viable_photons;
-
-        for (auto const& part : genparts) {
-          if (IsChargedLepton(*part) && part->statusFlags().isPrompt() && part->statusFlags().isLastCopy()) {
-            if (IsTau(*part)) {
-              viable_leptons.push_back(part);
-            } else if (part->status() == 1) {
-              viable_leptons.push_back(part);
-            }
-          }
-          if (IsPhoton(*part) && part->status() == 1 && part->statusFlags().isPrompt()) {
-            viable_photons.push_back(part);
-          }
-        }
-
-        boost::range::sort(viable_leptons, DescendingPt);
-        boost::range::sort(viable_photons, DescendingPt);
-        if (viable_leptons.size() && viable_photons.size()) {
-          gen_lep = viable_leptons[0];
-          gen_pho = viable_photons[0];
-          auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
-          WGSystem gen_sys = ProduceWGSystem(*gen_lep, *gen_met, *gen_pho, true, rng, false);
-          gen_p0_pt_ = gen_pho->pt();
-          gen_m0_q_ = gen_lep->charge();
-          double lep_phi = gen_sys.r_charged_lepton.phi();
-          gen_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
-              gen_lep->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
-          gen_m0_pt_ = gen_lep->pt();
+        if (parts.ok) {
+          WGSystem gen_sys = ProduceWGSystem(*parts.gen_lep, *gen_met, *parts.gen_pho, true, rng, false);
+          gen_p0_pt_ = parts.gen_pho->pt();
+          gen_m0_q_ = parts.gen_lep->charge();
+          gen_phi_ = gen_sys.Phi(parts.gen_lep->charge() > 0);
+          gen_m0_pt_ = parts.gen_lep->pt();
           gen_met_ = gen_met->pt();
-          gen_m0p0_dr_ = ac::DeltaR(gen_lep, gen_pho);
+          gen_m0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
         }
-
       }
-
     }
     tree_->Fill();
     return 0;
@@ -388,6 +369,7 @@ int WGDataAnalysis::PreAnalysis() {
     wt_trg_m0_ = 1.;
     wt_m1_ = 1.;
     wt_p0_ = 1.;
+    wt_p0_fake_ = 1.;
     gen_p0_pt_ = 0.;
     gen_phi_ = 0.;
     gen_m0_q_ = 0;

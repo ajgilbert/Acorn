@@ -108,17 +108,17 @@ if args.task == 'photon_fakes':
     X['baseline_wt'] = 'wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0'
     X['barrel'] = '$baseline && abs(p0_eta) < 1.4442'
     X['endcap'] = '$baseline && abs(p0_eta) > 1.4442'
+    X['iso_t'] = 'p0_chiso < 0.441'
+    X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
+    X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01022) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.03001)'
+    X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01022) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.03001)'
     do_cats.extend(['baseline', 'barrel', 'endcap'])
-    sdb = {
-        'barrel': '0.01022',
-        'endcap': '0.03001'
-    }
     for S in ['barrel', 'endcap']:
-        X['%s_iso_l' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7' % (S)
-        X['%s_sig_l' % S] = '$%s && p0_sigma > %s' % (S, sdb[S])
-        X['%s_iso_l_sig_t' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma < %s' % (S, sdb[S])
-        X['%s_iso_l_sig_l' % S] = '$%s && p0_chiso > 2.5 && p0_chiso < 7 && p0_sigma > %s' % (S, sdb[S])
-        X['%s_iso_t_sig_l' % S] = '$%s && p0_chiso < 0.441 && p0_sigma > %s' % (S, sdb[S])
+        X['%s_iso_l' % S] = '$%s && $iso_l' % S
+        X['%s_sig_l' % S] = '$%s && $sig_l' % S
+        X['%s_iso_l_sig_t' % S] = '$%s && $iso_l && $sig_t' % S
+        X['%s_iso_l_sig_l' % S] = '$%s && $iso_l && $sig_l' % S
+        X['%s_iso_t_sig_l' % S] = '$%s && $iso_t && $sig_l' % S
         do_cats.extend(['%s_iso_l' % S, '%s_sig_l' % S, '%s_iso_l_sig_t' % S, '%s_iso_l_sig_l' % S, '%s_iso_t_sig_l' % S])
 
     drawvars = [
@@ -131,7 +131,7 @@ if args.task == 'photon_fakes':
         ('m0m1_M', (40, 60, 120)),
         ('m0m1_dr', (20, 0., 5.)),
         ('met', (20, 0., 200.)),
-        ('p0_pt', (20, 0, 200.)),
+        ('p0_pt', (100, 0, 500.)),
         ('p0_eta', (20, -3.0, 3.0)),
         ('m0p0_dr', (20, 0., 5.)),
         ('m0p0_M', (40, 60, 120)),
@@ -139,7 +139,7 @@ if args.task == 'photon_fakes':
         ('p0_neiso', (40, 0, 20.0)),
         ('p0_phiso', (40, 0, 20.0)),
         ('p0_hovere', (20, 0., 0.5)),
-        ('p0_sigma', (40, 0., 0.050)),
+        ('p0_sigma', (30, 0., 0.06)),
         ('p0_haspix', (2, -0.5, 1.5))
     ]
 
