@@ -11,6 +11,7 @@
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"
+#include "Acorn/Analysis/interface/DiMuonMesonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
 #include "Acorn/Analysis/interface/SampleStitching.h"
@@ -99,7 +100,21 @@ int main(int argc, char* argv[]) {
   analysis.RetryFileAfterFailure(7, 3);
   analysis.CalculateTimings(false);
 
-  //bool is_data = contains(jsc["attributes"], "data");
+  bool is_data = contains(jsc["attributes"], "data");
+  
+  ac::Sequence dimuon_seq;
+  dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
+  if (is_data) {
+    dimuon_seq.BuildModule(
+        ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
+  }
+  dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
+                           .set_fs(fs.get())
+                           .set_year(jsc["year"])
+                           .set_corrections("input/wgamma_corrections_2016_v1.root")
+                           .set_is_data(is_data));
+
+  dimuon_seq.InsertSequence("DiMuonMeson", analysis);
 
   ac::Sequence hvmgen_seq;
   if (sequences.count("HVMGen")) {
