@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include "Acorn/NTupler/interface/Candidate.h"
+#include "Acorn/NTupler/interface/Track.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
 #include "Acorn/NTupler/interface/city.h"
@@ -13,11 +14,29 @@ namespace ac {
 
 // Containers - filtering, sorting etc
 bool DescendingPt(Candidate const* c1, Candidate const* c2) { return c1->pt() > c2->pt(); }
+bool DescendingTrackPt(Track const* t1, Track const* t2) { return t1->pt() > t2->pt(); }
+
+bool AscendingDR(std::pair<std::pair<unsigned,unsigned>,double> m1, std::pair<std::pair<unsigned,unsigned>,double>m2) { return m1.second < m2.second; }
+bool DescendingPairPt(std::pair<std::pair<unsigned,unsigned>,double> m1, std::pair<std::pair<unsigned,unsigned>,double> m2) {return m1.second > m2.second;}
+
 
 // Calculating observables
 double DeltaR(ac::Candidate const* c1, ac::Candidate const* c2) {
   return ROOT::Math::VectorUtil::DeltaR(c1->vector(), c2->vector());
 }
+
+double DeltaRTrack(ac::Track const* c1, ac::Candidate const* c2) {
+  return ROOT::Math::VectorUtil::DeltaR(c1->vector(), c2->vector());
+}
+
+double DeltaRDiTrack(ac::Track const* c1, ac::Track const* c2) {
+  return ROOT::Math::VectorUtil::DeltaR(c1->vector(), c2->vector());
+}
+
+double DeltaRTrackPair(ac::Track const* c1, ac::Track const* c2, ac::Track const* c3){
+ return ROOT::Math::VectorUtil::DeltaR(c1->vector()+c2->vector(),c3->vector());
+}
+
 
 bool IsFilterMatchedDR(Candidate const* cand, std::vector<TriggerObject*> const& objs,
                      std::string const& filter, double const& max_dr) {

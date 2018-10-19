@@ -16,6 +16,7 @@
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
 #include "Acorn/NTupler/interface/Muon.h"
+#include "Acorn/NTupler/interface/Track.h"
 #include "Acorn/NTupler/interface/Photon.h"
 
 namespace ac {
@@ -35,6 +36,7 @@ Container copy_keep_if(Container const& target, Pred pred) {
 }
 
 bool DescendingPt(Candidate const* c1, Candidate const* c2);
+bool DescendingTrackPt(Track const* t1, Track const* t2);
 
 // Nicer wrapper for calling a RooFunctor
 template <class T>
@@ -44,6 +46,13 @@ double RooFunc(T const& func, std::vector<double> const& args) {
 
 // Calculating observables
 double DeltaR(ac::Candidate const* c1, ac::Candidate const* c2);
+double DeltaRTrack(ac::Track const* c1, ac::Candidate const* c2);
+double DeltaRDiTrack(ac::Track const* c1, ac::Track const* c2);
+double DeltaRTrackPair(ac::Track const* c1, ac::Track const* c2, ac::Track const* c3);
+
+
+bool AscendingDR(std::pair<std::pair<unsigned,unsigned>,double> m1, std::pair<std::pair<unsigned,unsigned>,double>m2);
+bool DescendingPairPt(std::pair<std::pair<unsigned,unsigned>,double> m1 ,std::pair<std::pair<unsigned,unsigned>,double> m2);
 
 // Trigger matching
 bool IsFilterMatchedDR(Candidate const* cand, std::vector<TriggerObject*> const& objs,
