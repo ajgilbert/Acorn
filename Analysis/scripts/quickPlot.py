@@ -2,7 +2,7 @@ import CombineHarvester.CombineTools.plotting as plot
 from Acorn.Analysis.analysis import *
 import ROOT
 import argparse
-import sys
+import json
 import os
 import fnmatch
 from copy import deepcopy
@@ -12,71 +12,33 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
 
-
-LAYOUTS = {
-    "wgamma": [
-        ('VV', {
-            'entries': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L'],
-            'legend': 'Diboson',
-            'color': ROOT.TColor.GetColor(248, 206, 104)
-        }
-        ),
-        ('DY', {
-            'entries': ['DY_R'],
-            'legend': 'Z#rightarrowll',
-            'color': ROOT.TColor.GetColor(100, 192, 232)
-        }
-        ),
-        ('DY_F', {
-            'entries': ['DY_F'],
-            'legend': 'Z#rightarrowll (F)',
-            'color': 2
-        }
-        ),
-        ('TT', {
-            'entries': ['TT_R'],
-            'legend': 't#bar{t}',
-            'color': ROOT.TColor.GetColor(155, 152, 204)
-        }
-        ),
-        ('TT_F', {
-            'entries': ['TT_F'],
-            'legend': 't#bar{t}',
-            'color': 4
-        }
-        ),
-        ('W', {
-            'entries': ['W_F'],
-            'legend': 'W#rightarrowl#nu',
-            'color': ROOT.TColor.GetColor(222, 90, 106)
-        }
-        ),
-        ('WG', {
-            'entries': ['WG'],
-            # 'entries': ['WG_p_acc', 'WG_n_acc'],
-            'legend': 'W#rightarrowl#nu+#gamma (in)',
-            'color': ROOT.TColor.GetColor(119, 213, 217)
-
-        }
-        ),
-        # ('WG_OOA', {
-        #     'entries': ['WG_p_ooa', 'WG_n_ooa'],
-        #     'legend': 'W#rightarrowl#nu+#gamma (out)',
-        #     'color': 12
-        # }
-        # ),
-        # ('ZTT', {
-        #     'entries': ['ZTT'],
-        #     'legend': 'Z#rightarrow#tau#tau',
-        #     'color': ROOT.TColor.GetColor(248, 206, 104)
-        # }
-        # )
-    ]
+default_cfg = {
+    # full filename will be [outdir]/[prefix]name[postfix].[ext]:
+    'outdir': '',               # output directory
+    'prefix': '',               # filename prefix
+    'postfix': '',              # filename postfix
+    'logx': False,              # Draw x-axis in log-scale
+    'logy': False,              # Draw y-axis in log-scale
+    'ratio': False,             # Draw the ratio plot?
+    'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
+    'x_range': [],                  # Restrict the x-axis range shown
+    'rebin': 0,                     # Rebin by this factor
+    'rebinvar': [],                 # Rebin to this list of bin edges
+    'x_title': '',               # Title on the x-axis
+    'y_title': 'Events',         # Title on the y-axis
+    'divwidth': True,           # Divide all histogram contents by their bin widths
+    'layout': 'data_fakes_EFT',
+    'legend_pos': [0.67, 0.66, 0.90, 0.91], # Legend position in NDC (x1, y1, x2, y2)
+    'legend_padding': 0.05,      # Automatically increase the y-axis range to ensure the legend does not overlap the histograms (argument is fraction of frame height to pad)
+    'data_name': 'data_obs',     # Name of the TH1 to take for data
+    'main_logo': 'CMS',
+    'sub_logo': 'Internal',
+    'top_title_right': '35.9 fb^{-1} (13 TeV)',
+    'top_title_left': ''
 }
 
-
 config_by_setting = {
-    "xtitle": {
+    "x_title": {
         '*/m0met_mt': ('m_{T}(#mu,p_{T}^{miss})', 'GeV'),
         '*/m0_pt': ('Muon p_{T}', 'GeV'),
         '*/m0_eta': ('Muon #eta', ''),
@@ -97,26 +59,23 @@ config_by_setting = {
         '*/p0_sigma': ('Photon #sigma_{I#etaI#eta}^{full 5x5}', ''),
         '*/p0_haspix': ('Photon hasPixelSeed', ''),
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
-        '*/abs(gen_reco_phi)': ('Gen. Reconstructed #phi', ''),
+        '*/abs(gen_phi)': ('Gen. #phi', ''),
+        '*/abs(true_phi)': ('True #phi', ''),
     }
 }
 
-variants_by_path = {
-    "*": {
-    },
-    "*/p0_pt": {
-        "prefix": "logy_",
-        "logy": True
-    },
-    "*/p0_pt": {
-        "prefix": "zoom_",
-        "range": (0, 200)
-    }
-}
+variants_by_path = [
+    ("*", {}),
+    ("*/p0_pt", {
+            "prefix": "logy_",
+            "logy": True}),
+    ("*/p0_pt", {
+            "prefix": "zoom_",
+            "x_range": (0, 200)})
+]
 
-# Derive fake template as A = B * (C / D) from data
 
-def MakePlot(name, outdir, hists, cfg):
+def MakePlot(name, outdir, hists, cfg, layouts):
     copyhists = {}
     for hname, h in hists.iteritems():
         copyhists[hname] = h.Clone()
@@ -124,12 +83,16 @@ def MakePlot(name, outdir, hists, cfg):
             copyhists[hname].Scale(1., 'width')
 
     hists = copyhists
+
     # Canvas and pads
     canv = ROOT.TCanvas(name, name)
-    pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
+    if cfg['ratio']:
+        pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
+    else:
+        pads = plot.OnePad()
 
     # Get the data and create axis hist
-    h_data = hists['data_obs']
+    h_data = hists[cfg['data_name']]
     # h_data = Getter(file, '%s/data_obs' % target, True)
     if isinstance(h_data, ROOT.TH2):
         print 'TH2: aborting!'
@@ -137,8 +100,8 @@ def MakePlot(name, outdir, hists, cfg):
 
     h_axes = [h_data.Clone() for x in pads]
     for h in h_axes:
-        if len(cfg['range']):
-            h.GetXaxis().SetRangeUser(*cfg['range'])
+        if len(cfg['x_range']):
+            h.GetXaxis().SetRangeUser(*cfg['x_range'])
         h.Reset()
 
     build_h_tot = True
@@ -147,8 +110,8 @@ def MakePlot(name, outdir, hists, cfg):
         h_tot = hists['TotalProcs']
         build_h_tot = False
 
-    x_title = cfg['xtitle'][0]
-    units = cfg['xtitle'][1]
+    x_title = cfg['x_title'][0]
+    units = cfg['x_title'][1]
 
     if x_title == '' and h_data.GetXaxis().GetTitle() != '':
         x_title = h_data.GetXaxis().GetTitle()
@@ -160,27 +123,31 @@ def MakePlot(name, outdir, hists, cfg):
     if cfg['logy']:
         pads[0].SetLogy()
         h_axes[0].SetMinimum(0.1)
-    plot.StandardAxes(h_axes[1].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
+
+    if cfg['ratio']:
+        plot.StandardAxes(h_axes[1].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
+    else:
+        plot.StandardAxes(h_axes[0].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
     h_axes[0].Draw()
 
     # A dict to keep track of the hists
     h_store = {}
 
-    layout = LAYOUTS['wgamma']
+    layout = layouts[cfg['layout']]
 
     stack = ROOT.THStack()
-    legend = ROOT.TLegend(0.67, 0.86 - 0.04*len(layout), 0.90, 0.91, '', 'NBNDC')
+    legend = ROOT.TLegend(*(cfg['legend_pos'] + ['', 'NBNDC']))
 
-    # h_tot = None
-
-    for ele in layout:
-        info = ele[1]
+    for info in layout:
         hist = hists[info['entries'][0]]
-        plot.Set(hist, FillColor=info['color'], Title=info['legend'])
+        col = info['color']
+        if isinstance(col, list):
+            col = ROOT.TColor.GetColor(*col)
+        plot.Set(hist, FillColor=col, Title=info['legend'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
                 hist.Add(hists[other])
-        h_store[ele[0]] = hist
+        h_store[info['name']] = hist
         if build_h_tot:
             if h_tot is None:
                 h_tot = hist.Clone()
@@ -193,7 +160,7 @@ def MakePlot(name, outdir, hists, cfg):
 
     legend.AddEntry(h_data, 'Observed', 'PL')
     for ele in reversed(layout):
-        legend.AddEntry(h_store[ele[0]], '', 'F')
+        legend.AddEntry(h_store[ele['name']], '', 'F')
     bkg_uncert_label = 'Stat. Uncertainty'
     if not build_h_tot:
         bkg_uncert_label = 'Uncertainty'
@@ -203,27 +170,25 @@ def MakePlot(name, outdir, hists, cfg):
     h_tot.Draw("E2SAME")
     h_data.Draw('E0SAME')
 
-    # if args.logy:
-    #     h_axes[0].SetMinimum(args.y_min)
-    #     pads[0].SetLogy(True)
-
     plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.35)
     legend.Draw()
-    # plot.FixBoxPadding(pads[0], legend, 0.05)
+    if cfg['legend_padding'] > 0.:
+        plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
-    pads[1].cd()
-    pads[1].SetGrid(0, 1)
-    h_axes[1].Draw()
+    if cfg['ratio']:
+        pads[1].cd()
+        pads[1].SetGrid(0, 1)
+        h_axes[1].Draw()
 
-    r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
-    r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
-    r_tot.Draw('E2SAME')
-    r_data.Draw('SAME')
+        r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
+        r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
+        r_tot.Draw('E2SAME')
+        r_data.Draw('SAME')
 
-    plot.SetupTwoPadSplitAsRatio(
-        pads, plot.GetAxisHist(
-            pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
+        plot.SetupTwoPadSplitAsRatio(
+            pads, plot.GetAxisHist(
+                pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
 
     # Go back and tidy up the axes and frame
     pads[0].cd()
@@ -231,8 +196,9 @@ def MakePlot(name, outdir, hists, cfg):
     pads[0].RedrawAxis()
 
     # CMS logo
-    plot.DrawCMSLogo(pads[0], 'CMS', 'Internal', 11, 0.045, 0.05, 1.0, '', 1.0)
-    plot.DrawTitle(pads[0], '35.9 fb^{-1} (13 TeV)', 3)
+    plot.DrawCMSLogo(pads[0], cfg['main_logo'], cfg['sub_logo'], 11, 0.045, 0.05, 1.0, '', 1.0)
+    plot.DrawTitle(pads[0], cfg['top_title_left'], 1)
+    plot.DrawTitle(pads[0], cfg['top_title_right'], 3)
 
     latex = ROOT.TLatex()
     plot.Set(latex, NDC=None, TextFont=42, TextSize=0.03)
@@ -251,21 +217,14 @@ parser.add_argument('--x-title', default='', help='x-axis variable, without GeV'
 parser.add_argument('--logy', action='store_true')
 parser.add_argument('--y-min', type=float, default=1)
 parser.add_argument('--title', default='')
+parser.add_argument('--layout-file', '-l', default='layouts.json')
 
 args = parser.parse_args()
 
-default_cfg = {
-    'prefix': '',
-    'postfix': '',
-    'logy': False,
-    'logx': False,
-    'range': [],
-    'rebin': 0,
-    'rebinvar': [],
-    'xtitle': '',
-    'ytitle': 'Events',
-    'divwidth': True
-}
+
+
+with open(args.layout_file) as jsonfile:
+    layouts = json.load(jsonfile)
 
 filename, dirfilter = args.input.split(':')
 print filename
@@ -275,6 +234,8 @@ node = TDirToNode(file)
 
 for path, subnode in node.ListNodes(withObjects=True):
     print path
+    if not fnmatch.fnmatch(path, dirfilter):
+        continue
     # for now work on the assumption that the last component of the path will be the actual filename
     split_path = path.split('/')[:-1]
     name = path.split('/')[-1]
@@ -290,10 +251,8 @@ for path, subnode in node.ListNodes(withObjects=True):
             if fnmatch.fnmatch(path, pathkey):
                 plotcfg[setting] = val
                 print 'Path %s, setting %s, to value %s' % (path, setting, val)
-    for pathkey, varcfg in variants_by_path.iteritems():
+    for pathkey, varcfg in variants_by_path:
         if fnmatch.fnmatch(path, pathkey):
             varplotcfg = dict(plotcfg)
             varplotcfg.update(varcfg)
-            MakePlot(name, target_dir, hists, varplotcfg)
-
-
+            MakePlot(name, target_dir, hists, varplotcfg, layouts)

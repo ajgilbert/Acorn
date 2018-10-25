@@ -34,6 +34,7 @@ parser.add_argument('--g_eta', default='3.')
 parser.add_argument('--l_pt', default='80.')
 parser.add_argument('--l_eta', default='2.4')
 parser.add_argument('--n_pt', default='80.')
+parser.add_argument('--n_pt_max', default='9999999999.')
 parser.add_argument('--n_eta', default='9999.')
 parser.add_argument('--nparts_max', default='10')
 parser.add_argument('--dr', default='3.0')
@@ -72,8 +73,8 @@ for name, sa, wt in [
         charge_sel = '1'
     else:
         charge_sel = 'l_charge==%s' % args.charge
-    sel = '%s && nparts>=3 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
-        charge_sel, args.nparts_max, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.l_eta, args.n_eta, args.g_eta, args.dr)
+    sel = '%s && nparts>=3 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && n_pt<%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
+        charge_sel, args.nparts_max, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.n_pt_max, args.l_eta, args.n_eta, args.g_eta, args.dr)
     print sel
     hists[name] = Hist('TH1D', binning, sa, [drawvar],
                        sel=sel, wt=wt)
@@ -233,7 +234,7 @@ pt_l.AddText('p_{T}^{#gamma} > %s GeV, |#eta^{#gamma}| < %s' %
 pt_l.AddText('p_{T}^{l} > %s GeV, |#eta^{l}| < %s' % (args.l_pt, args.l_eta))
 pt_l.AddText('p_{T}^{miss} > %s GeV' % args.n_pt)
 pt_l.AddText('#DeltaR(l, #gamma) > %s' % args.dr)
-pt_l.AddText('nJets (ME) == 0')
+pt_l.AddText('nJets (ME) >= 0')
 plot.Set(pt_l, TextAlign=11, TextFont=42, BorderSize=0)
 
 pt_l.Draw()
