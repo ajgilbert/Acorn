@@ -109,14 +109,16 @@ int main(int argc, char* argv[]) {
   std::string wgamma_label = "WGamma";
   if (sequences.count(wgamma_label)) {
     auto wgamma_fs = fs.at(wgamma_label).get();
-    wgamma_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(wgamma_fs));
-    if (is_data) {
-      wgamma_seq.BuildModule(
-          ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
-    }
 
     if (jsc.count("stitching")) {
       wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+    }
+
+    wgamma_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(wgamma_fs));
+
+    if (is_data) {
+      wgamma_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
     }
 
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
