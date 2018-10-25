@@ -77,6 +77,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_p0_fake", &wt_p0_fake_);
     tree_->Branch("gen_p0_pt", &gen_p0_pt_);
     tree_->Branch("gen_phi", &gen_phi_);
+    tree_->Branch("true_phi", &true_phi_);
     tree_->Branch("gen_m0_q", &gen_m0_q_);
     tree_->Branch("gen_m0_pt", &gen_m0_pt_);
     tree_->Branch("gen_met", &gen_met_);
@@ -311,12 +312,14 @@ int WGDataAnalysis::PreAnalysis() {
 
         if (parts.ok) {
           WGSystem gen_sys = ProduceWGSystem(*parts.gen_lep, *gen_met, *parts.gen_pho, true, rng, false);
+          WGSystem gen_true_sys = ProduceWGSystem(*parts.gen_lep, *parts.gen_neu, *parts.gen_pho, false, rng, false);
           gen_p0_pt_ = parts.gen_pho->pt();
           gen_m0_q_ = parts.gen_lep->charge();
           gen_phi_ = gen_sys.Phi(parts.gen_lep->charge() > 0);
           gen_m0_pt_ = parts.gen_lep->pt();
           gen_met_ = gen_met->pt();
           gen_m0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
+          true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
         }
       }
     }
@@ -376,6 +379,7 @@ int WGDataAnalysis::PreAnalysis() {
     gen_m0_pt_ = 0.;
     gen_met_ = 0.;
     gen_m0p0_dr_ = 0.;
+    true_phi_ = 0.;
   }
 
   int WGDataAnalysis::PostAnalysis() {
