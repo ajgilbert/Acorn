@@ -15,7 +15,8 @@
 
 AcornTrackProducer::AcornTrackProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::Track>>(config),
-      inputToken_(consumes<edm::View<reco::Track>>(config.getParameter<edm::InputTag>("input"))){}
+      inputToken_(consumes<edm::View<reco::Track>>(config.getParameter<edm::InputTag>("input"))),
+      storeSlimmed_(config.getParameter<bool>("storeSlimmed")){}
 
 AcornTrackProducer::~AcornTrackProducer() { ; }
 
@@ -34,19 +35,21 @@ void AcornTrackProducer::produce(edm::Event& event, const edm::EventSetup& setup
     dest.setEta(setVar("eta",src.eta()));
     dest.setPhi(setVar("phi",src.phi()));
     dest.setCharge(setVar("charge",src.charge()));
-    dest.setVx(setVar("vx",src.vx()));
-    dest.setVy(setVar("vy",src.vy()));
-    dest.setVz(setVar("vz",src.vz()));
-    dest.setHits(setVar("hits",src.hitPattern().numberOfValidHits()));
-    dest.setPixel_hits(setVar("pixelhits",src.hitPattern().numberOfValidPixelHits()));
-    dest.setQuality(setVar("qual",src.qualityMask()));
-    #if CMSSW_MAJOR_VERSION >= 9
-    dest.setHits_miss_inner(setVar("missinghits",
-      src.hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS)));
-    #else 
-    dest.setHits_miss_inner(setVar("missinghits",
-      src.hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)));
-    #endif
+    if(!storeSlimmed_){
+      dest.setVx(setVar("vx",src.vx()));
+      dest.setVy(setVar("vy",src.vy()));
+      dest.setVz(setVar("vz",src.vz()));
+      dest.setHits(setVar("hits",src.hitPattern().numberOfValidHits()));
+      dest.setPixel_hits(setVar("pixelhits",src.hitPattern().numberOfValidPixelHits()));
+      dest.setQuality(setVar("qual",src.qualityMask()));
+      #if CMSSW_MAJOR_VERSION >= 9
+      dest.setHits_miss_inner(setVar("missinghits",
+        src.hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS)));
+      #else 
+      dest.setHits_miss_inner(setVar("missinghits",
+        src.hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)));
+      #endif
+    }
   }
 }
 

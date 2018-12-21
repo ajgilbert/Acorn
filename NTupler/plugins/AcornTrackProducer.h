@@ -23,6 +23,7 @@ class AcornTrackProducer : public AcornBaseProducer<std::vector<ac::Track>> {
   virtual void produce(edm::Event&, edm::EventSetup const&);
 
   edm::EDGetTokenT<edm::View<reco::Track>> inputToken_;
+  bool storeSlimmed_;
   boost::hash<reco::Track const*> track_hasher_;
 };
 

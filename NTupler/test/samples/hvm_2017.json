@@ -60,6 +60,36 @@
       "events": -1,
       "config": "data"
     },
+    "SingleElectron-2017B": {
+      "dataset": "/SingleElectron/Run2017B-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleElectron-2017C": {
+      "dataset": "/SingleElectron/Run2017C-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleElectron-2017D": {
+      "dataset": "/SingleElectron/Run2017D-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit", "submitpilot"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleElectron-2017E": {
+      "dataset": "/SingleElectron/Run2017E-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleElectron-2017F": {
+      "dataset": "/SingleElectron/Run2017F-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
     "HZrho-Long": {
       "dataset": "/hvm-miniaod-121018/adewit-crab_hvm-miniaod-rho-121018-692976c2d086f569d9a779b5701b870f/USER",
       "attributes": ["submit"],
@@ -74,6 +104,21 @@
       "config": "mc",
       "inputDBS": "phys03"
     },
+    "HZrho-Zee": {
+      "dataset" : "/hvm-miniaod-161118/adewit-crab_hvm-miniaod-rho-zee-161118-692976c2d086f569d9a779b5701b870f/USER",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "HZOmega-Zee": {
+      "dataset": "/hvm-miniaod-161118/adewit-crab_hvm-miniaod-omega-zee-161118-692976c2d086f569d9a779b5701b870f/USER",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+
     "DYJetsToLLMG": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAOD-RECOSIMstep_94X_mc2017_realistic_v10-v1/MINIAODSIM",
       "attributes": ["submit"],
