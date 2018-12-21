@@ -11,7 +11,9 @@
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"
+#include "Acorn/Analysis/interface/DiLeptonMesonGenAnalysis.h"
 #include "Acorn/Analysis/interface/DiMuonMesonAnalysis.h"
+#include "Acorn/Analysis/interface/DiElectronMesonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
 #include "Acorn/Analysis/interface/SampleStitching.h"
@@ -114,17 +116,32 @@ int main(int argc, char* argv[]) {
                            .set_corrections("input/wgamma_corrections_2016_v1.root")
                            .set_is_data(is_data));
 
-  dimuon_seq.InsertSequence("DiMuonMeson", analysis);
+  //dimuon_seq.InsertSequence("DiMuonMeson", analysis);
+
+  dimuon_seq.BuildModule(ac::DiElectronMesonAnalysis("DiElectronMesonAnalysis")
+                           .set_fs(fs.get())
+                           .set_year(jsc["year"])
+                           .set_corrections("input/wgamma_corrections_2016_v1.root")
+                           .set_is_data(is_data));
+
+  dimuon_seq.InsertSequence("DiLeptonMeson", analysis);
+
 
   ac::Sequence hvmgen_seq;
-  if (sequences.count("HVMGen")) {
+  if (sequences.count("HVMGen") && !is_data) {
     //auto hvmgen_fs = fs.at("HVMGen").get();
     hvmgen_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
  
     hvmgen_seq.BuildModule(ac::HVMGenAnalysis("HVMGenAnalysis")
                              .set_fs(fs.get()));
 
-    hvmgen_seq.InsertSequence("HVMGen", analysis);
+    //hvmgen_seq.InsertSequence("HVMGen", analysis);
+
+    hvmgen_seq.BuildModule(ac::DiLeptonMesonGenAnalysis("DiLeptonMesonGenAnalysis")
+                             .set_fs(fs.get()));
+
+    hvmgen_seq.InsertSequence("GenSequence", analysis);
+
   }
 
   analysis.RunAnalysis();

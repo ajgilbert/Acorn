@@ -366,7 +366,7 @@ namespace ac {
     res_pt_=(pions_from_meson.at(0)->vector()+pions_from_meson.at(1)->vector()).pt();
     res_eta_=(pions_from_meson.at(0)->vector()+pions_from_meson.at(1)->vector()).eta();
     res_phi_=(pions_from_meson.at(0)->vector()+pions_from_meson.at(1)->vector()).phi();
-  } else std::cout<<"Not enough pions from meson decay!"<<std::endl;
+  } 
 
 
 

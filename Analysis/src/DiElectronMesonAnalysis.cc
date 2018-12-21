@@ -9,7 +9,7 @@
 #include "boost/range/algorithm/sort.hpp"
 #include "RooRealVar.h"
 #include "RooWorkspace.h"
-#include "Acorn/Analysis/interface/DiMuonMesonAnalysis.h"
+#include "Acorn/Analysis/interface/DiElectronMesonAnalysis.h"
 #include "Acorn/Analysis/interface/AnalysisTools.h"
 #include "Acorn/NTupler/interface/Muon.h"
 #include "Acorn/NTupler/interface/Electron.h"
@@ -19,14 +19,14 @@
 
 namespace ac {
 
-DiMuonMesonAnalysis::DiMuonMesonAnalysis(std::string const& name)
+DiElectronMesonAnalysis::DiElectronMesonAnalysis(std::string const& name)
     : ModuleBase(name), fs_(nullptr), year_(2016), is_data_(true) {}
 
-DiMuonMesonAnalysis::~DiMuonMesonAnalysis() { ; }
+DiElectronMesonAnalysis::~DiElectronMesonAnalysis() { ; }
 
-int DiMuonMesonAnalysis::PreAnalysis() {
+int DiElectronMesonAnalysis::PreAnalysis() {
   if (fs_) {
-    tree_ = fs_->make<TTree>("DiMuonMesonAnalysis", "DiMuonMesonAnalysis");
+    tree_ = fs_->make<TTree>("DiElectronMesonAnalysis", "DiElectronMesonAnalysis");
     tree_->Branch("pt_1", &pt_1_);
     tree_->Branch("pt_2", &pt_2_);
     tree_->Branch("eta_1", &eta_1_);
@@ -62,30 +62,23 @@ int DiMuonMesonAnalysis::PreAnalysis() {
   }
 
   if (is_data_) {
-    filters_IsoMu24_ =
+    /*filters_IsoMu24_ =
         LookupFilter({{272023, "hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"},
                       {295982, "hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07"}});
 
     filters_IsoTkMu24_ =
         LookupFilter({{272023, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09"},
-                      {295982, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p07"}});
+                      {295982, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p07"}});*/
 
-    filters_IsoMu27_ =
-        LookupFilter({{272023, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},
-                      {295982, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"}});
+    filters_Ele35_ =
+        LookupFilter({{272023, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},//FIXME
+                      {294927, "hltEle35noerWPTightGsfTrackIsoFilter"}});
   } else {
-    filters_IsoMu24_ =
-        LookupFilter({{2016, "hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"},
-                      {2017, "hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07"},
-                      {2018, "hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07"}});
 
-    filters_IsoTkMu24_ =
-        LookupFilter({{2016, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09"}});
-
-    filters_IsoMu27_ =
-        LookupFilter({{2016, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},
-                      {2017, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"},
-                      {2018, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"}});
+    filters_Ele35_ =
+        LookupFilter({{2016, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},//FIXME
+                      {2017, "hltEle35noerWPTightGsfTrackIsoFilter"},
+                      {2018, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"}});//FIXME
   }
 
   TFile f(corrections_.c_str());
@@ -101,7 +94,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
   return 0;
   }
 
-  int DiMuonMesonAnalysis::Execute(TreeEvent* event) {
+  int DiElectronMesonAnalysis::Execute(TreeEvent* event) {
 
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
@@ -123,40 +116,40 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       return e->pt() > 30. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
     });
 
-    boost::range::sort(muons, DescendingPt);
+    boost::range::sort(electrons, DescendingPt);
     boost::range::sort(tracks, DescendingTrackPt);
     boost::range::sort(tracksforiso, DescendingTrackPt);
 
     ac::Candidate z_cand;
-    if (muons.size() >= 2) {
-      z_cand.setVector(muons[0]->vector() + muons[1]->vector());
-      z_cand.setCharge(muons[0]->charge() + muons[1]->charge());
+    if (electrons.size() >= 2) {
+      z_cand.setVector(electrons[0]->vector() + electrons[1]->vector());
+      z_cand.setCharge(electrons[0]->charge() + electrons[1]->charge());
     }
 
-    if (muons.size() == 2 && z_cand.charge() == 0 && electrons.size()==0) {
-      pt_1_ = muons[0]->pt();
-      pt_2_ = muons[1]->pt();
-      eta_1_ = muons[0]->eta();
-      eta_2_ = muons[1]->eta();
+    if (electrons.size() == 2 && z_cand.charge() == 0 && muons.size()==0) {
+      pt_1_ = electrons[0]->pt();
+      pt_2_ = electrons[1]->pt();
+      eta_1_ = electrons[0]->eta();
+      eta_2_ = electrons[1]->eta();
       m_ll_ = z_cand.M();
       pt_ll_ = z_cand.pt();
-      dr_ll_ = DeltaR(muons[0], muons[1]);
+      dr_ll_ = DeltaR(electrons[0], electrons[1]);
 
 
       unsigned trg_lookup = is_data_ ? info->run() : year_;
       if (year_ == 2016) {
-        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
+    /*    auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele35_WPTight_Gsf");
         auto const& trg_objs_tk = event->GetPtrVec<TriggerObject>("triggerObjects_IsoTkMu24");
         trg_1_ =
-            IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(muons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+            IsFilterMatchedDR(electrons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
+            IsFilterMatchedDR(electrons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
         trg_2_ =
-            IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(muons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+            IsFilterMatchedDR(electrons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
+            IsFilterMatchedDR(electrons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);*/
       } else {
-        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu27");
-        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
-        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
+        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele35_WPTight_Gsf");
+        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
+        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
       }
 
       wt_pu_ = 1.;
@@ -199,9 +192,9 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       std::vector<std::pair<std::pair<unsigned,unsigned>,double>> track_drs;
       std::vector<std::pair<std::pair<unsigned,unsigned>,double>> track_drs_smallcone;
       for (unsigned i = 0; i<tracks.size(); i++){
-        if(DeltaRTrack(tracks.at(i),muons.at(0))> 0.3 && DeltaRTrack(tracks.at(i),muons.at(1))>0.3){
+        if(DeltaRTrack(tracks.at(i),electrons.at(0))> 0.3 && DeltaRTrack(tracks.at(i),electrons.at(1))>0.3){
           for (unsigned j = 0; j < i; j++){
-            if(DeltaRTrack(tracks.at(j),muons.at(0))> 0.3 && DeltaRTrack(tracks.at(j),muons.at(1))>0.3 && tracks.at(i)->charge()!=tracks.at(j)->charge() && (tracks.at(i)->pt()>10 || tracks.at(j)->pt()>10)){
+            if(DeltaRTrack(tracks.at(j),electrons.at(0))> 0.3 && DeltaRTrack(tracks.at(j),electrons.at(1))>0.3 && tracks.at(i)->charge()!=tracks.at(j)->charge() && (tracks.at(i)->pt()>10 || tracks.at(j)->pt()>10)){
               track_drs.push_back(std::make_pair(std::make_pair(i,j),DeltaRDiTrack(tracks.at(i),tracks.at(j))));
               if(DeltaRDiTrack(tracks.at(i),tracks.at(j))<0.1) track_drs_smallcone.push_back(std::make_pair(std::make_pair(i,j),(tracks.at(i)->vector()+tracks.at(j)->vector()).pt()));
             }
@@ -215,8 +208,8 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       if(track_drs_smallcone.size()>0){
        highestpt_pair_id_1_=track_drs_smallcone.at(0).first.first;
        highestpt_pair_id_2_=track_drs_smallcone.at(0).first.second;
-       highestpt_pair_reco_higgs_mass_=(muons.at(0)->vector()+muons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).M();
-       highestpt_pair_reco_higgs_pt_=(muons.at(0)->vector()+muons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).pt();
+       highestpt_pair_reco_higgs_mass_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).M();
+       highestpt_pair_reco_higgs_pt_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).pt();
        highestpt_pair_dR_=DeltaRDiTrack(tracks.at(track_drs_smallcone.at(0).first.first),tracks.at(track_drs_smallcone.at(0).first.second));
        highestpt_pair_mass_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).M();
        highestpt_pair_pt_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).pt();
@@ -249,11 +242,11 @@ int DiMuonMesonAnalysis::PreAnalysis() {
 
     return 0;
   }
-  int DiMuonMesonAnalysis::PostAnalysis() {
+  int DiElectronMesonAnalysis::PostAnalysis() {
     return 0;
   }
 
-  void DiMuonMesonAnalysis::PrintInfo() {}
+  void DiElectronMesonAnalysis::PrintInfo() {}
 
 
 

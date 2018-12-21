@@ -1,5 +1,5 @@
-#ifndef Acorn_Analysis_DiMuonMesonAnalysis_h
-#define Acorn_Analysis_DiMuonMesonAnalysis_h
+#ifndef Acorn_Analysis_DiElectronMesonAnalysis_h
+#define Acorn_Analysis_DiElectronMesonAnalysis_h
 #include <string>
 #include <cstdint>
 #include "boost/range/algorithm_ext/erase.hpp"
@@ -16,16 +16,14 @@
 
 namespace ac {
 
-class DiMuonMesonAnalysis : public ModuleBase {
+class DiElectronMesonAnalysis : public ModuleBase {
  private:
-  CLASS_MEMBER(DiMuonMesonAnalysis, fwlite::TFileService*, fs)
-  CLASS_MEMBER(DiMuonMesonAnalysis, unsigned, year)
-  CLASS_MEMBER(DiMuonMesonAnalysis, bool, is_data)
-  CLASS_MEMBER(DiMuonMesonAnalysis, std::string, corrections)
+  CLASS_MEMBER(DiElectronMesonAnalysis, fwlite::TFileService*, fs)
+  CLASS_MEMBER(DiElectronMesonAnalysis, unsigned, year)
+  CLASS_MEMBER(DiElectronMesonAnalysis, bool, is_data)
+  CLASS_MEMBER(DiElectronMesonAnalysis, std::string, corrections)
 
-  LookupFilter filters_IsoMu24_;
-  LookupFilter filters_IsoTkMu24_;
-  LookupFilter filters_IsoMu27_;
+  LookupFilter filters_Ele35_;
 
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
@@ -65,8 +63,8 @@ class DiMuonMesonAnalysis : public ModuleBase {
   int nAddEle_;
 
  public:
-  DiMuonMesonAnalysis(std::string const& name);
-  virtual ~DiMuonMesonAnalysis();
+  DiElectronMesonAnalysis(std::string const& name);
+  virtual ~DiElectronMesonAnalysis();
 
   virtual int PreAnalysis();
   virtual int Execute(TreeEvent* event);
