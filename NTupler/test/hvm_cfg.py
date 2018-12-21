@@ -84,6 +84,11 @@ process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
     cut = cms.string("pt > 20 & abs(eta) < 3.5")
 )
 
+process.selectedElectrons = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("slimmedElectrons"),
+    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+)
+
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
     input=cms.InputTag("selectedMuons"),
     branch=cms.string('muons'),
@@ -125,6 +130,47 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 #    neutralHadronIsolation=cms.string('PhoAnyPFIsoWithEAAndQuadScalingCut_0'),
 #    photonIsolation=cms.string('PhoAnyPFIsoWithEACut_1')
 #)
+
+#### Adding electron ID
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+# turn on VID producer, indicate data format  to be
+# DataFormat.AOD or DataFormat.MiniAOD, as appropriate 
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+if opts.year == '2016':
+    my_id_modules = ['']
+    ele_veto_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-veto"
+    ele_loose_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-loose"
+    ele_medium_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-medium"
+    ele_tight_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-tight"
+else :
+    my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
+                     'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff',
+                     'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff']
+    ele_veto_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-veto"
+    ele_loose_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-loose"
+    ele_medium_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-medium"
+    ele_tight_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-tight"
+    ele_mva_wp80_id = "egmGsfElectronIDs:mvaEleID-Fall17-iso-V2-wp80"
+    ele_mva_wp90_id = "egmGsfElectronIDs:mvaEleID-Fall17-iso-V2-wp90"
+    ele_heep_id = "egmGsfElectronIDs:heepElectronID-HEEPV70"
+
+for idmod in my_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
+process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
+    input=cms.InputTag("selectedElectrons"),
+    inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
+    branch=cms.string('electrons'),
+    select=cms.vstring('keep .* p4=12'),
+    eleVetoIdMap=cms.InputTag(ele_veto_id), 
+    eleLooseIdMap=cms.InputTag(ele_loose_id), 
+    eleMediumIdMap=cms.InputTag(ele_medium_id), 
+    eleTightIdMap=cms.InputTag(ele_tight_id), 
+    eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
+    eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
+    eleHEEPIdMap=cms.InputTag(ele_heep_id) 
+)
+
 
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
@@ -298,9 +344,12 @@ elif genOnly == 2:
 else:
     process.p = cms.Path(
         #process.egmPhotonIDSequence +
+        process.egmGsfElectronIDSequence+
         process.selectedMuons +
+        process.selectedElectrons +
         #process.selectedPhotons +
         process.acMuonProducer +
+        process.acElectronProducer +
         #process.acPhotonProducer +
         process.acPFType1MetProducer +
         process.acMCSequence +
