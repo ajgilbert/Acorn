@@ -6,11 +6,17 @@ import json
 import os
 import fnmatch
 from copy import deepcopy
+from array import array
 
 ROOT.TH1.SetDefaultSumw2(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
+
+
+def VariableRebin(hist, binning):
+    newhist = hist.Rebin(len(binning) - 1, "", array('d', binning))
+    return newhist
 
 default_cfg = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
@@ -19,7 +25,7 @@ default_cfg = {
     'postfix': '',              # filename postfix
     'logx': False,              # Draw x-axis in log-scale
     'logy': False,              # Draw y-axis in log-scale
-    'ratio': False,             # Draw the ratio plot?
+    'ratio': True,             # Draw the ratio plot?
     'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
     'x_range': [],                  # Restrict the x-axis range shown
     'rebin': 0,                     # Rebin by this factor
@@ -27,14 +33,15 @@ default_cfg = {
     'x_title': '',               # Title on the x-axis
     'y_title': 'Events',         # Title on the y-axis
     'divwidth': True,           # Divide all histogram contents by their bin widths
-    'layout': 'data_fakes_EFT',
+    'layout': 'data_fakes',
     'legend_pos': [0.67, 0.66, 0.90, 0.91], # Legend position in NDC (x1, y1, x2, y2)
     'legend_padding': 0.05,      # Automatically increase the y-axis range to ensure the legend does not overlap the histograms (argument is fraction of frame height to pad)
     'data_name': 'data_obs',     # Name of the TH1 to take for data
     'main_logo': 'CMS',
     'sub_logo': 'Internal',
     'top_title_right': '35.9 fb^{-1} (13 TeV)',
-    'top_title_left': ''
+    'top_title_left': '',
+    'hide_data': True
 }
 
 config_by_setting = {
@@ -66,19 +73,30 @@ config_by_setting = {
 
 variants_by_path = [
     ("*", {}),
+    # ("*", {
+    #         "postfix": "_mc",
+    #         "layout": "pure_mc"
+    #     }),
     ("*/p0_pt", {
             "prefix": "logy_",
             "logy": True}),
     ("*/p0_pt", {
             "prefix": "zoom_",
-            "x_range": (0, 200)})
+            "x_range": (0, 200)}),
+    # ("*/p0_pt", {
+    #         "prefix": "fr_barrel_",
+    #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
+    #         "logy": True})
 ]
 
 
 def MakePlot(name, outdir, hists, cfg, layouts):
     copyhists = {}
     for hname, h in hists.iteritems():
-        copyhists[hname] = h.Clone()
+        if len(cfg['rebinvar']):
+            copyhists[hname] = VariableRebin(h, cfg['rebinvar'])
+        else:
+            copyhists[hname] = h.Clone()
         if cfg['divwidth']:
             copyhists[hname].Scale(1., 'width')
 
@@ -122,7 +140,7 @@ def MakePlot(name, outdir, hists, cfg, layouts):
 
     if cfg['logy']:
         pads[0].SetLogy()
-        h_axes[0].SetMinimum(0.1)
+        h_axes[0].SetMinimum(0.001)
 
     if cfg['ratio']:
         plot.StandardAxes(h_axes[1].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
@@ -168,11 +186,13 @@ def MakePlot(name, outdir, hists, cfg, layouts):
 
     stack.Draw('HISTSAME')
     h_tot.Draw("E2SAME")
-    h_data.Draw('E0SAME')
+    if not cfg['hide_data']:
+        h_data.Draw('E0SAME')
 
     plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.35)
     legend.Draw()
     if cfg['legend_padding'] > 0.:
+        print h_axes[0].GetMinimum(), h_axes[0].GetMaximum()
         plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
@@ -184,7 +204,8 @@ def MakePlot(name, outdir, hists, cfg, layouts):
         r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
         r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
         r_tot.Draw('E2SAME')
-        r_data.Draw('SAME')
+        if not cfg['hide_data']:
+            r_data.Draw('SAME')
 
         plot.SetupTwoPadSplitAsRatio(
             pads, plot.GetAxisHist(
@@ -218,10 +239,11 @@ parser.add_argument('--logy', action='store_true')
 parser.add_argument('--y-min', type=float, default=1)
 parser.add_argument('--title', default='')
 parser.add_argument('--layout-file', '-l', default='layouts.json')
+parser.add_argument('--layout', default='data_fakes')
 
 args = parser.parse_args()
 
-
+default_cfg['layout'] = args.layout
 
 with open(args.layout_file) as jsonfile:
     layouts = json.load(jsonfile)

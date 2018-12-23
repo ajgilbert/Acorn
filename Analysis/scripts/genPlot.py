@@ -28,6 +28,7 @@ parser.add_argument('--draw', default='gen_phi')
 parser.add_argument('--abs', action='store_true')
 parser.add_argument('--unit-norm', action='store_true')
 parser.add_argument('--charge', default='+1')
+parser.add_argument('--logy', action='store_true')
 parser.add_argument('--g_pt', default='300.')
 parser.add_argument('--g_pt_max', default='9999999999.')
 parser.add_argument('--g_eta', default='3.')
@@ -39,6 +40,7 @@ parser.add_argument('--n_eta', default='9999.')
 parser.add_argument('--nparts_max', default='10')
 parser.add_argument('--dr', default='3.0')
 parser.add_argument('--output', '-o', default='gen_plot')
+parser.add_argument('--ratio-max', default=1.46, type=float)
 parser.add_argument('--save-scalings', type=int, default=0, help="1: save absolute 2: save relative")
 # parser.add_argument('--ratio', '-o', default='gen_plot')
 args = parser.parse_args()
@@ -51,20 +53,24 @@ hists = Node()
 
 # drawabs = True
 # drawvar = 'lhe_phi1'
+pt_bins = [150, 210, 300, 420, 600, 850, 1200]
 if args.abs:
     drawvar = 'fabs(%s)' % args.draw
     binning = (5, 0, 3.15)
 else:
     drawvar = '%s' % args.draw
-    binning = (10, -3.15, 3.15)
+    if 'phi' in drawvar:
+        binning = (10, -3.15, 3.15)
+    elif 'g_pt' in drawvar:
+        binning = (20, 0, 1000)
 
-pt_bins = [150, 210, 300, 420, 600]
 
 for name, sa, wt in [
         ('nominal', 'WG', 'wt_C3w_0p0*wt_def'),
         ('C3w_0p1', 'WG', 'wt_C3w_0p1*wt_def'),
         ('C3w_0p2', 'WG', 'wt_C3w_0p2*wt_def'),
         ('C3w_0p4', 'WG', 'wt_C3w_0p4*wt_def'),
+        ('C3w_0p67', 'WG', 'wt_C3w_0p67*wt_def'),
         ('C3w_1p0', 'WG', 'wt_C3w_1p0*wt_def'),
         # ('SM', 'WGSM', '1.0'),
         # ('TH', 'WGTH', '1.0')
@@ -105,7 +111,7 @@ if save_scalings >= 1:
         for ib in xrange(1, hists['nominal_2D'].GetNbinsX() + 1):
             xmin = hists['nominal_2D'].GetXaxis().GetBinLowEdge(ib)
             xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
-            npoints = 5
+            npoints = 6
             gr = ROOT.TGraphErrors(npoints)
             nom = hists['nominal_2D'].GetBinContent(ib, jb)
             if nom != 0.:
@@ -113,12 +119,14 @@ if save_scalings >= 1:
                 gr.SetPoint(1, 0.1, hists['C3w_0p1_2D'].GetBinContent(ib, jb) / nom)
                 gr.SetPoint(2, 0.2, hists['C3w_0p2_2D'].GetBinContent(ib, jb) / nom)
                 gr.SetPoint(3, 0.4, hists['C3w_0p4_2D'].GetBinContent(ib, jb) / nom)
-                gr.SetPoint(4, 1.0, hists['C3w_1p0_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(4, 0.67, hists['C3w_0p67_2D'].GetBinContent(ib, jb) / nom)
+                gr.SetPoint(5, 1.0, hists['C3w_1p0_2D'].GetBinContent(ib, jb) / nom)
                 gr.SetPointError(0, 0., hists['nominal_2D'].GetBinError(ib, jb) / nom)
                 gr.SetPointError(1, 0., hists['C3w_0p1_2D'].GetBinError(ib, jb) / nom)
                 gr.SetPointError(2, 0., hists['C3w_0p2_2D'].GetBinError(ib, jb) / nom)
                 gr.SetPointError(3, 0., hists['C3w_0p4_2D'].GetBinError(ib, jb) / nom)
-                gr.SetPointError(4, 0., hists['C3w_1p0_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(4, 0., hists['C3w_0p67_2D'].GetBinError(ib, jb) / nom)
+                gr.SetPointError(5, 0., hists['C3w_1p0_2D'].GetBinError(ib, jb) / nom)
             canv = ROOT.TCanvas('%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1), '%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1))
             pads = plot.OnePad()
             gr.Draw('APC')
@@ -151,6 +159,8 @@ for h in h_axes:
 
 if 'true_phi' in drawvar:
     labelvar = '#varphi_{true}'
+elif 'g_pt' in drawvar:
+    labelvar = 'p_{T}^{#gamma} (GeV)'
 else:
     labelvar = '#varphi_{gen}'
 if args.abs:
@@ -159,11 +169,14 @@ h_axes[1].GetXaxis().SetTitle(labelvar)
 
 h_axes[0].GetYaxis().SetTitle('a.u.')
 h_axes[0].Draw()
+if args.logy:
+    pads[0].SetLogy()
+    h_axes[0].SetMinimum(0.1)
 
 # A dict to keep track of the hists
 legend = ROOT.TLegend(0.67, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
 
-legend.AddEntry(h_nominal, 'EWDim6', 'L')
+legend.AddEntry(h_nominal, 'C_{3W} = 0.0 (EWDim6)', 'L')
 # legend.AddEntry(h_sm, 'SM', 'L')
 # legend.AddEntry(h_th, 'Reference', 'L')
 legend.AddEntry(h_0p1, 'C_{3W} = 0.1', 'L')
@@ -174,7 +187,7 @@ legend.AddEntry(h_1p0, 'C_{3W} = 1.0', 'L')
 # plot.Set(h_sm, LineColor=2, LineWidth=2, MarkerColor=2)
 # plot.Set(h_th, LineColor=4, LineWidth=2, MarkerColor=4)
 plot.Set(h_0p1, LineColor=6, LineWidth=1)
-plot.Set(h_0p2, LineColor=7, LineWidth=1)
+plot.Set(h_0p2, LineColor=ROOT.kGreen-3, LineWidth=1)
 plot.Set(h_0p4, LineColor=9, LineWidth=1)
 plot.Set(h_1p0, LineColor=28, LineWidth=1)
 
@@ -208,7 +221,7 @@ r_1p0.Draw('HISTSAME')
 # r_data.Draw('SAME')
 plot.SetupTwoPadSplitAsRatio(
     pads, plot.GetAxisHist(
-        pads[0]), plot.GetAxisHist(pads[1]), 'C_{3W} = X / Nominal', True, 0.64, 1.36)
+        pads[0]), plot.GetAxisHist(pads[1]), 'C_{3W} = X / Nominal', True, 0.54, args.ratio_max)
 
 
 # Go back and tidy up the axes and frame
@@ -228,13 +241,13 @@ plot.DrawTitle(pads[0], 'W^{%s}#gamma^{} LO - MG5_aMC@NLO 2.4.2' %
                ('+' if args.charge == '+1' else '-' if args.charge == '-1' else '#pm'), 1)
 
 pt_l = ROOT.TPaveText(0.23, 0.65, 0.55, 0.9, 'NDCNB')
-pt_l.AddText('Selection: before showering (LHE)')
+pt_l.AddText('Selection:')
 pt_l.AddText('p_{T}^{#gamma} > %s GeV, |#eta^{#gamma}| < %s' %
              (args.g_pt, args.g_eta))
 pt_l.AddText('p_{T}^{l} > %s GeV, |#eta^{l}| < %s' % (args.l_pt, args.l_eta))
 pt_l.AddText('p_{T}^{miss} > %s GeV' % args.n_pt)
 pt_l.AddText('#DeltaR(l, #gamma) > %s' % args.dr)
-pt_l.AddText('nJets (ME) >= 0')
+# pt_l.AddText('nJets (ME) >= 0')
 plot.Set(pt_l, TextAlign=11, TextFont=42, BorderSize=0)
 
 pt_l.Draw()

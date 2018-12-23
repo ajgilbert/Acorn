@@ -13,8 +13,8 @@ ROOT.TH1.AddDirectory(False)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--task', default='eft_region', choices=['eft_region', 'photon_fakes'])
-parser.add_argument('--indir', default='output/130818-reduced/wgamma_2016_v2/WGamma/')
+parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes'])
+parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
 
 args = parser.parse_args()
 
@@ -38,6 +38,8 @@ remap = {
     'ZZTo4L': 'ZZTo4L-amcatnloFXFX'
 }
 
+dibosons = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L']
+
 samples = {}
 for sa in remap:
     samples[sa] = (prefix + remap[sa] + '.root')
@@ -49,8 +51,8 @@ do_cats = []
 X = SelectionManager()
 
 if args.task == 'eft_region':
-    pt_bins_min = [150, 210, 300, 420]
-    pt_bins_max = [210, 300, 420, 600]
+    pt_bins_min = [150, 210, 300, 420, 600, 850]
+    pt_bins_max = [210, 300, 420, 600, 850, 1200]
     phi_bins_min = [0.00, 0.63, 1.26, 1.89, 2.52]
     phi_bins_max = [0.63, 1.26, 1.89, 2.52, 3.15]
 
@@ -100,7 +102,7 @@ if args.task == 'eft_region':
         for var, binning in drawvars:
             for sample in samples:
                 hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-            for P in ['W', 'DY', 'TT']:
+            for P in ['W', 'DY', 'TT'] + dibosons:
                 hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && p0_isprompt'), wt=X.get('$baseline_wt'))
                 hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !p0_isprompt'), wt=X.get('$baseline_wt'))
             hists[sel][var]['data_fakes'] = Hist('TH1D', sample='data_obs', var=[var], binning=binning,
@@ -112,16 +114,61 @@ if args.task == 'eft_region':
             hists[sel][var]['WG_n_acc'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
             hists[sel][var]['WG_p_acc_met1'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc_met1'), wt=X.get('$baseline_wt'))
             hists[sel][var]['WG_n_acc_met1'] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc_met1'), wt=X.get('$baseline_wt'))
-            for i in range(len(pt_bins_min)):
-                hists[sel][var]['WG_p_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i' % (i)), wt=X.get('$baseline_wt'))
-                hists[sel][var]['WG_n_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i' % (i)), wt=X.get('$baseline_wt'))
-                hists[sel][var]['WG_p_met1_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_met1_%i' % (i)), wt=X.get('$baseline_wt'))
-                hists[sel][var]['WG_n_met1_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_met1_%i' % (i)), wt=X.get('$baseline_wt'))
-                for j in range(len(phi_bins_min)):
-                    hists[sel][var]['WG_p_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
-                    hists[sel][var]['WG_n_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
-                    hists[sel][var]['WG_p_met1_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_met1_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
-                    hists[sel][var]['WG_n_met1_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_met1_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+            if sel[-1].isdigit():
+                # for i in range(len(pt_bins_min)):
+                for i in [int(sel[-1])]:
+                    hists[sel][var]['WG_p_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i' % (i)), wt=X.get('$baseline_wt'))
+                    hists[sel][var]['WG_n_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i' % (i)), wt=X.get('$baseline_wt'))
+                    hists[sel][var]['WG_p_met1_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_met1_%i' % (i)), wt=X.get('$baseline_wt'))
+                    hists[sel][var]['WG_n_met1_%i' % (i)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_met1_%i' % (i)), wt=X.get('$baseline_wt'))
+                    for j in range(len(phi_bins_min)):
+                        hists[sel][var]['WG_p_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+                        hists[sel][var]['WG_n_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+                        hists[sel][var]['WG_p_met1_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_met1_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+                        hists[sel][var]['WG_n_met1_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_met1_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
+
+if args.task == 'baseline':
+    X['iso_t'] = 'p0_chiso < 0.441'
+    X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
+    X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01022) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.03001)'
+    X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01022) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.03001)'
+    X['baseline'] ='m0_trg && n_m==1 && m0_iso<0.15 && n_p==1 && p0_medium_noch && $iso_t && $sig_t && !p0_haspix && m0_pt>30 && met>0 && p0_pt>30 && m0p0_dr>0.7 && m0met_mt>60'
+    X['baseline_wt'] = 'wt_def*wt_pu*wt_m0*wt_trg_m0*wt_p0'
+    do_cats.extend(['baseline'])
+
+    drawvars = [
+        ('m0met_mt', (30, 0., 200.)),
+        ('m0_pt', (40, 0., 150.)),
+        ('m0_eta', (20, -3.0, 3.0)),
+        ('m0_iso', (40, 0, 2.0)),
+        ('m1_pt', (40, 0., 150.)),
+        ('m1_eta', (20, -3.0, 3.0)),
+        ('m0m1_M', (40, 60, 120)),
+        ('m0m1_dr', (20, 0., 5.)),
+        ('met', (20, 0., 200.)),
+        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300]),
+        # ('p0_pt', (100, 0, 500.)),
+        ('p0_eta', (20, -3.0, 3.0)),
+        ('m0p0_dr', (20, 0., 5.)),
+        ('m0p0_M', (20, 60, 120)),
+        ('p0_chiso', (40, 0, 20.0)),
+        ('p0_neiso', (40, 0, 20.0)),
+        ('p0_phiso', (40, 0, 20.0)),
+        ('p0_hovere', (20, 0., 0.5)),
+        ('p0_sigma', (30, 0., 0.06)),
+        ('p0_haspix', (2, -0.5, 1.5))
+    ]
+
+    for sel in do_cats:
+        for var, binning in drawvars:
+            for sample in samples:
+                hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+            for P in ['W', 'DY', 'TT'] + dibosons:
+                hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && p0_isprompt'), wt=X.get('$baseline_wt'))
+                hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !p0_isprompt'), wt=X.get('$baseline_wt'))
+            hists[sel][var]['data_fakes'] = Hist('TH1D', sample='data_obs', var=[var], binning=binning,
+                sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=2),
+                wt=X.get('$baseline_wt * wt_p0_fake'))
 
 
 if args.task == 'photon_fakes':
@@ -169,7 +216,7 @@ if args.task == 'photon_fakes':
         for var, binning in drawvars:
             for sample in samples:
                 hists[sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                for P in ['W', 'DY', 'TT']:
+                for P in ['W', 'DY', 'TT'] + dibosons:
                     hists[sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && p0_isprompt'), wt=X.get('$baseline_wt'))
                     hists[sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !p0_isprompt'), wt=X.get('$baseline_wt'))
                 if 'iso_t_sig_t' in sel:
@@ -201,7 +248,11 @@ for path, hname, obj in hists.ListObjects():
 fout = ROOT.TFile('output_2016_%s.root' % args.task, 'RECREATE')
 
 for path, node in hists.ListNodes(withObjects=True):
-    node['Total_R'] = node['WG'] + node['TT_R'] + node['DY_R']
+    node['VV'] = sum([node[X] for X in dibosons[1:]], node[dibosons[0]])
+    node['VV_F'] = sum([node['%s_F' % X] for X in dibosons[1:]], node['%s_F' % dibosons[0]])
+    node['VV_R'] = sum([node['%s_R' % X] for X in dibosons[1:]], node['%s_R' % dibosons[0]])
+    node['Total_R'] = node['WG'] + node['TT_R'] + node['DY_R'] + node['VV_R']
+    node['Total_F'] = node['W_F'] + node['TT_F'] + node['DY_F'] + node['VV_F']
 
 NodeToTDir(fout, hists)
 
