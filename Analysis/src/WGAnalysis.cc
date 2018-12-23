@@ -45,6 +45,7 @@ namespace ac {
       tree_->Branch("wt_C3w_0p1", &wt_C3w_0p1_);
       tree_->Branch("wt_C3w_0p2", &wt_C3w_0p2_);
       tree_->Branch("wt_C3w_0p4", &wt_C3w_0p4_);
+      tree_->Branch("wt_C3w_0p67", &wt_C3w_0p67_);
       tree_->Branch("wt_C3w_1p0", &wt_C3w_1p0_);
     }
     return 0;
@@ -66,6 +67,7 @@ namespace ac {
     wt_C3w_0p1_ = 1.0;
     wt_C3w_0p2_ = 1.0;
     wt_C3w_0p4_ = 1.0;
+    wt_C3w_0p67_ = 1.0;
     wt_C3w_1p0_ = 1.0;
 
     auto info = event->GetPtr<ac::EventInfo>("eventInfo");
@@ -76,6 +78,7 @@ namespace ac {
     wt_C3w_0p1_ = info->lheWeights().at(100001);
     wt_C3w_0p2_ = info->lheWeights().at(100002);
     wt_C3w_0p4_ = info->lheWeights().at(100003);
+    wt_C3w_0p67_ = info->lheWeights().at(100004);
 
     WGGenParticles parts = ProduceWGGenParticles(lhe_parts, gen_parts);
     nparts_ = parts.nparts;

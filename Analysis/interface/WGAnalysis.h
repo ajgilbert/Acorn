@@ -28,6 +28,7 @@ class WGAnalysis : public ModuleBase {
   float wt_C3w_0p1_;
   float wt_C3w_0p2_;
   float wt_C3w_0p4_;
+  float wt_C3w_0p67_;
   float wt_C3w_1p0_;
   float w_pt_;
   float g_pt_;
