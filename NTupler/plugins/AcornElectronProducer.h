@@ -49,9 +49,13 @@ class AcornElectronProducer : public AcornBaseProducer<std::vector<ac::Electron>
 
   std::string eleHEEPIdLabel_;
 
+  std::vector<std::string> relativeEAIsoFromUserData_;
+
   // Take the id values stored within the pat::Electron objects
   // instead of reading from external ValueMaps
   bool takeIdsFromObjects_;
+
+  void printCutFlowResult(vid::CutFlowResult const& cutflow);
 
 };
 

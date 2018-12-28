@@ -38,8 +38,8 @@ AcornElectronProducer::AcornElectronProducer(const edm::ParameterSet& config)
           consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleMVAwp90IdMap"))),
       eleHEEPIdMapToken_(
           consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleHEEPIdMap"))),
+      relativeEAIsoFromUserData_(config.getParameter<std::vector<std::string>>("relativeEAIsoFromUserData")),
       takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")) {
-
   eleVetoIdLabel_ = config.getParameter<edm::InputTag>("eleVetoIdMap").label();
   eleLooseIdLabel_ = config.getParameter<edm::InputTag>("eleLooseIdMap").label();
   eleMediumIdLabel_ = config.getParameter<edm::InputTag>("eleMediumIdMap").label();
@@ -108,6 +108,10 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
         dest.setIsMVAwp90Electron(setVar("isMVAwp90Electron", pat_src->electronID(eleMVAwp90IdLabel_)));
 
         dest.setIsHEEPElectron(setVar("isHEEPElectron", pat_src->electronID(eleHEEPIdLabel_)));
+        if (relativeEAIsoFromUserData_.size() == 2) {
+          vid::CutFlowResult const* fullCutFlowData = pat_src->userData<vid::CutFlowResult>(relativeEAIsoFromUserData_[0]);
+          dest.setRelativeEAIso(setVar("relativeEAIso", fullCutFlowData->getValueCutUpon(relativeEAIsoFromUserData_[1])));
+        }
       }
     } else {
       dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron",(*vetoIdDecisions)[electrons_handle->ptrAt(i)]));
@@ -126,6 +130,20 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     dest.setVertex(setVar("vertex", src.vertex()));
 
+  }
+}
+
+void AcornElectronProducer::printCutFlowResult(vid::CutFlowResult const& cutflow) {
+  printf("    CutFlow name= %s    decision is %d\n", cutflow.cutFlowName().c_str(),
+         (int)cutflow.cutFlowPassed());
+  int ncuts = cutflow.cutFlowSize();
+  printf(
+      " Index                               cut name              isMasked    value-cut-upon     "
+      "pass?\n");
+  for (int icut = 0; icut < ncuts; icut++) {
+    printf("  %d       %50s    %d        %f          %d\n", icut,
+           cutflow.getNameAtIndex(icut).c_str(), (int)cutflow.isCutMasked(icut),
+           cutflow.getValueCutUpon(icut), (int)cutflow.getCutResultByIndex(icut));
   }
 }
 

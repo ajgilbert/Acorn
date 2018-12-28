@@ -169,6 +169,7 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
+    relativeEAIsoFromUserData=cms.vstring(), # does nothing when args are empty
     takeIdsFromObjects=cms.bool(False)
 )
 

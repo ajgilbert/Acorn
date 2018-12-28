@@ -21,16 +21,18 @@ class Electron : public Candidate {
   Electron();
   virtual ~Electron();
   virtual void Print() const;
-  
+
   inline bool isCutBasedVetoElectron() const { return isCutBasedVetoElectron_; }
   inline bool isCutBasedLooseElectron() const { return isCutBasedLooseElectron_; }
   inline bool isCutBasedMediumElectron() const { return isCutBasedMediumElectron_; }
   inline bool isCutBasedTightElectron() const { return isCutBasedTightElectron_; }
-  
+
   inline bool isMVAwp90Electron() const { return isMVAwp90Electron_; }
   inline bool isMVAwp80Electron() const { return isMVAwp80Electron_; }
 
   inline bool isHEEPElectron() const { return isHEEPElectron_; }
+
+  inline double relativeEAIso() const { return relativeEAIso_; }
 
   inline double dxy() const { return dxy_; }
   inline double dz() const { return dz_; }
@@ -47,6 +49,8 @@ class Electron : public Candidate {
 
   inline void setIsHEEPElectron(bool const& isHEEPElectron) { isHEEPElectron_ = isHEEPElectron; }
 
+  inline void setRelativeEAIso(double const& relativeEAIso) { relativeEAIso_ = relativeEAIso; }
+
   inline void setDxy(double const& dxy) { dxy_ = dxy; }
   inline void setDz(double const& dz) { dz_ = dz; }
 
@@ -59,11 +63,13 @@ class Electron : public Candidate {
   bool isCutBasedMediumElectron_;
   bool isCutBasedTightElectron_;
 
-  bool isMVAwp90Electron_; 
-  bool isMVAwp80Electron_; 
+  bool isMVAwp90Electron_;
+  bool isMVAwp80Electron_;
 
-  bool isHEEPElectron_; 
-  
+  bool isHEEPElectron_;
+
+  double relativeEAIso_;
+
   double dxy_;
   double dz_;
 

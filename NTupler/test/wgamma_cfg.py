@@ -108,6 +108,18 @@ ele_mva_wp80_id = "mvaEleID-Fall17-iso-V2-wp80"
 ele_mva_wp90_id = "mvaEleID-Fall17-iso-V2-wp90"
 ele_heep_id = "heepElectronID-HEEPV70"
 
+# Embed the full vid results in the new electron object
+process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
+    electron_config=cms.PSet(
+        ElectronCutValues=cms.InputTag("egmGsfElectronIDs", ele_medium_id),
+        electronSrc=cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess"),
+    ),
+    modifierName=cms.string('EGExtraInfoModifierFromVIDCutFlowResultValueMaps'),
+    overrideExistingValues=cms.bool(True),
+    photon_config=cms.PSet()
+    )
+)
+
 process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
@@ -120,6 +132,7 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id),
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
+    relativeEAIsoFromUserData=cms.vstring('ElectronCutValues', 'GsfEleRelPFIsoScaledCut_0'),
     takeIdsFromObjects=cms.bool(True)
 )
 
