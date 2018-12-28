@@ -30,11 +30,19 @@ class AcornPhotonProducer : public AcornBaseProducer<std::vector<ac::Photon>> {
   edm::EDGetTokenT<edm::ValueMap<bool>> phoMediumIdMapToken_;
   edm::EDGetTokenT<edm::ValueMap<bool>> phoTightIdMapToken_;
 
+  std::string phoLooseIdLabel_;
+  std::string phoMediumIdLabel_;
+  std::string phoTightIdLabel_;
+
   edm::EDGetTokenT<edm::ValueMap<vid::CutFlowResult> > phoCutFlowToken_;
 
   std::string chargedIsolationLabel_;
   std::string neutralHadronIsolationLabel_;
   std::string photonIsolationLabel_;
+
+  // Take the id values stored within the pat::Photon objects
+  // instead of reading from external ValueMaps
+  bool takeIdsFromObjects_;
 
   void printCutFlowResult(vid::CutFlowResult &cutflow);
 };

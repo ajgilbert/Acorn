@@ -168,7 +168,8 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleTightIdMap=cms.InputTag(ele_tight_id), 
     eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
-    eleHEEPIdMap=cms.InputTag(ele_heep_id) 
+    eleHEEPIdMap=cms.InputTag(ele_heep_id),
+    takeIdsFromObjects=cms.bool(False)
 )
 
 

@@ -39,6 +39,20 @@ class AcornElectronProducer : public AcornBaseProducer<std::vector<ac::Electron>
 
   edm::EDGetTokenT<edm::ValueMap<bool>> eleHEEPIdMapToken_;
 
+  std::string eleVetoIdLabel_;
+  std::string eleLooseIdLabel_;
+  std::string eleMediumIdLabel_;
+  std::string eleTightIdLabel_;
+
+  std::string eleMVAwp80IdLabel_;
+  std::string eleMVAwp90IdLabel_;
+
+  std::string eleHEEPIdLabel_;
+
+  // Take the id values stored within the pat::Electron objects
+  // instead of reading from external ValueMaps
+  bool takeIdsFromObjects_;
+
 };
 
 #endif

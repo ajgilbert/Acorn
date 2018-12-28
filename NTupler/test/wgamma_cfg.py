@@ -1,4 +1,6 @@
 import FWCore.ParameterSet.Config as cms
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+
 process = cms.Process("MAIN")
 # import sys
 
@@ -69,15 +71,19 @@ process.GlobalTag.globaltag = cms.string(opts.globalTag)
 process.options.numberOfThreads = cms.untracked.uint32(opts.cores)
 process.options.numberOfStreams = cms.untracked.uint32(opts.cores)
 
+process.selectedElectrons = cms.EDFilter("PATElectronRefSelector",
+    src=cms.InputTag("slimmedElectrons"),
+    cut=cms.string("pt > 20 & abs(eta) < 2.6")
+)
 
 process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
-    src = cms.InputTag("slimmedMuons"),
-    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+    src=cms.InputTag("slimmedMuons"),
+    cut=cms.string("pt > 20 & abs(eta) < 2.6")
 )
 
 process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
-    src = cms.InputTag("slimmedPhotons"),
-    cut = cms.string("pt > 20 & abs(eta) < 3.5")
+    src=cms.InputTag("slimmedPhotons"),
+    cut=cms.string("pt > 20 & abs(eta) < 3.5")
 )
 
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
@@ -88,26 +94,39 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 )
 
 
-#### Adding the photon ID
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-# turn on VID producer, indicate data format  to be
-# DataFormat.AOD or DataFormat.MiniAOD, as appropriate
-switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
+### Setup for EGamma recipes
+setupEgammaPostRecoSeq(process,
+    runEnergyCorrections=False, #corrections by default are fine so no need to re-run
+    era='2016-Legacy')
 
-# define which IDs we want to produce
-if opts.year == '2016':
-    my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
-    photon_loose_id = "egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-loose"
-    photon_medium_id = "egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium"
-    photon_tight_id = "egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-tight"
-else:
-    my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V1_TrueVtx_cff']
-    photon_loose_id = 'egmPhotonIDs:cutBasedPhotonID-Fall17-94X-V1-loose'
-    photon_medium_id = 'egmPhotonIDs:cutBasedPhotonID-Fall17-94X-V1-medium'
-    photon_tight_id = 'egmPhotonIDs:cutBasedPhotonID-Fall17-94X-V1-tight'
-#add them to the VID producer
-for idmod in my_id_modules:
-    setupAllVIDIdsInModule(process, idmod, setupVIDPhotonSelection)
+### Electrons
+ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"
+ele_loose_id = "cutBasedElectronID-Fall17-94X-V2-loose"
+ele_medium_id = "cutBasedElectronID-Fall17-94X-V2-medium"
+ele_tight_id = "cutBasedElectronID-Fall17-94X-V2-tight"
+ele_mva_wp80_id = "mvaEleID-Fall17-iso-V2-wp80"
+ele_mva_wp90_id = "mvaEleID-Fall17-iso-V2-wp90"
+ele_heep_id = "heepElectronID-HEEPV70"
+
+process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
+    input=cms.InputTag("selectedElectrons"),
+    inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
+    branch=cms.string('electrons'),
+    select=cms.vstring('keep .* p4=12'),
+    eleVetoIdMap=cms.InputTag(ele_veto_id),
+    eleLooseIdMap=cms.InputTag(ele_loose_id),
+    eleMediumIdMap=cms.InputTag(ele_medium_id),
+    eleTightIdMap=cms.InputTag(ele_tight_id),
+    eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id),
+    eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
+    eleHEEPIdMap=cms.InputTag(ele_heep_id),
+    takeIdsFromObjects=cms.bool(True)
+)
+
+### Photons
+photon_loose_id = "cutBasedPhotonID-Fall17-94X-V2-loose"
+photon_medium_id = "cutBasedPhotonID-Fall17-94X-V2-medium"
+photon_tight_id = "cutBasedPhotonID-Fall17-94X-V2-tight"
 
 process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     input=cms.InputTag("selectedPhotons"),
@@ -117,9 +136,10 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     phoMediumIdMap=cms.InputTag(photon_medium_id),
     phoTightIdMap=cms.InputTag(photon_tight_id),
     phoCutFlow=cms.InputTag(photon_medium_id),
-    chargedIsolation=cms.string('PhoAnyPFIsoWithEACut_0'),
-    neutralHadronIsolation=cms.string('PhoAnyPFIsoWithEAAndQuadScalingCut_0'),
-    photonIsolation=cms.string('PhoAnyPFIsoWithEACut_1')
+    chargedIsolation=cms.string('phoChargedIsolation'),
+    neutralHadronIsolation=cms.string('phoNeutralHadronIsolation'),
+    photonIsolation=cms.string('phoPhotonIsolation'),
+    takeIdsFromObjects=cms.bool(True)
 )
 
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
@@ -198,10 +218,7 @@ process.acTriggerObjectSequence = cms.Sequence(
     # process.icTriggerPathProducer
 )
 
-if opts.year == '2016':
-    trigger_objects = 'selectedPatTrigger'
-else:
-    trigger_objects = 'slimmedPatTrigger'
+trigger_objects = 'slimmedPatTrigger'
 
 for path in hlt_paths:
     shortname = path[4:-2]  # drop the HLT_ and _v parts
@@ -253,9 +270,11 @@ elif genOnly == 2:
         process.acEventProducer)
 else:
     process.p = cms.Path(
-        process.egmPhotonIDSequence +
+        process.egammaPostRecoSeq +
+        process.selectedElectrons +
         process.selectedMuons +
         process.selectedPhotons +
+        process.acElectronProducer +
         process.acMuonProducer +
         process.acPhotonProducer +
         process.acPFType1MetProducer +

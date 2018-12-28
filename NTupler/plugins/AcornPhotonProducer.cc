@@ -28,7 +28,13 @@ AcornPhotonProducer::AcornPhotonProducer(const edm::ParameterSet& config)
           config.getParameter<edm::InputTag>("phoCutFlow"))),
       chargedIsolationLabel_(config.getParameter<std::string>("chargedIsolation")),
       neutralHadronIsolationLabel_(config.getParameter<std::string>("neutralHadronIsolation")),
-      photonIsolationLabel_(config.getParameter<std::string>("photonIsolation")) {}
+      photonIsolationLabel_(config.getParameter<std::string>("photonIsolation")),
+      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")) {
+
+  phoLooseIdLabel_ = config.getParameter<edm::InputTag>("phoLooseIdMap").label();
+  phoMediumIdLabel_ = config.getParameter<edm::InputTag>("phoMediumIdMap").label();
+  phoTightIdLabel_ = config.getParameter<edm::InputTag>("phoTightIdMap").label();
+}
 
 AcornPhotonProducer::~AcornPhotonProducer() { ;}
 
@@ -43,10 +49,12 @@ void AcornPhotonProducer::produce(edm::Event& event,
   edm::Handle<edm::ValueMap<bool>> tightIdDecisions;
   edm::Handle<edm::ValueMap<vid::CutFlowResult>> cutflow;
 
-  event.getByToken(phoLooseIdMapToken_, looseIdDecisions);
-  event.getByToken(phoMediumIdMapToken_, mediumIdDecisions);
-  event.getByToken(phoTightIdMapToken_, tightIdDecisions);
-  event.getByToken(phoCutFlowToken_, cutflow);
+  if (!takeIdsFromObjects_) {
+    event.getByToken(phoLooseIdMapToken_, looseIdDecisions);
+    event.getByToken(phoMediumIdMapToken_, mediumIdDecisions);
+    event.getByToken(phoTightIdMapToken_, tightIdDecisions);
+    event.getByToken(phoCutFlowToken_, cutflow);
+  }
 
   output()->clear();
   output()->resize(photons_handle->size(), ac::Photon());
@@ -55,15 +63,27 @@ void AcornPhotonProducer::produce(edm::Event& event,
     reco::Photon const& src = photons_handle->at(i);
     ac::Photon& dest = output()->at(i);
 
-    dest.setIsLooseIdPhoton(
-        setVar("isLooseIdPhoton", (*looseIdDecisions)[photons_handle->ptrAt(i)]));
-    dest.setIsMediumIdPhoton(
-        setVar("isMediumIdPhoton", (*mediumIdDecisions)[photons_handle->ptrAt(i)]));
-    dest.setIsTightIdPhoton(
-        setVar("isTightIdPhoton", (*tightIdDecisions)[photons_handle->ptrAt(i)]));
-
     // Two variables we need are only implemented for pat::Photons
     pat::Photon const* pat_src = dynamic_cast<pat::Photon const*>(&src);
+
+    if (takeIdsFromObjects_) {
+      if (pat_src) {
+        dest.setIsLooseIdPhoton(
+            setVar("isLooseIdPhoton", pat_src->photonID(phoLooseIdLabel_)));
+        dest.setIsMediumIdPhoton(
+            setVar("isMediumIdPhoton", pat_src->photonID(phoMediumIdLabel_)));
+        dest.setIsTightIdPhoton(
+            setVar("isTightIdPhoton", pat_src->photonID(phoTightIdLabel_)));
+      }
+    } else {
+      dest.setIsLooseIdPhoton(
+          setVar("isLooseIdPhoton", (*looseIdDecisions)[photons_handle->ptrAt(i)]));
+      dest.setIsMediumIdPhoton(
+          setVar("isMediumIdPhoton", (*mediumIdDecisions)[photons_handle->ptrAt(i)]));
+      dest.setIsTightIdPhoton(
+          setVar("isTightIdPhoton", (*tightIdDecisions)[photons_handle->ptrAt(i)]));
+    }
+
     if (pat_src) {
       dest.setPassElectronVeto(setVar("passElectronVeto", pat_src->passElectronVeto()));
       dest.setHasPixelSeed(setVar("hasPixelSeed", pat_src->hasPixelSeed()));
@@ -73,15 +93,21 @@ void AcornPhotonProducer::produce(edm::Event& event,
     dest.setHadTowOverEm(setVar("hadTowOverEm", src.hadTowOverEm()));
     dest.setFull5x5SigmaIetaIeta(setVar("full5x5SigmaIetaIeta", src.full5x5_sigmaIetaIeta()));
 
-    // This is how to print the full cut flow later if desired.
-    // See this message for details of what the cryptic cut names are:
-    // https://hypernews.cern.ch/HyperNews/CMS/get/met/506/2.html
-    vid::CutFlowResult fullCutFlowData = (*cutflow)[photons_handle->ptrAt(i)];
-    // printCutFlowResult(fullCutFlowData);
+    if (takeIdsFromObjects_) {
+      dest.setChargedIso(setVar("chargedIso", pat_src->userFloat(chargedIsolationLabel_)));
+      dest.setNeutralHadronIso(setVar("neutralHadronIso", pat_src->userFloat(neutralHadronIsolationLabel_)));
+      dest.setPhotonIso(setVar("photonIso", pat_src->userFloat(photonIsolationLabel_)));
+    } else {
+      // This is how to print the full cut flow later if desired.
+      // See this message for details of what the cryptic cut names are:
+      // https://hypernews.cern.ch/HyperNews/CMS/get/met/506/2.html
+      vid::CutFlowResult fullCutFlowData = (*cutflow)[photons_handle->ptrAt(i)];
+      // printCutFlowResult(fullCutFlowData);
 
-    dest.setChargedIso(setVar("chargedIso", fullCutFlowData.getValueCutUpon(chargedIsolationLabel_)));
-    dest.setNeutralHadronIso(setVar("neutralHadronIso", fullCutFlowData.getValueCutUpon(neutralHadronIsolationLabel_)));
-    dest.setPhotonIso(setVar("photonIso", fullCutFlowData.getValueCutUpon(photonIsolationLabel_)));
+      dest.setChargedIso(setVar("chargedIso", fullCutFlowData.getValueCutUpon(chargedIsolationLabel_)));
+      dest.setNeutralHadronIso(setVar("neutralHadronIso", fullCutFlowData.getValueCutUpon(neutralHadronIsolationLabel_)));
+      dest.setPhotonIso(setVar("photonIso", fullCutFlowData.getValueCutUpon(photonIsolationLabel_)));
+    }
 
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));

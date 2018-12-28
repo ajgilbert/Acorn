@@ -16,6 +16,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "Acorn/NTupler/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/VIDCutFlowResult.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 
 AcornElectronProducer::AcornElectronProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::Electron>>(config),
@@ -36,7 +37,17 @@ AcornElectronProducer::AcornElectronProducer(const edm::ParameterSet& config)
       eleMVAwp90IdMapToken_(
           consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleMVAwp90IdMap"))),
       eleHEEPIdMapToken_(
-          consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleHEEPIdMap"))) {}
+          consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleHEEPIdMap"))),
+      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")) {
+
+  eleVetoIdLabel_ = config.getParameter<edm::InputTag>("eleVetoIdMap").label();
+  eleLooseIdLabel_ = config.getParameter<edm::InputTag>("eleLooseIdMap").label();
+  eleMediumIdLabel_ = config.getParameter<edm::InputTag>("eleMediumIdMap").label();
+  eleTightIdLabel_ = config.getParameter<edm::InputTag>("eleTightIdMap").label();
+  eleMVAwp80IdLabel_ = config.getParameter<edm::InputTag>("eleMVAwp80IdMap").label();
+  eleMVAwp90IdLabel_ = config.getParameter<edm::InputTag>("eleMVAwp90IdMap").label();
+  eleHEEPIdLabel_ = config.getParameter<edm::InputTag>("eleHEEPIdMap").label();
+}
 
 
 AcornElectronProducer::~AcornElectronProducer() { ; }
@@ -53,14 +64,15 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
   edm::Handle<edm::ValueMap<bool>> mvawp90IdDecisions;
   edm::Handle<edm::ValueMap<bool>> heepIdDecisions;
 
-  event.getByToken(eleVetoIdMapToken_, vetoIdDecisions);
-  event.getByToken(eleLooseIdMapToken_, looseIdDecisions);
-  event.getByToken(eleMediumIdMapToken_, mediumIdDecisions);
-  event.getByToken(eleTightIdMapToken_, tightIdDecisions);
-  event.getByToken(eleMVAwp80IdMapToken_, mvawp80IdDecisions);
-  event.getByToken(eleMVAwp90IdMapToken_, mvawp90IdDecisions);
-  event.getByToken(eleHEEPIdMapToken_, heepIdDecisions);
-
+  if (!takeIdsFromObjects_) {
+    event.getByToken(eleVetoIdMapToken_, vetoIdDecisions);
+    event.getByToken(eleLooseIdMapToken_, looseIdDecisions);
+    event.getByToken(eleMediumIdMapToken_, mediumIdDecisions);
+    event.getByToken(eleTightIdMapToken_, tightIdDecisions);
+    event.getByToken(eleMVAwp80IdMapToken_, mvawp80IdDecisions);
+    event.getByToken(eleMVAwp90IdMapToken_, mvawp90IdDecisions);
+    event.getByToken(eleHEEPIdMapToken_, heepIdDecisions);
+  }
   output()->clear();
   output()->resize(electrons_handle->size(), ac::Electron());
 
@@ -79,18 +91,35 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
     reco::GsfElectron const& src = electrons_handle->at(i);
     ac::Electron& dest = output()->at(i);
 
+    pat::Electron const* pat_src = dynamic_cast<pat::Electron const*>(&src);
+
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
 
-    dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron",(*vetoIdDecisions)[electrons_handle->ptrAt(i)]));
-    dest.setIsCutBasedLooseElectron(setVar("isCutBasedLooseElectron",(*looseIdDecisions)[electrons_handle->ptrAt(i)]));
-    dest.setIsCutBasedMediumElectron(setVar("isCutBasedLooseElectron",(*mediumIdDecisions)[electrons_handle->ptrAt(i)]));
-    dest.setIsCutBasedTightElectron(setVar("isCutBasedLooseElectron",(*tightIdDecisions)[electrons_handle->ptrAt(i)]));
 
-    dest.setIsMVAwp80Electron(setVar("isMVAwp80Electron",(*mvawp80IdDecisions)[electrons_handle->ptrAt(i)]));
-    dest.setIsMVAwp90Electron(setVar("isMVAwp90Electron",(*mvawp90IdDecisions)[electrons_handle->ptrAt(i)]));
+    if (takeIdsFromObjects_) {
+      if (pat_src) {
+        dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron", pat_src->electronID(eleVetoIdLabel_)));
+        dest.setIsCutBasedLooseElectron(setVar("isCutBasedLooseElectron", pat_src->electronID(eleLooseIdLabel_)));
+        dest.setIsCutBasedMediumElectron(setVar("isCutBasedMediumElectron", pat_src->electronID(eleMediumIdLabel_)));
+        dest.setIsCutBasedTightElectron(setVar("isCutBasedTightElectron", pat_src->electronID(eleTightIdLabel_)));
 
-    dest.setIsHEEPElectron(setVar("isHEEPElectron",(*heepIdDecisions)[electrons_handle->ptrAt(i)]));
+        dest.setIsMVAwp80Electron(setVar("isMVAwp80Electron", pat_src->electronID(eleMVAwp80IdLabel_)));
+        dest.setIsMVAwp90Electron(setVar("isMVAwp90Electron", pat_src->electronID(eleMVAwp90IdLabel_)));
+
+        dest.setIsHEEPElectron(setVar("isHEEPElectron", pat_src->electronID(eleHEEPIdLabel_)));
+      }
+    } else {
+      dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron",(*vetoIdDecisions)[electrons_handle->ptrAt(i)]));
+      dest.setIsCutBasedLooseElectron(setVar("isCutBasedLooseElectron",(*looseIdDecisions)[electrons_handle->ptrAt(i)]));
+      dest.setIsCutBasedMediumElectron(setVar("isCutBasedMediumElectron",(*mediumIdDecisions)[electrons_handle->ptrAt(i)]));
+      dest.setIsCutBasedTightElectron(setVar("isCutBasedTightElectron",(*tightIdDecisions)[electrons_handle->ptrAt(i)]));
+
+      dest.setIsMVAwp80Electron(setVar("isMVAwp80Electron",(*mvawp80IdDecisions)[electrons_handle->ptrAt(i)]));
+      dest.setIsMVAwp90Electron(setVar("isMVAwp90Electron",(*mvawp90IdDecisions)[electrons_handle->ptrAt(i)]));
+
+      dest.setIsHEEPElectron(setVar("isHEEPElectron",(*heepIdDecisions)[electrons_handle->ptrAt(i)]));
+    }
 
     dest.setDxy(setVar("dxy", src.gsfTrack()->dxy(firstVertex->position())));
     dest.setDz(setVar("dz", src.gsfTrack()->dz(firstVertex->position())));
