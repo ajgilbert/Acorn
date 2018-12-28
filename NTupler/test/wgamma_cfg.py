@@ -220,11 +220,18 @@ if isMC:
     )
 
 hlt_paths = [
-    # 'HLT_IsoMu22_v',
-    # 'HLT_IsoTkMu22_v',
     'HLT_IsoMu24_v',
     'HLT_IsoTkMu24_v',
-    'HLT_IsoMu27_v'
+    'HLT_IsoMu27_v',
+    'HLT_Mu50_v',
+    'HLT_TkMu50_v',
+    'HLT_Ele27_WPTight_Gsf_v',
+    'HLT_Ele32_WPTight_Gsf_L1DoubleEG_v',
+    'HLT_Ele32_WPTight_Gsf_v',
+    'HLT_Ele35_WPTight_Gsf_v',
+    'HLT_Ele115_CaloIdVT_GsfTrkIdT_v',
+    'HLT_Photon175_v',
+    'HLT_Photon200_v',
 ]
 
 process.acTriggerObjectSequence = cms.Sequence(
