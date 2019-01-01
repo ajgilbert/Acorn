@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace ac {
-Met::Met() : Candidate::Candidate(), sumEt_(0.) {}
+Met::Met() : Candidate::Candidate(), level_(-1), shift_(-1), sumEt_(0.) {}
 
 Met::~Met() {}
 

@@ -18,11 +18,17 @@ class Met : public Candidate {
   virtual ~Met();
   virtual void Print() const;
 
+  inline int level() const { return level_; }
+  inline int shift() const { return shift_; }
   inline double sumEt() const { return sumEt_; }
 
+  inline void setLevel(int const& level) { level_ = level; }
+  inline void setShift(int const& shift) { shift_ = shift; }
   inline void setSumEt(double const& sumEt) { sumEt_ = sumEt; }
 
  private:
+  int level_;
+  int shift_;
   double sumEt_;
 };
 

@@ -27,6 +27,11 @@ class AcornMetProducer : public AcornBaseProducer<std::vector<ac::Met>> {
   virtual void produce(edm::Event&, edm::EventSetup const&);
 
   edm::EDGetTokenT<edm::View<reco::MET>> inputToken_;
+
+  // Possible values:
+  // https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/DataFormats/PatCandidates/interface/MET.h#L151
+  std::vector<int> saveCorrectionLevels_;
+  std::vector<int> saveUncertaintyShifts_;
   bool saveGenMetFromPat_;
 };
 

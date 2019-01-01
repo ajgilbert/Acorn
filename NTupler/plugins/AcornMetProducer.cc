@@ -15,6 +15,8 @@
 AcornMetProducer::AcornMetProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::Met>>(config),
       inputToken_(consumes<edm::View<reco::MET>>(config.getParameter<edm::InputTag>("input"))),
+      saveCorrectionLevels_(config.getParameter<std::vector<int>>("saveCorrectionLevels")),
+      saveUncertaintyShifts_(config.getParameter<std::vector<int>>("saveUncertaintyShifts")),
       saveGenMetFromPat_(config.getParameter<bool>("saveGenMetFromPat")) {}
 
 AcornMetProducer::~AcornMetProducer() { ; }
@@ -50,6 +52,31 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     dest.setVector(setVar("p4", srcptr->polarP4()));
     dest.setSumEt(setVar("sumEt", srcptr->sumEt()));
+  }
+
+  if (saveCorrectionLevels_.size()) {
+    pat::MET const* patsrc = dynamic_cast<pat::MET const*>(&met_handle->at(0));
+    if (!patsrc) {
+      throw cms::Exception("DynamicCastFailed")
+          << "Failed to dynamic cast reco::MET object to pat::MET\n";
+    }
+    for (unsigned icorr = 0; icorr < saveCorrectionLevels_.size(); ++icorr) {
+      auto level = pat::MET::METCorrectionLevel(saveCorrectionLevels_[icorr]);
+      output()->push_back(ac::Met());
+      ac::Met& dest = output()->back();
+      dest.setLevel(level);
+      dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->corP4(level))));
+      dest.setSumEt(setVar("sumEt", patsrc->corSumEt(level)));
+      for (unsigned ishift = 0; ishift < saveUncertaintyShifts_.size(); ++ishift) {
+        auto shift = pat::MET::METUncertainty(saveUncertaintyShifts_[ishift]);
+        output()->push_back(ac::Met());
+        ac::Met& dest = output()->back();
+        dest.setLevel(level);
+        dest.setShift(shift);
+        dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->shiftedP4(shift, level))));
+        dest.setSumEt(setVar("sumEt", patsrc->shiftedSumEt(shift, level)));
+      }
+    }
   }
 }
 

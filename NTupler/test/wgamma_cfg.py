@@ -159,6 +159,15 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12'),
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(1, 4),
+    saveUncertaintyShifts=cms.vint32(0, 1, 2, 3, 10, 11, 12, 13)
+)
+
+process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag("slimmedMETsPuppi"),
+    branch=cms.string('puppiMet'),
+    select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(False)
 )
 
@@ -298,6 +307,7 @@ else:
         process.acMuonProducer +
         process.acPhotonProducer +
         process.acPFType1MetProducer +
+        # process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
         process.acEventInfoProducer +

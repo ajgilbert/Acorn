@@ -178,7 +178,9 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(False)
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 process.acMCSequence = cms.Sequence(
