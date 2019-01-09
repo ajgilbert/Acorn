@@ -65,7 +65,7 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       output()->push_back(ac::Met());
       ac::Met& dest = output()->back();
       dest.setLevel(level);
-      dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->corP4(level))));
+      dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->corPt(level), 0., patsrc->corPhi(level), 0.)));
       dest.setSumEt(setVar("sumEt", patsrc->corSumEt(level)));
       for (unsigned ishift = 0; ishift < saveUncertaintyShifts_.size(); ++ishift) {
         auto shift = pat::MET::METUncertainty(saveUncertaintyShifts_[ishift]);
@@ -73,7 +73,7 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         ac::Met& dest = output()->back();
         dest.setLevel(level);
         dest.setShift(shift);
-        dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->shiftedP4(shift, level))));
+        dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->shiftedPt(shift, level), 0., patsrc->shiftedPhi(shift, level), 0.)));
         dest.setSumEt(setVar("sumEt", patsrc->shiftedSumEt(shift, level)));
       }
     }
