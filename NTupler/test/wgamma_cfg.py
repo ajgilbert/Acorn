@@ -158,7 +158,7 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
     branch=cms.string('pfType1Met'),
-    select=cms.vstring('keep .* p4=12'),
+    select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
     saveCorrectionLevels=cms.vint32(1, 4),
     saveUncertaintyShifts=cms.vint32(0, 1, 2, 3, 10, 11, 12, 13)
@@ -167,8 +167,10 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETsPuppi"),
     branch=cms.string('puppiMet'),
-    select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(False)
+    select=cms.vstring('keep .* p4=12', 'drop sumEt'),
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(1, 4),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 process.acMCSequence = cms.Sequence(
@@ -215,7 +217,9 @@ process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
     branch=cms.string('genMet'),
     select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(True)
+    saveGenMetFromPat=cms.bool(True),
+    saveCorrectionLevels=cms.vint32(),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 
@@ -268,6 +272,17 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     generator=cms.InputTag("generator"),
     includeLHEWeights=cms.bool(isMC),
     includeGenWeights=cms.bool(isMC),
+    metFilterResults=cms.InputTag("TriggerResults", "", "RECO"),
+    saveMetFilters=cms.vstring(
+        'Flag_goodVertices',
+        'Flag_globalSuperTightHalo2016Filter',
+        'Flag_HBHENoiseFilter',
+        'Flag_HBHENoiseIsoFilter',
+        'Flag_EcalDeadCellTriggerPrimitiveFilter',
+        'Flag_BadPFMuonFilter',
+        'Flag_BadChargedCandidateFilter',
+        'Flag_eeBadScFilter'
+        ),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
@@ -307,7 +322,7 @@ else:
         process.acMuonProducer +
         process.acPhotonProducer +
         process.acPFType1MetProducer +
-        # process.acPuppiMetProducer +
+        process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
         process.acEventInfoProducer +

@@ -12,6 +12,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/plugins/AcornBaseProducer.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
@@ -36,6 +37,9 @@ class AcornEventInfoProducer : public AcornBaseProducer<ac::EventInfo> {
   bool includeGenWeights_;
   std::vector<std::string> lheWeightLabels_;
   std::vector<bool> lheWeightWasKept_;
+  edm::EDGetTokenT<edm::TriggerResults> metfilterToken_;
+  std::vector<std::string> saveMetFilters_;
+  std::set<std::string> missedMetFilters_;
 
 };
 

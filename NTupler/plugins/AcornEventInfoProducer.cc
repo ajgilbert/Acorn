@@ -35,7 +35,9 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
       lheToken_(consumes<LHEEventProduct>(config.getParameter<edm::InputTag>("lheProducer"))),
       genToken_(consumes<GenEventInfoProduct>(config.getParameter<edm::InputTag>("generator"))),
       includeLHEWeights_(config.getParameter<bool>("includeLHEWeights")),
-      includeGenWeights_(config.getParameter<bool>("includeGenWeights")) {
+      includeGenWeights_(config.getParameter<bool>("includeGenWeights")),
+      metfilterToken_(consumes<edm::TriggerResults>(config.getParameter<edm::InputTag>("metFilterResults"))),
+      saveMetFilters_(config.getParameter<std::vector<std::string>>("saveMetFilters")) {
   consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
   consumes<GenEventInfoProduct>({"generator"});
 }
@@ -167,6 +169,30 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       info->setGenWeights(gen_weights);
     }
   }
+
+  if (saveMetFilters_.size()) {
+    constexpr unsigned maxfilters = 32;
+    if (saveMetFilters_.size() > maxfilters) {
+      throw cms::Exception("TooManyMETFilters")
+          << "Maximum MET filter flags to be saved is " << maxfilters << ", but "
+          << saveMetFilters_.size() << " were requested\n";
+    }
+    std::bitset<maxfilters> metfilter_bits;
+    edm::Handle<edm::TriggerResults> metfilter_handle;
+    event.getByToken(metfilterToken_, metfilter_handle);
+    edm::TriggerNames const& triggerNames = event.triggerNames(*metfilter_handle);
+    for (unsigned imet = 0; imet < saveMetFilters_.size(); ++imet) {
+      auto trg_idx = triggerNames.triggerIndex(saveMetFilters_[imet]);
+      if (trg_idx == triggerNames.size()) {
+        // The string requested wasn't found, so we'll just skip it
+        missedMetFilters_.insert(saveMetFilters_[imet]);
+        continue;
+      }
+      // std::cout << imet << "\t" << triggerNames.triggerName(trg_idx) << "\t" << metfilter_handle->accept(trg_idx) << "\n";
+      metfilter_bits[imet] = !metfilter_handle->accept(trg_idx);
+    }
+    info->setMetFilters(metfilter_bits);
+  }
 }
 
 void AcornEventInfoProducer::endStream() {
@@ -176,6 +202,12 @@ void AcornEventInfoProducer::endStream() {
     for (unsigned l = 0; l < lheWeightLabels_.size(); ++l) {
       if (lheWeightWasKept_[l]) std::cout << "(*) ";
       std::cout << lheWeightLabels_[l];
+    }
+  }
+  if (missedMetFilters_.size()) {
+    std::cout << "WARNING: the following MET filters were not defined for all events:\n";
+    for (auto const& filtername : missedMetFilters_) {
+      std::cout << " - " << filtername << "\n";
     }
   }
 }
