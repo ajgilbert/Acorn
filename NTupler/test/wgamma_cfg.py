@@ -27,6 +27,7 @@ opts.parseArguments()
 isData = bool(opts.isData)
 isMC = not isData
 genOnly = int(opts.genOnly)
+year = str(opts.year)
 
 ################################################################
 # Standard setup
@@ -73,12 +74,12 @@ process.options.numberOfStreams = cms.untracked.uint32(opts.cores)
 
 process.selectedElectrons = cms.EDFilter("PATElectronRefSelector",
     src=cms.InputTag("slimmedElectrons"),
-    cut=cms.string("pt > 20 & abs(eta) < 2.6")
+    cut=cms.string("pt > 10 & abs(eta) < 2.6")
 )
 
 process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
     src=cms.InputTag("slimmedMuons"),
-    cut=cms.string("pt > 20 & abs(eta) < 2.6")
+    cut=cms.string("pt > 5 & abs(eta) < 2.6")
 )
 
 process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
@@ -267,12 +268,29 @@ for path in hlt_paths:
     process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
 
 
+process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
+    ThePhotons=cms.InputTag("slimmedPhotons"),
+    TheJets=cms.InputTag("slimmedJets"),
+    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
+    DataEra=cms.string("2016BtoH"), #Use 2016BtoH for 2016, 2017BtoF for 2017
+    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
+    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
+)
+
+metfilter_proc_data = {
+    "2016": "RECO"
+}
+metfilter_proc_mc = {
+    "2016": "PAT"
+}
+metfilter_proc = metfilter_proc_data if isData else metfilter_proc_mc
+
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
     includeLHEWeights=cms.bool(isMC),
     includeGenWeights=cms.bool(isMC),
-    metFilterResults=cms.InputTag("TriggerResults", "", "RECO"),
+    metFilterResults=cms.InputTag("TriggerResults", "", metfilter_proc[year]),
     saveMetFilters=cms.vstring(
         'Flag_goodVertices',
         'Flag_globalSuperTightHalo2016Filter',
@@ -282,6 +300,11 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'Flag_BadPFMuonFilter',
         'Flag_BadChargedCandidateFilter',
         'Flag_eeBadScFilter'
+        ),
+    userDoubles=cms.VInputTag(
+        cms.InputTag('prefiringweight:NonPrefiringProb'),
+        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
+        cms.InputTag('prefiringweight:NonPrefiringProbDown')
         ),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
@@ -325,6 +348,7 @@ else:
         process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
+        process.prefiringweight +
         process.acEventInfoProducer +
         process.acEventProducer)
 

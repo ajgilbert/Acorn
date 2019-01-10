@@ -40,6 +40,7 @@ class AcornEventInfoProducer : public AcornBaseProducer<ac::EventInfo> {
   edm::EDGetTokenT<edm::TriggerResults> metfilterToken_;
   std::vector<std::string> saveMetFilters_;
   std::set<std::string> missedMetFilters_;
+  std::vector<edm::EDGetTokenT<double>> userDoubleTokens_;
 
 };
 

@@ -41,6 +41,9 @@ class EventInfo {
   inline std::map<unsigned, double> const& lheWeights() const { return lheWeights_; }
 
   inline std::bitset<32> metfilters() const { return std::bitset<32>(metfilters_); }
+
+  inline std::vector<double> const& userDoubles() const { return userDoubles_; }
+
   // /// Energy density used for the jet energy corrections in this event
   // inline double jet_rho() const { return jet_rho_; }
 
@@ -84,6 +87,8 @@ class EventInfo {
   inline void setLHEWeight(unsigned const& id, double const& weight) { lheWeights_[id] = weight; }
 
   inline void setMetFilters(std::bitset<32> const& metfilters) { metfilters_ = unsigned(metfilters.to_ulong()); }
+
+  inline void setUserDoubles(std::vector<double> const& userDoubles) { userDoubles_ = userDoubles; }
 
   inline void setWeight(std::string const& label, double const& wt, bool const& enabled = true) {
     weights_[label] = std::make_pair(enabled, wt);
@@ -143,6 +148,8 @@ class EventInfo {
   std::map<std::string, std::pair<bool, double>> weights_;
 
   unsigned metfilters_;
+
+  std::vector<double> userDoubles_;
 
   // double jet_rho_;
   // double lepton_rho_;

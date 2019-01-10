@@ -40,6 +40,10 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
       saveMetFilters_(config.getParameter<std::vector<std::string>>("saveMetFilters")) {
   consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
   consumes<GenEventInfoProduct>({"generator"});
+
+  for (auto const& tag : config.getParameter<std::vector<edm::InputTag>>("userDoubles")) {
+    userDoubleTokens_.emplace_back(consumes<double>(tag));
+  }
 }
 
 AcornEventInfoProducer::~AcornEventInfoProducer() {
@@ -193,6 +197,14 @@ void AcornEventInfoProducer::produce(edm::Event& event,
     }
     info->setMetFilters(metfilter_bits);
   }
+
+  std::vector<double> user_doubles;
+  for (unsigned idouble = 0; idouble < userDoubleTokens_.size(); ++idouble) {
+    edm::Handle<double> double_handle;
+    event.getByToken(userDoubleTokens_[idouble], double_handle);
+    user_doubles.push_back(*double_handle);
+  }
+  info->setUserDoubles(user_doubles);
 }
 
 void AcornEventInfoProducer::endStream() {

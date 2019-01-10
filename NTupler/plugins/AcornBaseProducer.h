@@ -72,6 +72,13 @@ class AcornBaseProducer : public edm::stream::EDProducer<> {
 
   virtual void beginStream(edm::StreamID id) { streamid_ = id.value(); }
 
+  virtual void endStream() {
+    // std::cout << "Producer for branch: " << branch_ << "\n";
+    // for (auto const& it : resolved_rules_) {
+    //   std::cout << it.first << ": " << "\t" << it.second.zeroed << "\t" << it.second.truncate << "\t" << it.second.round << "\n";
+    // }
+   }
+
   virtual void beginRun(edm::Run const &, edm::EventSetup const &) {
     if (!attachedBranch_) {
       AcornEventProducer::getStreamTree(streamid_)->Branch(branch_.c_str(), &output_);

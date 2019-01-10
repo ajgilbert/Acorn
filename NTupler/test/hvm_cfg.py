@@ -316,6 +316,22 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     generator=cms.InputTag("generator"),
     includeLHEWeights=cms.bool(isMC),
     includeGenWeights=cms.bool(isMC),
+    metFilterResults=cms.InputTag("TriggerResults", "", "PAT"), # NB will sometimes need "RECO" instead of "PAT"
+    saveMetFilters=cms.vstring(
+        # 'Flag_goodVertices',
+        # 'Flag_globalSuperTightHalo2016Filter',
+        # 'Flag_HBHENoiseFilter',
+        # 'Flag_HBHENoiseIsoFilter',
+        # 'Flag_EcalDeadCellTriggerPrimitiveFilter',
+        # 'Flag_BadPFMuonFilter',
+        # 'Flag_BadChargedCandidateFilter',
+        # 'Flag_eeBadScFilter'
+        ),
+    userDoubles=cms.VInputTag(
+        # cms.InputTag('prefiringweight:NonPrefiringProb'),
+        # cms.InputTag('prefiringweight:NonPrefiringProbUp'),
+        # cms.InputTag('prefiringweight:NonPrefiringProbDown')
+        ),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
