@@ -44,6 +44,8 @@ class EventInfo {
 
   inline std::vector<double> const& userDoubles() const { return userDoubles_; }
 
+  inline unsigned numVertices() const { return numVertices_; }
+
   // /// Energy density used for the jet energy corrections in this event
   // inline double jet_rho() const { return jet_rho_; }
 
@@ -59,9 +61,6 @@ class EventInfo {
   // /// Number of outgoing partons at generator level, used for combining n-jet binned samples with
   // inclusive samples inline unsigned n_outgoing_partons() const { return n_outgoing_partons_; }
 
-  /// Number of reconstructed vertices passing some baseline quality
-  /// requirements
-  // inline unsigned good_vertices() const { return good_vertices_; }
   /**@}*/
 
   inline void setIsRealData(bool const& isRealData) { isRealData_ = isRealData; }
@@ -89,6 +88,8 @@ class EventInfo {
   inline void setMetFilters(std::bitset<32> const& metfilters) { metfilters_ = unsigned(metfilters.to_ulong()); }
 
   inline void setUserDoubles(std::vector<double> const& userDoubles) { userDoubles_ = userDoubles; }
+
+  inline void setNumVertices(unsigned const& numVertices) { numVertices_ = numVertices; }
 
   inline void setWeight(std::string const& label, double const& wt, bool const& enabled = true) {
     weights_[label] = std::make_pair(enabled, wt);
@@ -122,10 +123,6 @@ class EventInfo {
   // inline void set_n_outgoing_partons(unsigned const& n_outgoing_partons) { n_outgoing_partons_ =
   // n_outgoing_partons; }
 
-  // /// @copybrief good_vertices()
-  // inline void set_good_vertices(unsigned const& good_vertices) {
-  //   good_vertices_ = good_vertices;
-  // }
   /**@}*/
 
  private:
@@ -151,6 +148,8 @@ class EventInfo {
 
   std::vector<double> userDoubles_;
 
+  unsigned numVertices_;
+
   // double jet_rho_;
   // double lepton_rho_;
   // double gen_ht_;
@@ -158,7 +157,6 @@ class EventInfo {
   // double gen_mll_;
   // SDMap weights_;
   // SBMap weight_status_;
-  // unsigned good_vertices_;
   // TBMap filters_;
 };
 }  // namespace ac

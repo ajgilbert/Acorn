@@ -37,7 +37,9 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
       includeLHEWeights_(config.getParameter<bool>("includeLHEWeights")),
       includeGenWeights_(config.getParameter<bool>("includeGenWeights")),
       metfilterToken_(consumes<edm::TriggerResults>(config.getParameter<edm::InputTag>("metFilterResults"))),
-      saveMetFilters_(config.getParameter<std::vector<std::string>>("saveMetFilters")) {
+      saveMetFilters_(config.getParameter<std::vector<std::string>>("saveMetFilters")),
+      includeNumVertices_(config.getParameter<bool>("includeNumVertices")),
+      vertexToken_(consumes<edm::View<reco::Vertex>>(config.getParameter<edm::InputTag>("inputVertices"))) {
   consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
   consumes<GenEventInfoProduct>({"generator"});
 
@@ -205,6 +207,12 @@ void AcornEventInfoProducer::produce(edm::Event& event,
     user_doubles.push_back(*double_handle);
   }
   info->setUserDoubles(user_doubles);
+
+  if (includeNumVertices_) {
+    edm::Handle<edm::View<reco::Vertex>> vtx_handle;
+    event.getByToken(vertexToken_, vtx_handle);
+    info->setNumVertices(vtx_handle->size());
+  }
 }
 
 void AcornEventInfoProducer::endStream() {

@@ -10,7 +10,8 @@ EventInfo::EventInfo()
       bunchCrossing_(0),
       nominalGenWeight_(0.),
       nominalLHEWeight_(0.),
-      metfilters_(0) {}
+      metfilters_(0),
+      numVertices_(0) {}
 
 EventInfo::~EventInfo() {}
 

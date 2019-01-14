@@ -13,6 +13,7 @@
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/plugins/AcornBaseProducer.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
@@ -41,7 +42,8 @@ class AcornEventInfoProducer : public AcornBaseProducer<ac::EventInfo> {
   std::vector<std::string> saveMetFilters_;
   std::set<std::string> missedMetFilters_;
   std::vector<edm::EDGetTokenT<double>> userDoubleTokens_;
-
+  bool includeNumVertices_;
+  edm::EDGetTokenT<edm::View<reco::Vertex>> vertexToken_;
 };
 
 #endif

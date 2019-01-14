@@ -31,7 +31,7 @@
       "config": "data"
     },
     "WGToLNuG-madgraphMLM": {
-      "dataset": "",
+      "dataset": "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": []
     },
     "WGToLNuG-amcatnloFXFX": {
