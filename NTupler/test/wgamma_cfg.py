@@ -18,6 +18,8 @@ opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
 opts.register('genOnly', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as genOnly")
+opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -29,6 +31,7 @@ isData = bool(opts.isData)
 isMC = not isData
 genOnly = int(opts.genOnly)
 year = str(opts.year)
+hasLHE = bool(opts.hasLHE)
 
 ################################################################
 # Standard setup
@@ -255,10 +258,13 @@ if isMC:
     process.acMCSequence += cms.Sequence(
         process.selectedGenParticles +
         process.acGenParticleProducer +
-        process.acLHEParticleProducer +
         process.acGenMetFromPatProducer +
         process.acPileupInfoProducer
     )
+    if hasLHE:
+        process.acMCSequence += cms.Sequence(
+            process.acLHEParticleProducer
+        )
 
 hlt_paths = [
     'HLT_IsoMu24_v',
@@ -299,19 +305,21 @@ for path in hlt_paths:
 
 metfilter_proc_data = {
     "2016": "RECO",
-    "2017": "PAT"
+    "2017": "PAT",
+    "2018": "RECO"
 }
 metfilter_proc_mc = {
     "2016_old": "PAT",
     "2016": "PAT",
-    "2017": "PAT"
+    "2017": "PAT",
+    "2018": "PAT"
 }
 metfilter_proc = metfilter_proc_data if isData else metfilter_proc_mc
 
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
-    includeLHEWeights=cms.bool(isMC),
+    includeLHEWeights=cms.bool(isMC and hasLHE),
     includeGenWeights=cms.bool(isMC),
     metFilterResults=cms.InputTag("TriggerResults", "", metfilter_proc[year]),
     saveMetFilters=cms.vstring(
@@ -327,7 +335,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     userDoubles=cms.VInputTag(),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
-        'keep .*',
+        'keep .* genWeights=10',
         'drop lheweights:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
         'keep lheweights:dim6=10',
@@ -339,7 +347,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep lheweights:Member.0.*PDF4LHC15_nnlo_100_pdfas=10',
         'keep lheweights:Member.0.*PDF4LHC15_nlo_nf4_30=10',
         'keep lheweights:lhapdf.(305800|306000|320500|320900|90200|91200|92000)=10',
-        'keep lheweights:PDF.*(305800|306000|320500|320900|90200|91200|92000).*=10',
+        'keep lheweights:PDF.*(305800|306000|320500|320900|90200|91200|92000).MemberID.0=10'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
@@ -357,7 +365,8 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
 prefiring_era_str = {
     "2016_old": "2016BtoH",
     "2016": "2016BtoH",
-    "2017": "2017BtoF"
+    "2017": "2017BtoF",
+    "2018": "2017BtoF"
 }
 
 process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",

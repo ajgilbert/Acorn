@@ -48,7 +48,7 @@
       "events": 0,
       "config": "data_prompt"
     },
-    "EGamma-2018D-v1": {
+    "EGamma-2018D-v2": {
       "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
@@ -180,19 +180,19 @@
       "dataset": "/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_no_lhe"
     },
     "WZ-pythia": {
       "dataset": "/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_no_lhe"
     },
     "ZZ-pythia": {
       "dataset": "/ZZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_no_lhe"
     },
     "TTGamma_SingleLeptFromT-madgraph": {
       "dataset": "/TTGamma_SingleLeptFromT_TuneCP5_13TeV_madgraph_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
@@ -264,7 +264,8 @@
   "configs": {
     "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018Rereco_v1", "cores=1"],
     "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v11", "cores=1"],
-    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "cores=1"]
+    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "cores=1"],
+    "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "hasLHE=0", "cores=1"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
