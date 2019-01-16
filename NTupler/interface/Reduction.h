@@ -8,7 +8,6 @@
 #include "Math/Vector4Dfwd.h"
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
-#include "DataFormats/PatCandidates/interface/libminifloat.h"
 
 template<typename T> std::string toBinaryString(const T& a) {
     const char* beg = reinterpret_cast<const char*>(&a);

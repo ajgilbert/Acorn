@@ -1,8 +1,12 @@
 #include <memory>
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
-#include "DataFormats/PatCandidates/interface/libminifloat.h"
 #include "Acorn/NTupler/interface/Reduction.h"
+#if CMSSW_MAJOR_VERSION >= 10 && CMSSW_MINOR_VERSION >= 2
+#include "DataFormats/Math/interface/libminifloat.h"
+#else
+#include "DataFormats/PatCandidates/interface/libminifloat.h"
+#endif
 
 template <>
 float reduceMantissaToNbitsRounding(const float &f, int bits) {

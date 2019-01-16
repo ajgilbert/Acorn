@@ -7,7 +7,6 @@
 #include "Acorn/Analysis/interface/AnalysisBase.h"
 #include "Acorn/Analysis/interface/AnalysisSequence.h"
 #include "Acorn/NTupler/interface/json.hpp"
-#include "Acorn/NTupler/interface/Reduction.h"
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"

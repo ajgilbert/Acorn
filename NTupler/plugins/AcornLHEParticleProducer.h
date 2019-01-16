@@ -14,7 +14,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/PatCandidates/interface/libminifloat.h"
 #include "Acorn/NTupler/plugins/AcornEventProducer.h"
 #include "Acorn/NTupler/plugins/AcornBaseProducer.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
