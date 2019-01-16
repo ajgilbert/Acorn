@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
-
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 process = cms.Process("MAIN")
 # import sys
 
@@ -94,11 +95,36 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
     select=cms.vstring('keep .* p4=12 pfIso.*=12')
 )
 
+process.customInitialSeq = cms.Sequence()
+met_proc = 'PAT'
+met_args = []
+### Re-run MET sequences for old 2016 MC (not 100% sure this gives the correct thing...)
+if year == '2016_old':
+    # met_proc = 'MAIN'  # i.e. take from our process
+    met_args = ['', 'MAIN']
+    runMetCorAndUncFromMiniAOD(process, isData=isData)
+    process.customInitialSeq += cms.Sequence(process.fullPatMetSequence)
+    makePuppiesFromMiniAOD(process, True)
+    runMetCorAndUncFromMiniAOD(process,
+                               isData=isData,
+                               metType="Puppi",
+                               postfix="Puppi",
+                               jetFlavor="AK4PFPuppi",
+                               )
+
+    process.puppiNoLep.useExistingWeights = False
+    process.puppi.useExistingWeights = False
+    process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppi)
 
 ### Setup for EGamma recipes
-setupEgammaPostRecoSeq(process,
-    runEnergyCorrections=False, #corrections by default are fine so no need to re-run
-    era='2016-Legacy')
+if year in ['2016_old']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=True, runVID=True, era='2016-Legacy')
+elif year in ['2016']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2016-Legacy')
+elif year in ['2017']:
+    setupEgammaPostRecoSeq(process, runVID=True, era='2017-Nov17ReReco')
+elif year in ['2018']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2018-Prompt')
 
 ### Electrons
 ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"
@@ -157,7 +183,7 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
 )
 
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag("slimmedMETs"),
+    input=cms.InputTag(*(["slimmedMETs"] + met_args)),
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
@@ -166,7 +192,7 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
 )
 
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag("slimmedMETsPuppi"),
+    input=cms.InputTag(*(["slimmedMETsPuppi"] + met_args)),
     branch=cms.string('puppiMet'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
@@ -183,7 +209,8 @@ process.selectedGenParticles = cms.EDProducer("GenParticlePruner",
     select=cms.vstring(
         "drop  *",
         "keep isPromptFinalState()",
-        "keep++ abs(pdgId) == 15 && statusFlags().isPrompt()"
+        "keep++ abs(pdgId) == 15 && statusFlags().isPrompt()",
+        "+keep pdgId == 22 && status == 1 && (pt > 10 || isPromptFinalState())"
     )
 )
 
@@ -253,6 +280,8 @@ process.acTriggerObjectSequence = cms.Sequence(
 )
 
 trigger_objects = 'slimmedPatTrigger'
+if year == '2016_old':
+    trigger_objects = 'selectedPatTrigger'
 
 for path in hlt_paths:
     shortname = path[4:-2]  # drop the HLT_ and _v parts
@@ -268,20 +297,14 @@ for path in hlt_paths:
     process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
 
 
-process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
-    ThePhotons=cms.InputTag("slimmedPhotons"),
-    TheJets=cms.InputTag("slimmedJets"),
-    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
-    DataEra=cms.string("2016BtoH"), #Use 2016BtoH for 2016, 2017BtoF for 2017
-    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
-    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
-)
-
 metfilter_proc_data = {
-    "2016": "RECO"
+    "2016": "RECO",
+    "2017": "PAT"
 }
 metfilter_proc_mc = {
-    "2016": "PAT"
+    "2016_old": "PAT",
+    "2016": "PAT",
+    "2017": "PAT"
 }
 metfilter_proc = metfilter_proc_data if isData else metfilter_proc_mc
 
@@ -301,24 +324,58 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'Flag_BadChargedCandidateFilter',
         'Flag_eeBadScFilter'
         ),
-    userDoubles=cms.VInputTag(
-        cms.InputTag('prefiringweight:NonPrefiringProb'),
-        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
-        cms.InputTag('prefiringweight:NonPrefiringProbDown')
-        ),
+    userDoubles=cms.VInputTag(),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
-        #'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
-        #'keep lheweights:PDF.306000=10',
         'keep lheweights:dim6=10',
-        #'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10'
+        'keep lheweights:Member.0.*NNPDF31_nlo_hessian_pdfas=10',
+        'keep lheweights:Member.0.*NNPDF31_nnlo_hessian_pdfas=10',
+        'keep lheweights:Member.0.*NNPDF31_nlo_as_0118_nf_4=10',
+        'keep lheweights:Member.0.*NNPDF31_nnlo_as_0118_nf_4=10',
+        'keep lheweights:Member.0.*PDF4LHC15_nlo_100_pdfas=10',
+        'keep lheweights:Member.0.*PDF4LHC15_nnlo_100_pdfas=10',
+        'keep lheweights:Member.0.*PDF4LHC15_nlo_nf4_30=10',
+        'keep lheweights:lhapdf.(305800|306000|320500|320900|90200|91200|92000)=10',
+        'keep lheweights:PDF.*(305800|306000|320500|320900|90200|91200|92000).*=10',
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
+
+# 305800: NNPDF31_nlo_hessian_pdfas
+# 306000: NNPDF31_nnlo_hessian_pdfas
+# 320500: NNPDF31_nlo_as_0118_nf_4
+# 320900: NNPDF31_nnlo_as_0118_nf_4
+# 90200: PDF4LHC15_nlo_100_pdfas
+# 91200: PDF4LHC15_nnlo_100_pdfas
+# 92000: PDF4LHC15_nlo_nf4_30
+
+### Prefiring weights - only needed for 2016 and 2017 MC
+prefiring_era_str = {
+    "2016_old": "2016BtoH",
+    "2016": "2016BtoH",
+    "2017": "2017BtoF"
+}
+
+process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
+    ThePhotons=cms.InputTag("slimmedPhotons"),
+    TheJets=cms.InputTag("slimmedJets"),
+    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
+    DataEra=cms.string(prefiring_era_str[year]), #Use 2016BtoH for 2016, 2017BtoF for 2017
+    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
+    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
+)
+
+if isMC and year in ['2016_old', '2016', '2017']:
+    process.customInitialSeq += cms.Sequence(process.prefiringweight)
+    process.acEventInfoProducer.userDoubles = cms.VInputTag(
+        cms.InputTag('prefiringweight:NonPrefiringProb'),
+        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
+        cms.InputTag('prefiringweight:NonPrefiringProbDown')
+        )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
@@ -340,6 +397,7 @@ elif genOnly == 2:
 else:
     process.p = cms.Path(
         process.egammaPostRecoSeq +
+        process.customInitialSeq +
         process.selectedElectrons +
         process.selectedMuons +
         process.selectedPhotons +
@@ -350,7 +408,6 @@ else:
         process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
-        process.prefiringweight +
         process.acEventInfoProducer +
         process.acEventProducer)
 

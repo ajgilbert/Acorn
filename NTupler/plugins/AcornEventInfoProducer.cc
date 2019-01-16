@@ -103,11 +103,12 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         std::regex_search(line, rgx_match, rgx);
         if (rgx_match.size() == 3) {
           std::vector<std::string> split_label = ac::TrimAndSplitString(rgx_match[2]);
-
+          split_label.push_back(ac::TrimString(rgx_match[2])); // Also add the full string
           bool keep = false;
           for (auto const& x : split_label) {
             auto rule = getVarRule("lheweights:" + x);
             if (!rule.zeroed) {
+              // std::cout << x << " matched " << rule.original << "\n";
               unsigned id = boost::lexical_cast<int>(rgx_match[1]);
               savedLHEWeightIds[id] = rule;
               keep = true;
@@ -144,8 +145,11 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   if (includeLHEWeights_) {
     edm::Handle<LHEEventProduct> lhe_handle;
     event.getByToken(lheToken_, lhe_handle);
-    //double nominalLHEWeight = lhe_handle->hepeup().XWGTUP;
-    double nominalLHEWeight = lhe_handle->weights()[0].wgt ;
+    double nominalLHEWeight = 1.;
+    if (lhe_handle->weights().size()) {
+      // Very rarely, this weights() vector is empty (seen in a powheg sample)
+      nominalLHEWeight = lhe_handle->weights()[0].wgt;
+    }
     info->setNominalLHEWeight(setVar("nominalLHEWeight", nominalLHEWeight));
     for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
       // Weight id is a string, assume it can always cast to an unsigned int

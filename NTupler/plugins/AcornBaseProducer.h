@@ -57,6 +57,7 @@ class AcornBaseProducer : public edm::stream::EDProducer<> {
           throw except;
         }
         newrule.rgx = std::regex(split_pattern.at(0));
+        newrule.original = split_pattern.at(0);
         if (split_pattern.size() == 2) {
           newrule.truncate = true;
           newrule.round = boost::lexical_cast<int>(split_pattern.at(1));
@@ -90,6 +91,7 @@ class AcornBaseProducer : public edm::stream::EDProducer<> {
   struct VarRule {
     bool zeroed = false;
     std::regex rgx;
+    std::string original = "";
     bool truncate = false;
     int round = 0;
   };

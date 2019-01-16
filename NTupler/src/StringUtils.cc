@@ -6,6 +6,13 @@
 
 namespace ac {
 
+std::string TrimString(std::string const& input) {
+  std::string input_copy = input;
+  boost::trim(input_copy);
+  return input_copy;
+}
+
+
 std::vector<std::string> TrimAndSplitString(std::string const& input) {
   std::string input_copy = input;
   boost::trim(input_copy);
