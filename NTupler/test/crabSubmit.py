@@ -51,6 +51,8 @@ config.Data.publication = False
 config.Data.ignoreLocality = False
 if 'outputDir' in crab_settings:
   config.Data.outLFNDirBase = '%s%s' % (crab_settings['outputDir'],args.label)
+if 'allowNonValidInputDataset' in crab_settings:
+  config.Data.allowNonValidInputDataset = bool(crab_settings['allowNonValidInputDataset'])
 
 config.section_('User')
 if 'voGroup' in crab_settings :
