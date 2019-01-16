@@ -11,6 +11,7 @@ alldirs=()
 
 for DIR in \
   "${ROOTSYS}/include" \
+  "${CMSSW_RELEASE_BASE}/src" \
   "$(scram tool tag boost INCLUDE)" \
   "$(scram tool tag tbb INCLUDE)" \
   "$(scram tool tag hepmc HEPMC_BASE)/include" \
