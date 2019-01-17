@@ -47,7 +47,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.maxEvents = cms.untracked.PSet(
     input=cms.untracked.int32(opts.events)
 )
-
+# process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+#         ignoreTotal = cms.untracked.int32(1)
+#         )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.options = cms.untracked.PSet(
@@ -66,9 +68,9 @@ from CondCore.CondDB.CondDB_cfi import *
 # 2018 MC: /store/mc/RunIISpring18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/100X_upgrade2018_realistic_v10_ext1-v1/30000/00F3DB63-1D25-E811-B003-0025901D08B2.root
 # 2017 data: /store/data/Run2017E/SingleMuon/MINIAOD/31Mar2018-v1/00000/000D53C5-9D39-E811-A39C-0025905B85A0.root
 # 2018 data: /store/data/Run2018A/SingleMuon/MINIAOD/PromptReco-v2/000/316/239/00000/06C61F62-3759-E811-A213-02163E017F4E.root
-process.source = cms.Source("PoolSource", fileNames=cms.untracked.vstring(
-   opts.input.split(',')
-))
+process.source = cms.Source("PoolSource",
+    fileNames=cms.untracked.vstring(opts.input.split(','))
+)
 
 process.GlobalTag.globaltag = cms.string(opts.globalTag)
 

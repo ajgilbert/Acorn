@@ -41,7 +41,12 @@ config.JobType.psetName = args.psetName
 config.JobType.pluginName = 'Analysis'
 config.JobType.outputFiles = ['EventTree.root']
 config.JobType.pyCfgParams = []
-
+if 'maxMemoryMB' in crab_settings:
+    config.JobType.maxMemoryMB = int(crab_settings['maxMemoryMB'])
+if 'numCores' in crab_settings:
+    config.JobType.numCores = int(crab_settings['numCores'])
+if 'maxJobRuntimeMin' in crab_settings:
+    config.JobType.maxJobRuntimeMin = int(crab_settings['maxJobRuntimeMin'])
 
 config.section_('Data')
 #config.Data.inputDataset = ''
