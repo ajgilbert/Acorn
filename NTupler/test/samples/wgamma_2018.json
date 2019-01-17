@@ -273,6 +273,6 @@
     "allowNonValidInputDataset": true,
     "maxMemoryMB": 3800,
     "numCores": 2,
-    "maxJobRuntimeMin": 360
+    "maxJobRuntimeMin": 480
   }
 }

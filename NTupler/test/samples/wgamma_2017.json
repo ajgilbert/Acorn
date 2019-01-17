@@ -304,7 +304,10 @@
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
     "outputDir" : "/store/group/cmst3/group/htautau/",
-    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"]
+    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"],
+    "allowNonValidInputDataset": true,
+    "maxMemoryMB": 3800,
+    "numCores": 2,
+    "maxJobRuntimeMin": 480
   }
-
 }
