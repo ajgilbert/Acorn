@@ -50,7 +50,7 @@ class AcornEventProducer : public edm::global::EDProducer<edm::StreamCache<Strea
   }
 
   template <class T>
-  static void AddBranch(unsigned int id, std::string name, T* ptr) {
+  static void AddBranch(unsigned int id, std::string name, T* & ptr) {
     auto treeptr = getStreamTree(id);
     m_queue.pushAndWait([&]() {
       treeptr->Branch(name.c_str(), &ptr);

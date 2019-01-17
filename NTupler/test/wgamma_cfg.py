@@ -97,7 +97,7 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
     input=cms.InputTag("selectedMuons"),
     branch=cms.string('muons'),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
-    select=cms.vstring('keep .* p4=12 pfIso.*=12')
+    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 pfIso.*=12')
 )
 
 process.customInitialSeq = cms.Sequence()
@@ -156,7 +156,7 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
     branch=cms.string('electrons'),
-    select=cms.vstring('keep .* p4=12'),
+    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12'),
     eleVetoIdMap=cms.InputTag(ele_veto_id),
     eleLooseIdMap=cms.InputTag(ele_loose_id),
     eleMediumIdMap=cms.InputTag(ele_medium_id),
@@ -176,7 +176,7 @@ photon_tight_id = "cutBasedPhotonID-Fall17-94X-V2-tight"
 process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     input=cms.InputTag("selectedPhotons"),
     branch=cms.string('photons'),
-    select=cms.vstring('keep .* p4=12'),
+    select=cms.vstring('keep .* p4=12 scEta=12 hadTowOverEm=12 full5x5SigmaIetaIeta=12 .*Iso=12'),
     phoLooseIdMap=cms.InputTag(photon_loose_id),
     phoMediumIdMap=cms.InputTag(photon_medium_id),
     phoTightIdMap=cms.InputTag(photon_tight_id),
@@ -192,8 +192,8 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(1, 4),
-    saveUncertaintyShifts=cms.vint32(0, 1, 2, 3, 10, 11, 12, 13)
+    saveCorrectionLevels=cms.vint32(4),
+    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13)
 )
 
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',

@@ -47,6 +47,8 @@ if 'numCores' in crab_settings:
     config.JobType.numCores = int(crab_settings['numCores'])
 if 'maxJobRuntimeMin' in crab_settings:
     config.JobType.maxJobRuntimeMin = int(crab_settings['maxJobRuntimeMin'])
+if 'inputFiles' in crab_settings:
+    config.JobType.inputFiles = [str(x) for x in crab_settings['inputFiles']]
 
 config.section_('Data')
 #config.Data.inputDataset = ''

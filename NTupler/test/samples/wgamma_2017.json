@@ -62,7 +62,7 @@
     },
     "SinglePhoton-2017B": {
       "dataset": "/SinglePhoton/Run2017B-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["submitx"],
       "events": 0,
       "config": "data"
     },
@@ -92,7 +92,7 @@
     },
     "WGToLNuG-madgraphMLM": {
       "dataset": "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": ["submitx"],
       "events": 0,
       "config": "mc"
     },
@@ -298,12 +298,13 @@
     }
   },
   "configs": {
-    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=1"],
-    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=1"]
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=2"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
-    "outputDir" : "/store/group/cmst3/group/htautau/"
+    "outputDir" : "/store/group/cmst3/group/htautau/",
+    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"]
   }
 
 }

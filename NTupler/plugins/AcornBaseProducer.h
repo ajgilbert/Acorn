@@ -83,7 +83,7 @@ class AcornBaseProducer : public edm::stream::EDProducer<> {
   virtual void beginRun(edm::Run const &, edm::EventSetup const &) {
     if (!attachedBranch_) {
       // AcornEventProducer::getStreamTree(streamid_)->Branch(branch_.c_str(), &output_);
-      AcornEventProducer::AddBranch(streamid_, branch_, &output_);
+      AcornEventProducer::AddBranch(streamid_, branch_, output_);
     }
     attachedBranch_ = true;
   }
