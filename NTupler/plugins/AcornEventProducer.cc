@@ -12,6 +12,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
 std::map<unsigned int, TTree *> AcornEventProducer::treeMap_;
+edm::SerialTaskQueue AcornEventProducer::m_queue;
 
 AcornEventProducer::AcornEventProducer(const edm::ParameterSet& /*config*/) { }
 

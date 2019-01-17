@@ -46,7 +46,15 @@ class AcornEventProducer : public edm::global::EDProducer<edm::StreamCache<Strea
   }
 
   static TTree* getStreamTree(unsigned int id) {
-    return treeMap_[id];
+    return treeMap_.at(id);
+  }
+
+  template <class T>
+  static void AddBranch(unsigned int id, std::string name, T* ptr) {
+    auto treeptr = getStreamTree(id);
+    m_queue.pushAndWait([&]() {
+      treeptr->Branch(name.c_str(), &ptr);
+    });
   }
 
  private:
@@ -57,7 +65,7 @@ class AcornEventProducer : public edm::global::EDProducer<edm::StreamCache<Strea
   static std::map<unsigned int, TTree *> treeMap_;
   mutable std::vector<TString> outputFiles_;
 
-  mutable edm::SerialTaskQueue m_queue;
+  static edm::SerialTaskQueue m_queue;
 };
 
 #endif
