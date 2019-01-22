@@ -24,6 +24,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, std::string, corrections)
   CLASS_MEMBER(WGDataAnalysis, std::string, gen_classify)
   CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
+  CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
 
   LookupFilter filters_IsoMu24_;
   LookupFilter filters_IsoTkMu24_;
@@ -103,9 +104,15 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
 
-  // truth variables
+  // truth variables for Wgamma events
+  bool is_wg_gen_;
+  unsigned gen_pdgid_;
+  bool gen_m0_match_;
+  bool gen_p0_match_;
   float gen_m0_pt_;
+  float gen_m0_eta_;
   float gen_p0_pt_;
+  float gen_p0_eta_;
   float gen_phi_;
   float true_phi_;
   int gen_m0_q_;

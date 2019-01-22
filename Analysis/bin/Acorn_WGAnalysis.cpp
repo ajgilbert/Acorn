@@ -127,7 +127,8 @@ int main(int argc, char* argv[]) {
                              .set_corrections("input/wgamma_corrections_2016_v1.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
-                             .set_do_wg_gen_vars(contains(jsc["attributes"], "do_wg_gen_vars")));
+                             .set_do_wg_gen_vars(contains(jsc["attributes"], "do_wg_gen_vars"))
+                             .set_do_presel(!contains(jsc["attributes"], "no_presel")));
 
     wgamma_seq.InsertSequence(wgamma_label, analysis);
   }
