@@ -103,6 +103,8 @@ for sample in sorted(samples['samples']):
     config2.JobType.pyCfgParams = [str(x) for x in samples['configs'][info['config']]]
     if 'runRange' in info:
         config2.Data.runRange = str(info['runRange'])
+    if 'lumiMask' in info:
+        config2.Data.lumiMask = str(info['lumiMask'])
     if 'useFileSplitting' in info:
         config2.Data.splitting = 'FileBased'
         config2.Data.unitsPerJob = info['useFileSplitting']
