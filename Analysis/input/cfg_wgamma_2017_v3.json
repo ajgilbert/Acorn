@@ -1,0 +1,18 @@
+{
+  "samples": {
+    "SingleMuon": {
+      "attributes": ["default", "data"],
+      "inputs": ["SingleMuon-2017B", "SingleMuon-2017C", "SingleMuon-2017D", "SingleMuon-2017E", "SingleMuon-2017F"],
+      "lumi": 41519.180032466
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM", "DYJetsToLL_M-50-madgraphMLM-ext1"],
+      "xsec": 5765.4
+    }
+  },
+  "config": {
+    "data_json": "input/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt",
+    "year": 2017
+  }
+}

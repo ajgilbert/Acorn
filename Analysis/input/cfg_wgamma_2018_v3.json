@@ -1,0 +1,62 @@
+{
+  "samples": {
+    "WGToLNuG-amcatnloFXFX": {
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "inputs": ["WGToLNuG-amcatnloFXFX"],
+      "xsec": 191.6,
+      "GenXSecAnalyzer": 465.4
+    },
+    "WGToLNuG-madgraphMLM": {
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM"],
+      "xsec": 612.72,
+      "GenXSecAnalyzer": 465.4
+    },
+    "WGToLNuG-madgraphMLM-PtG-130": {
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-130"],
+      "xsec": 0.946586226,
+      "GenXSecAnalyzer": 0.7323
+    },
+    "WGToLNuG-madgraphMLM-PtG-500": {
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-500"],
+      "xsec": 0.017822799,
+      "GenXSecAnalyzer": 0.007058
+    },
+    "WGToLNuG-madgraphMLM-stitched": {
+      "attributes": ["default", "no_presel", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
+      "xsec": 612.72,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToLNuG-madgraphMLM": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 6103817,
+          "xsec": 373.7
+        },
+        "WGToLNuG-madgraphMLM-PtG-130": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 1645059,
+          "xsec": 0.7343
+        }
+        ,
+        "WGToLNuG-madgraphMLM-PtG-500": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 1393505,
+          "xsec": 0.008196
+        }
+      }
+    }
+  },
+  "config": {
+    "data_json": "input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt",
+    "year": 2018
+  }
+}

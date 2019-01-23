@@ -1,0 +1,154 @@
+{
+  "pure_mc": [
+    {
+      "name": "VV_R",
+      "entries": ["VV_R"],
+      "legend": "Diboson (prompt #gamma)",
+      "color": [138,201,38]
+    },
+    {
+      "name": "VV_F",
+      "entries": ["VV_F"],
+      "legend": "Diboson (fake #gamma)",
+      "color": [210,248,152]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_F",
+      "entries": ["DY_F"],
+      "legend": "Z#rightarrowll (fake #gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT_R",
+      "entries": ["TT_R"],
+      "legend": "t#bar{t} (prompt #gamma)",
+      "color": [187,10,33]
+    },
+    {
+      "name": "TT_F",
+      "entries": ["TT_F"],
+      "legend": "t#bar{t} (fake #gamma)",
+      "color": [255,89,94]
+    },
+    {
+      "name": "W_F",
+      "entries": ["W_F"],
+      "legend": "W#rightarrowl#nu (fake #gamma)",
+      "color": [78,89,140]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+    "data_fakes": [
+    {
+      "name": "VV_R",
+      "entries": ["VV_R"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_R"],
+      "legend": "Z#rightarrowll",
+      "color": [250,169,22]
+    },
+    {
+      "name": "TT_R",
+      "entries": ["TT_R"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes"],
+      "legend": "Non-prompt/fake #gamma",
+      "color": [78,89,140]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "data_fakes_EFT": [
+    {
+      "name": "VV",
+      "entries": ["VVTo2L2Nu", "WWTo1L1Nu2Q", "WZTo1L1Nu2Q", "WZTo1L3Nu", "WZTo2L2Q", "WZTo3LNu", "ZZTo2L2Q", "ZZTo4L"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_R"],
+      "legend": "Z#rightarrowll",
+      "color": [250,169,22]
+    },
+    {
+      "name": "TT_R",
+      "entries": ["TT_R"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes"],
+      "legend": "Non-prompt/fake #gamma",
+      "color": [222, 90, 106]
+    },
+    {
+      "name": "WG_OOA",
+      "entries": ["WG_p_ooa", "WG_n_ooa"],
+      "legend": "W(#rightarrowl#nu)#gamma (out)",
+      "color": 12
+    },
+    {
+      "name": "WG_MET1",
+      "entries": ["WG_p_acc_met1", "WG_n_acc_met1"],
+      "legend": "W(#rightarrowl#nu)#gamma (met sdb.)",
+      "color": 11
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_p_acc", "WG_n_acc"],
+      "legend": "W(#rightarrowl#nu)#gamma (in)",
+      "color": [108,190,237]
+    }
+  ],
+  "fake_measurement": [
+    {
+      "name": "VV",
+      "entries": ["VVTo2L2Nu", "WWTo1L1Nu2Q", "WZTo1L1Nu2Q", "WZTo1L3Nu", "WZTo2L2Q", "WZTo3LNu", "ZZTo2L2Q", "ZZTo4L"],
+      "legend": "Diboson",
+      "color": [248, 206, 104]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
+      "color": [250,169,22]
+    },
+    {
+      "name": "TT_R",
+      "entries": ["TT_R"],
+      "legend": "t#bar{t} (prompt #gamma)",
+      "color": [187,10,33]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ]
+}
