@@ -2,7 +2,7 @@
   "samples": {
     "SingleMuon-2018A": {
       "dataset": "/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "data"
     },
@@ -56,7 +56,7 @@
     },
     "WGToLNuG-madgraphMLM": {
       "dataset": "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -225,7 +225,7 @@
       "config": "mc"
     },
     "WWG-amcatnlo": {
-      "dataset": "WWG_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
+      "dataset": "/WWG_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
       "config": "mc"
@@ -271,8 +271,7 @@
     "storageSite": "T2_CH_CERN",
     "outputDir" : "/store/group/cmst3/group/htautau/",
     "allowNonValidInputDataset": true,
-    "maxMemoryMB": 3800,
-    "numCores": 2,
-    "maxJobRuntimeMin": 480
+    "maxMemoryMB": 3900,
+    "numCores": 2
   }
 }
