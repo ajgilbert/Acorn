@@ -81,9 +81,14 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_p0", &wt_p0_);
     tree_->Branch("wt_p0_fake", &wt_p0_fake_);
     tree_->Branch("is_wg_gen", &is_wg_gen_);
+    tree_->Branch("gen_nparts", &gen_nparts_);
     tree_->Branch("gen_pdgid", &gen_pdgid_);
     tree_->Branch("gen_m0_match", &gen_m0_match_);
     tree_->Branch("gen_p0_match", &gen_p0_match_);
+    tree_->Branch("lhe_m0_pt", &lhe_m0_pt_);
+    tree_->Branch("lhe_m0_eta", &lhe_m0_eta_);
+    tree_->Branch("lhe_p0_pt", &lhe_p0_pt_);
+    tree_->Branch("lhe_p0_eta", &lhe_p0_eta_);
     tree_->Branch("gen_p0_pt", &gen_p0_pt_);
     tree_->Branch("gen_p0_eta", &gen_p0_eta_);
     tree_->Branch("gen_phi", &gen_phi_);
@@ -216,8 +221,15 @@ int WGDataAnalysis::PreAnalysis() {
       auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
       auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
       WGGenParticles parts = ProduceWGGenParticles(lhe_parts, gen_parts);
+      gen_nparts_ = parts.nparts;
       if (parts.lhe_lep) {
         gen_pdgid_ = std::abs(parts.lhe_lep->pdgId());
+        lhe_m0_pt_ = parts.lhe_lep->pt();
+        lhe_m0_eta_ = parts.lhe_lep->eta();
+      }
+      if (parts.lhe_pho) {
+        lhe_p0_pt_ = parts.lhe_pho->pt();
+        lhe_p0_eta_ = parts.lhe_pho->eta();
       }
       if (parts.ok) {
         is_wg_gen_ = true;
@@ -317,8 +329,8 @@ int WGDataAnalysis::PreAnalysis() {
     }
 
     if (!is_data_) {
-      wt_def_ = info->nominalGenWeight() >= 0. ? +1. : -1.; // temporary until new ntuples fix EventInfo bug
-      wt_def_ *= info->totalWeight();
+      // wt_def_ = info->nominalGenWeight() >= 0. ? +1. : -1.; // temporary until new ntuples fix EventInfo bug
+      wt_def_ = info->totalWeight();
       auto const& pu_info = event->GetPtrVec<PileupInfo>("pileupInfo");
       for (PileupInfo const* pu : pu_info) {
         if (pu->bunchCrossing() == 0) {
@@ -408,8 +420,13 @@ int WGDataAnalysis::PreAnalysis() {
     wt_p0_fake_ = 1.;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
+    gen_nparts_ = 0;
     gen_m0_match_ = false;
     gen_p0_match_ = false;
+    lhe_m0_pt_ = 0.;
+    lhe_m0_eta_ = 0.;
+    lhe_p0_pt_ = 0.;
+    lhe_p0_eta_ = 0.;
     gen_p0_pt_ = 0.;
     gen_p0_eta_ = 0.;
     gen_phi_ = 0.;

@@ -106,9 +106,14 @@ class WGDataAnalysis : public ModuleBase {
 
   // truth variables for Wgamma events
   bool is_wg_gen_;
+  unsigned gen_nparts_;
   unsigned gen_pdgid_;
   bool gen_m0_match_;
   bool gen_p0_match_;
+  float lhe_m0_pt_;
+  float lhe_m0_eta_;
+  float lhe_p0_pt_;
+  float lhe_p0_eta_;
   float gen_m0_pt_;
   float gen_m0_eta_;
   float gen_p0_pt_;

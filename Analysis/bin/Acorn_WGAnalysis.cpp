@@ -89,6 +89,16 @@ int main(int argc, char* argv[]) {
 
   bool is_data = contains(jsc["attributes"], "data");
 
+  ac::Sequence lumi_seq;
+  if (sequences.count("Lumi")) {
+    lumi_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("Lumi").get()));
+    if (is_data) {
+      lumi_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(fs.at("Lumi").get()).set_input_file(jsc["data_json"]));
+    }
+    lumi_seq.InsertSequence("Lumi", analysis);
+  }
+
   ac::Sequence dimuon_seq;
   if (sequences.count("DiMuon")) {
     dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.at("DiMuon").get()));

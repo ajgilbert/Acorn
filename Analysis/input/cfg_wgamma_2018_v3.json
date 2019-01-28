@@ -1,62 +1,210 @@
 {
   "samples": {
+    "SingleMuon": {
+      "attributes": ["default", "data"],
+      "inputs": ["SingleMuon-2018A", "SingleMuon-2018B", "SingleMuon-2018C", "SingleMuon-2018D-v2"],
+      "lumi": 59.508332160
+    },
+    "EGamma": {
+      "attributes": ["default", "data", "doit"],
+      "inputs": ["EGamma-2018A", "EGamma-2018B", "EGamma-2018C", "EGamma-2018D-v1", "EGamma-2018D-v2"],
+      "lumi": 59.268357238
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM"],
+      "xsec": 6225.42,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+    },
+    "ST_s-channel_4f-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_s-channel_4f-amcatnlo"],
+      "xsec": 3.740,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.740e+00 +- 3.527e-03 pb"
+    },
+    "ST_t-channel_antitop_4f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_t-channel_antitop_4f-powheg"],
+      "xsec": 80.95,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.909e+01 +- 4.613e-01 pb",
+      "XSecSource": "NLO from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#t_and_s_channel"
+    },
+    "ST_t-channel_top_4f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_t-channel_top_4f-powheg"],
+      "xsec": 136.02,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.153e+02 +- 9.153e-01 pb",
+      "XSecSource": "NLO from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#t_and_s_channel"
+    },
+    "ST_tW_antitop_5f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_tW_antitop_5f-powheg"],
+      "xsec": 34.97,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.497e+01 +- 2.779e-02 pb"
+    },
+    "ST_tW_top_5f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_tW_top_5f-powheg"],
+      "xsec": 34.91,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.491e+01 +- 2.762e-02 pb"
+    },
+    "TTToSemiLeptonic-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTToSemiLeptonic-powheg"],
+      "xsec": 365.34,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.871e+02 +- 5.174e-01 pb"
+    },
+    "TTToHadronic-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTToHadronic-powheg"],
+      "xsec": 377.96,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.871e+02 +- 5.174e-01 pb"
+    },
+    "TTTo2L2Nu-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTTo2L2Nu-powheg"],
+      "xsec": 88.29,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.871e+02 +- 5.174e-01 pb"
+    },
+    "TTGamma_Dilept-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_Dilept-madgraph"],
+      "xsec": 0.5801,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.801e-01 +- 2.808e-04 pb"
+    },
+    "TTGamma_Hadronic-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_Hadronic-madgraph"],
+      "xsec": 0.7306,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.294e-01 +- 3.541e-04 pb"
+    },
+    "TTGamma_SingleLeptFromT-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_SingleLeptFromT-madgraph"],
+      "xsec": 0.7041,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.049e-01 +- 4.039e-04 pb"
+    },
+    "TTGamma_SingleLeptFromTbar-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_SingleLeptFromTbar-madgraph"],
+      "xsec": 0.7022,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.025e-01 +- 3.571e-04 pb"
+    },
     "WGToLNuG-amcatnloFXFX": {
       "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 191.6,
-      "GenXSecAnalyzer": 465.4
+      "GenXSecAnalyzer": "After filter: final cross section = 1.914e+02 +- 4.441e-01 pb"
     },
     "WGToLNuG-madgraphMLM": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM"],
-      "xsec": 612.72,
-      "GenXSecAnalyzer": 465.4
+      "xsec": 613.668,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.659e+02 +- 6.125e-01 pb",
+      "XSecSource": "(1): 464.9 (LO) * 1.0982 (my fid NLO/LO ratio) * 1.2 (kNNL0) = 613.668,  (2): 464.9 (LO) * 1.63960396 (kNNLO -2016) = 762.25"
     },
     "WGToLNuG-madgraphMLM-PtG-130": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM-PtG-130"],
-      "xsec": 0.946586226,
-      "GenXSecAnalyzer": 0.7323
+      "xsec": 0.962016,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.288e-01 +- 5.152e-03 pb",
+      "XSecSource": "LO * kNNLO (1.32)"
     },
     "WGToLNuG-madgraphMLM-PtG-500": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM-PtG-500"],
-      "xsec": 0.017822799,
-      "GenXSecAnalyzer": 0.007058
+      "xsec": 0.00919116,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.963e-03 +- 6.026e-05 pb",
+      "XSecSource": "LO * kNNLO (1.32)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
       "attributes": ["default", "no_presel", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
-      "xsec": 612.72,
+      "xsec": 613.668,
       "stitching": {
         "binned": ["photon_pt"],
         "WGToLNuG-madgraphMLM": {
           "target": true,
           "min": [],
           "max": [],
-          "events": 6103817,
-          "xsec": 373.7
+          "events": 0,
+          "xsec": 464.9
         },
         "WGToLNuG-madgraphMLM-PtG-130": {
           "target": false,
           "min": [130.0],
           "max": [],
-          "events": 1645059,
-          "xsec": 0.7343
+          "events": 0,
+          "xsec": 0.7288
         }
         ,
         "WGToLNuG-madgraphMLM-PtG-500": {
           "target": false,
           "min": [500.0],
           "max": [],
-          "events": 1393505,
-          "xsec": 0.008196
+          "events": 0,
+          "xsec": 0.006963
         }
       }
+    },
+    "WJetsToLNu-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext1"],
+      "xsec": 61526.7,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.272e+04 +- 6.373e+01 pb",
+      "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV"
+    },
+    "WWG-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WWG-amcatnlo"],
+      "xsec": 0.2147,
+      "GenXSecAnalyzer": "After filter: final cross section = 2.316e-01 +- 2.307e-04 pb"
+    },
+    "WZG-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZG-amcatnlo"],
+      "xsec": 0.04345,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.345e-02 +- 4.524e-05 pb"
+    },
+    "WZTo3LNu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo3LNu-amcatnloFXFX"],
+      "xsec": 5.056,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.080e+00 +- 1.154e-02 pb"
+    },
+    "ZGToLLG-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZGToLLG-amcatnloFXFX"],
+      "xsec": 55.56,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.556e+01 +- 1.303e-01 pb"
+    },
+    "ZZTo4L-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZTo4L-powheg"],
+      "xsec": 1.325,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.325e+00 +- 1.220e-03 pb"
+    },
+    "WW-pythia": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WW-pythia"],
+      "xsec": 75.88,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.588e+01 +- 6.336e-02 pb"
+    },
+    "WZ-pythia": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZ-pythia"],
+      "xsec": 27.6,
+      "GenXSecAnalyzer": "After filter: final cross section = 2.760e+01 +- 2.123e-02 pb"
+    },
+    "ZZ-pythia": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZ-pythia"],
+      "xsec": 12.14,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.214e+01 +- 1.331e-02 pb"
     }
   },
   "config": {
-    "data_json": "input/Cert_314472-316723_13TeV_PromptReco_Collisions18_JSON.txt",
+    "data_json": "input/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt",
     "year": 2018
   }
 }

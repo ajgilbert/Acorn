@@ -172,7 +172,8 @@ double WGSystem::Phi(unsigned lepton_charge) {
         }
         info.gen_neu = part;
       }
-      if (IsPhoton(*part) && part->statusFlags().isPrompt() && part->status() == 1) {
+      // Use an arbitrary pT > 1 GeV cut to throw away some FSR noise
+      if (IsPhoton(*part) && part->statusFlags().isPrompt() && part->status() == 1 && part->pt() > 1.0) {
         info.viable_photons.push_back(part);
       }
     }
@@ -181,7 +182,7 @@ double WGSystem::Phi(unsigned lepton_charge) {
       return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
     });
     std::sort(info.viable_photons.begin(), info.viable_photons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
-      return ac::DeltaR(c1, info.lhe_pho) < ac::DeltaR(c2, info.lhe_pho);
+      return c1->pt() > c2->pt();
     });
     if (info.viable_leptons.size() && info.viable_photons.size() && info.gen_neu) {
       info.gen_lep = info.viable_leptons[0];
@@ -190,6 +191,13 @@ double WGSystem::Phi(unsigned lepton_charge) {
       // std::cout << "Not viable:" << info.viable_leptons.size() << "\t" << info.viable_photons.size() << "\t" << info.gen_neu << "\n";
       info.ok = false;
     }
+
+    // if (info.viable_photons.size() == 0) {
+    //     std::cout << "LHE particles:\n";
+    //     for (auto const* p : lhe_parts) p->Print();
+    //     std::cout << "GEN particles:\n";
+    //     for (auto const* p : gen_parts) p->Print();
+    // }
 
     return info;
   }

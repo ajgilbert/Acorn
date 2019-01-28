@@ -1,0 +1,286 @@
+{
+  "samples": {
+    "SingleMuon": {
+      "attributes": ["default", "data"],
+      "inputs": ["SingleMuon-2016B-ver2", "SingleMuon-2016C", "SingleMuon-2016D", "SingleMuon-2016E", "SingleMuon-2016F", "SingleMuon-2016G", "SingleMuon-2016H"],
+      "lumi": 35916.764758
+    },
+    "SingleElectron": {
+      "attributes": ["default", "data"],
+      "inputs": ["SingleElectron-2016B-ver2", "SingleElectron-2016C", "SingleElectron-2016D", "SingleElectron-2016E", "SingleElectron-2016F", "SingleElectron-2016G", "SingleElectron-2016H"],
+      "lumi": 35915.756582
+    },
+    "SinglePhoton": {
+      "attributes": ["default", "data"],
+      "inputs": ["SinglePhoton-2016B-ver2", "SinglePhoton-2016C", "SinglePhoton-2016D", "SinglePhoton-2016E", "SinglePhoton-2016F", "SinglePhoton-2016G", "SinglePhoton-2016H"],
+      "lumi": 35917.353795
+    },
+    "DYJetsToLL_M-50-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
+      "xsec": 6225.42,
+      "GenXSecAnalyzer": "After matching: total cross section = 4.954e+03 +- 4.704e+00 pb",
+      "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV"
+    },
+    "ST_s-channel_4f-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_s-channel_4f-amcatnlo"],
+      "xsec": 3.365,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.365e+00 +- 4.584e-03 pb"
+    },
+    "ST_t-channel_antitop_4f-powhegV2": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_t-channel_antitop_4f-powhegV2"],
+      "xsec": 80.95,
+      "GenXSecAnalyzer": "Something went wrong in the output",
+      "XSecSource": "NLO from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#t_and_s_channel"
+    },
+    "ST_t-channel_top_4f-powhegV2": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_t-channel_top_4f-powhegV2"],
+      "xsec": 136.02,
+      "GenXSecAnalyzer": "Something went wrong in the output",
+      "XSecSource": "NLO from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#t_and_s_channel"
+    },
+    "ST_tW_antitop_5f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_tW_antitop_5f-powheg"],
+      "xsec": 38.06,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.806e+01 +- 3.055e-02 pb"
+    },
+    "ST_tW_top_5f-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ST_tW_top_5f-powheg"],
+      "xsec": 38.09,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.809e+01 +- 3.050e-02 pb"
+    },
+    "TT-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TT-powheg"],
+      "xsec": 831.76,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.306e+02 +- 5.572e-01 pb",
+      "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO"
+    },
+    "TTGamma_Dilept-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_Dilept-madgraph"],
+      "xsec": 0.6343,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.343e-01 +- 5.762e-05 pb"
+    },
+    "TTGamma_Hadronic-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_Hadronic-madgraph"],
+      "xsec": 0.7948,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.948e-01 +- 1.745e-04 pb"
+    },
+    "TTGamma_SingleLeptFromT-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_SingleLeptFromT-madgraph"],
+      "xsec": 0.7689,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.689e-01 +- 1.747e-04 pb"
+    },
+    "TTGamma_SingleLeptFromTbar-madgraph": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TTGamma_SingleLeptFromTbar-madgraph"],
+      "xsec": 0.7653,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.653e-01 +- 1.671e-04 pb"
+    },
+    "VVTo2L2Nu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["VVTo2L2Nu-amcatnloFXFX", "VVTo2L2Nu-amcatnloFXFX-ext1"],
+      "xsec": 11.91,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.191e+01 +- 2.449e-02 pb"
+    },
+    "WGToLNuG-madgraphMLM": {
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM"],
+      "xsec": 612.72,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.737e+02 +- 1.562e+00 pb",
+      "XSecSource": "Based on **OLD** NLO sample xsec of 510.6 x kNNLO from Grazzini et al of 1.2"
+    },
+    "WGToLNuG-madgraphMLM-PtG-130": {
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-130"],
+      "xsec": 1.203961188,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.343e-01 +- 2.082e-03 pb",
+      "XSecSource": "LO * kNNLO (1.63960396)"
+    },
+    "WGToLNuG-madgraphMLM-PtG-500": {
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM-PtG-500"],
+      "xsec": 0.013403762,
+      "GenXSecAnalyzer": "After filter: final cross section = 8.175e-03 +- 1.549e-05 pb",
+      "XSecSource": "LO * kNNLO (1.63960396)"
+    },
+    "WGToLNuG-madgraphMLM-stitched": {
+      "attributes": ["default", "do_wg_gen_vars", "mc"],
+      "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
+      "xsec": 612.72,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToLNuG-madgraphMLM": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 6103817,
+          "xsec": 373.7
+        },
+        "WGToLNuG-madgraphMLM-PtG-130": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 1645059,
+          "xsec": 0.7343
+        }
+        ,
+        "WGToLNuG-madgraphMLM-PtG-500": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 1393505,
+          "xsec": 0.008196
+        }
+      }
+    },
+    "WGToLNuG-amcatnloFXFX": {
+      "attributes": ["default", "mc", "doit"],
+      "inputs": ["WGToLNuG-amcatnloFXFX"],
+      "xsec": 214.68,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.789e+02 +- 4.426e-01 pb",
+      "XSecSource": "NLO sample xsec * 1.2 kNNLO"
+    },
+    "WJetsToLNu-madgraphMLM": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext2"],
+      "xsec": 61526.7,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.032e+04 +- 5.532e+01 pb",
+      "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV"
+    },
+    "WWG-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WWG-amcatnlo"],
+      "xsec": 0.2147,
+      "GenXSecAnalyzer": "After filter: final cross section = 2.147e-01 +- 2.206e-04 pb"
+    },
+    "WWTo1L1Nu2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WWTo1L1Nu2Q-amcatnloFXFX"],
+      "xsec": 45.61,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.561e+01 +- 9.003e-02 pb"
+    },
+    "WZG-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZG-amcatnlo"],
+      "xsec": 0.04123,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.123e-02 +- 4.251e-05 pb"
+    },
+    "WZTo1L1Nu2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo1L1Nu2Q-amcatnloFXFX"],
+      "xsec": 10.74,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.074e+01 +- 2.016e-02 pb"
+    },
+    "WZTo1L3Nu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo1L3Nu-amcatnloFXFX"],
+      "xsec": 3.069,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.069e+00 +- 5.895e-03 pb"
+    },
+    "WZTo2L2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo2L2Q-amcatnloFXFX"],
+      "xsec": 5.588,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.588e+00 +- 1.058e-02 pb"
+    },
+    "WZTo3LNu-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["WZTo3LNu-amcatnloFXFX"],
+      "xsec": 4.706,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.706e+00 +- 8.943e-03 pb"
+    },
+    "ZGToLLG-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZGToLLG-amcatnloFXFX"],
+      "xsec": 51.759744,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.736e+01 +- 1.087e-01 pb",
+      "XSecSource": "Applied kNNLO of 1.0929 from https://arxiv.org/pdf/1711.06631.pdf"
+    },
+    "ZZTo2L2Q-amcatnloFXFX": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZTo2L2Q-amcatnloFXFX"],
+      "xsec": 3.225,
+      "GenXSecAnalyzer": "After filter: final cross section = 3.225e+00 +- 6.823e-03 pb"
+    },
+    "ZZTo4L-powheg": {
+      "attributes": ["default", "mc"],
+      "inputs": ["ZZTo4L-powheg"],
+      "xsec": 1.256,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.256e+00 +- 2.271e-03 pb"
+    },
+    "Theorists": {
+      "attributes": ["wg_gen"],
+      "inputs": ["Theorists"],
+      "xsec": 510.6
+    },
+    "WGToMuNuG-EFT-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT-madgraphMLM"],
+      "xsec": 232.9
+    },
+    "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_130_inf-madgraphMLM"],
+      "xsec": 0.3791
+    },
+    "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_300_inf-madgraphMLM"],
+      "xsec": 0.09792
+    },
+    "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG-EFT_pTA_500_inf-madgraphMLM"],
+      "xsec": 0.05124
+    },
+    "WGToMuNuG-EFT-madgraphMLM-stitched": {
+      "attributes": ["wg_gen_v3"],
+      "inputs": ["WGToMuNuG-EFT-madgraphMLM", "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM"],
+      "xsec": 232.9,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToMuNuG-EFT-madgraphMLM": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 2091072,
+          "xsec": 232.9
+        },
+        "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 801699,
+          "xsec": 0.3791
+        },
+        "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
+          "target": false,
+          "min": [300.0],
+          "max": [],
+          "events": 787537,
+          "xsec": 0.09792
+        },
+        "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 768786,
+          "xsec": 0.05124
+        }
+      }
+    }
+  },
+  "config": {
+    "data_json": "input/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt",
+    "year": 2016
+  }
+}

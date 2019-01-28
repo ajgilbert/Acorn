@@ -289,6 +289,7 @@ class Jobs:
               'EXTRA': self.bopts.decode('string_escape'),
               'NUMBER': jobs
             }
+            print '>> Created %i jobs to process %i tasks' % (jobs, len(self.job_queue))
             subfile.write(condor_settings)
             subfile.close()
             run_command(self.dry_run, 'condor_submit %s' % (subfilename))
