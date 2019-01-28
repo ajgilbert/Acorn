@@ -68,7 +68,7 @@ if 'voGroup' in crab_settings :
 config.section_('Site')
 config.Site.storageSite = crab_settings['storageSite']
 if 'whiteList' in crab_settings:
-  config.Site.whitelist = crab_settings['whiteList']
+  config.Site.whitelist = [str(x) for x in crab_settings['whiteList']]
 #config.Site.whitelist = ['T2_UK_London_IC', 'T2_CH_CERN', 'T2_FR_GRIF_LLR', 'T2_UK_SGrid_Bristol', 'T3_US_FNALLPC', 'T2_DE_DESY', 'T2_IT_Bari', 'T2_BE_IIHE', 'T2_US_UCSD', 'T2_US_MIT', 'T2_IT_Pisa', 'T2_US_Wisconsin', 'T2_US_Florida', 'T2_IT_Rome','T2_FR_IPHC']
 
 
@@ -108,7 +108,7 @@ for sample in sorted(samples['samples']):
     if 'useFileSplitting' in info:
         config2.Data.splitting = 'FileBased'
         config2.Data.unitsPerJob = info['useFileSplitting']
-        config2.General.instance = 'preprod' # temporary - see https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/3623/1/1.html
+        # config2.General.instance = 'preprod' # temporary - see https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/3623/1/1.html
     if 'inputDBS' in info:
         config2.Data.inputDBS = str(info['inputDBS'])
     if args.verbosity >= 1:
