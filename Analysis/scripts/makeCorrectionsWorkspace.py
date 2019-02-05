@@ -186,6 +186,10 @@ if era == '2016':
     SafeWrapHist(w, ['m_eta'], muon_trk_eff_hist, name='m_trk_ratio')
 
     w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
+else:
+    for t in ['trg24', 'id', 'iso']:
+        w.factory('expr::m_%s_ratio("1", m_pt[0], m_eta[0])' % (t))
+    w.factory('expr::m_idisotrk_ratio("1", m_pt[0], m_eta[0])')
 
 ###############################################################################
 ## Photons
@@ -200,6 +204,8 @@ if era == '2016':
     for task in histsToWrap:
         SafeWrapHist(w, ['p_eta', 'p_pt'],
                               GetFromTFile(task[0]), name=task[1])
+else:
+    w.factory('expr::p_id_ratio("1", p_pt[0], p_eta[0])')
 
 
 ###############################################################################
@@ -215,6 +221,8 @@ if era == '2016':
     for task in histsToWrap:
         SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'],
                               GetFromTFile(task[0]), name=task[1])
+else:
+    w.factory('expr::p_fake_ratio("1", p_pt[0], p_eta[0])')
 
 
 w.Print()

@@ -16,6 +16,7 @@
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
 #include "Acorn/NTupler/interface/Muon.h"
+#include "Acorn/NTupler/interface/Electron.h"
 #include "Acorn/NTupler/interface/Track.h"
 #include "Acorn/NTupler/interface/Photon.h"
 
@@ -77,6 +78,8 @@ double MuonPFIso(ac::Muon const* mu);
 //  - year: 2016/2017/2018
 //  - wp: 0=loose, 1=medium, 2=tight
 bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged, bool apply_sigma);
+
+bool ElectronIPCuts(ac::Electron const* e);
 
 // Transverse mass
 double MT(Candidate const* cand1, Candidate const* cand2);

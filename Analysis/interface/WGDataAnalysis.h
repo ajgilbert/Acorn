@@ -29,6 +29,7 @@ class WGDataAnalysis : public ModuleBase {
   LookupFilter filters_IsoMu24_;
   LookupFilter filters_IsoTkMu24_;
   LookupFilter filters_IsoMu27_;
+  LookupFilter filters_Mu50_;
 
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
@@ -38,30 +39,37 @@ class WGDataAnalysis : public ModuleBase {
   // truth properties
   unsigned gen_proc_;
 
-  unsigned n_m_; // number of medium muons
+  unsigned n_vtx_; // number of reco vertices
+  unsigned metfilters_; // metfilter bits (0 == OK)
 
-  // m0: Main muon variables
-  float m0_pt_;
-  float m0_eta_;
-  float m0_phi_;
-  float m0_iso_;
-  bool m0_tight_;
-  bool m0_trg_; // trigger fired and object matched
-  int m0_q_;
+  unsigned n_pre_m_; // number of medium/tight muons
+  unsigned n_pre_e_; // number of medium/tight electrons
+
+  // l0: Main muon/electron variables
+  float l0_pt_;
+  float l0_eta_;
+  float l0_phi_;
+  float l0_iso_;
+  float l0_tkiso_;
+  bool l0_tight_;
+  bool l0_trg_; // trigger fired and object matched
+  bool l0_trg_2_; // 2nd trigger option
+  int l0_q_;
+  unsigned l0_pdgid_;
 
   // m1: Second muon variables
-  float m1_pt_;
-  float m1_eta_;
-  float m1_phi_;
-  float m1_iso_;
+  float l1_pt_;
+  float l1_eta_;
+  float l1_phi_;
+  float l1_iso_;
 
   // di-muon variables
-  float m0m1_M_;
-  float m0m1_dr_;
-  bool m0m1_os_;
+  float l0l1_M_;
+  float l0l1_dr_;
+  bool l0l1_os_;
 
   // number of reco'd photons (no ID/Iso beyond miniaod presel)
-  unsigned n_p_;
+  unsigned n_pre_p_;
 
   // p0: Main photon variables, defined if n_p >= 1
   float p0_pt_;
@@ -83,12 +91,12 @@ class WGDataAnalysis : public ModuleBase {
   float met_phi_;
 
   // composite variables
-  float m0met_mt_;
+  float l0met_mt_;
 
   // composite variables defined inf n_p >= 1
-  float m0p0_dr_;
-  float m0p0_dphi_;
-  float m0p0_M_;
+  float l0p0_dr_;
+  float l0p0_dphi_;
+  float l0p0_M_;
   float reco_phi_;
 
   // vetos
@@ -98,9 +106,9 @@ class WGDataAnalysis : public ModuleBase {
   // event weights
   float wt_def_; // default weight
   float wt_pu_;
-  float wt_m0_; // trk/ID/Iso weight for m0
-  float wt_trg_m0_; // trigger weight for m0
-  float wt_m1_; // trk/ID/Iso weight for m1
+  float wt_l0_; // trk/ID/Iso weight for l0
+  float wt_trg_l0_; // trigger weight for l0
+  float wt_l1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
 
@@ -108,24 +116,26 @@ class WGDataAnalysis : public ModuleBase {
   bool is_wg_gen_;
   unsigned gen_nparts_;
   unsigned gen_pdgid_;
-  bool gen_m0_match_;
+  bool gen_l0_match_;
   bool gen_p0_match_;
-  float lhe_m0_pt_;
-  float lhe_m0_eta_;
+  float lhe_l0_pt_;
+  float lhe_l0_eta_;
   float lhe_p0_pt_;
   float lhe_p0_eta_;
-  float gen_m0_pt_;
-  float gen_m0_eta_;
+  float gen_l0_pt_;
+  float gen_l0_eta_;
   float gen_p0_pt_;
   float gen_p0_eta_;
   float gen_phi_;
   float true_phi_;
-  int gen_m0_q_;
+  int gen_l0_q_;
   float gen_met_;
   float gen_met_phi_;
-  float gen_m0p0_dr_;
+  float gen_l0p0_dr_;
 
   mutable TRandom3 rng;
+
+  void PhotonIsoCorrector(ac::Photon *p, unsigned nvertices);
 
 
  public:

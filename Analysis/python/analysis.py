@@ -331,7 +331,7 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
         drawtree[obj.sample].append(obj)
     # pprint(drawtree)
     for sample, drawobjs in drawtree.iteritems():
-        f = ROOT.TFile(sample_to_file_dict[sample])
+        f = ROOT.TFile.Open(sample_to_file_dict[sample])
         t = f.Get(tree_name)
         entries = t.GetEntriesFast()
         use_cores = 0

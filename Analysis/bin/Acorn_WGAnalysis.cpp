@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "boost/lexical_cast.hpp"
 // Services
 #include "PhysicsTools/FWLite/interface/TFileService.h"
 #include "Acorn/Analysis/interface/AnalysisBase.h"
@@ -67,6 +68,7 @@ int main(int argc, char* argv[]) {
 
   json js = json::parse(argv[1]);
   json const& jsc = js;
+  std::string s_year = boost::lexical_cast<std::string>(jsc["year"]);
 
   // Should move to passing the list of files to process directly?
   std::string outname = jsc["output"];
@@ -109,7 +111,7 @@ int main(int argc, char* argv[]) {
     dimuon_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis")
                              .set_fs(fs.at("DiMuon").get())
                              .set_year(jsc["year"])
-                             .set_corrections("input/wgamma_corrections_2016_v1.root")
+                             .set_corrections("input/wgamma_corrections_2016_v3.root")
                              .set_is_data(is_data));
 
     dimuon_seq.InsertSequence("DiMuon", analysis);
@@ -134,7 +136,7 @@ int main(int argc, char* argv[]) {
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("input/wgamma_corrections_2016_v1.root")
+                             .set_corrections("input/wgamma_corrections_" + s_year + "_v3.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(contains(jsc["attributes"], "do_wg_gen_vars"))
