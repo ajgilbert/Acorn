@@ -121,7 +121,7 @@ class Jobs:
                 pass
             return i + 1
 
-    def add_filelist_split_jobs(self, prog, cfg, files_per_job, output_cfgs, tempdir=''):
+    def add_filelist_split_jobs(self, prog, cfg, files_per_job, output_cfgs=['output'], tempdir=''):
         if 'filelist' in cfg:
             filelist = cfg['filelist']
             nfiles = self.file_len(filelist)
@@ -139,13 +139,18 @@ class Jobs:
                 filename, extension = os.path.splitext(cfg[item])
                 final_cfg[item] = filename + ('_%i' % n) + extension
             if tempdir:
-                copy_cmd="""cp %s/%s %s/%s""" % (tempdir,final_cfg['output'],final_cfg['outdir'],final_cfg['output'])
+                copy_cmds = []
+                cp_cmd = 'cp'
+                if final_cfg['outdir'].startswith('root://'):
+                    cp_cmd = 'xrdcp'
+                for item in output_cfgs:
+                    copy_cmds.append("""%s %s/%s %s/%s""" % (cp_cmd, tempdir, final_cfg[item], final_cfg['outdir'], final_cfg[item]))
                 final_cfg['outdir']=tempdir
             final_cfg['file_offset'] = n
             final_cfg['file_step'] = njobs
             cmd = """%s '%s'""" % (prog, json.dumps(final_cfg))
             if tempdir:
-                cmd = """%s '%s'\n %s""" % (prog, json.dumps(final_cfg), copy_cmd)
+                cmd = """%s '%s'; %s""" % (prog, json.dumps(final_cfg), '; '.join(copy_cmds))
             self.job_queue.append(cmd)
             # print cmd
 

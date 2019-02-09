@@ -19,6 +19,8 @@ parser.add_argument('--production', '-p', default='wgamma_2018_v1',
                     help='Production tag, used as filelist prefix and output path')
 parser.add_argument('--sequences', '-s', default='WGamma',
                     help='List of sequences to run')
+parser.add_argument('--tmp', '-t', default='',
+                    help='Write the job output in a temporary location')
 
 args = parser.parse_args()
 job_mgr.set_args(args)
@@ -29,10 +31,9 @@ with open(args.config) as jsonfile:
 full_outdir = os.path.join(args.outdir, args.production)
 sequences = args.sequences.split(',')
 
-for seq in sequences:
-    makedir = os.path.join(full_outdir, seq)
-    print '>> Creating directory %s' % makedir
-    os.system('mkdir -p %s' % makedir)
+if not full_outdir.startswith('root://'):
+    print '>> Creating directory %s' % full_outdir
+    os.system('mkdir -p %s' % full_outdir)
 
 SAMPLES = incfg['samples']
 
@@ -44,10 +45,13 @@ for sample in SAMPLES:
     cfg = {
         'sequences': sequences,
         'filelists': ['filelists/%s_%s.txt' % (args.production, x) for x in SAMPLES[sample]['inputs']],
-        'output': '%s.root' % sample,
         'outdir': full_outdir,
         'attributes': SAMPLES[sample]['attributes']
     }
+    output_cfgs = []
+    for seq in sequences:
+        cfg['output_%s' % seq] = '%s_%s.root' % (seq, sample)
+        output_cfgs.append('output_%s' % seq)
     cfg.update(incfg['config'])
     if 'stitching' in SAMPLES[sample]:
         cfg['stitching'] = SAMPLES[sample]['stitching']
@@ -56,6 +60,7 @@ for sample in SAMPLES:
         prog='Acorn_WGAnalysis',
         cfg=cfg,
         files_per_job=args.files_per_job,
-        output_cfgs=['output'])
+        output_cfgs=output_cfgs,
+        tempdir=args.tmp)
     job_mgr.task_name = task + '-' + sample
     job_mgr.flush_queue()

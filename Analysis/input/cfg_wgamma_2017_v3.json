@@ -3,17 +3,17 @@
     "SingleMuon": {
       "attributes": ["default", "data"],
       "inputs": ["SingleMuon-2017B", "SingleMuon-2017C", "SingleMuon-2017D", "SingleMuon-2017E", "SingleMuon-2017F"],
-      "lumi": 41.525407937
+      "lumi": 41525.407937
     },
     "SingleElectron": {
       "attributes": ["default", "data"],
       "inputs": ["SingleElectron-2017B", "SingleElectron-2017C", "SingleElectron-2017D", "SingleElectron-2017E", "SingleElectron-2017F"],
-      "lumi": 41.525685252
+      "lumi": 41525.685252
     },
     "SinglePhoton": {
       "attributes": ["default", "data"],
       "inputs": ["SinglePhoton-2017B", "SinglePhoton-2017C", "SinglePhoton-2017D", "SinglePhoton-2017E", "SinglePhoton-2017F"],
-      "lumi": 41.526052520
+      "lumi": 41526.052520
     },
     "DYJetsToLL_M-50-madgraphMLM": {
       "attributes": ["default", "mc"],
@@ -104,11 +104,11 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.403e+01 +- 5.408e-02 pb"
     },
     "WGToLNuG-madgraphMLM": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM"],
-      "xsec": 613.668,
+      "xsec": 846.43,
       "GenXSecAnalyzer": "After filter: final cross section = 4.649e+02 +- 6.565e-01 pb",
-      "XSecSource": "(1): 464.9 (LO) * 1.0982 (my fid NLO/LO ratio) * 1.2 (kNNL0) = 613.668,  (2): 464.9 (LO) * 1.63960396 (kNNLO -2016) = 762.25"
+      "XSecSource": "(1): 464.9 (LO) * 1.514 (my fid NLO/LO ratio) * 1.2 (kNNL0) = 613.668,  (2): 464.9 (LO) * 1.63960396 (kNNLO -2016) = 762.25"
     },
     "WGToLNuG-madgraphMLM-PtG-130": {
       "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
@@ -127,7 +127,7 @@
     "WGToLNuG-madgraphMLM-stitched": {
       "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
-      "xsec": 613.668,
+      "xsec": 846.43,
       "stitching": {
         "binned": ["photon_pt"],
         "WGToLNuG-madgraphMLM": {

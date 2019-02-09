@@ -71,15 +71,16 @@ int main(int argc, char* argv[]) {
   std::string s_year = boost::lexical_cast<std::string>(jsc["year"]);
 
   // Should move to passing the list of files to process directly?
-  std::string outname = jsc["output"];
+  // std::string outname = jsc["output"];
   vector<string> do_files = GetFilesForJob(jsc["filelists"], "", jsc["file_offset"], jsc["file_step"]);
   std::string outputdir = jsc["outdir"];
 
   std::set<std::string> sequences = jsc["sequences"];
   std::map<std::string, std::shared_ptr<fwlite::TFileService>> fs;
   for (auto const& seq : sequences) {
+    std::string outfile = jsc["output_" + seq];
     fs[seq] = std::make_shared<fwlite::TFileService>(
-        outputdir + "/" + seq + "/" + outname);
+        outputdir + "/" + outfile);
     fs[seq]->file().SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 5));
   }
 
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
     dimuon_seq.BuildModule(ac::DiMuonAnalysis("DiMuonAnalysis")
                              .set_fs(fs.at("DiMuon").get())
                              .set_year(jsc["year"])
-                             .set_corrections("input/wgamma_corrections_2016_v3.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_2016_v3.root")
                              .set_is_data(is_data));
 
     dimuon_seq.InsertSequence("DiMuon", analysis);
@@ -136,7 +137,7 @@ int main(int argc, char* argv[]) {
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("input/wgamma_corrections_" + s_year + "_v3.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v3.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(contains(jsc["attributes"], "do_wg_gen_vars"))

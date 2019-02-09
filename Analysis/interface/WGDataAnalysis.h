@@ -31,6 +31,9 @@ class WGDataAnalysis : public ModuleBase {
   LookupFilter filters_IsoMu27_;
   LookupFilter filters_Mu50_;
 
+  LookupFilter filters_Ele27_;
+  LookupFilter filters_Ele32_;
+
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
 

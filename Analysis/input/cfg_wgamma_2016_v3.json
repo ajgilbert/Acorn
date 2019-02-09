@@ -94,9 +94,9 @@
     "WGToLNuG-madgraphMLM": {
       "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM"],
-      "xsec": 612.72,
+      "xsec": 719.809614655,
       "GenXSecAnalyzer": "After filter: final cross section = 3.737e+02 +- 1.562e+00 pb",
-      "XSecSource": "Based on **OLD** NLO sample xsec of 510.6 x kNNLO from Grazzini et al of 1.2"
+      "XSecSource": "1) Based on **OLD** NLO sample xsec of 510.6 x kNNLO from Grazzini et al of 1.2. 2) plus residual 1.17477741 from baseline comparsion to NLO"
     },
     "WGToLNuG-madgraphMLM-PtG-130": {
       "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
@@ -113,9 +113,9 @@
       "XSecSource": "LO * kNNLO (1.63960396)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
-      "xsec": 612.72,
+      "xsec": 719.809614655,
       "stitching": {
         "binned": ["photon_pt"],
         "WGToLNuG-madgraphMLM": {
@@ -143,7 +143,7 @@
       }
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel"],
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel", "doit"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 214.68,
       "GenXSecAnalyzer": "After filter: final cross section = 1.789e+02 +- 4.426e-01 pb",

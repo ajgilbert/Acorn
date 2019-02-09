@@ -121,6 +121,13 @@ int WGDataAnalysis::PreAnalysis() {
 
     filters_Mu50_ =
         LookupFilter({{272023, "hltL3fL1sMu22Or25L1f0L2f10QL3Filtered50Q"}});
+
+    filters_Ele27_ =
+        LookupFilter({{272023, "hltEle27WPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_ =
+        LookupFilter({{281010, "hltEle32noerWPTightGsfTrackIsoFilter"},
+                      {302023, "hltEle32WPTightGsfTrackIsoFilter"}});
   } else {
     filters_IsoMu24_ =
         LookupFilter({{2016, "hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"},
@@ -136,7 +143,17 @@ int WGDataAnalysis::PreAnalysis() {
                       {2018, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"}});
 
     filters_Mu50_ =
-        LookupFilter({{272023, "hltL3fL1sMu22Or25L1f0L2f10QL3Filtered50Q"}});
+        LookupFilter({{2016, "hltL3fL1sMu22Or25L1f0L2f10QL3Filtered50Q"}});
+
+    filters_Ele27_ =
+        LookupFilter({{2016, "hltEle27WPTightGsfTrackIsoFilter"},
+                      {2017, "hltEle27WPTightGsfTrackIsoFilter"},
+                      {2018, "hltEle27WPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_ =
+        LookupFilter({{2016, "hltEle32noerWPTightGsfTrackIsoFilter"},
+                      {2017, "hltEle32WPTightGsfTrackIsoFilter"},
+                      {2018, "hltEle32WPTightGsfTrackIsoFilter"}});
   }
 
   TFile f(corrections_.c_str());
@@ -208,7 +225,7 @@ int WGDataAnalysis::PreAnalysis() {
              (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) && ElectronIPCuts(e);
     });
 
-    // At this stage apply the medium Photon ID without the charged is cut
+    // At this stage apply the medium Photon ID without the charged iso cut
     auto pre_photons = ac::copy_keep_if(photons, [&](ac::Photon const* p) {
       return p->pt() > 30. && fabs(p->scEta()) < 2.5 &&
              (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) && PhotonIDIso(p, year_, 1, false, false);
@@ -232,7 +249,6 @@ int WGDataAnalysis::PreAnalysis() {
     // Resolve the case where we have at n_m >= 1 and n_e >= 1
     ac::Muon* m0 = pre_muons.size() ? pre_muons[0] : nullptr;
     ac::Electron* e0 = pre_electrons.size() ? pre_electrons[0] : nullptr;
-    ac::Photon* p0 = pre_photons.size() ? pre_photons[0] : nullptr;
 
     ac::Candidate *l0 = nullptr;
     if (m0 && e0) {
@@ -254,6 +270,14 @@ int WGDataAnalysis::PreAnalysis() {
     } else if (e0) {
       l0_pdgid_ = 11;
     }
+
+    if (l0) {
+      ac::keep_if(pre_photons, [&](ac::Photon const* p) {
+        return DeltaR(p, l0) > 0.3;
+      });
+    }
+
+    ac::Photon* p0 = pre_photons.size() ? pre_photons[0] : nullptr;
 
     // Here are the conditions for skipping this event and not writing anything to the tree
     if (do_presel_ && (l0 == nullptr || p0 == nullptr)) {
@@ -354,6 +378,18 @@ int WGDataAnalysis::PreAnalysis() {
         }
         auto const& trg_objs_Mu50 = event->GetPtrVec<TriggerObject>("triggerObjects_Mu50");
         l0_trg_2_ = IsFilterMatchedDR(muons[0], trg_objs_Mu50, filters_Mu50_.Lookup(trg_lookup), 0.3);
+      }
+      if (e0) {
+        if (year_ == 2016) {
+          auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele27_WPTight_Gsf");
+          l0_trg_ = IsFilterMatchedDR(e0, trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3);
+        } else if (year_ == 2017) {
+          auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
+          l0_trg_ = IsFilterMatchedDR(e0, trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
+        } else if (year_ == 2018) {
+          auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
+          l0_trg_ = IsFilterMatchedDR(e0, trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
+        }
       }
     }
 

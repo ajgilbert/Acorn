@@ -24,6 +24,13 @@ def VariableRebin(hist, binning):
     newhist = hist.Rebin(len(binning) - 1, "", array('d', binning))
     return newhist
 
+
+def UpdateDict(current, update):
+    cfg = deepcopy(current)
+    cfg.update(update)
+    return cfg
+
+
 DEFAULT_CFG = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
     'type': 'datamc',           # or multihist
@@ -32,6 +39,7 @@ DEFAULT_CFG = {
     'postfix': '',              # filename postfix
     'logx': False,              # Draw x-axis in log-scale
     'logy': False,              # Draw y-axis in log-scale
+    'logy_min': 1E-3,
     'ratio': True,             # Draw the ratio plot?
     'ratio_pad_frac': 0.27,
     'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
@@ -45,6 +53,7 @@ DEFAULT_CFG = {
     'layout': 'data_fakes',
     'legend_pos': [0.67, 0.66, 0.90, 0.91], # Legend position in NDC (x1, y1, x2, y2)
     'legend_padding': 0.05,      # Automatically increase the y-axis range to ensure the legend does not overlap the histograms (argument is fraction of frame height to pad)
+    'legend_show_yields': False,  # Add the yields to the legends
     'data_name': 'data_obs',     # Name of the TH1 to take for data
     'main_logo': 'CMS',
     'sub_logo': 'Internal',
@@ -56,7 +65,8 @@ DEFAULT_CFG = {
         'legend_opts': 'L',
         'marker_size': 0.6,
         'line_width': 3
-    }
+    },
+    'norm_to': 0
 }
 
 
@@ -67,6 +77,8 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             copyhists[hname] = VariableRebin(h, cfg['rebinvar'])
         else:
             copyhists[hname] = h.Clone()
+        if cfg['norm_to'] > 0.:
+            copyhists[hname].Scale(cfg['norm_to'] / copyhists[hname].Integral())
         if cfg['divwidth']:
             copyhists[hname].Scale(1., 'width')
 
@@ -129,7 +141,7 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
     if cfg['logy']:
         pads[0].SetLogy()
-        h_axes[0].SetMinimum(0.001)
+        h_axes[0].SetMinimum(cfg['logy_min'])
 
     if cfg['ratio']:
         plot.StandardAxes(h_axes[1].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
@@ -179,7 +191,10 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             legend.AddEntry(h_store[ele['name']], ele['legend'], ele['legend_opts'])
     else:
         for ele in layout:
-            legend.AddEntry(h_store[ele['name']], ele['legend'], ele['legend_opts'])
+            leg_extra = ''
+            if cfg['legend_show_yields']:
+                leg_extra = ' (%.1f)' % h_store[ele['name']].Integral('width' if cfg['divwidth'] else '')
+            legend.AddEntry(h_store[ele['name']], ele['legend'] + leg_extra, ele['legend_opts'])
 
     if cfg['type'] == 'datamc':
         bkg_uncert_label = 'Stat. Uncertainty'
@@ -195,7 +210,6 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.35)
     legend.Draw()
     if cfg['legend_padding'] > 0.:
-        print h_axes[0].GetMinimum(), h_axes[0].GetMaximum()
         plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
@@ -220,7 +234,7 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
                 else:
                     rhist = plot.MakeRatioHist(h_store[info['num']], h_store[info['den']], True, True)
                 r_store['%s_%s' % (info['num'], info['den'])] = rhist
-                rhist.Draw('SAME')
+                rhist.Draw('SAMEE0')
 
         plot.SetupTwoPadSplitAsRatio(
             pads, plot.GetAxisHist(
@@ -347,7 +361,6 @@ def MakeDataMCPlot(name, outdir, hists, cfg, layouts):
     plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.35)
     legend.Draw()
     if cfg['legend_padding'] > 0.:
-        print h_axes[0].GetMinimum(), h_axes[0].GetMaximum()
         plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
