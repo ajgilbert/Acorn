@@ -42,6 +42,7 @@ struct WGSystem {
   bool valid_mt;
 
   double Phi(unsigned lepton_charge);
+  double SymPhi(unsigned lepton_charge);
 };
 
 WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,

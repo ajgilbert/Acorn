@@ -35,6 +35,7 @@ WGDataAnalysis::~WGDataAnalysis() { ; }
 int WGDataAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
+    tree_->Branch("run", &run_);
     tree_->Branch("gen_proc", &gen_proc_);
     tree_->Branch("n_vtx", &n_vtx_);
     tree_->Branch("n_pre_m", &n_pre_m_);
@@ -72,11 +73,20 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_isprompt", &p0_isprompt_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
+    tree_->Branch("xy_met", &xy_met_);
+    tree_->Branch("xy_met_phi", &xy_met_phi_);
+    tree_->Branch("puppi_met", &puppi_met_);
+    tree_->Branch("puppi_met_phi", &puppi_met_phi_);
     tree_->Branch("l0met_mt", &l0met_mt_);
     tree_->Branch("l0p0_dr", &l0p0_dr_);
     tree_->Branch("l0p0_dphi", &l0p0_dphi_);
     tree_->Branch("l0p0_M", &l0p0_M_);
     tree_->Branch("reco_phi", &reco_phi_);
+    tree_->Branch("reco_sphi", &reco_sphi_);
+    tree_->Branch("reco_xy_phi", &reco_xy_phi_);
+    tree_->Branch("reco_xy_sphi", &reco_xy_sphi_);
+    tree_->Branch("reco_puppi_phi", &reco_puppi_phi_);
+    tree_->Branch("reco_puppi_sphi", &reco_puppi_sphi_);
     tree_->Branch("n_vm", &n_vm_);
     tree_->Branch("vm_p0_dr", &vm_p0_dr_);
     tree_->Branch("wt_def", &wt_def_);
@@ -98,6 +108,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("gen_p0_pt", &gen_p0_pt_);
     tree_->Branch("gen_p0_eta", &gen_p0_eta_);
     tree_->Branch("gen_phi", &gen_phi_);
+    tree_->Branch("gen_sphi", &gen_sphi_);
     tree_->Branch("true_phi", &true_phi_);
     tree_->Branch("gen_l0_q", &gen_l0_q_);
     tree_->Branch("gen_l0_pt", &gen_l0_pt_);
@@ -128,6 +139,13 @@ int WGDataAnalysis::PreAnalysis() {
     filters_Ele32_ =
         LookupFilter({{281010, "hltEle32noerWPTightGsfTrackIsoFilter"},
                       {302023, "hltEle32WPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_L1DoubleEG_ =
+        LookupFilter({{295982, "hltEle32L1DoubleEGWPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_L1DoubleEG_seed_ = // this is the wrong filter!
+        LookupFilter({{295982, "hltL1sSingleAndDoubleEGor"}});
+
   } else {
     filters_IsoMu24_ =
         LookupFilter({{2016, "hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"},
@@ -178,6 +196,7 @@ int WGDataAnalysis::PreAnalysis() {
 
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
+    run_ = info->run();
     n_vtx_ = info->numVertices();
     metfilters_ = info->metfilters().to_ulong();
 
@@ -190,6 +209,7 @@ int WGDataAnalysis::PreAnalysis() {
       PhotonIsoCorrector(p, n_vtx_);
     }
     auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
+    auto puppi_mets = event->GetPtrVec<ac::Met>("puppiMet");
 
     // Sub-process classification - maybe move this into a separate module
     if (gen_classify_ == "DY") {
@@ -320,12 +340,13 @@ int WGDataAnalysis::PreAnalysis() {
         gen_p0_pt_ = parts.gen_pho->pt();
         gen_p0_eta_ = parts.gen_pho->eta();
         gen_l0_q_ = parts.gen_lep->charge();
-        gen_phi_ = gen_sys.Phi(parts.gen_lep->charge() > 0);
+        gen_phi_ = reduceMantissaToNbits(gen_sys.Phi(parts.gen_lep->charge() > 0), 12);
+        gen_sphi_ = reduceMantissaToNbits(gen_sys.SymPhi(parts.gen_lep->charge() > 0), 12);
         gen_l0_pt_ = parts.gen_lep->pt();
         gen_l0_eta_ = parts.gen_lep->eta();
         gen_met_ = gen_met->pt();
-        gen_l0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
-        true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
+        gen_l0p0_dr_ = reduceMantissaToNbits(ac::DeltaR(parts.gen_lep, parts.gen_pho), 12);
+        true_phi_ = reduceMantissaToNbits(gen_true_sys.Phi(parts.gen_lep->charge() > 0), 12);
 
         // Now try and match to the reco objects, if they exist
         if (l0 && ac::DeltaR(l0, parts.gen_lep) < 0.3) {
@@ -340,6 +361,14 @@ int WGDataAnalysis::PreAnalysis() {
     ac::Met* met = mets.at(0);
     met_ = met->pt();
     met_phi_ = met->phi();
+
+    ac::Met* xy_met = mets.at(1);
+    xy_met_ = xy_met->pt();
+    xy_met_phi_ = xy_met->phi();
+
+    ac::Met* puppi_met = puppi_mets.at(0);
+    puppi_met_ = puppi_met->pt();
+    puppi_met_phi_ = puppi_met->phi();
 
     if (l0) {
       l0_pt_ = l0->pt();
@@ -386,6 +415,12 @@ int WGDataAnalysis::PreAnalysis() {
         } else if (year_ == 2017) {
           auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
           l0_trg_ = IsFilterMatchedDR(e0, trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
+          if (is_data_ && info->run() < 302026) {
+            auto const& trg_objs_alt = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf_L1DoubleEG");
+            bool l0_trg_alt = IsFilterMatchedDR(e0, trg_objs_alt, filters_Ele32_L1DoubleEG_.Lookup(trg_lookup), 0.3) &&
+                              IsFilterMatchedDR(e0, trg_objs_alt, filters_Ele32_L1DoubleEG_seed_.Lookup(trg_lookup), 0.3);
+            l0_trg_ = l0_trg_ || l0_trg_alt;
+          }
         } else if (year_ == 2018) {
           auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
           l0_trg_ = IsFilterMatchedDR(e0, trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
@@ -443,9 +478,17 @@ int WGDataAnalysis::PreAnalysis() {
       l0p0_M_ = (l0->vector() + p0->vector()).M();
 
       WGSystem reco_sys = ProduceWGSystem(*l0, *met, *p0, true, rng, false);
-      double lep_phi = reco_sys.r_charged_lepton.phi();
-      reco_phi_ = ROOT::Math::VectorUtil::Phi_mpi_pi(
-          l0->charge() > 0 ? (lep_phi) : (lep_phi + ROOT::Math::Pi()));
+      reco_phi_ = reco_sys.Phi(l0->charge());
+      reco_sphi_ = reco_sys.SymPhi(l0->charge());
+
+      WGSystem reco_xy_sys = ProduceWGSystem(*l0, *xy_met, *p0, true, rng, false);
+      reco_xy_phi_ = reco_xy_sys.Phi(l0->charge());
+      reco_xy_sphi_ = reco_xy_sys.SymPhi(l0->charge());
+
+      WGSystem reco_puppi_sys = ProduceWGSystem(*l0, *puppi_met, *p0, true, rng, false);
+      reco_puppi_phi_ = reco_puppi_sys.Phi(l0->charge());
+      reco_puppi_sphi_ = reco_puppi_sys.SymPhi(l0->charge());
+
       wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, photons[0]->scEta()});
     }
 
@@ -494,6 +537,7 @@ int WGDataAnalysis::PreAnalysis() {
   }
 
   void WGDataAnalysis::SetDefaults() {
+    run_ = 0;
     gen_proc_ = 0;
     n_vtx_ = 0;
     metfilters_ = 0;
@@ -531,11 +575,20 @@ int WGDataAnalysis::PreAnalysis() {
     p0_isprompt_ = false;
     met_ = 0.;
     met_phi_ = 0.;
+    xy_met_ = 0.;
+    xy_met_phi_ = 0.;
+    puppi_met_ = 0.;
+    puppi_met_phi_ = 0.;
     l0met_mt_ = 0.;
     l0p0_dr_ = 0.;
     l0p0_dphi_ = 0.;
     l0p0_M_ = 0.;
     reco_phi_ = 0.;
+    reco_sphi_ = 0.;
+    reco_xy_phi_ = 0.;
+    reco_xy_sphi_ = 0.;
+    reco_puppi_phi_ = 0.;
+    reco_puppi_sphi_ = 0.;
     n_vm_ = 0;
     vm_p0_dr_ = 0.;
     wt_def_ = 1.;
@@ -557,6 +610,7 @@ int WGDataAnalysis::PreAnalysis() {
     gen_p0_pt_ = 0.;
     gen_p0_eta_ = 0.;
     gen_phi_ = 0.;
+    gen_sphi_ = 0.;
     gen_l0_q_ = 0;
     gen_l0_pt_ = 0.;
     gen_l0_eta_ = 0.;

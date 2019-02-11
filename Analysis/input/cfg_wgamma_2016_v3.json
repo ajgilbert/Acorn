@@ -92,7 +92,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.191e+01 +- 2.449e-02 pb"
     },
     "WGToLNuG-madgraphMLM": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
       "inputs": ["WGToLNuG-madgraphMLM"],
       "xsec": 719.809614655,
       "GenXSecAnalyzer": "After filter: final cross section = 3.737e+02 +- 1.562e+00 pb",
@@ -143,7 +143,7 @@
       }
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel", "doit"],
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 214.68,
       "GenXSecAnalyzer": "After filter: final cross section = 1.789e+02 +- 4.426e-01 pb",

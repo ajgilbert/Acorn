@@ -19,6 +19,16 @@ double WGSystem::Phi(unsigned lepton_charge) {
   return ROOT::Math::VectorUtil::Phi_mpi_pi(lepton_charge > 0 ? (lep_phi)
                                                               : (lep_phi + ROOT::Math::Pi()));
 }
+double WGSystem::SymPhi(unsigned lepton_charge) {
+  double lep_phi = Phi(lepton_charge);
+  if (lep_phi > ROOT::Math::Pi() / 2.) {
+    return ROOT::Math::Pi() - lep_phi;
+  } else if (lep_phi < -1. * (ROOT::Math::Pi() / 2.)) {
+    return -1. * (ROOT::Math::Pi() + lep_phi);
+  } else {
+    return lep_phi;
+  }
+}
 
   WGSystem ProduceWGSystem(ac::Candidate const& lep, ac::Candidate const& neu,
                                        ac::Candidate const& pho, bool reconstruct, TRandom3 & rng, bool verbose) {

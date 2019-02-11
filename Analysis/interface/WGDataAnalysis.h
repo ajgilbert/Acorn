@@ -33,11 +33,15 @@ class WGDataAnalysis : public ModuleBase {
 
   LookupFilter filters_Ele27_;
   LookupFilter filters_Ele32_;
+  LookupFilter filters_Ele32_L1DoubleEG_;
+  LookupFilter filters_Ele32_L1DoubleEG_seed_;
 
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
 
   TTree* tree_;
+
+  unsigned run_;
 
   // truth properties
   unsigned gen_proc_;
@@ -92,6 +96,10 @@ class WGDataAnalysis : public ModuleBase {
   // met
   float met_;
   float met_phi_;
+  float xy_met_;
+  float xy_met_phi_;
+  float puppi_met_;
+  float puppi_met_phi_;
 
   // composite variables
   float l0met_mt_;
@@ -101,6 +109,12 @@ class WGDataAnalysis : public ModuleBase {
   float l0p0_dphi_;
   float l0p0_M_;
   float reco_phi_;
+  float reco_sphi_;
+  float reco_xy_phi_;
+  float reco_xy_sphi_;
+  float reco_puppi_phi_;
+  float reco_puppi_sphi_;
+
 
   // vetos
   unsigned n_vm_; // number of additional veto muons
@@ -130,6 +144,7 @@ class WGDataAnalysis : public ModuleBase {
   float gen_p0_pt_;
   float gen_p0_eta_;
   float gen_phi_;
+  float gen_sphi_;
   float true_phi_;
   int gen_l0_q_;
   float gen_met_;

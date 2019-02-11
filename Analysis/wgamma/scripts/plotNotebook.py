@@ -12,14 +12,30 @@ from Acorn.Analysis.plottemplates import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.TH1.AddDirectory(False)
-plot.ModTDRStyle()
+plot.ModTDRStyle(width=900, height=900)
+
+
+def NormTH2InColumns(h):
+    for i in xrange(1, h.GetNbinsX() + 1):
+        col_tot = 0.
+        for j in xrange(1, h.GetNbinsY() + 1):
+            col_tot += h.GetBinContent(i, j)
+        if col_tot == 0.:
+            continue
+        for j in xrange(1, h.GetNbinsY() + 1):
+            h.SetBinContent(i, j, h.GetBinContent(i, j) / col_tot)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--load', action='store_true')
+parser.add_argument('--years', default='2016,2017,2018')
+parser.add_argument('--input', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190208')
+parser.add_argument('--output', default='output/plots')
 args = parser.parse_args()
 
-years = ['2016', '2017', '2018']
-inprefix = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190208'
+years = args.years.split(',')
+inprefix = args.input
+outdir = args.output
 # inprefix = '/home/files'
 indirs = {
     '2016': inprefix + '/wgamma_2016_v3/WGamma_',
@@ -99,12 +115,23 @@ if not args.load:
         X['photon_id_e'] = '$elec_trg_2 && n_pre_p>=1 && p0_medium'
         X['photon_match_e'] = '$photon_id_e && gen_p0_match'
         X['photon_pix_e'] = '$photon_match_e && !p0_haspix'
+        X['eft_m'] = '$photon_pix_m && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
+        X['eft_e'] = '$photon_pix_e && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
 
+# 'm0_pt>80 && met>80 && p0_pt>150 && m0p0_dr>3.0'
         for year in years:
             for sel in X.storage.keys():
                 for sa in ['WG', 'WG-inc', 'WG-NLO']:
                     hists[year][label][sa][sel] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + sel), wt='wt_pu*wt_def')
-
+            for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
+                for sa in ['WG']:
+                    hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['sphi_xy_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_xy_sphi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['sphi_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_puppi_sphi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['true_reco_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'reco_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    # hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(6, -1.571, 1.571, 6, -1.571, 1.571), sel=X.get('$' + sel), wt='wt_pu*wt_def')
     # X.get('$photon_pix', printlevel=1)
     for year in years:
         MultiDraw(hists[year], sample_files[year], 'WGDataAnalysis', mt_cores=4, mt_thresh=1E5)
@@ -117,6 +144,13 @@ if not args.load:
                 xsec = sample_cfgs[year][samples[year][name]]['xsec']
                 scale = tgt_lumi * xsec / events
                 obj.Scale(scale)
+
+        for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
+            for sa in ['WG']:
+                NormTH2InColumns(hists[year]['sphi_response'][sa][sel])
+                NormTH2InColumns(hists[year]['sphi_xy_response'][sa][sel])
+                NormTH2InColumns(hists[year]['sphi_puppi_response'][sa][sel])
+
 
     fout = ROOT.TFile('output_notebooks.root', 'RECREATE')
     NodeToTDir(fout, hists)
@@ -150,7 +184,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
 
     # Draw N/N-1 efficiencies
     MakeMultiHistPlot('efficiencies_m_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
@@ -177,7 +211,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                       ]
     )
     MakeMultiHistPlot('efficiencies_e_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
@@ -210,7 +244,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
 
     # Draw N/baseline efficiencies
     MakeMultiHistPlot('efficiencies_m_cumulative_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
@@ -237,7 +271,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                       ]
     )
     MakeMultiHistPlot('efficiencies_e_cumulative_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
@@ -281,7 +315,7 @@ for year, var in itertools.product(years, ['lhe_p0_pt', 'lhe_p0_pt_wide', 'p0_pt
         })
 
     MakeMultiHistPlot('lhe_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
@@ -300,7 +334,7 @@ for year, var in itertools.product(years, ['lhe_p0_pt', 'lhe_p0_pt_wide', 'p0_pt
                       ])
 
     MakeMultiHistPlot('lhe_normed_%s_%s' % (year, var),
-                      outdir='.',
+                      outdir=outdir,
                       hists=hist_dict,
                       cfg=UpdateDict(plotcfg, {
                           'x_title': x_titles[var],
