@@ -1,6 +1,7 @@
 import ROOT
 import time
 import re
+import hashlib
 # import json
 from array import array
 from pprint import pprint
@@ -323,6 +324,13 @@ def GenTreeCode(tree, objlist, multithread=4):
 GenTreeCode.counter = 0
 
 
+def DrawObjsHash(drawobjs):
+    allargs = []
+    for obj in drawobjs:
+        allargs.extend([obj.classname, obj.var, obj.sel, obj.wt])
+    return hashlib.md5(str(allargs)).hexdigest()
+
+
 def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
     drawtree = defaultdict(list)
     codegen_time = 0
@@ -330,6 +338,7 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
     for path, name, obj in node.ListObjects():
         drawtree[obj.sample].append(obj)
     # pprint(drawtree)
+    func_dict = {}
     for sample, drawobjs in drawtree.iteritems():
         f = ROOT.TFile.Open(sample_to_file_dict[sample])
         t = f.Get(tree_name)
@@ -338,7 +347,13 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
         if mt_cores > 0 and entries > mt_thresh:
             use_cores = mt_cores
         start = time.time()
-        fname = GenTreeCode(t, drawobjs, use_cores)
+        obj_hash = DrawObjsHash(drawobjs)
+        if obj_hash not in func_dict:
+            fname = GenTreeCode(t, drawobjs, use_cores)
+            func_dict[obj_hash] = fname
+        else:
+            fname = func_dict[obj_hash]
+            print '>> Recyling function %s in %.2g seconds' % (fname, (time.time() - start))
         end = time.time()
         codegen_time += (end - start)
         histarr = ROOT.TObjArray(len(drawobjs))
