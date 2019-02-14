@@ -142,7 +142,7 @@ class Jobs:
                 copy_cmds = []
                 cp_cmd = 'cp'
                 if final_cfg['outdir'].startswith('root://'):
-                    cp_cmd = 'xrdcp'
+                    cp_cmd = 'xrdcp --force'
                 for item in output_cfgs:
                     copy_cmds.append("""%s %s/%s %s/%s""" % (cp_cmd, tempdir, final_cfg[item], final_cfg['outdir'], final_cfg[item]))
                 final_cfg['outdir']=tempdir

@@ -76,26 +76,30 @@
     "TTGamma_Dilept-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_Dilept-madgraph"],
-      "xsec": 0.5801,
-      "GenXSecAnalyzer": "After filter: final cross section = 5.801e-01 +- 1.669e-04 pb"
+      "xsec": 0.893354,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.801e-01 +- 1.669e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 1.54"
     },
     "TTGamma_Hadronic-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_Hadronic-madgraph"],
-      "xsec": 0.7306,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.306e-01 +- 2.314e-04 pb"
+      "xsec": 2.279472,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.306e-01 +- 2.314e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 3.12"
     },
     "TTGamma_SingleLeptFromT-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_SingleLeptFromT-madgraph"],
-      "xsec": 0.7041,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.041e-01 +- 2.455e-04 pb"
+      "xsec": 1.457487,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.041e-01 +- 2.455e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "TTGamma_SingleLeptFromTbar-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_SingleLeptFromTbar-madgraph"],
-      "xsec": 0.7022,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.022e-01 +- 2.426e-04 pb"
+      "xsec": 1.453554,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.022e-01 +- 2.426e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "VVTo2L2Nu-amcatnloFXFX": {
       "attributes": ["default", "mc"],

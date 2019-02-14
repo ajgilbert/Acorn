@@ -26,7 +26,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R"],
+      "entries": ["TTG_R"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
     },
@@ -64,7 +64,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R"],
+      "entries": ["TTG_R"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },

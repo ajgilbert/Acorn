@@ -41,24 +41,44 @@ default_cfg = {
     'sub_logo': 'Internal',
     'top_title_right': '35.9 fb^{-1} (13 TeV)',
     'top_title_left': '',
-    'hide_data': True
+    'hide_data': False,
+    'auto_top_title_right': True
 }
 
 config_by_setting = {
     "x_title": {
-        '*/m0met_mt': ('m_{T}(#mu,p_{T}^{miss})', 'GeV'),
-        '*/m0_pt': ('Muon p_{T}', 'GeV'),
-        '*/m0_eta': ('Muon #eta', ''),
-        '*/m0_iso': ('Muon Iso', 'GeV'),
-        '*/m1_pt': ('Subleading muon p_{T}', 'GeV'),
-        '*/m1_eta': ('Subleading muon #eta', ''),
-        '*/m0m1_M': ('m_{#mu^{+}#mu^{-}}', 'GeV'),
-        '*/m0m1_dr': ('#DeltaR(#mu^{+},#mu^{-})', ''),
+        '*/n_vtx': ('Number of vertices', ''),
+        'm/*/l0met_mt': ('m_{T}(#mu,p_{T}^{miss})', 'GeV'),
+        'e/*/l0met_mt': ('m_{T}(e,p_{T}^{miss})', 'GeV'),
+        'm/*/l0_pt': ('Muon p_{T}', 'GeV'),
+        'e/*/l0_pt': ('Electron p_{T}', 'GeV'),
+        'm/*/l0_eta': ('Muon #eta', ''),
+        'e/*/l0_eta': ('Electron #eta', ''),
+        'm/*/l0_phi': ('Muon #phi', ''),
+        'e/*/l0_phi': ('Electron #phi', ''),
+        'm/*/l0_iso': ('Muon Iso', 'GeV'),
+        'e/*/l0_iso': ('Electron Iso', 'GeV'),
+        'm/*/l1_pt': ('Subleading muon p_{T}', 'GeV'),
+        'm/*/l1_eta': ('Subleading muon #eta', ''),
+        'm/*/l0l1_M': ('m_{#mu^{+}#mu^{-}}', 'GeV'),
+        'm/*/l0l1_dr': ('#DeltaR(#mu^{+},#mu^{-})', ''),
+        'e/*/l1_pt': ('Subleading electron p_{T}', 'GeV'),
+        'e/*/l1_eta': ('Subleading electron #eta', ''),
+        'e/*/l0l1_M': ('m_{e^{+}e^{-}}', 'GeV'),
+        'e/*/l0l1_dr': ('#DeltaR(e^{+},e^{-})', ''),
         '*/met': ('p_{T}^{miss}', 'GeV'),
+        '*/met_phi': ('p_{T}^{miss} #phi', ''),
+        '*/xy_met': ('xy-corrected p_{T}^{miss}', 'GeV'),
+        '*/xy_met_phi': ('xy-corrected p_{T}^{miss} #phi', ''),
+        '*/puppi_met': ('PUPPI p_{T}^{miss}', 'GeV'),
+        '*/puppi_met_phi': ('PUPPI p_{T}^{miss} #phi', ''),
         '*/p0_pt': ('Photon p_{T}', 'GeV'),
         '*/p0_eta': ('Photon #eta', ''),
-        '*/m0p0_dr': ('#DeltaR(#mu,#gamma)', ''),
-        '*/m0p0_M': ('m_{#mu#gamma}', 'GeV'),
+        '*/p0_phi': ('Photon #phi', ''),
+        'm/*/l0p0_dr': ('#DeltaR(#mu,#gamma)', ''),
+        'm/*/l0p0_M': ('m_{#mu#gamma}', 'GeV'),
+        'e/*/l0p0_dr': ('#DeltaR(e,#gamma)', ''),
+        'e/*/l0p0_M': ('m_{e#gamma}', 'GeV'),
         '*/p0_chiso': ('Photon I_{charged}', 'GeV'),
         '*/p0_neiso': ('Photon I_{neutral}', 'GeV'),
         '*/p0_phiso': ('Photon I_{photon}', 'GeV'),
@@ -68,6 +88,11 @@ config_by_setting = {
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
         '*/abs(gen_phi)': ('Gen. #phi', ''),
         '*/abs(true_phi)': ('True #phi', ''),
+        '*/wt_def': ('Default weight', ''),
+        '*/wt_pu': ('Pileup weight', ''),
+        '*/wt_m0': ('Lepton weight', ''),
+        '*/wt_trg_m0': ('Lepton trigger weight', ''),
+        '*/wt_p0': ('Photon weight', '')
     }
 }
 
@@ -219,7 +244,12 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     # CMS logo
     plot.DrawCMSLogo(pads[0], cfg['main_logo'], cfg['sub_logo'], 11, 0.045, 0.05, 1.0, '', 1.0)
     plot.DrawTitle(pads[0], cfg['top_title_left'], 1)
-    plot.DrawTitle(pads[0], cfg['top_title_right'], 3)
+    if cfg['auto_top_title_right']:
+        title_right = h_data.GetTitle()
+        if title_right.startswith('lumi:'):
+            plot.DrawTitle(pads[0], title_right.replace('lumi:', ''), 3)
+    else:
+        plot.DrawTitle(pads[0], cfg['top_title_right'], 3)
 
     latex = ROOT.TLatex()
     plot.Set(latex, NDC=None, TextFont=42, TextSize=0.03)

@@ -51,6 +51,8 @@ class WGDataAnalysis : public ModuleBase {
 
   unsigned n_pre_m_; // number of medium/tight muons
   unsigned n_pre_e_; // number of medium/tight electrons
+  unsigned n_veto_m_; // number of veto muons
+  unsigned n_veto_e_; // number of veto electrons
 
   // l0: Main muon/electron variables
   float l0_pt_;
@@ -88,6 +90,7 @@ class WGDataAnalysis : public ModuleBase {
   float p0_hovere_;
   float p0_sigma_;
   bool p0_haspix_;
+  bool p0_eveto_;
   bool p0_medium_noch_;
   bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
@@ -122,6 +125,7 @@ class WGDataAnalysis : public ModuleBase {
 
   // event weights
   float wt_def_; // default weight
+  float wt_pf_; // prefiring weight
   float wt_pu_;
   float wt_l0_; // trk/ID/Iso weight for l0
   float wt_trg_l0_; // trigger weight for l0

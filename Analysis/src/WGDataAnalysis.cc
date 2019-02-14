@@ -40,6 +40,8 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("n_vtx", &n_vtx_);
     tree_->Branch("n_pre_m", &n_pre_m_);
     tree_->Branch("n_pre_e", &n_pre_e_);
+    tree_->Branch("n_veto_m", &n_veto_m_);
+    tree_->Branch("n_veto_e", &n_veto_e_);
     tree_->Branch("l0_pt", &l0_pt_);
     tree_->Branch("l0_eta", &l0_eta_);
     tree_->Branch("l0_phi", &l0_phi_);
@@ -67,6 +69,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_hovere", &p0_hovere_);
     tree_->Branch("p0_sigma", &p0_sigma_);
     tree_->Branch("p0_haspix", &p0_haspix_);
+    tree_->Branch("p0_eveto", &p0_eveto_);
     tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
@@ -90,10 +93,11 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("n_vm", &n_vm_);
     tree_->Branch("vm_p0_dr", &vm_p0_dr_);
     tree_->Branch("wt_def", &wt_def_);
+    tree_->Branch("wt_pf", &wt_pf_);
     tree_->Branch("wt_pu", &wt_pu_);
-    tree_->Branch("wt_m0", &wt_l0_);
-    tree_->Branch("wt_trg_m0", &wt_trg_l0_);
-    tree_->Branch("wt_m1", &wt_l1_);
+    tree_->Branch("wt_l0", &wt_l0_);
+    tree_->Branch("wt_trg_l0", &wt_trg_l0_);
+    tree_->Branch("wt_l1", &wt_l1_);
     tree_->Branch("wt_p0", &wt_p0_);
     tree_->Branch("wt_p0_fake", &wt_p0_fake_);
     tree_->Branch("is_wg_gen", &is_wg_gen_);
@@ -182,7 +186,9 @@ int WGDataAnalysis::PreAnalysis() {
   fns_["m_idisotrk_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_trg24_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+    ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio"] = std::shared_ptr<RooFunctor>(
@@ -307,6 +313,9 @@ int WGDataAnalysis::PreAnalysis() {
     n_pre_m_ = pre_muons.size();
     n_pre_e_ = pre_electrons.size();
     n_pre_p_ = pre_photons.size();
+
+    n_veto_m_ = veto_muons.size();
+    n_veto_e_ = veto_electrons.size();
 
     // Always remove m0 from the list of veto muons
     if (m0) {
@@ -449,6 +458,8 @@ int WGDataAnalysis::PreAnalysis() {
       l0l1_dr_ = DeltaR(e0, e1);
       l0l1_os_ = e0->charge() != e1->charge();
     }
+    l0l1_M_ = reduceMantissaToNbits(l0l1_M_, 12);
+    l0l1_dr_ = reduceMantissaToNbits(l0l1_dr_, 12);
 
     if (p0) {
       p0_pt_ = p0->pt();
@@ -460,6 +471,7 @@ int WGDataAnalysis::PreAnalysis() {
       p0_hovere_ = p0->hadTowOverEm();
       p0_sigma_ = p0->full5x5SigmaIetaIeta();
       p0_haspix_ = p0->hasPixelSeed();
+      p0_eveto_ = p0->passElectronVeto();
       p0_medium_noch_ = ac::PhotonIDIso(p0, year_, 1, false, false);
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
@@ -473,21 +485,21 @@ int WGDataAnalysis::PreAnalysis() {
     }
 
     if (p0 && l0) {
-      l0p0_dr_ =  ac::DeltaR(l0, p0);
-      l0p0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector());
-      l0p0_M_ = (l0->vector() + p0->vector()).M();
+      l0p0_dr_ =  reduceMantissaToNbits(ac::DeltaR(l0, p0), 12);
+      l0p0_dphi_ = reduceMantissaToNbits(ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector()), 12);
+      l0p0_M_ = reduceMantissaToNbits((l0->vector() + p0->vector()).M(), 12);
 
       WGSystem reco_sys = ProduceWGSystem(*l0, *met, *p0, true, rng, false);
-      reco_phi_ = reco_sys.Phi(l0->charge());
-      reco_sphi_ = reco_sys.SymPhi(l0->charge());
+      reco_phi_ = reduceMantissaToNbits(reco_sys.Phi(l0->charge()), 12);
+      reco_sphi_ = reduceMantissaToNbits(reco_sys.SymPhi(l0->charge()), 12);
 
       WGSystem reco_xy_sys = ProduceWGSystem(*l0, *xy_met, *p0, true, rng, false);
-      reco_xy_phi_ = reco_xy_sys.Phi(l0->charge());
-      reco_xy_sphi_ = reco_xy_sys.SymPhi(l0->charge());
+      reco_xy_phi_ = reduceMantissaToNbits(reco_xy_sys.Phi(l0->charge()), 12);
+      reco_xy_sphi_ = reduceMantissaToNbits(reco_xy_sys.SymPhi(l0->charge()), 12);
 
       WGSystem reco_puppi_sys = ProduceWGSystem(*l0, *puppi_met, *p0, true, rng, false);
-      reco_puppi_phi_ = reco_puppi_sys.Phi(l0->charge());
-      reco_puppi_sphi_ = reco_puppi_sys.SymPhi(l0->charge());
+      reco_puppi_phi_ = reduceMantissaToNbits(reco_puppi_sys.Phi(l0->charge()), 12);
+      reco_puppi_sphi_ = reduceMantissaToNbits(reco_puppi_sys.SymPhi(l0->charge()), 12);
 
       wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, photons[0]->scEta()});
     }
@@ -502,9 +514,16 @@ int WGDataAnalysis::PreAnalysis() {
           break;
         }
       }
+      if (info->userDoubles().size() >= 1) {
+        wt_pf_ = info->userDoubles().at(0);
+      }
       if (m0) {
         wt_l0_ = RooFunc(fns_["m_idisotrk_ratio"], {l0_pt_, l0_eta_});
         wt_trg_l0_ = RooFunc(fns_["m_trg_ratio"], {l0_pt_, l0_eta_});
+      }
+      if (e0) {
+        wt_l0_ = RooFunc(fns_["e_gsfidiso_ratio"], {l0_pt_, l0_eta_});
+        wt_trg_l0_ = 1.0;
       }
       if (m0 && muons.size() >= 2) {
         wt_l1_ = RooFunc(fns_["m_idisotrk_ratio"], {l1_pt_, l1_eta_});
@@ -543,6 +562,8 @@ int WGDataAnalysis::PreAnalysis() {
     metfilters_ = 0;
     n_pre_m_ = 0;
     n_pre_e_ = 0;
+    n_veto_m_ = 0;
+    n_veto_e_ = 0;
     l0_pt_ = 0.;
     l0_eta_ = 0.;
     l0_phi_ = 0.;
@@ -569,6 +590,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_hovere_ = 0.;
     p0_sigma_ = 0.;
     p0_haspix_ = false;
+    p0_eveto_ = false;
     p0_medium_noch_ = false;
     p0_medium_ = false;
     p0_tight_ = false;
@@ -592,6 +614,7 @@ int WGDataAnalysis::PreAnalysis() {
     n_vm_ = 0;
     vm_p0_dr_ = 0.;
     wt_def_ = 1.;
+    wt_pf_ = 1.;
     wt_pu_ = 1.;
     wt_l0_ = 1.;
     wt_trg_l0_ = 1.;

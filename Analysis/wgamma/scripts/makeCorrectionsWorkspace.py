@@ -57,7 +57,7 @@ if era == '2016':
                 2.0307e-05, 1.73032e-05, 1.435e-05, 1.36486e-05, 1.35555e-05,
                 1.37491e-05, 1.34255e-05, 1.33987e-05, 1.34061e-05, 1.34211e-05,
                 1.34177e-05, 1.32959e-05, 1.33287e-05]
-    h_data = GetFromTFile('input/pileup_wgamma_2016_v3.root:pileup')
+    h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2016_v3.root:pileup')
 
 if era == '2017':
     mc_edges = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
@@ -91,7 +91,7 @@ if era == '2017':
                 7.83538083774e-07, 4.94602064224e-07, 3.10989480331e-07, 1.94628487765e-07,
                 1.57888581037e-07, 1.2114867431e-07, 7.49518929908e-08, 4.6060444984e-08,
                 2.81008884326e-08, 1.70121486128e-08, 1.02159894812e-08]
-    h_data = GetFromTFile('input/pileup_wgamma_2017_v3.root:pileup')
+    h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2017_v3.root:pileup')
 
 if era == '2018':
     mc_edges = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
@@ -122,7 +122,7 @@ if era == '2018':
                 5.350694e-07, 3.808318e-07, 2.781785e-07, 2.098661e-07, 1.642811e-07,
                 1.312835e-07, 1.081326e-07, 9.141993e-08, 7.890983e-08, 6.91468e-08,
                 6.119019e-08, 5.443693e-08, 4.85036e-08, 4.31486e-08, 3.822112e-08]
-    h_data = GetFromTFile('input/pileup_wgamma_2018_v3.root:pileup')
+    h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2018_v3.root:pileup')
 
 print len(mc_edges), len(mc_probs)
 
@@ -163,55 +163,111 @@ if args.debug:
 ###############################################################################
 ## Muons
 ###############################################################################
-loc = 'input/muons/%s' % era
+loc = 'wgamma/inputs/muons/%s' % era
 if era == '2016':
     histsToWrap = [
-        (loc + '/trigger/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg24_bf_ratio'),
-        (loc + '/trigger/EfficienciesAndSF_Period4.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg24_gh_ratio'),
-        (loc + '/id/EfficienciesAndSF_BCDEF.root:MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio', 'm_id_bf_ratio'),
-        (loc + '/id/EfficienciesAndSF_GH.root:MC_NUM_MediumID_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio', 'm_id_gh_ratio'),
-        (loc + '/iso/EfficienciesAndSF_BCDEF.root:TightISO_MediumID_pt_eta/pt_abseta_ratio', 'm_iso_bf_ratio'),
-        (loc + '/iso/EfficienciesAndSF_GH.root:TightISO_MediumID_pt_eta/pt_abseta_ratio', 'm_iso_gh_ratio')
+        (loc + '/trigger/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio'),
+        (loc + '/trigger/EfficienciesAndSF_Period4.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio')
     ]
-
-    for task in histsToWrap:
-        SafeWrapHist(w, ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])'],
-                              GetFromTFile(task[0]), name=task[1])
-
-    # Factor of 0.439 is the lumi of G+H
-    for t in ['trg24', 'id', 'iso']:
-        w.factory('expr::m_%s_ratio("@0*(1-0.439) + @1*0.439", m_%s_bf_ratio, m_%s_gh_ratio)' % (t, t, t))
+    histsToWrapNewStyle = [
+        (loc + '/id/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_bf_ratio'),
+        (loc + '/id/RunGH_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_gh_ratio'),
+        (loc + '/iso/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_bf_ratio'),
+        (loc + '/iso/RunGH_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_gh_ratio')
+    ]
 
     muon_trk_eff_hist = TGraphAsymmErrorsToTH1D(GetFromTFile(loc + '/track/Tracking_EfficienciesAndSF_BCDEFGH.root:ratio_eff_eta3_dr030e030_corr'))
     SafeWrapHist(w, ['m_eta'], muon_trk_eff_hist, name='m_trk_ratio')
 
-    w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
-else:
-    for t in ['trg24', 'id', 'iso']:
+if era == '2017':
+    histsToWrap = [
+        (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/pt_abseta_ratio', 'm_trg_ratio'),
+        (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio'),
+        (loc + '/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
+    ]
+    histsToWrapNewStyle = []
+
+if era == '2018':
+    histsToWrap = [
+        (loc + '/RunABCD_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio'),
+        (loc + '/RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
+    ]
+    histsToWrapNewStyle = []
+
+for task in histsToWrap:
+    SafeWrapHist(w, ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])'], GetFromTFile(task[0]), name=task[1])
+
+for task in histsToWrapNewStyle:
+    SafeWrapHist(w, ['m_eta', 'm_pt'], GetFromTFile(task[0]), name=task[1])
+
+if era == '2016':
+    # Factor of 0.439 is the lumi of G+H
+    for t in ['trg', 'id', 'iso']:
+        w.factory('expr::m_%s_ratio("@0*(1-0.439) + @1*0.439", m_%s_bf_ratio, m_%s_gh_ratio)' % (t, t, t))
+
+if era == '2017':
+    w.factory('expr::m_trk_ratio("1", m_eta[0])')
+
+if era == '2018':
+    w.factory('expr::m_trk_ratio("1", m_eta[0])')
+    for t in ['trg']:
         w.factory('expr::m_%s_ratio("1", m_pt[0], m_eta[0])' % (t))
-    w.factory('expr::m_idisotrk_ratio("1", m_pt[0], m_eta[0])')
+
+w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
+
+
+###############################################################################
+## Electrons
+###############################################################################
+loc = 'wgamma/inputs/electrons/%s' % era
+
+if era == '2016':
+    histsToWrap = [
+        (loc + '/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root:EGamma_SF2D', 'e_gsf_ratio'),
+        (loc + '/2016LegacyReReco_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+    ]
+if era == '2017':
+    histsToWrap = [
+        (loc + '/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root:EGamma_SF2D', 'e_gsf_ratio'),
+        (loc + '/2017_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+    ]
+if era == '2018':
+    histsToWrap = [
+        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'e_gsf_ratio'),
+        (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+    ]
+
+for task in histsToWrap:
+    SafeWrapHist(w, ['e_eta', 'e_pt'], GetFromTFile(task[0]), name=task[1])
+
+w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
 
 ###############################################################################
 ## Photons
 ###############################################################################
-loc = 'input/photons/%s' % era
+loc = 'wgamma/inputs/photons/%s' % era
 
 if era == '2016':
     histsToWrap = [
-        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'p_id_ratio')
+        (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio')
+    ]
+if era == '2017':
+    histsToWrap = [
+        (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio')
+    ]
+if era == '2018':
+    histsToWrap = [
+        (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio')
     ]
 
-    for task in histsToWrap:
-        SafeWrapHist(w, ['p_eta', 'p_pt'],
-                              GetFromTFile(task[0]), name=task[1])
-else:
-    w.factory('expr::p_id_ratio("1", p_pt[0], p_eta[0])')
+for task in histsToWrap:
+    SafeWrapHist(w, ['p_eta', 'p_pt'], GetFromTFile(task[0]), name=task[1])
 
 
 ###############################################################################
 ## Photon fakes
 ###############################################################################
-loc = 'input/photons/%s' % era
+loc = 'wgamma/inputs/photons/%s' % era
 
 if era == '2016':
     histsToWrap = [
@@ -226,6 +282,6 @@ else:
 
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v3.root' % era)
+w.writeToFile('wgamma_corrections_%s_v4.root' % era)
 w.Delete()
 

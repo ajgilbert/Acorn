@@ -64,26 +64,30 @@
     "TTGamma_Dilept-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_Dilept-madgraph"],
-      "xsec": 0.6343,
-      "GenXSecAnalyzer": "After filter: final cross section = 6.343e-01 +- 5.762e-05 pb"
+      "xsec": 0.976822,
+      "GenXSecAnalyzer": "After filter: final cross section = 6.343e-01 +- 5.762e-05 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 1.54"
     },
     "TTGamma_Hadronic-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_Hadronic-madgraph"],
-      "xsec": 0.7948,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.948e-01 +- 1.745e-04 pb"
+      "xsec": 2.479776,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.948e-01 +- 1.745e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 3.12"
     },
     "TTGamma_SingleLeptFromT-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_SingleLeptFromT-madgraph"],
-      "xsec": 0.7689,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.689e-01 +- 1.747e-04 pb"
+      "xsec": 1.591623,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.689e-01 +- 1.747e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "TTGamma_SingleLeptFromTbar-madgraph": {
       "attributes": ["default", "mc"],
       "inputs": ["TTGamma_SingleLeptFromTbar-madgraph"],
-      "xsec": 0.7653,
-      "GenXSecAnalyzer": "After filter: final cross section = 7.653e-01 +- 1.671e-04 pb"
+      "xsec": 1.584171,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.653e-01 +- 1.671e-04 pb",
+      "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "VVTo2L2Nu-amcatnloFXFX": {
       "attributes": ["default", "mc"],
@@ -113,7 +117,7 @@
       "XSecSource": "LO * kNNLO (1.63960396)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 719.809614655,
       "stitching": {
