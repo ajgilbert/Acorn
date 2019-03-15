@@ -49,7 +49,7 @@
       "color": [108,190,237]
     }
   ],
-    "data_fakes": [
+  "data_fakes": [
     {
       "name": "VV_R",
       "entries": ["VV_R"],
@@ -81,10 +81,48 @@
       "color": [108,190,237]
     }
   ],
+  "data_fakes_e": [
+    {
+      "name": "VV_R",
+      "entries": ["VV_R"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_R"],
+      "legend": "Z#rightarrowll",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_F",
+      "entries": ["DY_F"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT_R",
+      "entries": ["TTG_R"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes"],
+      "legend": "Non-prompt/fake #gamma",
+      "color": [78,89,140]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
   "data_fakes_EFT": [
     {
-      "name": "VV",
-      "entries": ["VVTo2L2Nu", "WWTo1L1Nu2Q", "WZTo1L1Nu2Q", "WZTo1L3Nu", "WZTo2L2Q", "WZTo3LNu", "ZZTo2L2Q", "ZZTo4L"],
+      "name": "VV_R",
+      "entries": ["VV_R"],
       "legend": "Diboson",
       "color": [138,201,38]
     },
@@ -96,7 +134,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R"],
+      "entries": ["TTG_R"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -127,10 +165,10 @@
   ],
   "fake_measurement": [
     {
-      "name": "VV",
-      "entries": ["VVTo2L2Nu", "WWTo1L1Nu2Q", "WZTo1L1Nu2Q", "WZTo1L3Nu", "WZTo2L2Q", "WZTo3LNu", "ZZTo2L2Q", "ZZTo4L"],
-      "legend": "Diboson",
-      "color": [248, 206, 104]
+      "name": "VV_R",
+      "entries": ["VV_R"],
+      "legend": "Diboson (prompt #gamma)",
+      "color": [138,201,38]
     },
     {
       "name": "DY_R",
@@ -140,7 +178,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R"],
+      "entries": ["TTG_R"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
     },

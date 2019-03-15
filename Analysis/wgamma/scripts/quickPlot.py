@@ -48,6 +48,8 @@ default_cfg = {
 config_by_setting = {
     "x_title": {
         '*/n_vtx': ('Number of vertices', ''),
+        '*/n_veto_m': ('Number of veto muons', ''),
+        '*/n_veto_e': ('Number of veto electrons', ''),
         'm/*/l0met_mt': ('m_{T}(#mu,p_{T}^{miss})', 'GeV'),
         'e/*/l0met_mt': ('m_{T}(e,p_{T}^{miss})', 'GeV'),
         'm/*/l0_pt': ('Muon p_{T}', 'GeV'),
@@ -90,8 +92,8 @@ config_by_setting = {
         '*/abs(true_phi)': ('True #phi', ''),
         '*/wt_def': ('Default weight', ''),
         '*/wt_pu': ('Pileup weight', ''),
-        '*/wt_m0': ('Lepton weight', ''),
-        '*/wt_trg_m0': ('Lepton trigger weight', ''),
+        '*/wt_l0': ('Lepton weight', ''),
+        '*/wt_trg_l0': ('Lepton trigger weight', ''),
         '*/wt_p0': ('Photon weight', '')
     }
 }
@@ -218,7 +220,8 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     legend.Draw()
     if cfg['legend_padding'] > 0.:
         print h_axes[0].GetMinimum(), h_axes[0].GetMaximum()
-        plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
+        if not h_axes[0].GetMaximum() == 0.:
+            plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
     if cfg['ratio']:

@@ -29,7 +29,7 @@ def NormTH2InColumns(h):
 parser = argparse.ArgumentParser()
 parser.add_argument('--load', action='store_true')
 parser.add_argument('--years', default='2016,2017,2018')
-parser.add_argument('--input', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190208')
+parser.add_argument('--input', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190214-full')
 parser.add_argument('--output', default='output/plots')
 args = parser.parse_args()
 
@@ -115,6 +115,7 @@ if not args.load:
         X['photon_id_e'] = '$elec_trg_2 && n_pre_p>=1 && p0_medium'
         X['photon_match_e'] = '$photon_id_e && gen_p0_match'
         X['photon_pix_e'] = '$photon_match_e && !p0_haspix'
+        X['mZ_veto_e'] = '$photon_pix_e && abs(91.2 - l0p0_M) > 15'
         X['eft_m'] = '$photon_pix_m && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
         X['eft_e'] = '$photon_pix_e && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
 
@@ -123,6 +124,21 @@ if not args.load:
             for sel in X.storage.keys():
                 for sa in ['WG', 'WG-inc', 'WG-NLO']:
                     hists[year][label][sa][sel] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + sel), wt='wt_pu*wt_def')
+            final_sel = 'photon_pix_m'
+            for sa in ['WG', 'WG-inc', 'WG-NLO']:
+                hists[year][label][sa]['m_with_wt_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0')
+                hists[year][label][sa]['m_with_wt_trg_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0')
+                hists[year][label][sa]['m_with_wt_p0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0')
+                hists[year][label][sa]['m_with_wt_pf'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
+                hists[year][label][sa]['m_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_m && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
+            final_sel = 'mZ_veto_e'
+            for sa in ['WG', 'WG-inc', 'WG-NLO']:
+                hists[year][label][sa]['e_with_wt_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0')
+                hists[year][label][sa]['e_with_wt_trg_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0')
+                hists[year][label][sa]['e_with_wt_p0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0')
+                hists[year][label][sa]['e_with_wt_pf'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
+                hists[year][label][sa]['e_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_e && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
+
             for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
                 for sa in ['WG']:
                     hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
@@ -210,6 +226,29 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'photon_pix_m', 'den': 'photon_id_m', 'type': 'binomial'},
                       ]
     )
+    MakeMultiHistPlot('weights_m_%s_%s' % (year, var),
+                      outdir=outdir,
+                      hists=hist_dict,
+                      cfg=UpdateDict(plotcfg, {
+                          'x_title': x_titles[var],
+                          'ratio_y_title': '#varepsilon(N/N-1)',
+                          'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
+                          'ratio_y_range': [0.9, 1.05],
+                          }),
+                      layout=[
+                          {'name': 'photon_pix_m', 'legend': 'Full selection'},
+                          {'name': 'm_with_wt_l0', 'legend': ' + Muon Trk/ID/Iso SF'},
+                          {'name': 'm_with_wt_trg_l0', 'legend': ' + Muon trigger SF'},
+                          {'name': 'm_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
+                          {'name': 'm_with_wt_pf', 'legend': ' + L1 prefiring SF'},
+                      ],
+                      ratios=[
+                          {'num': 'm_with_wt_l0', 'den': 'photon_pix_m', 'type': 'binomial'},
+                          {'num': 'm_with_wt_trg_l0', 'den': 'm_with_wt_l0', 'type': 'binomial'},
+                          {'num': 'm_with_wt_p0', 'den': 'm_with_wt_trg_l0', 'type': 'binomial'},
+                          {'num': 'm_with_wt_pf', 'den': 'm_with_wt_p0', 'type': 'binomial'},
+                      ]
+    )
     MakeMultiHistPlot('efficiencies_e_%s_%s' % (year, var),
                       outdir=outdir,
                       hists=hist_dict,
@@ -229,6 +268,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'name': 'photon_id_e', 'legend': ' + Photon ID'},
                           # {'name': 'photon_match_e', 'legend': ' + Photon matched'},
                           {'name': 'photon_pix_e', 'legend': ' + Photon pix veto'},
+                          {'name': 'mZ_veto_e', 'legend': ' + |m_{Z} - m_{e#gamma})| > 15'},
                       ],
                       ratios=[
                           {'num': 'elec_id', 'den': 'baseline_e', 'type': 'binomial'},
@@ -239,6 +279,29 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'photon_id_e', 'den': 'elec_trg', 'type': 'binomial'},
                           # {'num': 'photon_match_e', 'den': 'photon_id_e', 'type': 'binomial'},
                           {'num': 'photon_pix_e', 'den': 'photon_id_e', 'type': 'binomial'},
+                          {'num': 'mZ_veto_e', 'den': 'photon_pix_e', 'type': 'binomial'},
+                      ]
+    )
+    MakeMultiHistPlot('weights_e_%s_%s' % (year, var),
+                      outdir=outdir,
+                      hists=hist_dict,
+                      cfg=UpdateDict(plotcfg, {
+                          'x_title': x_titles[var],
+                          'ratio_y_title': '#varepsilon(N/N-1)',
+                          'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
+                          'ratio_y_range': [0.9, 1.05],
+                          }),
+                      layout=[
+                          {'name': 'mZ_veto_e', 'legend': 'Full selection'},
+                          {'name': 'e_with_wt_l0', 'legend': ' + Electron Trk/ID/Iso SF'},
+                          {'name': 'e_with_wt_trg_l0', 'legend': ' + Electron trigger SF'},
+                          {'name': 'e_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
+                          {'name': 'e_with_wt_pf', 'legend': ' + L1 prefiring SF'},
+                      ],
+                      ratios=[
+                          {'num': 'e_with_wt_l0', 'den': 'mZ_veto_e', 'type': 'binomial'},
+                          {'num': 'e_with_wt_p0', 'den': 'e_with_wt_trg_l0', 'type': 'binomial'},
+                          {'num': 'e_with_wt_pf', 'den': 'e_with_wt_p0', 'type': 'binomial'},
                       ]
     )
 
@@ -351,3 +414,47 @@ for year, var in itertools.product(years, ['lhe_p0_pt', 'lhe_p0_pt_wide', 'p0_pt
                       ratios=[
                           {'num': 'WG-NLO', 'den': 'WG'}
                       ])
+
+# Draw l0_pt in the high p0_pt region
+for year, var in itertools.product(years, ['l0_pt']):
+    hist_dict = {}
+    for hname in ['WG']:
+        hist_dict[hname] = hists[year][var][hname]['m_high_p0_pt']
+
+    cfg = deepcopy(plotcfg)
+    cfg.update({
+        'x_title': x_titles[var],
+        'ratio': False,
+        'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
+        })
+
+    MakeMultiHistPlot('m_high_p0_pt_%s_%s' % (year, var),
+                      outdir=outdir,
+                      hists=hist_dict,
+                      cfg=UpdateDict(cfg, {
+                      }),
+                      layout=[
+                          {'name': 'WG', 'legend': 'LO stitched sample'},
+                      ])
+
+    hist_dict = {}
+    for hname in ['WG']:
+        hist_dict[hname] = hists[year][var][hname]['e_high_p0_pt']
+
+    cfg = deepcopy(plotcfg)
+    cfg.update({
+        'x_title': x_titles[var],
+        'ratio': False,
+        'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
+        })
+
+    MakeMultiHistPlot('e_high_p0_pt_%s_%s' % (year, var),
+                      outdir=outdir,
+                      hists=hist_dict,
+                      cfg=UpdateDict(cfg, {
+                      }),
+                      layout=[
+                          {'name': 'WG', 'legend': 'LO stitched sample'},
+                      ])
+
+

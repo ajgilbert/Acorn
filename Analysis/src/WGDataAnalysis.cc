@@ -73,7 +73,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
-    tree_->Branch("p0_isprompt", &p0_isprompt_);
+    tree_->Branch("p0_truth", &p0_truth_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
     tree_->Branch("xy_met", &xy_met_);
@@ -191,8 +191,10 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
-  fns_["p_fake_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_m_chn"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_m_chn")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_e_chn"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_e_chn")->functor(ws_->argSet("p_pt,p_eta")));
   return 0;
   }
 
@@ -501,7 +503,12 @@ int WGDataAnalysis::PreAnalysis() {
       reco_puppi_phi_ = reduceMantissaToNbits(reco_puppi_sys.Phi(l0->charge()), 12);
       reco_puppi_sphi_ = reduceMantissaToNbits(reco_puppi_sys.SymPhi(l0->charge()), 12);
 
-      wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, photons[0]->scEta()});
+      if (m0) {
+        wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_m_chn"], {p0_pt_, p0->scEta()});
+      }
+      if (e0) {
+        wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_e_chn"], {p0_pt_, p0->scEta()});
+      }
     }
 
     if (!is_data_) {
@@ -531,23 +538,46 @@ int WGDataAnalysis::PreAnalysis() {
       auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
       if (p0) {
         wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
-        auto prompt_gen_photons = ac::copy_keep_if(genparts, [&](ac::GenParticle *p) {
-          return p->pt() > 10. && p->pdgId() == 22 && p->status() == 1 && p->statusFlags().isPrompt() && DeltaR(p, photons[0]) < 0.3;
+
+        auto gen_st1_dr = ac::copy_keep_if(genparts, [&](ac::GenParticle *p) {
+          return p->status() == 1 && DeltaR(p, p0) < 0.3;
         });
-        if (prompt_gen_photons.size()) {
-          // photons[0]->Print();
-          // prompt_gen_photons[0]->Print();
-          p0_isprompt_ = true;
-          // std::cout << "------------\n";
-          // auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
-          // for (auto p : genparts) {
-          //   p->Print();
-          // }
-          // std::cout << "----\n";
-          // auto lheparts = event->GetPtrVec<ac::GenParticle>("lheParticles");
-          // for (auto p : lheparts) {
-          //   p->Print();
-          // }
+        auto gen_photons = ac::copy_keep_if(gen_st1_dr, [&](ac::GenParticle *p) {
+          return p->pt() > 10. && p->pdgId() == 22;
+        });
+        auto prompt_gen_photons = ac::copy_keep_if(gen_photons, [&](ac::GenParticle *p) {
+          return p->statusFlags().isPrompt();
+        });
+        auto hadronic_gen_photons = ac::copy_keep_if(gen_photons, [&](ac::GenParticle *p) {
+          return p->statusFlags().isDirectHadronDecayProduct();
+        });
+        auto all_prompt_gen_elecs = ac::copy_keep_if(gen_st1_dr, [&](ac::GenParticle *p) {
+          return p->pt() > 0. && std::abs(p->pdgId()) == 11 && p->statusFlags().isPrompt();
+        });
+        auto all_prompt_gen_muons = ac::copy_keep_if(gen_st1_dr, [&](ac::GenParticle *p) {
+          return p->pt() > 0. && std::abs(p->pdgId()) == 13 && p->statusFlags().isPrompt();
+        });
+        auto prompt_gen_elecs = ac::copy_keep_if(all_prompt_gen_elecs, [&](ac::GenParticle *p) {
+          return p->pt() > 10.;
+        });
+        auto prompt_gen_muons = ac::copy_keep_if(all_prompt_gen_muons, [&](ac::GenParticle *p) {
+          return p->pt() > 10.;
+        });
+
+        // Only prompt e/mu, pT > 10 -> lep->photon fake
+        if (prompt_gen_elecs.size() > 0 && prompt_gen_photons.size() == 0) {
+          p0_truth_ = 2;
+        } else if (prompt_gen_muons.size() > 0 && prompt_gen_photons.size() == 0) {
+          p0_truth_ = 3;
+        // Prompt photon + any lepton -> FSR photon
+        } else if (all_prompt_gen_elecs.size() > 0 && prompt_gen_photons.size() > 0) {
+          p0_truth_ = 4;
+        } else if (all_prompt_gen_muons.size() > 0 && prompt_gen_photons.size() > 0) {
+          p0_truth_ = 5;
+        } else if (hadronic_gen_photons.size() > 0) {
+          p0_truth_ = 6;
+        } else if (prompt_gen_photons.size() > 0) {
+          p0_truth_ = 1;
         }
       }
     }
@@ -594,7 +624,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_medium_noch_ = false;
     p0_medium_ = false;
     p0_tight_ = false;
-    p0_isprompt_ = false;
+    p0_truth_ = 0;
     met_ = 0.;
     met_phi_ = 0.;
     xy_met_ = 0.;

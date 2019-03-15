@@ -94,7 +94,7 @@ class WGDataAnalysis : public ModuleBase {
   bool p0_medium_noch_;
   bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
-  bool p0_isprompt_; // truth matched to prompt photon
+  unsigned p0_truth_; // 0 = default (assume jet), 1 = prompt photon, 2 = prompt electron
 
   // met
   float met_;

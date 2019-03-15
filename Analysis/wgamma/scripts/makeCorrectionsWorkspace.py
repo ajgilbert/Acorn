@@ -269,16 +269,15 @@ for task in histsToWrap:
 ###############################################################################
 loc = 'wgamma/inputs/photons/%s' % era
 
-if era == '2016':
-    histsToWrap = [
-        (loc + '/output_2016_photon_fakes_ratios.root:photon_fakes', 'p_fake_ratio')
-    ]
 
-    for task in histsToWrap:
-        SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'],
-                              GetFromTFile(task[0]), name=task[1])
-else:
-    w.factory('expr::p_fake_ratio("1", p_pt[0], p_eta[0])')
+histsToWrap = [
+    (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes' % era, 'p_fake_ratio_m_chn'),
+    (loc + '/output_%s_photon_fakes_ratios_e.root:photon_fakes' % era, 'p_fake_ratio_e_chn'),
+]
+
+for task in histsToWrap:
+    SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'],
+                          GetFromTFile(task[0]), name=task[1])
 
 
 w.Print()

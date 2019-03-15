@@ -25,9 +25,9 @@ n_pt_bins = 6
 
 for c in ['p', 'n']:
     for ptbin in range(n_pt_bins):
-        cat = (ptbin, '%s_%i' % (c, ptbin))
+        cat = (ptbin, '%s_m_%i' % (c, ptbin))
         cb.AddObservations(['*'], ['wg'], ["13TeV"], ['mu_%s' % c], [cat])
-        cb.AddProcesses(['*'], ['wg'], ["13TeV"], ['mu_%s' % c], ['WG_%s_ooa' % c, 'DY_R', 'TT_R', 'data_fakes'], [cat], False)
+        cb.AddProcesses(['*'], ['wg'], ["13TeV"], ['mu_%s' % c], ['WG_%s_ooa' % c, 'VV_R', 'DY_R', 'TT_R', 'data_fakes'], [cat], False)
         for phibin in range(5):
             cb.AddProcesses(['*'], ['wg'], ["13TeV"], ['mu_%s' % c], ['WG_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
             cb.AddProcesses(['*'], ['wg'], ["13TeV"], ['mu_%s' % c], ['WG_%s_met1_%i_%i' % (c, ptbin, phibin)], [cat], True)
@@ -40,7 +40,7 @@ cb.cp().AddSyst(
 cb.cp().signals().AddSyst(
     cb, 'eff_$BIN', 'lnN', ch.SystMap()(1.1))
 
-cb.cp().process(['WG_p_ooa', 'WG_n_ooa', 'DY_R', 'TT_R']).AddSyst(
+cb.cp().process(['WG_p_ooa', 'WG_n_ooa', 'DY_R', 'TTG_R', 'VV_R']).AddSyst(
     cb, 'eff_$BIN', 'lnN', ch.SystMap()(1.1))
 
 cb.cp().process(['data_fakes']).AddSyst(
