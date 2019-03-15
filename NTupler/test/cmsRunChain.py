@@ -23,10 +23,10 @@ RUN_DIR=${PWD}
 echo ">> Setting RUN_DIR to ${RUN_DIR}"
 
 cd ${CMSSW_BASE}/../
-if [ ! -d chain ]; then
-  mkdir chain
+if [ ! -d %(CHAIN_DIRNAME)s ]; then
+  mkdir %(CHAIN_DIRNAME)s
 fi
-cd chain
+cd %(CHAIN_DIRNAME)s
 CHAIN_DIR=${PWD}
 echo ">> Setting CHAIN_DIR to ${CHAIN_DIR}"
 
@@ -34,6 +34,10 @@ CMSSW_RELEASE=%(CMSSW_RELEASE)s
 SCRAM_ARCH=%(SCRAM_ARCH)s
 
 if [ "${CMSSW_RELEASE}" != "local" ]; then
+    if [ -d ${CMSSW_RELEASE} ]; then
+      echo ">> Cleaning up existing ${CMSSW_RELEASE} directory"
+      rm -r ${CMSSW_RELEASE}
+    fi
     echo ">> Setting up release area for ${CMSSW_RELEASE} and arch ${SCRAM_ARCH}"
     if [ ! -d ${CMSSW_RELEASE} ]; then
       scram project CMSSW ${CMSSW_RELEASE}
@@ -42,7 +46,7 @@ if [ "${CMSSW_RELEASE}" != "local" ]; then
     cd %(CMSSW_RELEASE)s
     eval `scramv1 runtime -sh`
 
-    cd ${CHAIN_DIR} 
+    cd ${CHAIN_DIR}
 fi
 
 %(FILE_COPY)s
@@ -78,8 +82,10 @@ process.schedule = cms.Schedule(process.output_step)
 parser = argparse.ArgumentParser()
 parser.add_argument('config', default='config.json',
                     help='Specify the sequence to run')
+parser.add_argument('--chain-dirname', default='chain',
+                    help='Name of the directory that will contain all of the specified CMSSW areas in the chain')
 parser.add_argument('--run', action='store_true',
-                    help='Actually runt the sequence')
+                    help='Actually run the sequence')
 parser.add_argument('--events', default=100, type=int,
                     help='Specify the number of events to generate')
 parser.add_argument('--crab', action='store_true',
@@ -99,7 +105,7 @@ saved_file = 'dummy.root'
 files_to_ship = ['modifyCfg.py']
 
 for i, seq in enumerate(sequence):
-    release = seq['release'] 
+    release = seq['release']
     JOB_SCRIPT = SINGLE_JOB
 
     if release == 'local':
@@ -111,14 +117,20 @@ for i, seq in enumerate(sequence):
     files_to_ship.append(str(run_script))
     files_to_ship.extend([str(x) for x in seq['local_files']])
     files_to_ship.extend([str(x) for x in seq['cmssw_files']])
+    if 'cmssw_lib' not in seq:  # for backward compatibility with cfgs that don't have this
+        seq['cmssw_lib'] = []
+    files_to_ship.extend([str(x) for x in seq['cmssw_lib']])
 
     if args.crab:
         seq['local_files'] = [os.path.basename(x) for x in seq['local_files']]
         seq['cmssw_files'] = [os.path.basename(x) for x in seq['cmssw_files']]
+        seq['cmssw_lib'] = [os.path.basename(x) for x in seq['cmssw_lib']]
 
     copy_arg = '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/%s' % (x, os.path.basename(x)) for x in seq['local_files']])
     copy_arg += '\n'
     copy_arg += '\n'.join(['cp ${RUN_DIR}/%s ${CHAIN_DIR}/${CMSSW_RELEASE}/src/%s' % (x, os.path.basename(x)) for x in seq['cmssw_files']])
+    copy_arg += '\n'
+    copy_arg += '\n'.join(['tar -xf ${RUN_DIR}/%s -C ${CHAIN_DIR}/${CMSSW_RELEASE}/' % (x,) for x in seq['cmssw_lib']])
 
     events = -1
     inputFileArg = '--inputFile=step_%i.root' % (i - 1)
@@ -139,7 +151,7 @@ for i, seq in enumerate(sequence):
     mod_arg = 'python ${RUN_DIR}/modifyCfg.py %s %s --events=%i --randomSeeds=${SEED} %s %s %s %s' % (inputScript, outputScript, events, inputFileArg, outputFileArg, outputModuleArg, lumiOffsetArg)
 
     return_files_arg = ''
-    
+
     jobreport_name = 'JobReport_%i.xml' % i
     if 'save' in seq and seq['save'] == True:
         jobreport_name = 'FrameworkJobReport.xml'
@@ -150,15 +162,16 @@ for i, seq in enumerate(sequence):
         saved_file = 'step_%i.root' % i
     if 'output_files' in seq:
         return_files_arg = '\n'.join(['cp ${CHAIN_DIR}/%s ${RUN_DIR}/%s' % (x, x) for x in set(seq['output_files'])])
-    
+
     gen_script = JOB_SCRIPT % ({
+        'CHAIN_DIRNAME': args.chain_dirname,
         'SCRAM_ARCH': scram_arch,
         'CMSSW_RELEASE': release,
         'RUN_SCRIPT': outputScript,
         'FILE_COPY': copy_arg,
         'MOD_SCRIPT': mod_arg,
         'RETURN_FILES': return_files_arg,
-        'JOB_REPORT': jobreport_name 
+        'JOB_REPORT': jobreport_name
         })
     #print gen_script
     script_name = 'chain_step_%i_%s.sh' % (i, args.label)

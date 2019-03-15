@@ -243,7 +243,9 @@ process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("genMetTrue"),
     branch=cms.string('genMet'),
     select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(False)
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
@@ -380,7 +382,7 @@ process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
     PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
 )
 
-if isMC and year in ['2016_old', '2016', '2017']:
+if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
     process.customInitialSeq += cms.Sequence(process.prefiringweight)
     process.acEventInfoProducer.userDoubles = cms.VInputTag(
         cms.InputTag('prefiringweight:NonPrefiringProb'),
@@ -393,6 +395,8 @@ process.acEventProducer = cms.EDProducer('AcornEventProducer')
 if genOnly == 1:
     # Take the full collection for now
     process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
+    process.acEventInfoProducer.saveMetFilters = cms.vstring()
+    process.acEventInfoProducer.includeNumVertices=cms.bool(False)
     process.p = cms.Path(
         process.acGenMetProducer +
         process.acGenParticleProducer +
@@ -401,6 +405,8 @@ if genOnly == 1:
         process.acEventProducer)
 elif genOnly == 2:
     # Take the full collection for now
+    process.acEventInfoProducer.saveMetFilters = cms.vstring()
+    process.acEventInfoProducer.includeNumVertices=cms.bool(False)
     process.p = cms.Path(
         process.acLHEParticleProducer +
         process.acEventInfoProducer +
