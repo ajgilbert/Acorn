@@ -1,0 +1,4 @@
+{
+	"remote_dir": "root://eoscms.cern.ch//store/user/agilbert",
+	"manifest": ["lib", "bin", "src/Acorn/Analysis/wgamma/inputs", "src/Acorn/Analysis/filelists", "src/Acorn/Analysis/input/Cert*.txt"]
+}
