@@ -1,1 +1,5 @@
 *.py
+*.sh
+lib*.tar.gz
+crab*/
+crab.log
