@@ -116,14 +116,35 @@
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM",
+      "attributes": ["submitx"],
       "events": 0,
       "config": "mc"
     },
+    "WGToLNuG-amcatnloFXFX-PtG-130": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIFall17MiniAODv2-5f646ecd4e1c7a39ab0ed099ff55ceb9/USER",
+      "attributes": ["submitx"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "WGToLNuG-amcatnloFXFX-PtG-300": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-300_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIFall17MiniAODv2-5f646ecd4e1c7a39ab0ed099ff55ceb9/USER",
+      "attributes": ["submitx"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "WGToLNuG-amcatnloFXFX-PtG-500": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIFall17MiniAODv2-5f646ecd4e1c7a39ab0ed099ff55ceb9/USER",
+      "attributes": ["submitx"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
     "ZGToLLG-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM",
+      "attributes": ["submitx"],
       "events": 0,
       "config": "mc"
     },
@@ -317,7 +338,6 @@
     "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"],
     "allowNonValidInputDataset": true,
     "maxMemoryMB": 3900,
-    "numCores": 2,
-    "whiteList": ["T2_US_*"]
+    "numCores": 2
   }
 }
