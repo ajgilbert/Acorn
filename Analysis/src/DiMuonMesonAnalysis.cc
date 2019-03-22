@@ -154,10 +154,14 @@ int DiMuonMesonAnalysis::PreAnalysis() {
         trg_2_ =
             IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
             IsFilterMatchedDR(muons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
-      } else {
+      } else if (year_ == 2017){
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu27");
         trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
         trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
+      } else {
+        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
+        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3);
+        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3);
       }
 
       wt_pu_ = 1.;

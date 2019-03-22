@@ -283,8 +283,9 @@ hlt_paths = [
     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v',
     'HLT_Ele32_WPTight_Gsf_L1DoubleEG_v',
     'HLT_Ele35_WPTight_Gsf_v',
-    #'HLT_IsoMu24_v',
-    #'HLT_IsoTkMu24_v',
+    'HLT_Ele27_WPTight_Gsf_v',
+    'HLT_IsoMu24_v',
+    'HLT_IsoTkMu24_v',
     'HLT_IsoMu27_v'
 ]
 
