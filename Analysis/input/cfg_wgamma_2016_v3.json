@@ -6,7 +6,7 @@
       "lumi": 35916.764758
     },
     "SingleElectron": {
-      "attributes": ["default", "data"],
+      "attributes": ["default", "data", "tp"],
       "inputs": ["SingleElectron-2016B-ver2", "SingleElectron-2016C", "SingleElectron-2016D", "SingleElectron-2016E", "SingleElectron-2016F", "SingleElectron-2016G", "SingleElectron-2016H"],
       "lumi": 35915.756582
     },
@@ -16,7 +16,7 @@
       "lumi": 35917.353795
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "tp", "check_is_zg"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
       "xsec": 6225.42,
       "GenXSecAnalyzer": "After matching: total cross section = 4.954e+03 +- 4.704e+00 pb",
@@ -203,7 +203,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 4.706e+00 +- 8.943e-03 pb"
     },
     "ZGToLLG-amcatnloFXFX": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "check_is_zg"],
       "inputs": ["ZGToLLG-amcatnloFXFX"],
       "xsec": 51.759744,
       "GenXSecAnalyzer": "After filter: final cross section = 4.736e+01 +- 1.087e-01 pb",

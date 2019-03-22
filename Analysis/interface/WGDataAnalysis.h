@@ -24,6 +24,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, std::string, corrections)
   CLASS_MEMBER(WGDataAnalysis, std::string, gen_classify)
   CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
+  CLASS_MEMBER(WGDataAnalysis, bool, check_is_zg)
   CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
 
   LookupFilter filters_IsoMu24_;
@@ -45,6 +46,7 @@ class WGDataAnalysis : public ModuleBase {
 
   // truth properties
   unsigned gen_proc_;
+  bool gen_is_zg_; // Event is in the phase space covered by the NLO ZG sample
 
   unsigned n_vtx_; // number of reco vertices
   unsigned metfilters_; // metfilter bits (0 == OK)
@@ -95,6 +97,7 @@ class WGDataAnalysis : public ModuleBase {
   bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
   unsigned p0_truth_; // 0 = default (assume jet), 1 = prompt photon, 2 = prompt electron
+  bool p0_fsr_; // true if mother is a charged lepton, false otherwise
 
   // met
   float met_;
@@ -154,6 +157,8 @@ class WGDataAnalysis : public ModuleBase {
   float gen_met_;
   float gen_met_phi_;
   float gen_l0p0_dr_;
+  // float gen_dy_mll_;
+  // float gen_n2_pt_;
 
   mutable TRandom3 rng;
 

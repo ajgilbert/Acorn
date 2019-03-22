@@ -28,6 +28,7 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       year_(2016),
       is_data_(true),
       do_wg_gen_vars_(false),
+      check_is_zg_(false),
       do_presel_(true) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
@@ -37,6 +38,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
     tree_->Branch("run", &run_);
     tree_->Branch("gen_proc", &gen_proc_);
+    tree_->Branch("gen_is_zg", &gen_is_zg_);
     tree_->Branch("n_vtx", &n_vtx_);
     tree_->Branch("n_pre_m", &n_pre_m_);
     tree_->Branch("n_pre_e", &n_pre_e_);
@@ -73,6 +75,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
     tree_->Branch("p0_tight", &p0_tight_);
+    tree_->Branch("p0_fsr", &p0_fsr_);
     tree_->Branch("p0_truth", &p0_truth_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
@@ -119,6 +122,8 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("gen_l0_eta", &gen_l0_eta_);
     tree_->Branch("gen_met", &gen_met_);
     tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
+    // tree_->Branch("gen_dy_mll", &gen_dy_mll_);
+    // tree_->Branch("gen_n2_pt", &gen_n2_pt_);
   }
 
   if (is_data_) {
@@ -579,6 +584,31 @@ int WGDataAnalysis::PreAnalysis() {
         } else if (prompt_gen_photons.size() > 0) {
           p0_truth_ = 1;
         }
+        for (auto const& p_pho : prompt_gen_photons) {
+          for (auto const& p : genparts) {
+            if (ac::IsChargedLepton(*p) && ac::contains(p->daughters(), p_pho->index())) {
+              p0_fsr_ = true;
+              break;
+            }
+          }
+          if (p0_fsr_) break;
+        }
+      }
+
+      // Check if this is the ZG sample phasespace
+      if (check_is_zg_) {
+        ROOT::Math::PtEtaPhiMVector dy_parts;
+        std::vector<double> pts;
+        for (auto const& p : genparts) {
+          if (p->statusFlags().isPrompt() && IsChargedLepton(*p) && p->statusFlags().isLastCopy()) {
+            dy_parts += p->vector();
+            pts.push_back(p->pt());
+          }
+        }
+        std::sort(pts.begin(), pts.end(), [](double d1, double d2) {return d1 > d2; });
+        if (pts.size() >= 2 && pts.at(1) > 15. && dy_parts.M() > 30.) {
+          gen_is_zg_ = true;
+        }
       }
     }
     tree_->Fill();
@@ -588,6 +618,7 @@ int WGDataAnalysis::PreAnalysis() {
   void WGDataAnalysis::SetDefaults() {
     run_ = 0;
     gen_proc_ = 0;
+    gen_is_zg_ = false;
     n_vtx_ = 0;
     metfilters_ = 0;
     n_pre_m_ = 0;
@@ -623,6 +654,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_eveto_ = false;
     p0_medium_noch_ = false;
     p0_medium_ = false;
+    p0_fsr_ = false;
     p0_tight_ = false;
     p0_truth_ = 0;
     met_ = 0.;
@@ -670,6 +702,8 @@ int WGDataAnalysis::PreAnalysis() {
     gen_met_ = 0.;
     gen_l0p0_dr_ = 0.;
     true_phi_ = 0.;
+    // gen_dy_mll_ = 0.;
+    // gen_n2_pt_ = 0.;
   }
 
   int WGDataAnalysis::PostAnalysis() {

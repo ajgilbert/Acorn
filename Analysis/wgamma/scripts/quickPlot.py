@@ -77,6 +77,7 @@ config_by_setting = {
         '*/p0_pt': ('Photon p_{T}', 'GeV'),
         '*/p0_eta': ('Photon #eta', ''),
         '*/p0_phi': ('Photon #phi', ''),
+        '*/p0_truth': ('Photon truth match', ''),
         'm/*/l0p0_dr': ('#DeltaR(#mu,#gamma)', ''),
         'm/*/l0p0_M': ('m_{#mu#gamma}', 'GeV'),
         'e/*/l0p0_dr': ('#DeltaR(e,#gamma)', ''),

@@ -14,9 +14,15 @@
     },
     {
       "name": "DY_R",
-      "entries": ["DY_R"],
-      "legend": "Z#rightarrowll (prompt #gamma)",
+      "entries": ["DY_XZG_R"],
+      "legend": "Z#rightarrowll (LO)",
       "color": [250,169,22]
+    },
+    {
+      "name": "ZG_R",
+      "entries": ["ZG_IZG_R"],
+      "legend": "Z#rightarrowll (NLO)",
+      "color": [255,202,58]
     },
     {
       "name": "DY_F",
@@ -49,7 +55,7 @@
       "color": [108,190,237]
     }
   ],
-  "data_fakes": [
+  "data_fakes_m": [
     {
       "name": "VV_R",
       "entries": ["VV_R"],
@@ -58,9 +64,15 @@
     },
     {
       "name": "DY_R",
-      "entries": ["DY_R"],
-      "legend": "Z#rightarrowll",
+      "entries": ["DY_XZG_R"],
+      "legend": "Z#rightarrowll (LO)",
       "color": [250,169,22]
+    },
+    {
+      "name": "ZG_R",
+      "entries": ["ZG_IZG_R"],
+      "legend": "Z#rightarrowll (NLO)",
+      "color": [255,202,58]
     },
     {
       "name": "TT_R",
@@ -90,19 +102,31 @@
     },
     {
       "name": "DY_R",
-      "entries": ["DY_R"],
-      "legend": "Z#rightarrowll",
+      "entries": ["DY_XZG_R"],
+      "legend": "Z#rightarrowll (LO)",
       "color": [250,169,22]
     },
     {
-      "name": "DY_F",
-      "entries": ["DY_F"],
+      "name": "ZG_R",
+      "entries": ["ZG_IZG_R"],
+      "legend": "Z#rightarrowll (NLO)",
+      "color": 2
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
       "legend": "Z#rightarrowll (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
+      "name": "TT_E",
+      "entries": ["TT_E"],
+      "legend": "t#bar{t} (e)",
+      "color": [187,10,33]
+    },
+    {
       "name": "TT_R",
-      "entries": ["TTG_R"],
+      "entries": ["TT_R"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },

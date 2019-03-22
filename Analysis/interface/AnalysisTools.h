@@ -22,6 +22,11 @@
 
 namespace ac {
 
+template <typename T, typename Range>
+bool contains(Range const& r, T const& value) {
+  return std::find(r.begin(), r.end(), value) != r.end();
+}
+
 // Containers - filtering, sorting etc
 template <class Container, class Pred>
 Container& keep_if(Container& target, Pred pred) {
@@ -43,6 +48,37 @@ bool DescendingTrackPt(Track const* t1, Track const* t2);
 template <class T>
 double RooFunc(T const& func, std::vector<double> const& args) {
   return func->eval(args.data());
+}
+
+template <typename T>
+std::vector<std::pair<T, T> > MakePairs(std::vector<T> const& collection) {
+  unsigned n = collection.size();
+  std::vector<std::pair<T, T> > pairVec;
+  if (n == 0) return pairVec;
+  pairVec.resize((n * (n - 1)) / 2);
+  unsigned vecIndex = 0;
+  for (unsigned i = 0; i < (n - 1); ++i) {
+    for (unsigned j = (i + 1); j < n; ++j, ++vecIndex) {
+      pairVec[vecIndex] = (std::pair<T, T>(collection[i], collection[j]));
+    }
+  }
+  return pairVec;
+}
+
+template <class T, class U>
+std::vector<std::pair<T, U> > MakePairs(std::vector<T> const& collection1,
+                                        std::vector<U> const& collection2) {
+  unsigned n = collection1.size();
+  unsigned m = collection2.size();
+  std::vector<std::pair<T, U> > pairVec;
+  pairVec.resize(n * m);
+  unsigned vecIndex = 0;
+  for (unsigned i = 0; i < n; ++i) {
+    for (unsigned j = 0; j < m; ++j, ++vecIndex) {
+      pairVec[vecIndex] = (std::pair<T, U>(collection1[i], collection2[j]));
+    }
+  }
+  return pairVec;
 }
 
 // Calculating observables

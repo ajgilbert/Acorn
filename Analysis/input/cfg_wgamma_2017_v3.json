@@ -16,7 +16,7 @@
       "lumi": 41526.052520
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "check_is_zg"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM", "DYJetsToLL_M-50-madgraphMLM-ext1"],
       "xsec": 6225.42
     },
