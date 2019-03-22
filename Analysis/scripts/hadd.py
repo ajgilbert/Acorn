@@ -53,7 +53,7 @@ for target, inputs in hadddict.items():
         actual_target = '$TMPDIR/%s' % os.path.basename(target)
     job = 'hadd -O -f6 %s %s' % (actual_target, ' '.join(inputs))
     if is_remote:
-        job += ' && xrdcp %s %s && rm %s' % (actual_target, target, actual_target)
+        job += ' && xrdcp --force %s %s && rm %s' % (actual_target, target, actual_target)
     if args.clean:
         job += ' && rm %s' % (' '.join(cleandict[target]))
     job_mgr.job_queue.append(job)
