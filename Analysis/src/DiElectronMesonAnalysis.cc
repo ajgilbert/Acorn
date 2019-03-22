@@ -63,24 +63,32 @@ int DiElectronMesonAnalysis::PreAnalysis() {
   }
 
   if (is_data_) {
-    /*filters_IsoMu24_ =
-        LookupFilter({{272023, "hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"},
-                      {295982, "hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07"}});
-
-    filters_IsoTkMu24_ =
-        LookupFilter({{272023, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09"},
-                      {295982, "hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p07"}});*/
+    filters_Ele27_ =
+        LookupFilter({{272023, "hltEle27WPTightGsfTrackIsoFilter"}});
 
     filters_Ele35_ =
-        LookupFilter({{272023, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},//FIXME
-                      {294927, "hltEle35noerWPTightGsfTrackIsoFilter"}});
+        LookupFilter({{294927, "hltEle35noerWPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_ =
+        LookupFilter({{281010, "hltEle32noerWPTightGsfTrackIsoFilter"},
+                      {302023, "hltEle32WPTightGsfTrackIsoFilter"}});
+
+
   } else {
 
     filters_Ele35_ =
-        LookupFilter({{2016, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09"},//FIXME
-                      {2017, "hltEle35noerWPTightGsfTrackIsoFilter"},
-                      {2018, "hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07"}});//FIXME
-  }
+        LookupFilter({{2017, "hltEle35noerWPTightGsfTrackIsoFilter"}});
+
+    filters_Ele27_ =
+        LookupFilter({{2016, "hltEle27WPTightGsfTrackIsoFilter"},
+                      {2017, "hltEle27WPTightGsfTrackIsoFilter"},
+                      {2018, "hltEle27WPTightGsfTrackIsoFilter"}});
+
+    filters_Ele32_ =
+        LookupFilter({{2016, "hltEle32noerWPTightGsfTrackIsoFilter"},
+                      {2017, "hltEle32WPTightGsfTrackIsoFilter"},
+                      {2018, "hltEle32WPTightGsfTrackIsoFilter"}});
+   } 
 
   TFile f(corrections_.c_str());
   ws_ = std::shared_ptr<RooWorkspace>((RooWorkspace*)gDirectory->Get("w"));
@@ -139,18 +147,19 @@ int DiElectronMesonAnalysis::PreAnalysis() {
 
       unsigned trg_lookup = is_data_ ? info->run() : year_;
       if (year_ == 2016) {
-    /*    auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele35_WPTight_Gsf");
-        auto const& trg_objs_tk = event->GetPtrVec<TriggerObject>("triggerObjects_IsoTkMu24");
+        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele27_WPTight_Gsf");
         trg_1_ =
-            IsFilterMatchedDR(electrons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(electrons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+            IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3);
         trg_2_ =
-            IsFilterMatchedDR(electrons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(electrons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);*/
-      } else {
+            IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3);
+      } else if (year_ == 2017) {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele35_WPTight_Gsf");
         trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
         trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
+      } else {
+        auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
+        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
+        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
       }
 
       wt_pu_ = 1.;

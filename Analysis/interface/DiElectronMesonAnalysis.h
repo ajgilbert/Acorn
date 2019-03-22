@@ -24,6 +24,8 @@ class DiElectronMesonAnalysis : public ModuleBase {
   CLASS_MEMBER(DiElectronMesonAnalysis, std::string, corrections)
 
   LookupFilter filters_Ele35_;
+  LookupFilter filters_Ele32_;
+  LookupFilter filters_Ele27_;
 
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
