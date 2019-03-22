@@ -58,6 +58,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("highestpt_pair_looser_iso", &highestpt_pair_looser_iso_);
     tree_->Branch("highestpt_pair_reco_higgs_mass", &highestpt_pair_reco_higgs_mass_);
     tree_->Branch("highestpt_pair_reco_higgs_pt", &highestpt_pair_reco_higgs_pt_);
+    tree_->Branch("Zrho_dphi",&Zrho_dphi_);
     tree_->Print();
   }
 
@@ -223,6 +224,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
        highestpt_pair_2_pt_=tracks.at(track_drs_smallcone.at(0).first.second)->pt();
        highestpt_pair_iso_=0;
        highestpt_pair_looser_iso_=0;
+       Zrho_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector(),z_cand.vector());
        for (unsigned i=0; i <tracks.size(); i++){
          if( i!=highestpt_pair_id_1_ && i!=highestpt_pair_id_2_){
            if(DeltaRTrackPair(tracks.at(highestpt_pair_id_1_),tracks.at(highestpt_pair_id_2_),tracks.at(i))<0.3) highestpt_pair_iso_+=tracks.at(i)->pt();

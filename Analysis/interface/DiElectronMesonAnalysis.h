@@ -61,6 +61,7 @@ class DiElectronMesonAnalysis : public ModuleBase {
   float highestpt_pair_reco_higgs_mass_;
   float highestpt_pair_reco_higgs_pt_;
   int nAddEle_;
+  float Zrho_dphi_;
 
  public:
   DiElectronMesonAnalysis(std::string const& name);

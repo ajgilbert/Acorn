@@ -58,6 +58,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     tree_->Branch("highestpt_pair_looser_iso", &highestpt_pair_looser_iso_);
     tree_->Branch("highestpt_pair_reco_higgs_mass", &highestpt_pair_reco_higgs_mass_);
     tree_->Branch("highestpt_pair_reco_higgs_pt", &highestpt_pair_reco_higgs_pt_);
+    tree_->Branch("Zrho_dphi",&Zrho_dphi_);
     tree_->Print();
   }
 
@@ -228,6 +229,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
        highestpt_pair_2_eta_=tracks.at(track_drs_smallcone.at(0).first.second)->eta();
        highestpt_pair_2_phi_=tracks.at(track_drs_smallcone.at(0).first.second)->phi();
        highestpt_pair_2_pt_=tracks.at(track_drs_smallcone.at(0).first.second)->pt();
+       Zrho_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector(),z_cand.vector());
        highestpt_pair_iso_=0;
        highestpt_pair_looser_iso_=0;
        for (unsigned i=0; i <tracks.size(); i++){
