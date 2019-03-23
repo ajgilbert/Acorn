@@ -95,14 +95,71 @@
       "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 229.92,
       "GenXSecAnalyzer": "After filter: final cross section = 1.914e+02 +- 4.441e-01 pb",
       "XSecSource": "(1): 191.6 (NLO) * 1.2 (kNNLO) = 229.92"
     },
+    "WGToLNuG-amcatnloFXFX-PtG-130": {
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel"],
+      "inputs": ["WGToLNuG-amcatnloFXFX-PtG-130"],
+      "xsec": 1.2336,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.028e+00 +- 6.803e-03 pb",
+      "XSecSource": "NLO sample xsec * 1.2 kNNLO"
+    },
+    "WGToLNuG-amcatnloFXFX-PtG-300": {
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel"],
+      "inputs": ["WGToLNuG-amcatnloFXFX-PtG-300"],
+      "xsec": 0.0843,
+      "GenXSecAnalyzer": "After filter: final cross section = 7.025e-02 +- 4.095e-04 pb",
+      "XSecSource": "NLO sample xsec * 1.2 kNNLO"
+    },
+    "WGToLNuG-amcatnloFXFX-PtG-500": {
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel"],
+      "inputs": ["WGToLNuG-amcatnloFXFX-PtG-500"],
+      "xsec": 0.0111864,
+      "GenXSecAnalyzer": "After filter: final cross section = 9.322e-03 +- 4.986e-05 pb",
+      "XSecSource": "NLO sample xsec * 1.2 kNNLO"
+    },
+    "WGToLNuG-amcatnloFXFX-stitched": {
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "doit"],
+      "inputs": ["WGToLNuG-amcatnloFXFX", "WGToLNuG-amcatnloFXFX-PtG-130", "WGToLNuG-amcatnloFXFX-PtG-300", "WGToLNuG-amcatnloFXFX-PtG-500"],
+      "xsec": 229.92,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToLNuG-amcatnloFXFX": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 16780663,
+          "xsec": 191.4
+        },
+        "WGToLNuG-amcatnloFXFX-PtG-130": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 1248888,
+          "xsec": 1.028
+        },
+        "WGToLNuG-amcatnloFXFX-PtG-300": {
+          "target": false,
+          "min": [300.0],
+          "max": [],
+          "events": 300001,
+          "xsec": 0.07025
+        },
+        "WGToLNuG-amcatnloFXFX-PtG-500": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 329220,
+          "xsec": 0.009322
+        }
+      }
+    },
     "WGToLNuG-madgraphMLM": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM"],
       "xsec": 846.43,
       "GenXSecAnalyzer": "After filter: final cross section = 4.659e+02 +- 6.125e-01 pb",
@@ -123,7 +180,7 @@
       "XSecSource": "LO * kNNLO (1.32)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc", "doit"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 846.43,
       "stitching": {
