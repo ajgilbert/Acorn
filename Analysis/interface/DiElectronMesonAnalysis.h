@@ -31,6 +31,8 @@ class DiElectronMesonAnalysis : public ModuleBase {
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
 
   TTree* tree_;
+  int  electron_overlaps_;
+  int  muon_overlaps_;
   float pt_1_;
   float pt_2_;
   float eta_1_;

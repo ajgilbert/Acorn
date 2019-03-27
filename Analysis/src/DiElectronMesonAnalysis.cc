@@ -27,6 +27,8 @@ DiElectronMesonAnalysis::~DiElectronMesonAnalysis() { ; }
 int DiElectronMesonAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("DiElectronMesonAnalysis", "DiElectronMesonAnalysis");
+    tree_->Branch("electron_overlaps",&electron_overlaps_);
+    tree_->Branch("muon_overlaps",&muon_overlaps_);
     tree_->Branch("pt_1", &pt_1_);
     tree_->Branch("pt_2", &pt_2_);
     tree_->Branch("eta_1", &eta_1_);
@@ -108,17 +110,31 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
     std::vector<ac::Muon *> muons = event->GetPtrVec<ac::Muon>("muons");
+    std::vector<ac::Muon *> veto_muons = event->GetPtrVec<ac::Muon>("muons");
+    std::vector<ac::Muon *> all_muons = event->GetPtrVec<ac::Muon>("muons");
     std::vector<ac::Electron *> electrons = event->GetPtrVec<ac::Electron>("electrons");
+    std::vector<ac::Electron *> veto_electrons = event->GetPtrVec<ac::Electron>("electrons");
+    std::vector<ac::Electron *> all_electrons = event->GetPtrVec<ac::Electron>("electrons");
     std::vector<ac::Track *> tracks = event->GetPtrVec<ac::Track>("Tracks");
     std::vector<ac::Track *> tracksforiso = event->GetPtrVec<ac::Track>("TracksForIso");
     std::vector<int> higgs_daughters;
     std::vector<int> rho_daughters;
     std::vector<GenParticle *> pions_from_meson;
 
+
+
     // Apply pT and ID cuts
     // The medium ID already includes iso?
+    ac::keep_if(veto_muons, [](ac::Muon const* m) {
+      return m->pt() > 5. && fabs(m->eta()) < 2.4 && m->isMediumMuon();
+    });
+
     ac::keep_if(muons, [](ac::Muon const* m) {
       return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
+    });
+
+    ac::keep_if(veto_electrons, [](ac::Electron const* e) {
+      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
     });
 
     ac::keep_if(electrons, [](ac::Electron const* e) {
@@ -135,7 +151,22 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       z_cand.setCharge(electrons[0]->charge() + electrons[1]->charge());
     }
 
-    if (electrons.size() == 2 && z_cand.charge() == 0 && muons.size()==0) {
+    if (electrons.size()==2 && veto_electrons.size() == 2 && z_cand.charge() == 0 && veto_muons.size()==0) {
+      electron_overlaps_=0;
+      muon_overlaps_=0;
+      for(unsigned j=0; j<tracks.size(); j++){
+        bool no_muon_overlap=1;
+        for (unsigned i = 0; i<all_muons.size(); i++){
+          no_muon_overlap&&(DeltaRTrack(tracks.at(j),all_muons.at(i))>0.3);
+        }
+        if (!no_muon_overlap) muon_overlaps_ +=1;
+        bool no_electron_overlap=1;
+        for (unsigned i = 0; i<all_electrons.size(); i++){
+          no_electron_overlap&&(DeltaRTrack(tracks.at(j),all_electrons.at(i))>0.3);
+        }
+        if (!no_electron_overlap) electron_overlaps_ +=1;
+      }
+
       pt_1_ = electrons[0]->pt();
       pt_2_ = electrons[1]->pt();
       eta_1_ = electrons[0]->eta();
