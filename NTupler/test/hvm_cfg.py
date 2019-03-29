@@ -8,8 +8,9 @@ process = cms.Process("MAIN")
 # ################################################################
 import FWCore.ParameterSet.VarParsing as parser
 opts = parser.VarParsing ('analysis')
-#opts.register('globalTag', '94X_mc2017_realistic_v11', parser.VarParsing.multiplicity.singleton,
-opts.register('globalTag', '94X_dataRun2_v11', parser.VarParsing.multiplicity.singleton,
+#opts.register('globalTag', '94X_mcRun2_asymptotic_v3', parser.VarParsing.multiplicity.singleton,
+opts.register('globalTag', '94X_mc2017_realistic_v17', parser.VarParsing.multiplicity.singleton,
+#opts.register('globalTag', '94X_dataRun2_v11', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "global tag")
 opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
@@ -21,7 +22,9 @@ opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468-rho.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
-opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017D/DoubleMuon/MINIAOD/31Mar2018-v1/30000/2A02BE21-0839-E811-B18B-0023AEEEB55F.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+#opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017D/DoubleMuon/MINIAOD/31Mar2018-v1/30000/2A02BE21-0839-E811-B18B-0023AEEEB55F.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+#opts.register('input', 'root://xrootd.unl.edu///store/mc/RunIISummer16MiniAODv3/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v2/120000/8E6C0FF8-15E9-E811-894F-509A4C83018B.root',parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+opts.register('input','root://xrootd.unl.edu//store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/RECOSIMstep_94X_mc2017_realistic_v10-v1/00000/162296AB-82F1-E711-8E16-001A648F1DEA.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
 #opts.register('input', 'root://xrootd.unl.edu//store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FEB2F873-C1D8-E611-8AAC-02163E012A61.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 opts.register('year', '2017', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "Year label")
@@ -222,20 +225,6 @@ process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
     maxBx=cms.int32(0)
 )
 
-process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag("genMetTrue"),
-    branch=cms.string('genMet'),
-    select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(False)
-)
-
-process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag("slimmedMETs"),
-    branch=cms.string('genMet'),
-    select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(True)
-)
-
 process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
 
 process.selectedPackedCands = cms.EDFilter("PATPackedCandidateSelector", 
@@ -280,7 +269,6 @@ if isMC:
         process.selectedGenParticles +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
-        process.acGenMetFromPatProducer +
         process.acPileupInfoProducer
     )
 
@@ -372,7 +360,6 @@ if genOnly == 1:
     # Take the full collection for now
     process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
     process.p = cms.Path(
-        process.acGenMetProducer +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
         process.acEventInfoProducer +

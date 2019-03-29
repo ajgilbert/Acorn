@@ -90,6 +90,36 @@
       "events": -1,
       "config": "data"
     },
+    "DoubleEG-2017B": {
+      "dataset": "/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleEG-2017C": {
+      "dataset": "/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleEG-2017D": {
+      "dataset": "/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit", "submitpilot"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleEG-2017E": {
+      "dataset": "/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleEG-2017F": {
+      "dataset": "/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
     "HZrho-Long": {
       "dataset": "/hvm-miniaod-121018/adewit-crab_hvm-miniaod-rho-121018-692976c2d086f569d9a779b5701b870f/USER",
       "attributes": ["submit"],
@@ -118,7 +148,6 @@
       "config": "mc",
       "inputDBS": "phys03"
     },
-
     "DYJetsToLLMG": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAOD-RECOSIMstep_94X_mc2017_realistic_v10-v1/MINIAODSIM",
       "attributes": ["submit"],
@@ -133,8 +162,8 @@
     }
   },
   "configs": {
-    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=1"],
-    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=1"]
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v11", "cores=1"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "cores=1"]
   },
   "crabSettings": {
     "storageSite": "T2_DE_DESY",
