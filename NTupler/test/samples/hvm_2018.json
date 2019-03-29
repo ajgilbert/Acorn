@@ -1,0 +1,112 @@
+{
+  "samples": {
+    "DoubleMuon-2018A": {
+      "dataset": "/DoubleMuon/Run2018A-17Sep2018-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleMuon-2018B": {
+      "dataset": "/DoubleMuon/Run2018B-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleMuon-2018C": {
+      "dataset": "/DoubleMuon/Run2018C-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "DoubleMuon-2018D": {
+      "dataset": "/DoubleMuon/Run2018D-PromptReco-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "promptdata"
+    },
+    "SingleMuon-2018A": {
+      "dataset": "/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2018B": {
+      "dataset": "/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2018C": {
+      "dataset": "/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "SingleMuon-2018D": {
+      "dataset": "/SingleMuon/Run2018D-PromptReco-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "promptdata"
+    },
+    "EGamma-2018A": {
+      "dataset": "/EGamma/Run2018A-17Sep2018-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "EGamma-2018B": {
+      "dataset": "/EGamma/Run2018B-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "EGamma-2018C": {
+      "dataset": "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "EGamma-2018D": {
+      "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "promptdata"
+    },
+    "HZrho-mumu-2018": {
+      "dataset": "/hvm-miniaod-mumu2018-120319/adewit-crab_hvm-miniaod-rho-mumu2018-120319-49a4661a3947e55672f521824357eab1/USER",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "HZrho-ee-2018": {
+      "dataset": "/hvm-miniaod-ee2018-120319/adewit-crab_hvm-miniaod-rho-ee2018-120319-49a4661a3947e55672f521824357eab1/USER",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "DYJetsToLLMG": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc"
+    },
+    "DYJetsToLLaMCNLO": {
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "mc"
+    }
+  },
+  "configs": {
+    "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018ABC_v2", "cores=1"],
+    "promptdata": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v13", "cores=1"],
+    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v18", "cores=1"]
+  },
+  "crabSettings": {
+    "storageSite": "T2_DE_DESY",
+    "voGroup": "dcms",
+    "outputDir" : "/store/user/adewit/HVMData/"
+  }
+}
