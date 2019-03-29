@@ -277,7 +277,7 @@ hlt_paths = [
     # 'HLT_IsoTkMu22_v',
     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v',
     'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v',
-    'HLT_Ele32_WPTight_Gsf_L1DoubleEG_v',
+    'HLT_Ele32_WPTight_Gsf_v',
     'HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v',
     'HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
     'HLT_Ele35_WPTight_Gsf_v',
