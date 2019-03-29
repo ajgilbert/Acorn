@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 process = cms.Process("MAIN")
 # import sys
 
@@ -8,7 +9,7 @@ process = cms.Process("MAIN")
 import FWCore.ParameterSet.VarParsing as parser
 opts = parser.VarParsing ('analysis')
 #opts.register('globalTag', '94X_mc2017_realistic_v11', parser.VarParsing.multiplicity.singleton,
-opts.register('globalTag', '94X_dataRun2_v6', parser.VarParsing.multiplicity.singleton,
+opts.register('globalTag', '94X_dataRun2_v11', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "global tag")
 opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
@@ -20,7 +21,7 @@ opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468-rho.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
-opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017B/DoubleMuon/MINIAOD/23Jun2017-v1/10000/046A6D49-4859-E711-8CAF-0025904B2C68.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017D/DoubleMuon/MINIAOD/31Mar2018-v1/30000/2A02BE21-0839-E811-B18B-0023AEEEB55F.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
 #opts.register('input', 'root://xrootd.unl.edu//store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FEB2F873-C1D8-E611-8AAC-02163E012A61.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 opts.register('year', '2017', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "Year label")
@@ -97,6 +98,8 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 )
 
 
+process.customInitialSeq = cms.Sequence()
+
 #### Adding the photon ID
 #from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 # turn on VID producer, indicate data format  to be
@@ -132,45 +135,50 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 #)
 
 #### Adding electron ID
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-# turn on VID producer, indicate data format  to be
-# DataFormat.AOD or DataFormat.MiniAOD, as appropriate 
-switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
-if opts.year == '2016':
-    my_id_modules = ['']
-    ele_veto_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-veto"
-    ele_loose_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-loose"
-    ele_medium_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-medium"
-    ele_tight_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-tight"
-else :
-    my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
-                     'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff',
-                     'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff']
-    ele_veto_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-veto"
-    ele_loose_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-loose"
-    ele_medium_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-medium"
-    ele_tight_id = "egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-tight"
-    ele_mva_wp80_id = "egmGsfElectronIDs:mvaEleID-Fall17-iso-V2-wp80"
-    ele_mva_wp90_id = "egmGsfElectronIDs:mvaEleID-Fall17-iso-V2-wp90"
-    ele_heep_id = "egmGsfElectronIDs:heepElectronID-HEEPV70"
+if opts.year in ['2016_old']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=True, runVID=True, era='2016-Legacy')
+elif opts.year in ['2016']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2016-Legacy')
+elif opts.year in ['2017']:
+    setupEgammaPostRecoSeq(process, runVID=True, era='2017-Nov17ReReco')
+elif opts.year in ['2018']:
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2018-Prompt')
 
-for idmod in my_id_modules:
-    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+### Electrons
+ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"
+ele_loose_id = "cutBasedElectronID-Fall17-94X-V2-loose"
+ele_medium_id = "cutBasedElectronID-Fall17-94X-V2-medium"
+ele_tight_id = "cutBasedElectronID-Fall17-94X-V2-tight"
+ele_mva_wp80_id = "mvaEleID-Fall17-iso-V2-wp80"
+ele_mva_wp90_id = "mvaEleID-Fall17-iso-V2-wp90"
+ele_heep_id = "heepElectronID-HEEPV70"
+
+# Embed the full vid results in the new electron object
+process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
+    electron_config=cms.PSet(
+        ElectronCutValues=cms.InputTag("egmGsfElectronIDs", ele_medium_id),
+        electronSrc=cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess"),
+    ),
+    modifierName=cms.string('EGExtraInfoModifierFromVIDCutFlowResultValueMaps'),
+    overrideExistingValues=cms.bool(True),
+    photon_config=cms.PSet()
+    )
+)
 
 process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
     branch=cms.string('electrons'),
-    select=cms.vstring('keep .* p4=12'),
-    eleVetoIdMap=cms.InputTag(ele_veto_id), 
-    eleLooseIdMap=cms.InputTag(ele_loose_id), 
-    eleMediumIdMap=cms.InputTag(ele_medium_id), 
-    eleTightIdMap=cms.InputTag(ele_tight_id), 
-    eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
-    eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
+    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12'),
+    eleVetoIdMap=cms.InputTag(ele_veto_id),
+    eleLooseIdMap=cms.InputTag(ele_loose_id),
+    eleMediumIdMap=cms.InputTag(ele_medium_id),
+    eleTightIdMap=cms.InputTag(ele_tight_id),
+    eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id),
+    eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
-    relativeEAIsoFromUserData=cms.vstring(), # does nothing when args are empty
-    takeIdsFromObjects=cms.bool(False)
+    relativeEAIsoFromUserData=cms.vstring('ElectronCutValues', 'GsfEleRelPFIsoScaledCut_0'),
+    takeIdsFromObjects=cms.bool(True)
 )
 
 
@@ -295,7 +303,7 @@ process.acTriggerObjectSequence = cms.Sequence(
     # process.icTriggerPathProducer
 )
 
-if opts.year == '2016':
+if opts.year == '2016_old':
     trigger_objects = 'selectedPatTrigger'
 else:
     trigger_objects = 'slimmedPatTrigger'
@@ -320,32 +328,43 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     includeLHEWeights=cms.bool(isMC),
     includeGenWeights=cms.bool(isMC),
     metFilterResults=cms.InputTag("TriggerResults", "", "PAT"), # NB will sometimes need "RECO" instead of "PAT"
-    saveMetFilters=cms.vstring(
-        # 'Flag_goodVertices',
-        # 'Flag_globalSuperTightHalo2016Filter',
-        # 'Flag_HBHENoiseFilter',
-        # 'Flag_HBHENoiseIsoFilter',
-        # 'Flag_EcalDeadCellTriggerPrimitiveFilter',
-        # 'Flag_BadPFMuonFilter',
-        # 'Flag_BadChargedCandidateFilter',
-        # 'Flag_eeBadScFilter'
-        ),
-    userDoubles=cms.VInputTag(
-        # cms.InputTag('prefiringweight:NonPrefiringProb'),
-        # cms.InputTag('prefiringweight:NonPrefiringProbUp'),
-        # cms.InputTag('prefiringweight:NonPrefiringProbDown')
-        ),
+    saveMetFilters=cms.vstring(),
+    userDoubles=cms.VInputTag(),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
-        #'keep lheweights:lhapdf.306[0-9][0-9][0-9]=10',
-        #'keep lheweights:PDF.306000=10',
         'keep lheweights:dim6=10',
-        #'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10'
-        )
+        ),
+    includeNumVertices=cms.bool(True),
+    inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
+
+prefiring_era_str = {
+    "2016_old": "2016BtoH",
+    "2016": "2016BtoH",
+    "2017": "2017BtoF",
+    "2018": "2017BtoF"
+}
+
+process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
+    ThePhotons=cms.InputTag("slimmedPhotons"),
+    TheJets=cms.InputTag("slimmedJets"),
+    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
+    DataEra=cms.string(prefiring_era_str[opts.year]), #Use 2016BtoH for 2016, 2017BtoF for 2017
+    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
+    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
+)
+
+if isMC and opts.year in ['2016_old', '2016', '2017'] and genOnly == 0:
+    process.customInitialSeq += cms.Sequence(process.prefiringweight)
+    process.acEventInfoProducer.userDoubles = cms.VInputTag(
+        cms.InputTag('prefiringweight:NonPrefiringProb'),
+        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
+        cms.InputTag('prefiringweight:NonPrefiringProbDown')
+        )
+
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
 
@@ -359,21 +378,17 @@ if genOnly == 1:
         process.acEventInfoProducer +
         process.acEventProducer)
 elif genOnly == 2:
-    # Take the full collection for now
     process.p = cms.Path(
         process.acLHEParticleProducer +
         process.acEventInfoProducer +
         process.acEventProducer)
 else:
     process.p = cms.Path(
-        #process.egmPhotonIDSequence +
-        process.egmGsfElectronIDSequence+
+        process.egammaPostRecoSeq +
         process.selectedMuons +
         process.selectedElectrons +
-        #process.selectedPhotons +
         process.acMuonProducer +
         process.acElectronProducer +
-        #process.acPhotonProducer +
         process.acPFType1MetProducer +
         process.acMCSequence +
         process.selectedPackedCands+
@@ -384,6 +399,7 @@ else:
         process.acSelectIsoTracks+
         process.acTrackFromPatProducerL+
         process.acTriggerObjectSequence +
+        process.customInitialSeq +
         process.acEventInfoProducer +
         process.acEventProducer)
 
