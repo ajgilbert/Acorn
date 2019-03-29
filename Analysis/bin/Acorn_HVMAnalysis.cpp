@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "boost/lexical_cast.hpp"
 // Services
 #include "PhysicsTools/FWLite/interface/TFileService.h"
 #include "Acorn/Analysis/interface/AnalysisBase.h"
@@ -12,6 +13,7 @@
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"
 #include "Acorn/Analysis/interface/DiLeptonMesonGenAnalysis.h"
 #include "Acorn/Analysis/interface/DiMuonMesonAnalysis.h"
+#include "Acorn/Analysis/interface/HVMTagAndProbe.h"
 #include "Acorn/Analysis/interface/DiElectronMesonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
@@ -68,6 +70,7 @@ int main(int argc, char* argv[]) {
 
   json js = json::parse(argv[1]);
   json const& jsc = js;
+  std::string s_year = boost::lexical_cast<std::string>(jsc["year"]);
 
   // Should move to passing the list of files to process directly?
   //std::string outname = "testout.root";
@@ -112,7 +115,7 @@ int main(int argc, char* argv[]) {
   dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
                            .set_fs(fs.get())
                            .set_year(jsc["year"])
-                           .set_corrections("input/wgamma_corrections_2016_v1.root")
+                           .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
                            .set_is_data(is_data));
 
   //dimuon_seq.InsertSequence("DiMuonMeson", analysis);
@@ -120,7 +123,13 @@ int main(int argc, char* argv[]) {
   dimuon_seq.BuildModule(ac::DiElectronMesonAnalysis("DiElectronMesonAnalysis")
                            .set_fs(fs.get())
                            .set_year(jsc["year"])
-                           .set_corrections("input/wgamma_corrections_2016_v1.root")
+                           .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
+                           .set_is_data(is_data));
+
+  dimuon_seq.BuildModule(ac::HVMTagAndProbe("HVMTagAndProbe")
+                           .set_fs(fs.get())
+                           .set_year(jsc["year"])
+                           .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v1.root")
                            .set_is_data(is_data));
 
   dimuon_seq.InsertSequence("DiLeptonMeson", analysis);

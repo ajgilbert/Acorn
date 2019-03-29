@@ -96,10 +96,10 @@ int DiMuonMesonAnalysis::PreAnalysis() {
   f.Close();
   fns_["pileup_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
-  fns_["m_idisotrk_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_idiso_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_idiso_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_trg24_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+    ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
 
   return 0;
   }
@@ -151,10 +151,6 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
     });
 
-
-    ac::keep_if(electrons, [](ac::Electron const* e) {
-      return e->pt() > 30. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
-    });
 
     boost::range::sort(muons, DescendingPt);
     boost::range::sort(tracks, DescendingTrackPt);
@@ -226,8 +222,8 @@ int DiMuonMesonAnalysis::PreAnalysis() {
             break;
           }
         }
-        wt_1_ = RooFunc(fns_["m_idisotrk_ratio"], {pt_1_, eta_1_});
-        wt_2_ = RooFunc(fns_["m_idisotrk_ratio"], {pt_2_, eta_2_});
+        wt_1_ = RooFunc(fns_["m_idiso_ratio"], {pt_1_, eta_1_});
+        wt_2_ = RooFunc(fns_["m_idiso_ratio"], {pt_2_, eta_2_});
         wt_trg1_ = RooFunc(fns_["m_trg_ratio"], {pt_1_, eta_1_});
         wt_trg2_ = RooFunc(fns_["m_trg_ratio"], {pt_2_, eta_2_});
       }

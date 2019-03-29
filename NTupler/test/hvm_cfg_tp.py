@@ -8,7 +8,7 @@ process = cms.Process("MAIN")
 import FWCore.ParameterSet.VarParsing as parser
 opts = parser.VarParsing ('analysis')
 #opts.register('globalTag', '94X_mc2017_realistic_v11', parser.VarParsing.multiplicity.singleton,
-opts.register('globalTag', '94X_dataRun2_v6', parser.VarParsing.multiplicity.singleton,
+opts.register('globalTag', '94X_dataRun2_v10', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "global tag")
 opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
@@ -20,9 +20,13 @@ opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
 #opts.register('input', 'file:/nfs/dust/cms/user/dewita/CMSSW_9_4_0/src/HIG-RunIIFall17MiniAOD-00468-rho.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
-opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017B/DoubleMuon/MINIAOD/23Jun2017-v1/10000/046A6D49-4859-E711-8CAF-0025904B2C68.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+#opts.register('input', 'root://xrootd.unl.edu//store/data/Run2017B/DoubleMuon/MINIAOD/23Jun2017-v1/10000/046A6D49-4859-E711-8CAF-0025904B2C68.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
+#opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016G/Charmonium/MINIAOD/17Jul2018-v1/00000/C0FC530F-558C-E811-96AB-0242AC130002.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
+opts.register('input','root://xrootd.unl.edu//store/mc/RunIISummer16MiniAODv2/JpsiToMuMu_JpsiPt8_TuneCUEP8M1_13TeV-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/CC9DEB7E-12C7-E611-A422-0CC47A13D284.root',parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
+#opts.register('input', 'root://xrootd.unl.edu//store/mc/RunIIFall17MiniAODv2/JpsiToMuMu_JpsiPt8_TuneCP5_13TeV-pythia8/MINIAODSIM/PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/90000/549633A9-6444-E811-B850-28924A33B9FE.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
+#opts.register('input','root://xrootd.unl.edu//store/data/Run2017E/Charmonium/MINIAOD/31Mar2018-v1/90000/2461C37C-0438-E811-B67D-0CC47AF9B1DE.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string,"input file")
 #opts.register('input', 'root://xrootd.unl.edu//store/mc/RunIISummer16MiniAODv2/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FEB2F873-C1D8-E611-8AAC-02163E012A61.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
-opts.register('year', '2017', parser.VarParsing.multiplicity.singleton,
+opts.register('year', '2016', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "Year label")
 
 opts.parseArguments()
@@ -76,7 +80,7 @@ process.options.numberOfStreams = cms.untracked.uint32(opts.cores)
 
 process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
     src = cms.InputTag("slimmedMuons"),
-    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+    cut = cms.string("pt > 5 & abs(eta) < 2.6")
 )
 
 process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
@@ -166,9 +170,9 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleLooseIdMap=cms.InputTag(ele_loose_id), 
     eleMediumIdMap=cms.InputTag(ele_medium_id), 
     eleTightIdMap=cms.InputTag(ele_tight_id), 
-    eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
-    eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
-    eleHEEPIdMap=cms.InputTag(ele_heep_id),
+    #eleMVAwp80IdMap=cms.InputTag(ele_mva_wp80_id), 
+    #eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id), 
+    #eleHEEPIdMap=cms.InputTag(ele_heep_id),
     relativeEAIsoFromUserData=cms.vstring(), # does nothing when args are empty
     takeIdsFromObjects=cms.bool(False)
 )
@@ -218,14 +222,18 @@ process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("genMetTrue"),
     branch=cms.string('genMet'),
     select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(False)
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag("slimmedMETs"),
     branch=cms.string('genMet'),
     select=cms.vstring('keep .* p4=12'),
-    saveGenMetFromPat=cms.bool(True)
+    saveGenMetFromPat=cms.bool(True),
+    saveCorrectionLevels=cms.vint32(),
+    saveUncertaintyShifts=cms.vint32()
 )
 
 process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
@@ -271,7 +279,7 @@ if isMC:
     process.acMCSequence += cms.Sequence(
         process.selectedGenParticles +
         process.acGenParticleProducer +
-        process.acLHEParticleProducer +
+        #process.acLHEParticleProducer +
         process.acGenMetFromPatProducer +
         process.acPileupInfoProducer
     )
@@ -295,10 +303,7 @@ process.acTriggerObjectSequence = cms.Sequence(
     # process.icTriggerPathProducer
 )
 
-if opts.year == '2016':
-    trigger_objects = 'selectedPatTrigger'
-else:
-    trigger_objects = 'slimmedPatTrigger'
+trigger_objects = 'slimmedPatTrigger'
 
 for path in hlt_paths:
     shortname = path[4:-2]  # drop the HLT_ and _v parts
@@ -317,7 +322,7 @@ for path in hlt_paths:
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
-    includeLHEWeights=cms.bool(isMC),
+    includeLHEWeights=cms.bool(False),
     includeGenWeights=cms.bool(isMC),
     metFilterResults=cms.InputTag("TriggerResults", "", "PAT"), # NB will sometimes need "RECO" instead of "PAT"
     saveMetFilters=cms.vstring(
@@ -344,7 +349,9 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         #'keep lheweights:PDF.306000=10',
         'keep lheweights:dim6=10',
         #'keep lheweights:NNPDF31_nnlo_hessian_pdfas=10'
-        )
+        ),
+    includeNumVertices=cms.bool(True),
+    inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
@@ -367,12 +374,12 @@ elif genOnly == 2:
 else:
     process.p = cms.Path(
         #process.egmPhotonIDSequence +
-        process.egmGsfElectronIDSequence+
+        #process.egmGsfElectronIDSequence+
         process.selectedMuons +
-        process.selectedElectrons +
+        #process.selectedElectrons +
         #process.selectedPhotons +
         process.acMuonProducer +
-        process.acElectronProducer +
+        #process.acElectronProducer +
         #process.acPhotonProducer +
         process.acPFType1MetProducer +
         process.acMCSequence +

@@ -1,0 +1,49 @@
+{
+  "samples": {
+    "Charmonium-2017B": {
+      "dataset": "/Charmonium/Run2017B-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "Charmonium-2017C": {
+      "dataset": "/Charmonium/Run2017C-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "Charmonium-2017D": {
+      "dataset": "/Charmonium/Run2017D-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "Charmonium-2017E": {
+      "dataset": "/Charmonium/Run2017E-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "Charmonium-2017F": {
+      "dataset": "/Charmonium/Run2017F-31Mar2018-v1/MINIAOD",
+      "attributes": ["submit"],
+      "events": -1,
+      "config": "data"
+    },
+    "JpsiRunIIFall17MiniAODv2": {
+      "dataset": "/JpsiToMuMu_JpsiPt8_TuneCP5_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes" : ["submit"],
+      "events":-1,
+      "config":"mc"
+    }
+  },
+  "configs": {
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v11", "cores=1"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "cores=1"]
+  },
+  "crabSettings": {
+    "storageSite": "T2_DE_DESY",
+    "voGroup": "dcms",
+    "outputDir" : "/store/user/adewit/HVMDataTP/"
+  }
+}

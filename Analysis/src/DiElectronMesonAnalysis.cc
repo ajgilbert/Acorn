@@ -97,10 +97,10 @@ int DiElectronMesonAnalysis::PreAnalysis() {
   f.Close();
   fns_["pileup_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
-  fns_["m_idisotrk_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_idiso_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_idiso_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_trg24_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+    ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
 
   return 0;
   }
@@ -129,17 +129,23 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       return m->pt() > 5. && fabs(m->eta()) < 2.4 && m->isMediumMuon();
     });
 
-    ac::keep_if(muons, [](ac::Muon const* m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
-    });
-
     ac::keep_if(veto_electrons, [](ac::Electron const* e) {
       return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
     });
 
-    ac::keep_if(electrons, [](ac::Electron const* e) {
-      return e->pt() > 30. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
-    });
+    if (year_==2016){
+      ac::keep_if(electrons, [](ac::Electron const* e) {
+        return e->pt() > 30. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
+      });
+   } else if(year_==2017){
+      ac::keep_if(electrons, [](ac::Electron const* e) {
+        return e->pt() > 38. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
+      });
+   } else if(year_==2018){
+       ac::keep_if(electrons, [](ac::Electron const* e) {
+        return e->pt() > 35. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
+      });
+   }
 
     boost::range::sort(electrons, DescendingPt);
     boost::range::sort(tracks, DescendingTrackPt);
@@ -207,8 +213,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
             break;
           }
         }
-        wt_1_ = RooFunc(fns_["m_idisotrk_ratio"], {pt_1_, eta_1_});
-        wt_2_ = RooFunc(fns_["m_idisotrk_ratio"], {pt_2_, eta_2_});
+        wt_1_ = RooFunc(fns_["m_idiso_ratio"], {pt_1_, eta_1_});
+        wt_2_ = RooFunc(fns_["m_idiso_ratio"], {pt_2_, eta_2_});
         wt_trg1_ = RooFunc(fns_["m_trg_ratio"], {pt_1_, eta_1_});
         wt_trg2_ = RooFunc(fns_["m_trg_ratio"], {pt_2_, eta_2_});
       }
