@@ -1,0 +1,18 @@
+{
+  "samples": {
+    "Charmonium": {
+      "attributes": ["default", "data"],
+      "inputs": ["Charmonium-2017C", "Charmonium-2017D", "Charmonium-2017E", "Charmonium-2017F"],
+      "lumi": 41519.180032466
+    },
+    "JPsi": {
+      "attributes": ["default", "mc"],
+      "inputs": ["JpsiRunIIFall17MiniAODv2-re"],
+      "xsec": 5765.4
+    }
+  },
+  "config": {
+    "data_json": "input/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt",
+    "year": 2017
+  }
+}
