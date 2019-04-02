@@ -27,6 +27,11 @@ bool contains(Range const& r, T const& value) {
   return std::find(r.begin(), r.end(), value) != r.end();
 }
 
+template <typename T, typename R>
+bool contains(std::initializer_list<T> const& r, R const& value) {
+  return std::find(r.begin(), r.end(), value) != r.end();
+}
+
 // Containers - filtering, sorting etc
 template <class Container, class Pred>
 Container& keep_if(Container& target, Pred pred) {
