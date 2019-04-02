@@ -50,7 +50,7 @@
     },
     {
       "name": "WG",
-      "entries": ["WG"],
+      "entries": ["WG_NLO"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
@@ -138,7 +138,7 @@
     },
     {
       "name": "WG",
-      "entries": ["WG"],
+      "entries": ["WG_NLO"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
@@ -189,21 +189,27 @@
   ],
   "fake_measurement": [
     {
-      "name": "VV_R",
-      "entries": ["VV_R"],
-      "legend": "Diboson (prompt #gamma)",
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
       "color": [138,201,38]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_R"],
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
       "legend": "Z#rightarrowll (prompt #gamma)",
       "color": [250,169,22]
     },
     {
-      "name": "TT_R",
-      "entries": ["TTG_R"],
-      "legend": "t#bar{t} (prompt #gamma)",
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TT_R", "TT_E"],
+      "legend": "t#bar{t}",
       "color": [187,10,33]
     },
     {
