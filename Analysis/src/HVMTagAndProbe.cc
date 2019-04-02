@@ -45,6 +45,7 @@ int HVMTagAndProbe::PreAnalysis() {
     tree_->Branch("p_phi", &p_phi_);
     tree_->Branch("p_q", &p_phi_);
     tree_->Branch("p_id", &p_id_);
+    tree_->Branch("p_trk_iso", &p_trk_iso_);
 
     tree_->Branch("m_ll", &m_ll_);
 
@@ -103,11 +104,11 @@ int HVMTagAndProbe::PreAnalysis() {
     //auto electrons = event->GetPtrVec<ac::Electron>("electrons");
 
     auto tags = ac::copy_keep_if(muons, [](ac::Muon *m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m)<0.15;
+      return m->pt() > 5. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m)<0.15;
     });
 
     auto probes = ac::copy_keep_if(muons, [](ac::Muon *m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4;
+      return m->pt() > 5. && fabs(m->eta()) < 2.4;
     });
 
     auto muon_pairs = ac::MakePairs(tags, probes);
@@ -151,11 +152,9 @@ int HVMTagAndProbe::PreAnalysis() {
       p_trg_ = PassesTrigger(mu_p, event);
 
       p_trk_iso_=0;
-       std::cout<<"for this pair"<<std::endl;
-       for (unsigned i=0; i <tracksforiso.size(); i++){
-         if(DeltaRTrack(tracksforiso.at(i),mu_p)<0.3) p_trk_iso_+=tracksforiso.at(i)->pt();
-         std::cout<<DeltaRTrack(tracksforiso.at(i),mu_p)<<std::endl;
-       }
+      for (unsigned i=0; i <tracksforiso.size(); i++){
+        if(DeltaRTrack(tracksforiso.at(i),mu_p)<0.3&&DeltaRTrack(tracksforiso.at(i),mu_p)>0.001) p_trk_iso_+=tracksforiso.at(i)->pt();
+      }
 
       tree_->Fill();
     }
@@ -175,6 +174,7 @@ int HVMTagAndProbe::PreAnalysis() {
     p_eta_ = 0.;
     p_phi_ = 0.;
     p_id_ = false;
+    p_trk_iso_ = 0.;
     p_q_ = 0;
     m_ll_ = 0.;
     t_trg_ = false;

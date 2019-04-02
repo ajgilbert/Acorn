@@ -107,33 +107,44 @@ int main(int argc, char* argv[]) {
   bool is_data = contains(jsc["attributes"], "data");
   
   ac::Sequence dimuon_seq;
-  dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
-  if (is_data) {
-    dimuon_seq.BuildModule(
-        ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
-  }
-  dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
-                           .set_fs(fs.get())
-                           .set_year(jsc["year"])
-                           .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
-                           .set_is_data(is_data));
+  if (sequences.count("DiLeptonMeson") ){
+    dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
+    if (is_data) {
+      dimuon_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
+    }
+    dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
+                             .set_fs(fs.get())
+                             .set_year(jsc["year"])
+                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
+                             .set_is_data(is_data));
 
   //dimuon_seq.InsertSequence("DiMuonMeson", analysis);
 
-  dimuon_seq.BuildModule(ac::DiElectronMesonAnalysis("DiElectronMesonAnalysis")
-                           .set_fs(fs.get())
-                           .set_year(jsc["year"])
-                           .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
-                           .set_is_data(is_data));
+    dimuon_seq.BuildModule(ac::DiElectronMesonAnalysis("DiElectronMesonAnalysis")
+                             .set_fs(fs.get())
+                             .set_year(jsc["year"])
+                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v1.root")
+                             .set_is_data(is_data));
 
-  dimuon_seq.BuildModule(ac::HVMTagAndProbe("HVMTagAndProbe")
-                           .set_fs(fs.get())
-                           .set_year(jsc["year"])
-                           .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v1.root")
-                           .set_is_data(is_data));
+    dimuon_seq.InsertSequence("DiLeptonMeson", analysis);
+  }
 
-  dimuon_seq.InsertSequence("DiLeptonMeson", analysis);
+  ac::Sequence jpsi_tp_seq;
+  if(sequences.count("TPJpsi")) {
+    jpsi_tp_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
+    if (is_data) {
+      jpsi_tp_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
+    }
+    jpsi_tp_seq.BuildModule(ac::HVMTagAndProbe("HVMTagAndProbe")
+                             .set_fs(fs.get())
+                             .set_year(jsc["year"])
+                             .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v1.root")
+                             .set_is_data(is_data));
 
+    jpsi_tp_seq.InsertSequence("JpsiTandP", analysis);
+  }
 
   ac::Sequence hvmgen_seq;
   if (sequences.count("HVMGen") && !is_data) {
