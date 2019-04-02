@@ -63,18 +63,23 @@ main_dir = '/'.join(pfn[0].split('/')[:-2])
 print '>> The main PFN directory is: %s' % main_dir
 
 print '>> Looking for %s files in this directory...' % args.filename
-out = subprocess.check_output(['gfal-ls', main_dir])
+# Workaround for running under CC7 - the cvmfs/CMSSW python version breaks gfal commands
+# We have to hide the contents of LD_LIBRARY_PATH:
+env_for_gfal = os.environ.copy()
+env_for_gfal['LD_LIBRARY_PATH'] = ""
+
+out = subprocess.check_output(['gfal-ls', main_dir], env=env_for_gfal)
 subdirs = [x for x in out.split('\n') if x != '']
 all_matched_files = []
 for subdir in subdirs:
-    out = subprocess.check_output(['gfal-ls', '/'.join([main_dir, subdir])])
+    out = subprocess.check_output(['gfal-ls', '/'.join([main_dir, subdir])], env=env_for_gfal)
     files = [x for x in out.split('\n') if x != '']
     for f in files:
         res = re.match(filename_re, f)
         if re.match(filename_re, f):
             index = res.groups()[0]
             if index not in done_ids:
-                print '>> Found output file for job index %i, not yet in finished state - skipping\n' % index
+                print '>> Found output file for job index %i, not yet in finished state - skipping\n' % int(index)
                 continue
             file_ids.add(index)
             all_matched_files.append('/'.join([xrootd_dir, subdir, f]))
