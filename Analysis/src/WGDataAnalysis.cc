@@ -103,6 +103,7 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("wt_l1", &wt_l1_);
     tree_->Branch("wt_p0", &wt_p0_);
     tree_->Branch("wt_p0_fake", &wt_p0_fake_);
+    tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
     tree_->Branch("is_wg_gen", &is_wg_gen_);
     tree_->Branch("gen_nparts", &gen_nparts_);
     tree_->Branch("gen_pdgid", &gen_pdgid_);
@@ -194,8 +195,12 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+  fns_["e_trg_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_trg_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["e_p_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_m_chn"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio_m_chn")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_e_chn"] = std::shared_ptr<RooFunctor>(
@@ -535,15 +540,13 @@ int WGDataAnalysis::PreAnalysis() {
       }
       if (e0) {
         wt_l0_ = RooFunc(fns_["e_gsfidiso_ratio"], {l0_pt_, l0_eta_});
-        wt_trg_l0_ = 1.0;
+        wt_trg_l0_ = RooFunc(fns_["e_trg_ratio"], {l0_pt_, l0_eta_});
       }
       if (m0 && muons.size() >= 2) {
         wt_l1_ = RooFunc(fns_["m_idisotrk_ratio"], {l1_pt_, l1_eta_});
       }
       auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
       if (p0) {
-        wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
-
         auto gen_st1_dr = ac::copy_keep_if(genparts, [&](ac::GenParticle *p) {
           return p->status() == 1 && DeltaR(p, p0) < 0.3;
         });
@@ -592,6 +595,12 @@ int WGDataAnalysis::PreAnalysis() {
             }
           }
           if (p0_fsr_) break;
+        }
+        if (ac::contains({1, 2, 4, 5}, p0_truth_)) {
+          wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
+        }
+        if (ac::contains({2}, p0_truth_)) {
+          wt_p0_e_fake_ = RooFunc(fns_["e_p_fake_ratio"], {p0_pt_, p0->eta()});
         }
       }
 
@@ -683,6 +692,7 @@ int WGDataAnalysis::PreAnalysis() {
     wt_l1_ = 1.;
     wt_p0_ = 1.;
     wt_p0_fake_ = 1.;
+    wt_p0_e_fake_ = 1.;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
     gen_nparts_ = 0;

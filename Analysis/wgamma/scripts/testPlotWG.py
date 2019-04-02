@@ -24,7 +24,6 @@ tname = 'WGDataAnalysis'
 prefix = args.indir
 
 year = args.year
-doEle = True
 
 remaps = {
     "2016": {
@@ -34,6 +33,7 @@ remaps = {
         'data_obs_e': 'SingleElectron',
         'TT': 'TT-powheg',
         'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -55,12 +55,14 @@ remaps = {
     },
     "2017": {
         'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'ZG': 'ZGToLLG-amcatnloFXFX',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
         'TT_SL': 'TTToSemiLeptonic-powheg',
         'TT_Had': 'TTToHadronic-powheg',
         'TT_DL': 'TTTo2L2Nu-powheg',
         'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -89,6 +91,7 @@ remaps = {
         'TT_Had': 'TTToHadronic-powheg',
         'TT_DL': 'TTTo2L2Nu-powheg',
         'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'WW': 'WW-pythia',
         'WZ': 'WZ-pythia',
@@ -108,22 +111,38 @@ remaps = {
 remap = remaps[year]
 
 ttgammas = ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar']
+zg_samples = ['ZG']
 if year == '2016':
     dibosons = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     tt_samples = ['TT']
-    zg_samples = ['ZG']
 if year == '2017':
-    dibosons = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L']
+    dibosons = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
-    zg_samples = []
 if year == '2018':
-    dibosons = ['WW', 'WZ', 'ZZ']
+    dibosons = ['WW', 'WZ', 'ZZ', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
-    zg_samples = ['ZG']
 
 samples = {}
 for sa in remap:
     samples[sa] = (prefix + remap[sa] + '.root')
+
+
+def AddPhotonSplitting(node, label, sample, var_list, binning, sel, wt):
+    node['%s_R' % label] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_isprompt' % sel), wt=X.get(wt))
+    node['%s_F' % label] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_isfake' % sel), wt=X.get(wt))
+    node['%s_J' % label] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_isjet' % sel), wt=X.get(wt))
+    node['%s_E' % label] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_iselec' % sel), wt=X.get(wt))
+
+
+def AddDYSplitting(node, label, sample, var_list, binning, sel, wt):
+    node[label + '_XZG'] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && !(gen_is_zg && p0_truth==1)' % sel), wt=X.get(wt))
+    node[label + '_IZG'] = Hist('TH1D', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (gen_is_zg && p0_truth==1)' % sel), wt=X.get(wt))
+    AddPhotonSplitting(node, label + '_XZG', sample, var_list, binning, '(%s) && !(gen_is_zg && p0_truth==1)' % sel, wt)
+    AddPhotonSplitting(node, label + '_IZG', sample, var_list, binning, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt)
+
+def HistSum(label_list):
+    return sum([node[X] for X in label_list[1:]], node[label_list[0]])
+
 
 hists = Node()
 do_cats = {}
@@ -131,10 +150,47 @@ do_cats['e'] = []
 do_cats['m'] = []
 
 X = SelectionManager()
+# Selections for photon truth
 X['p0_isprompt'] = 'p0_truth == 1 || p0_truth == 4 || p0_truth == 5'
 X['p0_isjet'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 3'
 X['p0_iselec'] = 'p0_truth == 2'
 X['p0_isfake'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 2 || p0_truth == 3'
+
+# Selecting barrel or endcap photons
+X['p0_eb'] = 'abs(p0_eta) < 1.4442'
+X['p0_ee'] = 'abs(p0_eta) > 1.4442'
+
+# Selections for photon isolation and sigma_ietaieta
+X['iso_t'] = '($p0_eb && p0_chiso < 1.141) || ($p0_ee && p0_chiso < 1.051)'
+X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
+X['sig_t'] = '($p0_eb && p0_sigma < 0.01015) || ($p0_ee && p0_sigma < 0.0272)'
+X['sig_l'] = '($p0_eb && p0_sigma > 0.01015) || ($p0_ee && p0_sigma > 0.0272)'
+
+# Selections for vetoing e->photon fakes
+X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1'
+X['efake_veto_m'] = 'p0_eveto && n_veto_m == 1'
+
+# Selection to veto (or select) mZ region
+X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'
+X['mZ_veto_inv'] = 'abs(91.2 - l0p0_M) <= 15'
+
+# Analysis selection levels:
+X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60'
+X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60'
+X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
+X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
+X['baseline_m_mZ_veto'] ='$baseline_m'
+X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto'
+X['baseline_m_mZ_veto_t'] ='$baseline_m_mZ_veto && l0_tight'
+X['baseline_e_mZ_veto_t'] ='$baseline_e_mZ_veto && l0_tight'
+
+# EFT region
+X['baseline_m_eft'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0'
+X['baseline_e_eft'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto'
+
+# Event weights
+X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
+
 
 if args.task == 'eft_region':
     pt_bins_min = [150, 210, 300, 420, 600, 850]
@@ -142,15 +198,8 @@ if args.task == 'eft_region':
     phi_bins_min = [0.00, 0.63, 1.26, 1.89, 2.52]
     phi_bins_max = [0.63, 1.26, 1.89, 2.52, 3.15]
 
-    X['iso_t'] = '(abs(p0_eta) < 1.4442 && p0_chiso < 1.141) || (abs(p0_eta) > 1.4442 && p0_chiso < 1.051)'
-    X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
-    X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.0272)'
-    X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.0272)'
-    X['baseline_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && !p0_haspix && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0'
-    X['baseline_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && !p0_haspix && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && abs(91.2 - l0p0_M) > 15'
-    X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
-    do_cats['e'].extend(['baseline_e'])
-    do_cats['m'].extend(['baseline_m'])
+    do_cats['e'].extend(['baseline_e_eft'])
+    do_cats['m'].extend(['baseline_m_eft'])
 
     X['p_gen_ooa'] = 'gen_l0_q==+1 && !(gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0)'
     X['n_gen_ooa'] = 'gen_l0_q==-1 && !(gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0)'
@@ -163,10 +212,10 @@ if args.task == 'eft_region':
 
     for i in range(len(pt_bins_min)):
         # Reconstructed categories
-        X['p_e_%i' % i] = '$baseline_e && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_e_%i' % i] = '$baseline_e && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['p_m_%i' % i] = '$baseline_m && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_m_%i' % i] = '$baseline_m && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['p_e_%i' % i] = '$baseline_e_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_e_%i' % i] = '$baseline_e_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['p_m_%i' % i] = '$baseline_m_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_m_%i' % i] = '$baseline_m_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
         do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
 
@@ -196,7 +245,7 @@ if args.task == 'eft_region':
                     hists[chn][sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 for P in ['W', 'DY'] + zg_samples + tt_samples + dibosons + ttgammas:
                     hists[chn][sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isprompt'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !$p0_isprompt'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isfake'), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_obs'] = Hist('TH1D', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1D', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
@@ -221,36 +270,24 @@ if args.task == 'eft_region':
                             hists[chn][sel][var]['WG_n_met1_%i_%i' % (i, j)] = Hist('TH1D', sample='WG', var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_met1_%i_%i' % (i, j)), wt=X.get('$baseline_wt'))
 
 if args.task in ['baseline', 'electron_fakes']:
-    X['iso_t'] = '(abs(p0_eta) < 1.4442 && p0_chiso < 1.141) || (abs(p0_eta) > 1.4442 && p0_chiso < 1.051)'
-    X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
-    X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.0272)'
-    X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.0272)'
-
-    X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60'
-    X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60'
-    X['baseline_m'] ='$baseline_m_nopix && !p0_haspix'
-    X['baseline_e'] ='$baseline_e_nopix && !p0_haspix && p0_eveto && n_veto_e == 1'
-    X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
-    X['baseline_M_veto_m'] ='$baseline_m && abs(91.2 - l0p0_M) > 15'
-    X['baseline_M_veto_e'] ='$baseline_e && abs(91.2 - l0p0_M) > 15'
-
     if args.task == 'electron_fakes':
         pt_bins_min = [30, 35, 40, 60, 100]
         pt_bins_max = [35, 40, 60, 100, 200]
         eta_bins_min = [0, 1.4442]
         eta_bins_max = [1.4442, 2.5]
+        X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
 
         for e_min, e_max in zip(eta_bins_min, eta_bins_max):
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
                 label = '%g_%g_%g_%g' % (e_min, e_max, p_min, p_max)
                 label = label.replace('.', 'p')
-                X['fail_%s' % label] ='$baseline_e_nopix && abs(91.2 - l0p0_M) <= 15 && !(!p0_haspix && p0_eveto && n_veto_e == 1) && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
-                X['pass_%s' % label] ='$baseline_e && abs(91.2 - l0p0_M) <= 15 && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
-    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_M_veto_e'])
-    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_M_veto_m'])
+    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_mZ_veto_t'])
+    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_mZ_veto_t'])
 
     drawvars = [
         ('n_vtx', (30, 0., 60.)),
@@ -298,17 +335,9 @@ if args.task in ['baseline', 'electron_fakes']:
                 for sample in samples:
                     hists[chn][sel][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 for P in ['W', 'DY'] + zg_samples + tt_samples + dibosons + ttgammas:
-                    hists[chn][sel][var]['%s_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isprompt'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isfake'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_J' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isjet'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_E' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_iselec'), wt=X.get('$baseline_wt'))
+                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                 for P in ['DY'] + zg_samples:
-                    hists[chn][sel][var]['%s_XZG_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isprompt && !(gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_XZG_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isfake && !(gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_XZG_J' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isjet && !(gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_XZG_E' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_iselec && !(gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['%s_IZG_R' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isprompt && (gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
-                    # hists[chn][sel][var]['%s_IZG_F' % P] = Hist('TH1D', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !$p0_isprompt && (gen_is_zg && p0_truth==1)'), wt=X.get('$baseline_wt'))
+                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                 hists[chn][sel][var]['data_obs'] = Hist('TH1D', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1D', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}),
@@ -319,21 +348,13 @@ if args.task in ['baseline', 'electron_fakes']:
 
 
 if args.task == 'photon_fakes':
-    # X['baseline'] = 'm0_trg && n_m==1 && m0_iso<0.15 && m0met_mt>60 && n_p==1 && m0p0_dr>0.7 && p0_medium_noch && !p0_haspix'
-    X['baseline_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60 && !p0_haspix'
-    X['baseline_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && l0met_mt>60 && !p0_haspix && abs(91.2 - l0p0_M) > 15'
-    X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
-    X['barrel_m'] = '$baseline_m && abs(p0_eta) < 1.4442'
-    X['endcap_m'] = '$baseline_m && abs(p0_eta) > 1.4442'
-    X['barrel_e'] = '$baseline_e && abs(p0_eta) < 1.4442'
-    X['endcap_e'] = '$baseline_e && abs(p0_eta) > 1.4442'
-    X['iso_t'] = '(abs(p0_eta) < 1.4442 && p0_chiso < 1.141) || (abs(p0_eta) > 1.4442 && p0_chiso < 1.051)'
-    X['iso_l'] = 'p0_chiso > 2 && p0_chiso < 10'
-    X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.0272)'
-    X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.0272)'
+    X['barrel_m'] = '$baseline_m_mZ_veto && $p0_eb'
+    X['endcap_m'] = '$baseline_m_mZ_veto && $p0_ee'
+    X['barrel_e'] = '$baseline_e_mZ_veto && $p0_eb'
+    X['endcap_e'] = '$baseline_e_mZ_veto && $p0_ee'
 
-    do_cats['e'].extend(['baseline_e', 'barrel_e', 'endcap_e'])
-    do_cats['m'].extend(['baseline_m', 'barrel_m', 'endcap_m'])
+    do_cats['e'].extend(['baseline_e_mZ_veto', 'barrel_e', 'endcap_e'])
+    do_cats['m'].extend(['baseline_m_mZ_veto', 'barrel_m', 'endcap_m'])
 
     for chn in ['e', 'm']:
         for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
@@ -362,8 +383,7 @@ if args.task == 'photon_fakes':
         ('p0_hovere', (20, 0., 0.5)),
         ('p0_sigma', (30, 0., 0.06)),
         ('p0_haspix', (2, -0.5, 1.5)),
-        ('n_veto_m', (3, -0.5, 2.5)),
-        ('n_veto_e', (3, -0.5, 2.5))
+        ('p0_truth', (7, -0.5, 6.5)),
     ]
 
     for chn in ['e', 'm']:
@@ -371,9 +391,11 @@ if args.task == 'photon_fakes':
             for var, binning in drawvars:
                 for sample in samples:
                     hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                    for P in ['W', 'DY'] + zg_samples + tt_samples + dibosons + ttgammas:
-                        hists[chn][sel][var]['%s_R' % P] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p0_isprompt'), wt=X.get('$baseline_wt'))
-                        hists[chn][sel][var]['%s_F' % P] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && !$p0_isprompt'), wt=X.get('$baseline_wt'))
+                for P in ['W', 'DY'] + zg_samples + tt_samples + dibosons + ttgammas:
+                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
+                for P in ['DY'] + zg_samples:
+                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
+
                     hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                     if 'iso_t_sig_t' in sel:
                         hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
@@ -419,21 +441,22 @@ for path, node in hists.ListNodes(withObjects=True):
     print path
     if path.startswith('2D'):
         continue
-    node['VV'] = sum([node[X] for X in dibosons[1:]], node[dibosons[0]])
-    node['VV_F'] = sum([node['%s_F' % X] for X in dibosons[1:]], node['%s_F' % dibosons[0]])
-    node['VV_R'] = sum([node['%s_R' % X] for X in dibosons[1:]], node['%s_R' % dibosons[0]])
 
-    node['TTG'] = sum([node[X] for X in ttgammas[1:]], node[ttgammas[0]])
-    node['TTG_F'] = sum([node['%s_F' % X] for X in ttgammas[1:]], node['%s_F' % ttgammas[0]])
-    node['TTG_R'] = sum([node['%s_R' % X] for X in ttgammas[1:]], node['%s_R' % ttgammas[0]])
-
+    node['VV'] = HistSum(dibosons)
+    node['TTG'] = HistSum(ttgammas)
     if year in ['2017', '2018']:
-        node['TT'] = sum([node[X] for X in tt_samples[1:]], node[tt_samples[0]])
-        node['TT_F'] = sum([node['%s_F' % X] for X in tt_samples[1:]], node['%s_F' % tt_samples[0]])
-        node['TT_R'] = sum([node['%s_R' % X] for X in tt_samples[1:]], node['%s_R' % tt_samples[0]])
+        node['TT'] = HistSum(tt_samples)
 
-    node['Total_R'] = node['WG'] + node['TTG_R'] + node['DY_R'] + node['VV_R']
-    node['Total_F'] = node['W_F'] + node['TT_F'] + node['DY_F'] + node['VV_F']
+    for P in ['F', 'E', 'J', 'R']:
+        node['VV_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in dibosons])
+        node['TTG_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in ttgammas])
+        if year in ['2017', '2018']:
+            node['TT_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in tt_samples])
+
+    node['Total_R'] = HistSum(['WG_NLO', 'TT_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
+    node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
+    node['Total_J'] = HistSum(['W_J', 'TT_J', 'DY_J', 'VV_J'])
+    node['Total_F'] = HistSum(['W_F', 'TT_F', 'DY_F', 'VV_F'])
 
 NodeToTDir(fout, hists)
 

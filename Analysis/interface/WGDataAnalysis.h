@@ -135,6 +135,7 @@ class WGDataAnalysis : public ModuleBase {
   float wt_l1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
+  float wt_p0_e_fake_; // Electron -> photon fake factor
 
   // truth variables for Wgamma events
   bool is_wg_gen_;

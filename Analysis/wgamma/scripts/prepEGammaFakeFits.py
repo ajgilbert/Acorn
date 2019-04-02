@@ -61,6 +61,13 @@ for sample in ['data_obs', 'DY_E']:
                 h_fail.Add(h_fail_bkg, -1)
                 h_pass.Add(h_pass_bkg, -1)
 
+                for ibin in xrange(1, h_fail.GetNbinsX() + 1):
+                    if h_fail.GetBinContent(ibin) < 0.:
+                        h_fail.SetBinContent(ibin, 0.)
+                for ibin in xrange(1, h_pass.GetNbinsX() + 1):
+                    if h_pass.GetBinContent(ibin) < 0.:
+                        h_pass.SetBinContent(ibin, 0.)
+
 
             dat = wsp.imp(ROOT.RooDataHist(binname, '', ROOT.RooArgList(var),
                           ROOT.RooFit.Index(wsp.factory('cat[fail,pass]')),

@@ -20,10 +20,10 @@ class SampleStitching : public ModuleBase {
   struct SampleInfo {
     std::string name;
     bool target;
-    bool has_min;
-    bool has_max;
-    double min;
-    double max;
+    std::vector<bool> has_min;
+    std::vector<bool> has_max;
+    std::vector<double> min;
+    std::vector<double> max;
     unsigned events;
     double xsec;
   };
@@ -32,9 +32,8 @@ class SampleStitching : public ModuleBase {
   CLASS_MEMBER(SampleStitching, fwlite::TFileService*, fs)
 
   TTree* tree_;
-  float var1_;
-
-  std::string binned_;
+  std::vector<double> vars_;
+  std::vector<std::string> binned_;
   std::vector<SampleInfo> samples_;
 
  public:

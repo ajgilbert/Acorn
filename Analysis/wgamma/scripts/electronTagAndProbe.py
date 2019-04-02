@@ -1,7 +1,5 @@
 import ROOT
-import glob
-import sys
-# import json
+import argparse
 from array import array
 from Acorn.Analysis.analysis import *
 
@@ -9,6 +7,9 @@ ROOT.RooWorkspace.imp = getattr(ROOT.RooWorkspace, 'import')
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.TH1.AddDirectory(0)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-y', '--year', default='2016')
+args = parser.parse_args()
 
 bin_cfgs = [
     {
@@ -205,19 +206,19 @@ remaps = {
         'Data': 'SingleElectron',
     },
     "2017": {
-        'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'DYJetsToLL': 'DYJetsToLL_M-50-madgraphMLM',
         # 'data_obs_m': 'SingleMuon',
         'Data': 'SingleElectron',
     },
     "2018": {
-        'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'DYJetsToLL': 'DYJetsToLL_M-50-madgraphMLM',
         # 'data_obs_m': 'SingleMuon',
         'Data': 'EGamma',
     }
 }
 
-remap = remaps['2016']
-prefix = '/home/files/190318-full/wgamma_2016_v3/TP_'
+remap = remaps[args.year]
+prefix = '/home/files/190318-full/wgamma_%s_v3/TP_' % args.year
 
 samples = {}
 for sa in remap:
@@ -236,7 +237,7 @@ hists = Node()
 # sys.exit(0)
 
 for sample in remap:
-    outfile = ROOT.TFile('ZeeTP_%s.root' % sample, 'RECREATE')
+    outfile = ROOT.TFile('ZeeTP_%s_%s.root' % (args.year, sample), 'RECREATE')
 
     hists = Node()
     for cfg in bin_cfgs:
