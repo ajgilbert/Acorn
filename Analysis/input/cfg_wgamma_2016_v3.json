@@ -284,7 +284,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.329e+00 +- 2.584e-03 pb"
     },
     "WJetsToLNu-stitched": {
-      "attributes": ["wjets_binned", "mc", "doit"],
+      "attributes": ["wjets_binned", "mc"],
       "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext2",
                  "W1JetsToLNu-madgraphMLM", "W2JetsToLNu-madgraphMLM", "W3JetsToLNu-madgraphMLM",
                  "W4JetsToLNu-madgraphMLM", "W4JetsToLNu-madgraphMLM-ext2", "WJetsToLNu_HT-70To100",
@@ -442,6 +442,12 @@
       "inputs": ["ZZTo4L-powheg"],
       "xsec": 1.256,
       "GenXSecAnalyzer": "After filter: final cross section = 1.256e+00 +- 2.271e-03 pb"
+    },
+    "DiPhotonJetsBox_MGG-80toInf": {
+      "attributes": ["default", "mc"],
+      "inputs": ["DiPhotonJetsBox_MGG-80toInf"],
+      "xsec": 88.36,
+      "GenXSecAnalyzer": ""
     },
     "Theorists": {
       "attributes": ["wg_gen"],

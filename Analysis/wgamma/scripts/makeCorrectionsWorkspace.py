@@ -223,24 +223,32 @@ loc = 'wgamma/inputs/electrons/%s' % era
 
 if era == '2016':
     histsToWrap = [
-        (loc + '/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root:EGamma_SF2D', 'e_gsf_ratio'),
-        (loc + '/2016LegacyReReco_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+        (loc + '/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root:EGamma_SF2D', 'e_gsf_ratio', ['e_eta', 'e_pt']),
+        (loc + '/2016LegacyReReco_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio', ['e_eta', 'e_pt']),
+        (loc + '/ZeeTP_2016_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/ZeeTP_2016_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])'])
     ]
 if era == '2017':
     histsToWrap = [
-        (loc + '/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root:EGamma_SF2D', 'e_gsf_ratio'),
-        (loc + '/2017_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+        (loc + '/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root:EGamma_SF2D', 'e_gsf_ratio', ['e_eta', 'e_pt']),
+        (loc + '/2017_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio', ['e_eta', 'e_pt']),
+        (loc + '/ZeeTP_2017_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/ZeeTP_2017_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])'])
     ]
+
 if era == '2018':
     histsToWrap = [
-        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'e_gsf_ratio'),
-        (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio')
+        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'e_gsf_ratio', ['e_eta', 'e_pt']),
+        (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio', ['e_eta', 'e_pt']),
+        (loc + '/ZeeTP_2018_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/ZeeTP_2018_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])'])
     ]
 
 for task in histsToWrap:
-    SafeWrapHist(w, ['e_eta', 'e_pt'], GetFromTFile(task[0]), name=task[1])
+    SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
 w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
+w.factory('expr::e_trg_ratio("@0/@1", e_trg_data, e_trg_mc)')
 
 ###############################################################################
 ## Photons
@@ -249,20 +257,31 @@ loc = 'wgamma/inputs/photons/%s' % era
 
 if era == '2016':
     histsToWrap = [
-        (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio')
+        (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/EFakesTP_2016_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/EFakesTP_2016_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
     ]
+
 if era == '2017':
     histsToWrap = [
-        (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio')
+        (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/EFakesTP_2017_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/EFakesTP_2017_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
+
     ]
+
 if era == '2018':
     histsToWrap = [
-        (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio')
+        (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/EFakesTP_2018_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/EFakesTP_2018_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
+
     ]
 
 for task in histsToWrap:
-    SafeWrapHist(w, ['p_eta', 'p_pt'], GetFromTFile(task[0]), name=task[1])
+    SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
+w.factory('expr::e_p_fake_ratio("@0/@1", e_p_fake_data, e_p_fake_mc)')
 
 ###############################################################################
 ## Photon fakes
@@ -281,6 +300,6 @@ for task in histsToWrap:
 
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v4.root' % era)
+w.writeToFile('wgamma_corrections_%s_v5.root' % era)
 w.Delete()
 
