@@ -502,16 +502,16 @@ int WGDataAnalysis::PreAnalysis() {
       l0p0_M_ = reduceMantissaToNbits((l0->vector() + p0->vector()).M(), 12);
 
       WGSystem reco_sys = ProduceWGSystem(*l0, *met, *p0, true, rng, false);
-      reco_phi_ = reduceMantissaToNbits(reco_sys.Phi(l0->charge()), 12);
-      reco_sphi_ = reduceMantissaToNbits(reco_sys.SymPhi(l0->charge()), 12);
+      reco_phi_ = reduceMantissaToNbits(reco_sys.Phi(l0->charge()), 7);
+      reco_sphi_ = reduceMantissaToNbits(reco_sys.SymPhi(l0->charge()), 7);
 
       WGSystem reco_xy_sys = ProduceWGSystem(*l0, *xy_met, *p0, true, rng, false);
-      reco_xy_phi_ = reduceMantissaToNbits(reco_xy_sys.Phi(l0->charge()), 12);
-      reco_xy_sphi_ = reduceMantissaToNbits(reco_xy_sys.SymPhi(l0->charge()), 12);
+      reco_xy_phi_ = reduceMantissaToNbits(reco_xy_sys.Phi(l0->charge()), 7);
+      reco_xy_sphi_ = reduceMantissaToNbits(reco_xy_sys.SymPhi(l0->charge()), 7);
 
       WGSystem reco_puppi_sys = ProduceWGSystem(*l0, *puppi_met, *p0, true, rng, false);
-      reco_puppi_phi_ = reduceMantissaToNbits(reco_puppi_sys.Phi(l0->charge()), 12);
-      reco_puppi_sphi_ = reduceMantissaToNbits(reco_puppi_sys.SymPhi(l0->charge()), 12);
+      reco_puppi_phi_ = reduceMantissaToNbits(reco_puppi_sys.Phi(l0->charge()), 7);
+      reco_puppi_sphi_ = reduceMantissaToNbits(reco_puppi_sys.SymPhi(l0->charge()), 7);
 
       if (m0) {
         wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_m_chn"], {p0_pt_, p0->scEta()});

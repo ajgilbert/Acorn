@@ -26,6 +26,7 @@ default_cfg = {
     'logx': False,              # Draw x-axis in log-scale
     'logy': False,              # Draw y-axis in log-scale
     'ratio': True,             # Draw the ratio plot?
+    'fraction': False,             # Draw the ratio plot?
     'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
     'x_range': [],                  # Restrict the x-axis range shown
     'rebin': 0,                     # Rebin by this factor
@@ -88,6 +89,7 @@ config_by_setting = {
         '*/p0_hovere': ('Photon H/E', ''),
         '*/p0_sigma': ('Photon #sigma_{I#etaI#eta}^{full 5x5}', ''),
         '*/p0_haspix': ('Photon hasPixelSeed', ''),
+        '*/p0_eveto': ('Photon passElectronVeto', ''),
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
         '*/abs(gen_phi)': ('Gen. #phi', ''),
         '*/abs(true_phi)': ('True #phi', ''),
@@ -111,10 +113,10 @@ variants_by_path = [
     ("*/p0_pt", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),
-    # ("*/p0_pt", {
-    #         "prefix": "fr_barrel_",
-    #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
-    #         "logy": True})
+    ("*/p0_pt", {
+            "prefix": "fr_barrel_",
+            "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
+            "logy": True})
 ]
 
 
@@ -132,7 +134,7 @@ def MakePlot(name, outdir, hists, cfg, layouts):
 
     # Canvas and pads
     canv = ROOT.TCanvas(name, name)
-    if cfg['ratio']:
+    if cfg['ratio'] or cfg['fraction']:
         pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
     else:
         pads = plot.OnePad()
@@ -170,7 +172,7 @@ def MakePlot(name, outdir, hists, cfg, layouts):
         pads[0].SetLogy()
         h_axes[0].SetMinimum(0.001)
 
-    if cfg['ratio']:
+    if cfg['ratio'] or cfg['fraction']:
         plot.StandardAxes(h_axes[1].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
     else:
         plot.StandardAxes(h_axes[0].GetXaxis(), h_axes[0].GetYaxis(), x_title, units)
@@ -225,20 +227,27 @@ def MakePlot(name, outdir, hists, cfg, layouts):
             plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
-    if cfg['ratio']:
+    if cfg['ratio'] or cfg['fraction']:
         pads[1].cd()
         pads[1].SetGrid(0, 1)
         h_axes[1].Draw()
 
-        r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
-        r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
-        r_tot.Draw('E2SAME')
-        if not cfg['hide_data']:
-            r_data.Draw('SAME')
+        if cfg['ratio']:
+            r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
+            r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
+            r_tot.Draw('E2SAME')
+            if not cfg['hide_data']:
+                r_data.Draw('SAME')
 
-        plot.SetupTwoPadSplitAsRatio(
-            pads, plot.GetAxisHist(
-                pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
+            plot.SetupTwoPadSplitAsRatio(
+                pads, plot.GetAxisHist(
+                    pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
+        if cfg['fraction']:
+            r_frac = plot.MakeRatioHist(h_tot, h_data, True, True)
+            r_frac.Draw('SAME')
+            plot.SetupTwoPadSplitAsRatio(
+                pads, plot.GetAxisHist(
+                    pads[0]), plot.GetAxisHist(pads[1]), 'Exp/Obs', True, 0.0, 0.5)
 
     # Go back and tidy up the axes and frame
     pads[0].cd()
@@ -288,6 +297,8 @@ file = ROOT.TFile(filename)
 
 node = TDirToNode(file)
 
+made_dirs = set()
+
 for path, subnode in node.ListNodes(withObjects=True):
     print path
     if not fnmatch.fnmatch(path, dirfilter):
@@ -296,7 +307,9 @@ for path, subnode in node.ListNodes(withObjects=True):
     split_path = path.split('/')[:-1]
     name = path.split('/')[-1]
     target_dir = os.path.join(args.output, *split_path)
-    os.system('mkdir -p %s' % target_dir)
+    if target_dir not in made_dirs:
+        os.system('mkdir -p %s' % target_dir)
+        made_dirs.add(target_dir)
     hists = {}
     for opath, objname, obj in subnode.ListObjects(depth=0):
         hists[objname] = obj

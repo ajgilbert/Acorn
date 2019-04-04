@@ -2,43 +2,43 @@
   "pure_mc": [
     {
       "name": "VV_R",
-      "entries": ["VV_R"],
+      "entries": ["VV_R", "VV_E"],
       "legend": "Diboson (prompt #gamma)",
       "color": [138,201,38]
     },
     {
       "name": "VV_F",
-      "entries": ["VV_F"],
+      "entries": ["VV_J"],
       "legend": "Diboson (fake #gamma)",
       "color": [210,248,152]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R"],
-      "legend": "Z#rightarrowll (LO)",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
       "color": [250,169,22]
     },
     {
-      "name": "ZG_R",
-      "entries": ["ZG_IZG_R"],
-      "legend": "Z#rightarrowll (NLO)",
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
       "name": "DY_F",
-      "entries": ["DY_F"],
+      "entries": ["DY_J"],
       "legend": "Z#rightarrowll (fake #gamma)",
       "color": [255,202,58]
     },
     {
       "name": "TT_R",
-      "entries": ["TTG_R"],
+      "entries": ["TT_R", "TT_E"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
     },
     {
-      "name": "TT_F",
-      "entries": ["TT_F"],
+      "name": "TT_J",
+      "entries": ["TT_J"],
       "legend": "t#bar{t} (fake #gamma)",
       "color": [255,89,94]
     },
@@ -57,26 +57,26 @@
   ],
   "data_fakes_m": [
     {
-      "name": "VV_R",
-      "entries": ["VV_R"],
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R"],
-      "legend": "Z#rightarrowll (LO)",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
       "color": [250,169,22]
     },
     {
-      "name": "ZG_R",
-      "entries": ["ZG_IZG_R"],
-      "legend": "Z#rightarrowll (NLO)",
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
-      "name": "TT_R",
-      "entries": ["TTG_R"],
+      "name": "TT",
+      "entries": ["TT_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -88,29 +88,23 @@
     },
     {
       "name": "WG",
-      "entries": ["WG"],
+      "entries": ["WG_NLO"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
   ],
   "data_fakes_e": [
     {
-      "name": "VV_R",
-      "entries": ["VV_R"],
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R"],
-      "legend": "Z#rightarrowll (LO)",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
       "color": [250,169,22]
-    },
-    {
-      "name": "ZG_R",
-      "entries": ["ZG_IZG_R"],
-      "legend": "Z#rightarrowll (NLO)",
-      "color": 2
     },
     {
       "name": "DY_E",
@@ -119,14 +113,8 @@
       "color": [255,202,58]
     },
     {
-      "name": "TT_E",
-      "entries": ["TT_E"],
-      "legend": "t#bar{t} (e)",
-      "color": [187,10,33]
-    },
-    {
-      "name": "TT_R",
-      "entries": ["TT_R"],
+      "name": "TT",
+      "entries": ["TT_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -214,7 +202,45 @@
     },
     {
       "name": "WG",
-      "entries": ["WG"],
+      "entries": ["WG_NLO"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "fake_measurement_val": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TT_R", "TT_E"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_sub"],
+      "legend": "Non-prompt/fake #gamma",
+      "color": [78,89,140]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_NLO"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }

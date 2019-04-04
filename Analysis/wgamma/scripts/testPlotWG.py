@@ -168,7 +168,7 @@ X['sig_l'] = '($p0_eb && p0_sigma > 0.01015) || ($p0_ee && p0_sigma > 0.0272)'
 
 # Selections for vetoing e->photon fakes
 X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1'
-X['efake_veto_m'] = 'p0_eveto && n_veto_m == 1'
+X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1'
 
 # Selection to veto (or select) mZ region
 X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'

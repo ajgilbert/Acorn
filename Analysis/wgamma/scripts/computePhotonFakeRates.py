@@ -46,7 +46,7 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
 
         # newbins = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
         node.ForEach(lambda x: RebinHist(x, newbins))
-        node['data_sub'] = node['data_obs'] - node['Total_R']
+        node['data_sub'] = node['data_obs'] - (node['Total_R'] + node['Total_E'])
     h_fr = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['data_sub'].Clone()
     h_fr.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['data_sub'])
 
