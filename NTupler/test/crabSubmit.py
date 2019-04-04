@@ -41,6 +41,7 @@ config.JobType.psetName = args.psetName
 config.JobType.pluginName = 'Analysis'
 config.JobType.outputFiles = ['EventTree.root']
 config.JobType.pyCfgParams = []
+config.JobType.allowUndistributedCMSSW = True
 if 'maxMemoryMB' in crab_settings:
     config.JobType.maxMemoryMB = int(crab_settings['maxMemoryMB'])
 if 'numCores' in crab_settings:
