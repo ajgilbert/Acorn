@@ -210,6 +210,12 @@ def Hist(classname, binning, sample, var, wt='1.0', sel='1'):
     res.var = var
     res.wt = wt
     res.sel = sel
+    # res.SetTitle(json.dumps({
+    #     'sample': sample,
+    #     'var': var,
+    #     'wt': wt,
+    #     'sel': sel
+    #     }))
     return res
 
 
@@ -243,32 +249,53 @@ def GenTreeCode(tree, objlist, multithread=4):
     # Figure out the list of variable names
     varnames = set()
     varregex = re.compile('[_a-zA-Z][_a-zA-Z0-9]*')
-    for i, obj in enumerate(objlist):
-        obj._draw_idx = i
-        varnames.update(varregex.findall(obj.sel))
-        for var in obj.var:
-            varnames.update(varregex.findall(var))
-        varnames.update(varregex.findall(obj.wt))
-        objs_by_sel[obj.sel].append(obj)
-        # Give each object an index for the weight expression
-        if obj.wt not in indexed_wts:
-            indexed_wts[obj.wt] = len(indexed_wts)
-        obj._wt_idx = indexed_wts[obj.wt]
+
+    classnames = list(objlist.keys())
+    nobjs_total = 0
+    for clname in classnames:
+        nobjs_total += len(objlist[clname])
+        for i, obj in enumerate(objlist[clname]):
+            obj._draw_idx = i
+            varnames.update(varregex.findall(obj.sel))
+            for var in obj.var:
+                varnames.update(varregex.findall(var))
+            varnames.update(varregex.findall(obj.wt))
+            objs_by_sel[obj.sel].append(obj)
+            # Give each object an index for the weight expression
+            if obj.wt not in indexed_wts:
+                indexed_wts[obj.wt] = len(indexed_wts)
+            obj._wt_idx = indexed_wts[obj.wt]
 
     code = CodeLines()
     if multithread:
         code.Add('R__LOAD_LIBRARY(libTreePlayer)')
     code.Add('void %s(TTree *tree, TObjArray *hists) {' % fname)
     code.idlevel += 1
-    for obj in objlist:
-        code.Add('%s* hist%i = static_cast<%s*>(hists->UncheckedAt(%i));' % (obj.classname, obj._draw_idx, obj.classname, obj._draw_idx))
+    obj_offset = 0  # offset in the full list
+    for clname in classnames:
+        nobjs = len(objlist[clname])
+        code.Add('std::vector<%s *> v_%s_hists(%i);' % (clname, clname, nobjs))
+        code.Add('for (unsigned i = 0; i < %i; ++i) {' % nobjs)
+        code.idlevel += 1
+        code.Add('v_%s_hists[i] = static_cast<%s*>(hists->UncheckedAt(i + %i));' % (clname, clname, obj_offset))
+        code.idlevel -= 1
+        code.Add('}')
+        obj_offset += nobjs
     if multithread:
         code.Add('ROOT::EnableImplicitMT(%i);' % multithread)
-        for i, obj in enumerate(objlist):
-            code.Add('ROOT::TThreadedObject<%s> t_hist%i(*hist%i);' % (obj.classname, i, i))
+        for clname in classnames:
+            nobjs = len(objlist[clname])
+            code.Add('std::vector<std::unique_ptr<ROOT::TThreadedObject<%s>>> v_%s_t_hists(%i);' % (clname, clname, nobjs))
+            code.Add('for (unsigned i = 0; i < %i; ++i) {' % nobjs)
+            code.idlevel += 1
+            code.Add('v_%s_t_hists[i] = std::make_unique<ROOT::TThreadedObject<%s>>(*(v_%s_hists[i]));' % (clname, clname, clname))
+            code.idlevel -= 1
+            code.Add('}')
         code.Add('ROOT::TTreeProcessorMT tp(*tree);')
+        code.Add('unsigned ncalled = 0;')
         code.Add('auto myFunction = [&](TTreeReader &reader) {')
         code.idlevel += 1
+        code.Add('ncalled += 1;')
     else:
         code.Add('TTreeReader reader(tree);')
 
@@ -282,8 +309,15 @@ def GenTreeCode(tree, objlist, multithread=4):
         if bname in varnames:
             code.Add('TTreeReaderValue<%s> %s_(reader, "%s");' % (btype, bname, bname))
     if multithread:
-        for i, obj in enumerate(objlist):
-            code.Add('std::shared_ptr<%s> l_hist%i = t_hist%i.Get();' % (obj.classname, i, i))
+        for clname in classnames:
+            nobjs = len(objlist[clname])
+            code.Add('std::vector<std::shared_ptr<%s>> v_%s_l_hists(%i);' % (clname, clname, nobjs))
+            code.Add('for (unsigned i = 0; i < %i; ++i) {' % nobjs)
+            code.idlevel += 1
+            code.Add('v_%s_l_hists[i] = v_%s_t_hists[i]->Get();' % (clname, clname))
+            code.idlevel -= 1
+            code.Add('}')
+
     code.Add('while (reader.Next()) {')
     code.idlevel += 1
     for bname, btype in binfos:
@@ -296,9 +330,9 @@ def GenTreeCode(tree, objlist, multithread=4):
         code.idlevel += 1
         for obj in objs:
             if multithread:
-                code.Add('l_hist%i->Fill(%s, weightexpr_%i_);' % (obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
+                code.Add('v_%s_l_hists[%i]->Fill(%s, weightexpr_%i_);' % (obj.classname, obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
             else:
-                code.Add('hist%i->Fill(%s, weightexpr_%i_);' % (obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
+                code.Add('v_%s_hists[%i]->Fill(%s, weightexpr_%i_);' % (obj.classname, obj._draw_idx, ', '.join(obj.var), obj._wt_idx))
         code.idlevel -= 1
         code.Add('}')
     code.idlevel -= 1
@@ -306,18 +340,50 @@ def GenTreeCode(tree, objlist, multithread=4):
     if multithread:
         code.idlevel -= 1
         code.Add('};')
+        # Sometimes it seems small Trees don't have proper clusters assigned (we end up splitting with 1 per event)
+        # This seems to be the only way to detect this...
+        code.Add('auto it = tree->GetClusterIterator(0); it.Next();')
+        code.Add('if (it.GetNextEntry() == 1) {')
+        code.idlevel += 1
+        code.Add('std::cout << ">> Tree does not have proper clusters, running single-threaded" << std::endl;')
+        code.Add('TTreeReader reader(tree);')
+        code.Add('myFunction(reader);')
+        code.idlevel -= 1
+        code.Add('} else {')
+        code.idlevel += 1
         code.Add('tp.Process(myFunction);')
-        for obj in objlist:
-            code.Add('t_hist%i.Merge()->Copy(*hist%i);' % (obj._draw_idx, obj._draw_idx))
+        code.idlevel -= 1
+        code.Add('}')
+        for clname in classnames:
+            nobjs = len(objlist[clname])
+            code.Add('for (unsigned i = 0; i < %i; ++i) {' % nobjs)
+            code.idlevel += 1
+            code.Add('v_%s_t_hists[i]->Merge()->Copy(*(v_%s_hists[i]));' % (clname, clname))
+            code.idlevel -= 1
+            code.Add('}')
         code.Add('ROOT::DisableImplicitMT();')
+        code.Add('std::cout << ">> Draw function was called " << ncalled << " times" << std::endl;')
     code.idlevel -= 1
     code.Add('}')
     fullcode = '\n'.join(code.res)
+    # If we want to dump the code for testing...
+    # includes = [
+    #     '#include "TTreeReader.h"',
+    #     '#include "TTree.h"',
+    #     '#include "TObjArray.h"',
+    #     '#include "TH1F.h"',
+    #     '#include "TH2F.h"',
+    #     '#include "ROOT/TTreeProcessorMT.hxx"',
+    #     '#include <memory>',
+    #     ''
+    # ]
+    # with open('%s.cc' % fname, 'w') as out_file:
+    #     out_file.write('\n'.join(includes + code.res))
     # print fullcode
     start = time.time()
     ROOT.gInterpreter.Declare(fullcode)
     end = time.time()
-    print '>> JIT compiled function %s with %i objects in %.2g seconds (%i cores)' % (fname, len(objlist), (end - start), multithread)
+    print '>> JIT compiled function %s with %i objects in %.2g seconds (%i cores)' % (fname, nobjs_total, (end - start), multithread)
     return fname
 
 
@@ -332,14 +398,19 @@ def DrawObjsHash(drawobjs):
 
 
 def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
-    drawtree = defaultdict(list)
+    drawtree = defaultdict(lambda: defaultdict(list))
     codegen_time = 0
     draw_time = 0
     for path, name, obj in node.ListObjects():
-        drawtree[obj.sample].append(obj)
+        drawtree[obj.sample][obj.classname].append(obj)
     # pprint(drawtree)
+    # sys.exit(0)
     func_dict = {}
     for sample, drawobjs in drawtree.iteritems():
+        flatobjlist = []
+        for objlist in drawobjs.values():
+            flatobjlist.extend(objlist)
+
         f = ROOT.TFile.Open(sample_to_file_dict[sample])
         t = f.Get(tree_name)
         entries = t.GetEntriesFast()
@@ -347,7 +418,7 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
         if mt_cores > 0 and entries > mt_thresh:
             use_cores = mt_cores
         start = time.time()
-        obj_hash = DrawObjsHash(drawobjs)
+        obj_hash = DrawObjsHash(flatobjlist)
         if obj_hash not in func_dict:
             fname = GenTreeCode(t, drawobjs, use_cores)
             func_dict[obj_hash] = fname
@@ -356,8 +427,8 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
             print '>> Recyling function %s in %.2g seconds' % (fname, (time.time() - start))
         end = time.time()
         codegen_time += (end - start)
-        histarr = ROOT.TObjArray(len(drawobjs))
-        for i, h in enumerate(drawobjs):
+        histarr = ROOT.TObjArray(len(flatobjlist))
+        for i, h in enumerate(flatobjlist):
             histarr.AddAt(h, i)
         start = time.time()
         getattr(ROOT, fname)(t, histarr)
