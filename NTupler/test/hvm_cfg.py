@@ -12,7 +12,7 @@ opts = parser.VarParsing ('analysis')
 opts.register('globalTag', '94X_mc2017_realistic_v17', parser.VarParsing.multiplicity.singleton,
 #opts.register('globalTag', '94X_dataRun2_v11', parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.string, "global tag")
-opts.register('events', 1000, parser.VarParsing.multiplicity.singleton,
+opts.register('events', 5000, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of events")
 opts.register('isData', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
@@ -80,7 +80,7 @@ process.options.numberOfStreams = cms.untracked.uint32(opts.cores)
 
 process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
     src = cms.InputTag("slimmedMuons"),
-    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+    cut = cms.string("pt > 5 & abs(eta) < 2.6")
 )
 
 process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
@@ -90,7 +90,7 @@ process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
 
 process.selectedElectrons = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("slimmedElectrons"),
-    cut = cms.string("pt > 20 & abs(eta) < 2.6")
+    cut = cms.string("pt > 5 & abs(eta) < 2.6")
 )
 
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',

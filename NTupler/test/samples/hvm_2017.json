@@ -168,6 +168,7 @@
   "crabSettings": {
     "storageSite": "T2_DE_DESY",
     "voGroup": "dcms",
-    "outputDir" : "/store/user/adewit/HVMData/"
+    "outputDir" : "/store/user/adewit/HVMData/",
+    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"]
   }
 }
