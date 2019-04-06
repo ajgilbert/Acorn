@@ -100,6 +100,8 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     ws_->function("m_idiso_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["rhoiso_ratio_etainc"] = std::shared_ptr<RooFunctor>(
+    ws_->function("rhoiso_ratio_etainc")->functor(ws_->argSet("rho_pt,rho_eta")));
 
   return 0;
   }
@@ -262,6 +264,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       boost::range::sort(track_drs_smallcone,DescendingPairPt);
       highestpt_pair_iso_ = -99; 
       highestpt_pair_looser_iso_ = -99; 
+      wt_rhoiso_ = 1.;
       if(track_drs_smallcone.size()>0){
        highestpt_pair_id_1_=track_drs_smallcone.at(0).first.first;
        highestpt_pair_id_2_=track_drs_smallcone.at(0).first.second;
@@ -294,6 +297,9 @@ int DiMuonMesonAnalysis::PreAnalysis() {
        highestpt_pair_looser_iso_-=highestpt_pair_1_pt_;
        highestpt_pair_looser_iso_-=highestpt_pair_2_pt_;
       }
+      if(highestpt_pair_pt_>20.){
+          wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
+      } else wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {21., std::abs(highestpt_pair_eta_)});
       tree_->Fill();
     }
 

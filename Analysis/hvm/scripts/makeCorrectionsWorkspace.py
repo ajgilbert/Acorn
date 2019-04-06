@@ -242,8 +242,37 @@ for task in histsToWrap:
 
 w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
 
+loc='hvm/inputs/rhoiso/%s' %era
+
+if era == '2016':
+    histsToWrap = [
+       (loc + '/ZMMTP_2016_Data_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_data_eff_etainc'),
+       (loc + '/ZMMTP_2016_DY_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_mc_eff_etainc'),
+       (loc + '/ZMMTP_2016_Data_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_data_eff'),
+       (loc + '/ZMMTP_2016_DY_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_mc_eff')
+    ]
+if era == '2017':
+    histsToWrap = [
+       (loc + '/ZMMTP_2017_Data_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_data_eff_etainc'),
+       (loc + '/ZMMTP_2017_DY_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_mc_eff_etainc'),
+       (loc + '/ZMMTP_2017_Data_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_data_eff'),
+       (loc + '/ZMMTP_2017_DY_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_mc_eff')
+    ]
+if era == '2018':
+    histsToWrap = [
+       (loc + '/ZMMTP_2018_Data_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_data_eff_etainc'),
+       (loc + '/ZMMTP_2018_DY_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_mc_eff_etainc'),
+       (loc + '/ZMMTP_2018_Data_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_data_eff'),
+       (loc + '/ZMMTP_2018_DY_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_mc_eff')
+    ]
+
+for task in histsToWrap:
+   SafeWrapHist(w, ['rho_pt', 'rho_eta'], GetFromTFile(task[0]), name=task[1])
+
+w.factory('expr::rhoiso_ratio_etainc("@0/@1", rho_iso_data_eff_etainc, rho_iso_mc_eff_etainc)')
+w.factory('expr::rhoiso_ratio("@0/@1", rho_iso_data_eff, rho_iso_mc_eff)')
 
 w.Print()
-w.writeToFile('hvm_corrections_%s_v1.root' % era)
+w.writeToFile('hvm_corrections_%s_v2.root' % era)
 w.Delete()
 

@@ -43,6 +43,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("wt_2", &wt_2_);
     tree_->Branch("wt_trg1", &wt_trg1_);
     tree_->Branch("wt_trg2", &wt_trg2_);
+    tree_->Branch("wt_rhoiso", &wt_rhoiso_);
     tree_->Branch("highestpt_pair_id_1", &highestpt_pair_id_1_);
     tree_->Branch("highestpt_pair_id_2", &highestpt_pair_id_2_);
     tree_->Branch("highestpt_pair_dR", &highestpt_pair_dR_);
@@ -97,10 +98,10 @@ int DiElectronMesonAnalysis::PreAnalysis() {
   f.Close();
   fns_["pileup_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
-  fns_["m_idiso_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_idiso_ratio")->functor(ws_->argSet("m_pt,m_eta")));
-  fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+  fns_["rhoiso_ratio_etainc"] = std::shared_ptr<RooFunctor>(
+    ws_->function("rhoiso_ratio_etainc")->functor(ws_->argSet("rho_pt,rho_eta")));
 
   return 0;
   }
@@ -203,10 +204,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
             break;
           }
         }
-        wt_1_ = RooFunc(fns_["m_idiso_ratio"], {pt_1_, eta_1_});
-        wt_2_ = RooFunc(fns_["m_idiso_ratio"], {pt_2_, eta_2_});
-        wt_trg1_ = RooFunc(fns_["m_trg_ratio"], {pt_1_, eta_1_});
-        wt_trg2_ = RooFunc(fns_["m_trg_ratio"], {pt_2_, eta_2_});
+        wt_1_ = RooFunc(fns_["e_gsfidiso_ratio"], {pt_1_, eta_1_});
+        wt_2_ = RooFunc(fns_["e_gsfidiso_ratio"], {pt_2_, eta_2_});
       }
 
       highestpt_pair_id_1_ = 0;
@@ -242,6 +241,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       boost::range::sort(track_drs_smallcone,DescendingPairPt);
       highestpt_pair_iso_ = -99; 
       highestpt_pair_looser_iso_ = -99; 
+      wt_rhoiso_ = 1.;
       if(track_drs_smallcone.size()>0){
        highestpt_pair_id_1_=track_drs_smallcone.at(0).first.first;
        highestpt_pair_id_2_=track_drs_smallcone.at(0).first.second;
@@ -274,6 +274,10 @@ int DiElectronMesonAnalysis::PreAnalysis() {
        highestpt_pair_looser_iso_-=highestpt_pair_1_pt_;
        highestpt_pair_looser_iso_-=highestpt_pair_2_pt_;
       }
+      if(highestpt_pair_pt_>20.){
+          wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
+      } else wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {21., std::abs(highestpt_pair_eta_)});
+
       tree_->Fill();
     }
 

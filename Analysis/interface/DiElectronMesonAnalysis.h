@@ -47,6 +47,7 @@ class DiElectronMesonAnalysis : public ModuleBase {
   float wt_2_;
   float wt_trg1_;
   float wt_trg2_;
+  float wt_rhoiso_;
   float highestpt_pair_iso_;
   float highestpt_pair_looser_iso_;
   float highestpt_pair_dR_;
