@@ -144,7 +144,7 @@ int HVMTagAndProbe::PreAnalysis() {
       p_eta_ = mu_p->eta();
       p_phi_ = mu_p->phi();
       p_q_ = mu_p->charge();
-      p_id_ = mu_p->isMediumMuon() && MuonPFIso(mu_p)<0.15;
+      p_id_ = mu_p->isMediumMuon();
 
       m_ll_ = (mu_t->vector() + mu_p->vector()).M();
 

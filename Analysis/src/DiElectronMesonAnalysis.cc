@@ -133,19 +133,9 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
     });
 
-    if (year_==2016){
-      ac::keep_if(electrons, [](ac::Electron const* e) {
-        return e->pt() > 30. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
-      });
-   } else if(year_==2017){
-      ac::keep_if(electrons, [](ac::Electron const* e) {
-        return e->pt() > 38. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
-      });
-   } else if(year_==2018){
-       ac::keep_if(electrons, [](ac::Electron const* e) {
-        return e->pt() > 35. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
-      });
-   }
+    ac::keep_if(electrons, [](ac::Electron const* e) {
+      return e->pt() > 20. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
+    });
 
     boost::range::sort(electrons, DescendingPt);
     boost::range::sort(tracks, DescendingTrackPt);
@@ -186,17 +176,17 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       if (year_ == 2016) {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele27_WPTight_Gsf");
         trg_1_ =
-            IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3);
+            IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>30;
         trg_2_ =
-            IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3);
+            IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele27_.Lookup(trg_lookup), 0.3)&&electrons[1]->pt()>30;
       } else if (year_ == 2017) {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele35_WPTight_Gsf");
-        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
-        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3);
+        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>38;
+        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele35_.Lookup(trg_lookup), 0.3)&&electrons[1]->pt()>38;
       } else {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
-        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
-        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3);
+        trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>35;
+        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>35;
       }
 
       wt_pu_ = 1.;

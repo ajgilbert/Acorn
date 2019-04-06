@@ -143,8 +143,9 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       return m->pt() > 5. && fabs(m->eta()) < 2.4 && m->isMediumMuon();
     });
 
+    
     ac::keep_if(muons, [](ac::Muon const* m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
+      return m->pt() > 20. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15;
     });
 
     ac::keep_if(veto_electrons, [](ac::Electron const* e) {
@@ -193,19 +194,19 @@ int DiMuonMesonAnalysis::PreAnalysis() {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
         auto const& trg_objs_tk = event->GetPtrVec<TriggerObject>("triggerObjects_IsoTkMu24");
         trg_1_ =
-            IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(muons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+            (IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
+            IsFilterMatchedDR(muons[0], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3)) && muons[0]->pt()>27;
         trg_2_ =
-            IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
-            IsFilterMatchedDR(muons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3);
+            (IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) ||
+            IsFilterMatchedDR(muons[1], trg_objs_tk, filters_IsoTkMu24_.Lookup(trg_lookup), 0.3)) && muons[1]->pt()>27;
       } else if (year_ == 2017){
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu27");
-        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
-        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3);
-      } else {
+        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3)&&muons[0]->pt()>30;
+        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu27_.Lookup(trg_lookup), 0.3)&&muons[1]->pt()>30;
+       } else {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_IsoMu24");
-        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3);
-        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3);
+        trg_1_ = IsFilterMatchedDR(muons[0], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) && muons[0]->pt()>27;
+        trg_2_ = IsFilterMatchedDR(muons[1], trg_objs, filters_IsoMu24_.Lookup(trg_lookup), 0.3) && muons[1]->pt()>27;
       }
 
       wt_pu_ = 1.;
