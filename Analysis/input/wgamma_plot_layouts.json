@@ -49,6 +49,12 @@
       "color": [78,89,140]
     },
     {
+      "name": "GG",
+      "entries": ["GG"],
+      "legend": "#gamma#gamma",
+      "color": [1]
+    },
+    {
       "name": "WG",
       "entries": ["WG_NLO"],
       "legend": "W(#rightarrowl#nu)#gamma",

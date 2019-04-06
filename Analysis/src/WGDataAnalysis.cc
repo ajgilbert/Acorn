@@ -599,7 +599,7 @@ int WGDataAnalysis::PreAnalysis() {
         if (ac::contains({1, 2, 4, 5}, p0_truth_)) {
           wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
         }
-        if (ac::contains({2}, p0_truth_)) {
+        if (ac::contains({2}, p0_truth_) && !p0->hasPixelSeed() && p0->passElectronVeto()) {
           wt_p0_e_fake_ = RooFunc(fns_["e_p_fake_ratio"], {p0_pt_, p0->eta()});
         }
       }

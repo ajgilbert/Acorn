@@ -97,7 +97,8 @@ config_by_setting = {
         '*/wt_pu': ('Pileup weight', ''),
         '*/wt_l0': ('Lepton weight', ''),
         '*/wt_trg_l0': ('Lepton trigger weight', ''),
-        '*/wt_p0': ('Photon weight', '')
+        '*/wt_p0': ('Photon weight', ''),
+        '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', '')
     }
 }
 

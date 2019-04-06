@@ -288,6 +288,12 @@
       "inputs": ["ZZTo4L-powheg"],
       "xsec": 1.325,
       "GenXSecAnalyzer": "After filter: final cross section = 1.325e+00 +- 1.220e-03 pb"
+    },
+    "DiPhotonJetsBox_MGG-80toInf": {
+      "attributes": ["default", "mc", "doit"],
+      "inputs": ["DiPhotonJetsBox_MGG-80toInf"],
+      "xsec": 88.36,
+      "GenXSecAnalyzer": ""
     }
   },
   "config": {
