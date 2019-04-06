@@ -16,7 +16,7 @@ bin_cfgs = [
         'var': 'm_ll',
         'binning': (50, 75, 125),
         #'binning': (40, 2.9, 3.3),
-        'tag': 't_id && t_rand ',
+        'tag': 't_id && t_rand && t_trg ',
         'probe': 'p_trk_iso<0.5',
         'binvar_x': 'p_pt',
         'bins_x': [20., 25., 30., 35., 40., 45., 50., 100.],
@@ -29,13 +29,13 @@ bin_cfgs = [
         'var': 'm_ll',
         #'binning': (40, 2.9, 3.3),
         'binning': (50, 75, 125),
-        'tag': 't_id && t_rand',
+        'tag': 't_id && t_rand && t_trg',
         'probe': 'p_trk_iso<0.5',
         'binvar_x': 'p_pt',
         'bins_x': [20., 25., 30., 35., 40., 45., 50.,  100.],
         #'bins_x': [5., 6., 7., 8., 9., 10., 11., 12.],
         'binvar_y': 'abs(p_eta)',
-        'bins_y': [0, 1.0, 1.56, 2.1, 2.5]
+        'bins_y': [0, 0.9, 1.2, 2.1, 2.5]
     },
 ]
 
@@ -91,8 +91,8 @@ remaps = {
 }
 
 remap = remaps['2016']
-prefix = '/nfs/dust/cms/user/dewita/CMSSW_9_4_13/src/Acorn/Analysis/output-zmmtp/PROD-29032018-17/'
-#prefix = '/nfs/dust/cms/user/dewita/CMSSW_10_2_10/src/Acorn/Analysis/output-zmmtp/PROD-29032019-18/'
+#prefix = '/nfs/dust/cms/user/dewita/CMSSW_9_4_13/src/Acorn/Analysis/output-zmmtp/PROD-29032018-16/'
+prefix = '/nfs/dust/cms/user/dewita/CMSSW_10_2_10/src/Acorn/Analysis/output-zmmtp/PROD-29032019-18/'
 
 samples = {}
 for sa in remap:
@@ -111,7 +111,7 @@ hists = Node()
 # sys.exit(0)
 
 for sample in remap:
-    outfile = ROOT.TFile('ZMMTP_2017_%s.root' % sample, 'RECREATE')
+    outfile = ROOT.TFile('ZMMTP_2018_%s.root' % sample, 'RECREATE')
 
     hists = Node()
     for cfg in bin_cfgs:
