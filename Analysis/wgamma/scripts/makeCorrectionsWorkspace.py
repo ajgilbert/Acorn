@@ -300,6 +300,6 @@ for task in histsToWrap:
 
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v5.root' % era)
+w.writeToFile('wgamma_corrections_%s_v6.root' % era)
 w.Delete()
 
