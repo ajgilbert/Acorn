@@ -88,9 +88,15 @@
     },
     {
       "name": "data_fakes",
-      "entries": ["data_fakes"],
+      "entries": ["data_fakes_sub"],
       "legend": "Non-prompt/fake #gamma",
       "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG"],
+      "legend": "#gamma#gamma",
+      "color": [1]
     },
     {
       "name": "WG",
@@ -126,9 +132,15 @@
     },
     {
       "name": "data_fakes",
-      "entries": ["data_fakes"],
+      "entries": ["data_fakes_sub"],
       "legend": "Non-prompt/fake #gamma",
       "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG"],
+      "legend": "#gamma#gamma",
+      "color": [1]
     },
     {
       "name": "WG",

@@ -263,6 +263,12 @@
       "inputs": ["ZZ-pythia"],
       "xsec": 12.14,
       "GenXSecAnalyzer": "After filter: final cross section = 1.214e+01 +- 1.331e-02 pb"
+    },
+    "DiPhotonJetsBox_MGG-80toInf": {
+      "attributes": [],
+      "inputs": ["DiPhotonJetsBox_MGG-80toInf"],
+      "xsec": 88.36,
+      "GenXSecAnalyzer": "THIS IS A FAKE SAMPLE FROM 2017!"
     }
   },
   "config": {

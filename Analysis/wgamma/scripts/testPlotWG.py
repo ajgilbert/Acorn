@@ -107,6 +107,7 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
+        'GG': 'DiPhotonJetsBox_MGG-80toInf'
     }
 }
 
@@ -192,10 +193,12 @@ X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'
 X['mZ_veto_inv'] = 'abs(91.2 - l0p0_M) <= 15'
 
 # Analysis selection levels:
-X['baseline_m_nomt'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_e_nomt'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_m_nopix'] ='$baseline_m_nomt && l0met_mt>60'
-X['baseline_e_nopix'] ='$baseline_e_nomt && l0met_mt>60'
+X['baseline_m_nomt_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
+X['baseline_e_nomt_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7'
+X['baseline_m_nopix'] ='$baseline_m_nomt_nopix && l0met_mt>60'
+X['baseline_e_nopix'] ='$baseline_e_nomt_nopix && l0met_mt>60'
+X['baseline_m_nomt'] ='$baseline_m_nomt_nopix && $efake_veto_m'
+X['baseline_e_nomt'] ='$baseline_e_nomt_nopix && $efake_veto_e'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
 X['baseline_m_mZ_veto'] ='$baseline_m'
@@ -305,8 +308,8 @@ if args.task in ['baseline', 'electron_fakes']:
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
-    do_cats['e'].extend(['baseline_e_nomt', 'baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto'])
-    do_cats['m'].extend(['baseline_m_nomt', 'baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto'])
+    do_cats['e'].extend(['baseline_e_nomt_nopix', 'baseline_e_nomt', 'baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto'])
+    do_cats['m'].extend(['baseline_m_nomt_nopix', 'baseline_m_nomt', 'baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto'])
 
     drawvars = [
         ('n_vtx', (30, 0., 60.)),
@@ -357,10 +360,13 @@ if args.task in ['baseline', 'electron_fakes']:
             for var, binning in drawvars:
                 for sample in samples:
                     hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                for P in ['W', 'DY'] + zg_samples + tt_samples + vv_samples + ttg_samples:
+                for P in all_samples:
                     AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                for P in ['DY'] + zg_samples:
+                    AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'])
+                for P in dy_samples + zg_samples:
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
+                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+
                 hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}),
