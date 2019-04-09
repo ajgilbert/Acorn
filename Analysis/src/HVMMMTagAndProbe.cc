@@ -9,7 +9,7 @@
 #include "boost/range/algorithm/sort.hpp"
 #include "RooRealVar.h"
 #include "RooWorkspace.h"
-#include "Acorn/Analysis/interface/HVMTagAndProbe.h"
+#include "Acorn/Analysis/interface/HVMMMTagAndProbe.h"
 #include "Acorn/Analysis/interface/AnalysisTools.h"
 #include "Acorn/NTupler/interface/Muon.h"
 #include "Acorn/NTupler/interface/Electron.h"
@@ -20,17 +20,17 @@
 
 namespace ac {
 
-HVMTagAndProbe::HVMTagAndProbe(std::string const& name)
+HVMMMTagAndProbe::HVMMMTagAndProbe(std::string const& name)
     : ModuleBase(name),
       fs_(nullptr),
       year_(2016),
       is_data_(true) {}
 
-HVMTagAndProbe::~HVMTagAndProbe() { ; }
+HVMMMTagAndProbe::~HVMMMTagAndProbe() { ; }
 
-int HVMTagAndProbe::PreAnalysis() {
+int HVMMMTagAndProbe::PreAnalysis() {
   if (fs_) {
-    tree_ = fs_->make<TTree>("HVMTagAndProbe", "HVMTagAndProbe");
+    tree_ = fs_->make<TTree>("HVMMMTagAndProbe", "HVMMMTagAndProbe");
     tree_->Branch("run", &run_);
     tree_->Branch("n_vtx", &n_vtx_);
     tree_->Branch("t_pt", &t_pt_);
@@ -90,7 +90,7 @@ int HVMTagAndProbe::PreAnalysis() {
   return 0;
   }
 
-  int HVMTagAndProbe::Execute(TreeEvent* event) {
+  int HVMMMTagAndProbe::Execute(TreeEvent* event) {
 
     SetDefaults();
 
@@ -162,7 +162,7 @@ int HVMTagAndProbe::PreAnalysis() {
     return 0;
   }
 
-  void HVMTagAndProbe::SetDefaults() {
+  void HVMMMTagAndProbe::SetDefaults() {
     run_ = 0;
     n_vtx_ = 0;
     t_pt_ = 0.;
@@ -182,13 +182,13 @@ int HVMTagAndProbe::PreAnalysis() {
     wt_def_ = 1.;
   }
 
-  int HVMTagAndProbe::PostAnalysis() {
+  int HVMMMTagAndProbe::PostAnalysis() {
     return 0;
   }
 
-  void HVMTagAndProbe::PrintInfo() {}
+  void HVMMMTagAndProbe::PrintInfo() {}
 
-  bool HVMTagAndProbe::PassesTrigger(ac::Muon const* m, ac::TreeEvent * event) const {
+  bool HVMMMTagAndProbe::PassesTrigger(ac::Muon const* m, ac::TreeEvent * event) const {
     unsigned trg_lookup = is_data_ ? run_ : year_;
     bool mu_trg=false;
     if (year_ == 2016) {

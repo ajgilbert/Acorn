@@ -13,7 +13,8 @@
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"
 #include "Acorn/Analysis/interface/DiLeptonMesonGenAnalysis.h"
 #include "Acorn/Analysis/interface/DiMuonMesonAnalysis.h"
-#include "Acorn/Analysis/interface/HVMTagAndProbe.h"
+#include "Acorn/Analysis/interface/HVMMMTagAndProbe.h"
+#include "Acorn/Analysis/interface/HVMEETagAndProbe.h"
 #include "Acorn/Analysis/interface/DiElectronMesonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
 #include "Acorn/Analysis/interface/LumiMask.h"
@@ -130,20 +131,29 @@ int main(int argc, char* argv[]) {
     dimuon_seq.InsertSequence("DiLeptonMeson", analysis);
   }
 
-  ac::Sequence jpsi_tp_seq;
-  if(sequences.count("TPJpsi")) {
-    jpsi_tp_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
+  ac::Sequence tp_seq;
+  if(sequences.count("TPMM")||sequences.count("TPEE")) {
+    tp_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
     if (is_data) {
-      jpsi_tp_seq.BuildModule(
+      tp_seq.BuildModule(
           ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
     }
-    jpsi_tp_seq.BuildModule(ac::HVMTagAndProbe("HVMTagAndProbe")
-                             .set_fs(fs.get())
-                             .set_year(jsc["year"])
-                             .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v2.root")
-                             .set_is_data(is_data));
+    if(sequences.count("TPMM")){
+      tp_seq.BuildModule(ac::HVMMMTagAndProbe("HVMMMTagAndProbe")
+                               .set_fs(fs.get())
+                               .set_year(jsc["year"])
+                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v2.root")
+                               .set_is_data(is_data));
+    } 
+    if(sequences.count("TPEE")){
+      tp_seq.BuildModule(ac::HVMEETagAndProbe("HVMEETagAndProbe")
+                               .set_fs(fs.get())
+                               .set_year(jsc["year"])
+                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v2.root")
+                               .set_is_data(is_data));
 
-    jpsi_tp_seq.InsertSequence("JpsiTandP", analysis);
+    }
+    tp_seq.InsertSequence("TandP", analysis);
   }
 
   ac::Sequence hvmgen_seq;

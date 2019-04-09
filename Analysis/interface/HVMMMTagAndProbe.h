@@ -1,5 +1,5 @@
-#ifndef Acorn_Analysis_HVMTagAndProbe_h
-#define Acorn_Analysis_HVMTagAndProbe_h
+#ifndef Acorn_Analysis_HVMMMTagAndProbe_h
+#define Acorn_Analysis_HVMMMTagAndProbe_h
 #include <string>
 #include <cstdint>
 #include "boost/range/algorithm_ext/erase.hpp"
@@ -16,12 +16,12 @@
 
 namespace ac {
 
-class HVMTagAndProbe : public ModuleBase {
+class HVMMMTagAndProbe : public ModuleBase {
  private:
-  CLASS_MEMBER(HVMTagAndProbe, fwlite::TFileService*, fs)
-  CLASS_MEMBER(HVMTagAndProbe, unsigned, year)
-  CLASS_MEMBER(HVMTagAndProbe, bool, is_data)
-  CLASS_MEMBER(HVMTagAndProbe, std::string, corrections)
+  CLASS_MEMBER(HVMMMTagAndProbe, fwlite::TFileService*, fs)
+  CLASS_MEMBER(HVMMMTagAndProbe, unsigned, year)
+  CLASS_MEMBER(HVMMMTagAndProbe, bool, is_data)
+  CLASS_MEMBER(HVMMMTagAndProbe, std::string, corrections)
 
   LookupFilter filters_IsoMu24_;
   LookupFilter filters_IsoTkMu24_;
@@ -62,8 +62,8 @@ class HVMTagAndProbe : public ModuleBase {
   mutable TRandom3 rng;
 
  public:
-  HVMTagAndProbe(std::string const& name);
-  virtual ~HVMTagAndProbe();
+  HVMMMTagAndProbe(std::string const& name);
+  virtual ~HVMMMTagAndProbe();
 
   virtual int PreAnalysis();
   virtual int Execute(TreeEvent* event);
