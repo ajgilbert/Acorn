@@ -151,7 +151,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     });
 
     ac::keep_if(veto_electrons, [](ac::Electron const* e) {
-      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
+      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron() && fabs(e->eta())>1.44 && fabs(e->eta())<1.56;
     });
 
 

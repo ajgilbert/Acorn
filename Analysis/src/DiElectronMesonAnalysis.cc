@@ -133,11 +133,11 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     });
 
     ac::keep_if(veto_electrons, [](ac::Electron const* e) {
-      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron();
+      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron()&&fabs(e->eta())>1.44 && fabs(e->eta())<1.56;
     });
 
     ac::keep_if(electrons, [](ac::Electron const* e) {
-      return e->pt() > 20. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron();
+      return e->pt() > 20. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron() &&fabs(e->eta())>1.44 && fabs(e->eta())<1.56;
     });
 
     boost::range::sort(electrons, DescendingPt);
