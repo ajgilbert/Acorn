@@ -166,10 +166,10 @@ if args.debug:
 ###############################################################################
 loc = 'hvm/inputs/muons/%s' % era
 if era == '2016':
-    histsToWrap = []
-    #    (loc + '/trigger/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio'),
-    #    (loc + '/trigger/EfficienciesAndSF_Period4.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio')
-    #]
+    histsToWrap = [
+        (loc + '/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio'),
+        (loc + '/EfficienciesAndSF_RunGtoH.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio')
+    ]
     histsToWrapNewStyle = [
         (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_bf_ratio'),
         (loc + '/RunGH_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_gh_ratio'),
@@ -198,14 +198,14 @@ if era == '2018':
     histsToWrapNewStyle = []
 
 for task in histsToWrap:
-    SafeWrapHist(w, ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])'], GetFromTFile(task[0]), name=task[1])
+    SafeWrapHist(w, ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)", m_eta[0])'], GetFromTFile(task[0]), name=task[1])
 
 for task in histsToWrapNewStyle:
     SafeWrapHist(w, ['m_eta', 'm_pt'], GetFromTFile(task[0]), name=task[1])
 
 if era == '2016':
     # Factor of 0.439 is the lumi of G+H
-    for t in ['id', 'iso']:
+    for t in ['trg','id', 'iso']:
         w.factory('expr::m_%s_ratio("@0*(1-0.439) + @1*0.439", m_%s_bf_ratio, m_%s_gh_ratio)' % (t, t, t))
 
 if era == '2018':
@@ -255,8 +255,7 @@ for task in histsToWrap:
     SafeWrapHist(w, ['e_eta', 'e_pt'], GetFromTFile(task[0]), name=task[1])
 
 for task in histsToWrapInv:
-    SafeWrapHist(w, ['e_pt', 'e_eta'], GetFromTFile(task[0]), name=task[1])
-
+    SafeWrapHist(w, ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])'], GetFromTFile(task[0]), name=task[1])
 
 w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
 w.factory('expr::e_trg_ratio("@0/@1", e_trg_data_eff, e_trg_mc_eff)')
@@ -265,7 +264,7 @@ loc='hvm/inputs/rhoiso/%s' %era
 
 if era == '2016':
     histsToWrap = [
-       (loc + '/ZMMTP_2016_Data_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_data_eff_etainc'),
+       (loc + '/ZMMTP_2016_Data_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_data_eff_etainc'), 
        (loc + '/ZMMTP_2016_DY_Fits_TkIso_pt_bins_inc_eta.root:TkIso_pt_bins_inc_eta', 'rho_iso_mc_eff_etainc'),
        (loc + '/ZMMTP_2016_Data_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_data_eff'),
        (loc + '/ZMMTP_2016_DY_Fits_TkIso_pt_eta_bins.root:TkIso_pt_eta_bins', 'rho_iso_mc_eff')
@@ -286,7 +285,7 @@ if era == '2018':
     ]
 
 for task in histsToWrap:
-   SafeWrapHist(w, ['rho_pt', 'rho_eta'], GetFromTFile(task[0]), name=task[1])
+   SafeWrapHist(w, ['rho_pt', 'expr::rho_abs_eta("TMath::Abs(@0)",rho_eta[0])'], GetFromTFile(task[0]), name=task[1])
 
 w.factory('expr::rhoiso_ratio_etainc("@0/@1", rho_iso_data_eff_etainc, rho_iso_mc_eff_etainc)')
 w.factory('expr::rhoiso_ratio("@0/@1", rho_iso_data_eff, rho_iso_mc_eff)')
