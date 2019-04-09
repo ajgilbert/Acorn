@@ -226,21 +226,40 @@ if era == '2016':
         (loc + '/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root:EGamma_SF2D', 'e_gsf_ratio'),
         (loc + '/80X_2016_MVA80Xwp80.root:EGamma_SF2D', 'e_id_ratio')
     ]
+    histsToWrapInv = [
+        (loc + '/ZEETP_2016_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data_eff'),
+        (loc + '/ZEETP_2016_DY_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc_eff')
+    ]
 if era == '2017':
     histsToWrap = [
         (loc + '/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root:EGamma_SF2D', 'e_gsf_ratio'),
         (loc + '/2017_ElectronMVA80.root:EGamma_SF2D', 'e_id_ratio')
     ]
+    histsToWrapInv = [
+        (loc + '/ZEETP_2017_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data_eff'),
+        (loc + '/ZEETP_2017_DY_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc_eff')
+    ]
+
 if era == '2018':
     histsToWrap = [
         (loc + '/egammaEffi.txt_EGM2D_updatedAll.root:EGamma_SF2D', 'e_gsf_ratio'),
         (loc + '/2018_ElectronMVA80.root:EGamma_SF2D', 'e_id_ratio')
     ]
+    histsToWrapInv = [
+        (loc + '/ZEETP_2018_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data_eff'),
+        (loc + '/ZEETP_2018_DY_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc_eff')
+    ]
+
 
 for task in histsToWrap:
     SafeWrapHist(w, ['e_eta', 'e_pt'], GetFromTFile(task[0]), name=task[1])
 
+for task in histsToWrapInv:
+    SafeWrapHist(w, ['e_pt', 'e_eta'], GetFromTFile(task[0]), name=task[1])
+
+
 w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
+w.factory('expr::e_trg_ratio("@0/@1", e_trg_data_eff, e_trg_mc_eff)')
 
 loc='hvm/inputs/rhoiso/%s' %era
 
@@ -273,6 +292,6 @@ w.factory('expr::rhoiso_ratio_etainc("@0/@1", rho_iso_data_eff_etainc, rho_iso_m
 w.factory('expr::rhoiso_ratio("@0/@1", rho_iso_data_eff, rho_iso_mc_eff)')
 
 w.Print()
-w.writeToFile('hvm_corrections_%s_v2.root' % era)
+w.writeToFile('hvm_corrections_%s_v3.root' % era)
 w.Delete()
 

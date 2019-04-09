@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
                              .set_fs(fs.get())
                              .set_year(jsc["year"])
-                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v2.root")
+                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v3.root")
                              .set_is_data(is_data));
 
   //dimuon_seq.InsertSequence("DiMuonMeson", analysis);
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
     dimuon_seq.BuildModule(ac::DiElectronMesonAnalysis("DiElectronMesonAnalysis")
                              .set_fs(fs.get())
                              .set_year(jsc["year"])
-                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v2.root")
+                             .set_corrections("hvm/inputs/hvm_corrections_"+s_year+"_v3.root")
                              .set_is_data(is_data));
 
     dimuon_seq.InsertSequence("DiLeptonMeson", analysis);
@@ -142,14 +142,14 @@ int main(int argc, char* argv[]) {
       tp_seq.BuildModule(ac::HVMMMTagAndProbe("HVMMMTagAndProbe")
                                .set_fs(fs.get())
                                .set_year(jsc["year"])
-                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v2.root")
+                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v3.root")
                                .set_is_data(is_data));
     } 
     if(sequences.count("TPEE")){
       tp_seq.BuildModule(ac::HVMEETagAndProbe("HVMEETagAndProbe")
                                .set_fs(fs.get())
                                .set_year(jsc["year"])
-                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v2.root")
+                               .set_corrections("hvm/inputs/hvm_corrections_" + s_year + "_v3.root")
                                .set_is_data(is_data));
 
     }

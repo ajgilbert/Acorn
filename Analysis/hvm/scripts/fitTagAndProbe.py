@@ -157,8 +157,12 @@ for b in bins:
     # Set the initial yield and efficiency values
     yield_tot = wsp.data(dat).sumEntries()
     yield_pass = wsp.data(dat).sumEntries("cat==cat::pass")
-    wsp.var("numTot").setVal(yield_tot)
-    wsp.var("efficiency").setVal(yield_pass/yield_tot)
+    if(yield_tot == 0):
+      wsp.var("numTot").setVal(0.)
+      wsp.var("efficiency").setVal(0.)
+    else:
+      wsp.var("numTot").setVal(yield_tot)
+      wsp.var("efficiency").setVal(yield_pass/yield_tot)
 
     wsp.pdf("model").fitTo(wsp.data(dat),
                            ROOT.RooFit.Minimizer("Minuit2", "Scan"),

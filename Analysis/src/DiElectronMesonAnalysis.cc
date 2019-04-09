@@ -100,6 +100,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
   fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+  fns_["e_trg_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_trg_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["rhoiso_ratio_etainc"] = std::shared_ptr<RooFunctor>(
     ws_->function("rhoiso_ratio_etainc")->functor(ws_->argSet("rho_pt,rho_eta")));
 
@@ -206,6 +208,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
         }
         wt_1_ = RooFunc(fns_["e_gsfidiso_ratio"], {pt_1_, eta_1_});
         wt_2_ = RooFunc(fns_["e_gsfidiso_ratio"], {pt_2_, eta_2_});
+        wt_trg1_ = RooFunc(fns_["e_trg_ratio"], {pt_1_, eta_1_});
+        wt_trg2_ = RooFunc(fns_["e_trg_ratio"], {pt_2_, eta_2_});
       }
 
       highestpt_pair_id_1_ = 0;
