@@ -17,7 +17,7 @@ class WGModel(PhysicsModel):
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
         if self.eftMode:
-            self.modelBuilder.doVar("c3w[0,0,1]")
+            self.modelBuilder.doVar("c3w[0,0,10]")
             pois = ['c3w']
             for filename, label in self.files:
                 print filename, label
@@ -34,17 +34,21 @@ class WGModel(PhysicsModel):
 
     def ImportFile(self, filename, sign, sublabel=''):
         fin = ROOT.TFile(filename)
+        w = fin.Get('w')
+        w.Print()
         for c in [sign]:
             for ptbin in range(self.ptBins):
                 for phibin in range(self.phiBins):
-                    name = 'w_%s_gen_bin_%i_%i' % (c, ptbin, phibin)
-                    gr = fin.Get(name)
+                    name = '%s_w_%s_bin_%i_%i' % (sublabel, c, ptbin + 1, phibin + 1)
+                    # gr = fin.Get(name)
                     sub = ''
-                    if sublabel != '':
+                    if sublabel != 'main':
                         sub = str('_' + sublabel)
                     print 'scale_%s%s_%i_%i' % (c, sub, ptbin, phibin)
-                    spline = ROOT.RooSpline1D('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin), '', self.modelBuilder.out.var('c3w'), gr.GetN(), gr.GetX(), gr.GetY(), 'CSPLINE')
-                    self.modelBuilder.out._import(spline)
+                    obj = w.function(name)
+                    obj.SetName('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin))
+                    # spline = ROOT.RooSpline1D('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin), '', self.modelBuilder.out.var('c3w'), gr.GetN(), gr.GetX(), gr.GetY(), 'CSPLINE')
+                    self.modelBuilder.out._import(obj)
         fin.Close()
 
     def getYieldScale(self, bin, process):

@@ -41,10 +41,10 @@ pads = plot.OnePad()
 
 pt_bins = [150, 210, 300, 420, 600, 850, 1200]
 
-gr_0jet = plot.LimitTGraphFromJSONFile('limit_0jet.json', 'obs')
+gr_0jet = plot.LimitTGraphFromJSONFile('limit_inc_bsm.json', 'obs')
 h_0jet = ConvertToHist(gr_0jet, pt_bins)
 
-gr_0jet_1bin = plot.LimitTGraphFromJSONFile('limit_0jet_1bin.json', 'obs')
+gr_0jet_1bin = plot.LimitTGraphFromJSONFile('limit_inc_1bin_bsm.json', 'obs')
 h_0jet_1bin = ConvertToHist(gr_0jet_1bin, pt_bins)
 
 gr_inc = plot.LimitTGraphFromJSONFile('limit_inc.json', 'obs')
@@ -58,7 +58,7 @@ h_axes = [h_0jet.Clone() for x in pads]
 for h in h_axes:
     h.Reset()
 
-plot.Set(h_axes[0], Minimum=0.01, Maximum=1.4)
+plot.Set(h_axes[0], Minimum=0.01, Maximum=50)
 plot.Set(h_axes[0].GetXaxis(), Title='Maximum p_{T}^{#gamma} (GeV)')
 plot.Set(h_axes[0].GetYaxis(), Title='95% CL limit on C_{3W} (TeV^{-2})')
 h_axes[0].Draw()
@@ -74,14 +74,14 @@ h_inc.Draw('SAME')
 h_inc_1bin.Draw('SAME')
 
 legend = ROOT.TLegend(0.45, 0.7, 0.90, 0.91, '', 'NBNDC')
-legend.AddEntry(h_0jet, 'LO, 0jet', 'L')
-legend.AddEntry(h_0jet_1bin, 'LO, 0 jets - no interference', 'L')
-legend.AddEntry(h_inc, 'LO, #leq3 jets', 'L')
-legend.AddEntry(h_inc_1bin, 'LO, #leq3 jets - no interference', 'L')
+legend.AddEntry(h_0jet, 'LO, #leq3 jets', 'L')
+legend.AddEntry(h_0jet_1bin, 'LO, #leq3 jets, no #varphi binning', 'L')
+legend.AddEntry(h_inc, 'LO, #leq3 jets, No BSM', 'L')
+legend.AddEntry(h_inc_1bin, 'LO, #leq3 jets, No BSM, no #varphi binning', 'L')
 legend.Draw()
 
 plot.DrawTitle(pads[0], '13 TeV', 3)
-plot.DrawTitle(pads[0], 'Projection to 100 fb^{-1}: W^{+}(e^{+}#nu/#mu^{+}#nu)#gamma', 1)
+plot.DrawTitle(pads[0], '136.7 fb^{-1}: W^{+}(e^{+}#nu/#mu^{+}#nu)#gamma', 1)
 
 # plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.3)
 
