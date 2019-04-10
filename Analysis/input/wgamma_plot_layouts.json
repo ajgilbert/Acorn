@@ -151,20 +151,26 @@
   ],
   "data_fakes_EFT": [
     {
-      "name": "VV_R",
-      "entries": ["VV_R"],
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_R"],
-      "legend": "Z#rightarrowll",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
       "color": [250,169,22]
     },
     {
-      "name": "TT_R",
-      "entries": ["TTG_R"],
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TT_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -172,23 +178,29 @@
       "name": "data_fakes",
       "entries": ["data_fakes"],
       "legend": "Non-prompt/fake #gamma",
-      "color": [222, 90, 106]
+      "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG"],
+      "legend": "#gamma#gamma",
+      "color": [1]
     },
     {
       "name": "WG_OOA",
-      "entries": ["WG_p_ooa", "WG_n_ooa"],
+      "entries": ["WG_NLO_p_ooa", "WG_NLO_n_ooa"],
       "legend": "W(#rightarrowl#nu)#gamma (out)",
       "color": 12
     },
     {
       "name": "WG_MET1",
-      "entries": ["WG_p_acc_met1", "WG_n_acc_met1"],
+      "entries": ["WG_NLO_p_acc_met1", "WG_NLO_n_acc_met1"],
       "legend": "W(#rightarrowl#nu)#gamma (met sdb.)",
       "color": 11
     },
     {
       "name": "WG",
-      "entries": ["WG_p_acc", "WG_n_acc"],
+      "entries": ["WG_NLO_p_acc", "WG_NLO_n_acc"],
       "legend": "W(#rightarrowl#nu)#gamma (in)",
       "color": [108,190,237]
     }

@@ -13,11 +13,6 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
 
-
-def VariableRebin(hist, binning):
-    newhist = hist.Rebin(len(binning) - 1, "", array('d', binning))
-    return newhist
-
 default_cfg = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
     'outdir': '',               # output directory
@@ -114,10 +109,10 @@ variants_by_path = [
     ("*/p0_pt", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),
-    ("*/p0_pt", {
-            "prefix": "fr_barrel_",
-            "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
-            "logy": True})
+    # ("*/p0_pt", {
+    #         "prefix": "fr_barrel_",
+    #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
+    #         "logy": True})
 ]
 
 

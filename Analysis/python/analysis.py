@@ -445,5 +445,44 @@ def NormaliseTo(hist, val=1.0):
     if hist.Integral() != 0.0:
         hist.Scale(val / hist.Integral())
 
+
 def WidthDivide(hist):
         hist.Scale(1., 'width')
+
+
+def VariableRebin(hist, binning):
+    newhist = hist.Rebin(len(binning) - 1, "", array('d', binning))
+    return newhist
+
+
+def ReadTxtHist(filename, column=1, column_err=2, classname='TH1D', objname='hist', correct_density=True):
+    with open(filename) as infile:
+        lines = [tuple(line.split()) for line in infile.readlines() if not line.startswith('#')]
+    N = (len(lines) - 1) / 2
+    edges = []
+    contents = []
+    errors = []
+    for i in xrange(N):
+        lo_edge = float(lines[(i * 2)][0])
+        hi_edge = float(lines[(i * 2) + 1][0])
+        edges.append(lo_edge)
+        if i == N - 1:
+            edges.append(hi_edge)
+        width = 1.0
+        if correct_density:
+            width = hi_edge - lo_edge
+        contents.append(float(lines[i * 2][column]) * width)
+        errors.append(float(lines[i * 2][column_err]))
+    hist = getattr(ROOT, classname)(objname, objname, len(contents), array('d', edges))
+    for i in xrange(N):
+        hist.SetBinContent(i + 1, contents[i])
+        hist.SetBinError(i + 1, errors[i])
+    return hist
+    print hist.Integral()
+    print hist.Integral('width')
+
+    # bin_edges = []
+    # bin_contents = []
+    # bin_errors = []
+    # for i in range(1, len(lines)):
+

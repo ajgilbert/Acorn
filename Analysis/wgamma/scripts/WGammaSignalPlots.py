@@ -26,9 +26,9 @@ prefix = args.indir
 
 remap = {
     'WG-LO-inc': 'WGToLNuG-madgraphMLM',
-    'WG-LO-130': 'WGToLNuG-madgraphMLM-PtG-130',
-    'WG-LO-500': 'WGToLNuG-madgraphMLM-PtG-500',
-    'WG-NLO-inc': 'WGToLNuG-amcatnloFXFX'
+    # 'WG-LO-130': 'WGToLNuG-madgraphMLM-PtG-130',
+    # 'WG-LO-500': 'WGToLNuG-madgraphMLM-PtG-500',
+    'WG-NLO-inc': 'WGToLNuG-amcatnloFXFX-stitched'
 }
 
 samples = {}
@@ -45,26 +45,26 @@ do_cats = []
 drawvars = [
     ('lhe_p0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
     ('gen_p0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
-    ('lhe_m0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
-    ('gen_m0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
+    ('lhe_l0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
+    ('gen_l0_pt', [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]),
     ('lhe_p0_eta', (50, -5, 5)),
     ('gen_p0_eta', (50, -5, 5)),
-    ('lhe_m0_eta', (50, -5, 5)),
-    ('gen_m0_eta', (50, -5, 5)),
+    ('lhe_l0_eta', (50, -5, 5)),
+    ('gen_l0_eta', (50, -5, 5)),
 ]
 
 # This is the selection used by the MATRIX authors:
-# baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_m0_pt > 25 && abs(gen_m0_eta) < 2.5 && gen_met > 35 && gen_m0p0_dr > 0.7'
-baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_m0_pt > 15 && abs(gen_m0_eta) < 2.5'
+# baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_l0_pt > 25 && abs(gen_l0_eta) < 2.5 && gen_met > 35 && gen_m0p0_dr > 0.7'
+baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_l0_pt > 15 && abs(gen_l0_eta) < 2.5'
 for var, binning in drawvars:
     for sample in samples:
-        hists['inclusive'][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel='is_wg_gen && %s' % baseline_sel, wt='wt_def')
-    hists['inclusive'][var]['WG-LO-inc-cut-130'] = Hist('TH1D', sample='WG-LO-inc', var=[var], binning=binning, sel='is_wg_gen && lhe_p0_pt > 130 && %s' % baseline_sel, wt='wt_def')
-    hists['inclusive'][var]['WG-LO-inc-cut-500'] = Hist('TH1D', sample='WG-LO-inc', var=[var], binning=binning, sel='is_wg_gen && lhe_p0_pt > 500 && %s' % baseline_sel, wt='wt_def')
+        hists['inclusive'][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel='is_wg_gen && gen_pdgid == 13 && %s' % baseline_sel, wt='wt_def')
+    hists['inclusive'][var]['WG-LO-inc-cut-130'] = Hist('TH1D', sample='WG-LO-inc', var=[var], binning=binning, sel='is_wg_gen && gen_pdgid == 13 && lhe_p0_pt > 130 && %s' % baseline_sel, wt='wt_def')
+    hists['inclusive'][var]['WG-LO-inc-cut-500'] = Hist('TH1D', sample='WG-LO-inc', var=[var], binning=binning, sel='is_wg_gen && gen_pdgid == 13 && lhe_p0_pt > 500 && %s' % baseline_sel, wt='wt_def')
 
-hists['WG-LO-total'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && lhe_p0_pt > 15', wt='wt_def')
-hists['WG-LO-min130'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && lhe_p0_pt > 130', wt='wt_def')
-hists['WG-LO-min500'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && lhe_p0_pt > 500', wt='wt_def')
+hists['WG-LO-total'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && gen_pdgid == 13 && lhe_p0_pt > 15', wt='wt_def')
+hists['WG-LO-min130'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && gen_pdgid == 13 && lhe_p0_pt > 130', wt='wt_def')
+hists['WG-LO-min500'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='is_wg_gen && gen_pdgid == 13 && lhe_p0_pt > 500', wt='wt_def')
 
 
 hists['WG-LO-full'] = Hist('TH1D', sample='WG-LO-inc', var=['0.5'], binning=(1, 0, 1), sel='1', wt='wt_def')
@@ -100,9 +100,9 @@ pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
 # Get the data and create axis hist
 var = 'gen_p0_pt'
 h_LO_inc = hists['inclusive'][var]['WG-LO-inc']
-h_LO_130 = hists['inclusive'][var]['WG-LO-130']
+# h_LO_130 = hists['inclusive'][var]['WG-LO-130']
 h_LO_inc_cut_130 = hists['inclusive'][var]['WG-LO-inc-cut-130']
-h_LO_500 = hists['inclusive'][var]['WG-LO-500']
+# h_LO_500 = hists['inclusive'][var]['WG-LO-500']
 h_NLO_inc = hists['inclusive'][var]['WG-NLO-inc']
 
 h_axes = [h_LO_inc.Clone() for x in pads]
@@ -111,9 +111,9 @@ for h in h_axes:
 
 h_LO_inc.Scale(1. / h_LO_inc.Integral(), 'width')
 h_NLO_inc.Scale(1. / h_NLO_inc.Integral(), 'width')
-h_LO_130.Scale(frac_130 / h_LO_130.Integral(), 'width')
+# h_LO_130.Scale(frac_130 / h_LO_130.Integral(), 'width')
 h_LO_inc_cut_130.Scale(frac_130 / h_LO_inc_cut_130.Integral(), 'width')
-h_LO_500.Scale(frac_500 / h_LO_500.Integral(), 'width')
+# h_LO_500.Scale(frac_500 / h_LO_500.Integral(), 'width')
 
 # if 'true_phi' in drawvar:
 #     labelvar = '#varphi_{true}'
@@ -145,9 +145,9 @@ legend.AddEntry(h_NLO_inc, 'NLO inclusive', 'L')
 # plot.Set(h_th, LineColor=4, LineWidth=2, MarkerColor=4)
 plot.Set(h_LO_inc, LineColor=1, LineWidth=2, MarkerColor=1, MarkerSize=0.5)
 plot.Set(h_NLO_inc, LineColor=ROOT.kGreen-3, LineWidth=1, MarkerColor=ROOT.kGreen-3, MarkerSize=0.5)
-plot.Set(h_LO_130, LineColor=9, LineWidth=1)
-plot.Set(h_LO_inc_cut_130, LineColor=2, LineWidth=2)
-plot.Set(h_LO_500, LineColor=28, LineWidth=1)
+# plot.Set(h_LO_130, LineColor=9, LineWidth=1)
+# plot.Set(h_LO_inc_cut_130, LineColor=2, LineWidth=2)
+# plot.Set(h_LO_500, LineColor=28, LineWidth=1)
 
 h_LO_inc.Draw('HISTSAMEE')
 # h_sm.Draw('HISTSAMEE')
@@ -169,9 +169,9 @@ h_axes[1].Draw()
 # r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
 # r_nominal = plot.MakeRatioHist(h_nominal, h_nominal, True, False)
 r_NLO_inc = plot.MakeRatioHist(h_NLO_inc, h_LO_inc, True, True)
-r_LO_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
-r_LO_inc_cut_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
-r_LO_500 = plot.MakeRatioHist(h_LO_inc_cut_130, h_LO_inc, True, True)
+# r_LO_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
+# r_LO_inc_cut_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
+# r_LO_500 = plot.MakeRatioHist(h_LO_inc_cut_130, h_LO_inc, True, True)
 r_NLO_inc.Draw('SAMEE')
 # r_LO_130.Draw('SAMEE')
 # r_LO_inc_cut_130.Draw('SAMEE')
