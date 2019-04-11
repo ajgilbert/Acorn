@@ -1,0 +1,20 @@
+[
+  {
+    "release": "CMSSW_7_1_30",
+    "SCRAM_ARCH": "slc6_amd64_gcc481",
+    "cfg": "gen-only-miniaod-2016/SMP-RunIISummer15wmLHEGS-00183_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": ["gen-only-miniaod-2016/run_remote_tarball_7_1_30.sh"],
+    "cmssw_lib": ["wgamma-miniaod-2016/lib-CMSSW_7_1_30-4-ge3b9a7d.tar.gz"],
+    "output_module": "RAWSIMoutput"
+  },
+  {
+    "release": "CMSSW_8_0_21",
+    "SCRAM_ARCH": "slc6_amd64_gcc530",
+    "cfg": "gen-only-miniaod-2016/SMP-RunIISummer16MiniAODv2-00084_1_cfg.py",
+    "local_files": [],
+    "cmssw_files": [],
+    "save": true,
+    "output_files": ["step_1.root", "FrameworkJobReport.xml"]
+  }
+]
