@@ -115,11 +115,11 @@ class WGDataAnalysis : public ModuleBase {
   float l0p0_dphi_;
   float l0p0_M_;
   float reco_phi_;
-  float reco_sphi_;
+  float reco_phi_f_;
   float reco_xy_phi_;
-  float reco_xy_sphi_;
+  float reco_xy_phi_f_;
   float reco_puppi_phi_;
-  float reco_puppi_sphi_;
+  float reco_puppi_phi_f_;
 
 
   // vetos
@@ -152,8 +152,9 @@ class WGDataAnalysis : public ModuleBase {
   float gen_p0_pt_;
   float gen_p0_eta_;
   float gen_phi_;
-  float gen_sphi_;
+  float gen_phi_f_;
   float true_phi_;
+  float true_phi_f_;
   int gen_l0_q_;
   float gen_met_;
   float gen_met_phi_;

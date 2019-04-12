@@ -15,9 +15,10 @@ tname = 'WGAnalysis'
 samples = {
     'WGSM': 'output/100718/wgamma_2016_v2/wg_gen/WpAToLNuA0j_5f_LO_MLM_pTA_300_0.root',
     'WGTH': 'output/100718/wgamma_2016_v2/wg_gen/Theorists_0.root',
-    'WG': 'output/100718/wgamma_2016_v2/wg_gen/WGToMuNuG-EFT-madgraphMLM-stitched_0.root'
+    # 'WG': 'output/100718/wgamma_2016_v2/wg_gen/WGToMuNuG-EFT-madgraphMLM-stitched_0.root'
+    'WG': '/home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root'
 }
-
+# /home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root
 remap = {
     'WG': 'WGToLNuG-EFT_pTA_300_inf-madgraphMLM'
 }
@@ -35,7 +36,7 @@ def GetBinning(binning_str):
     return binning
 
 
-def ParametrizeBin(x_vals, y_vals, y_val_errs, label, plot=False, dropBSM=False, dropInt=False, wsp=None):
+def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=True, dropBSM=False, dropInt=False, wsp=None):
     if y_vals[0] == 0.:
         print '>> Skipping bin %s due to zero content' % label
         return
@@ -53,7 +54,7 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, plot=False, dropBSM=False,
     sig_BSM = (y_0p2 - 2. * y_0p1 + y_0) / 0.02
     sig_int = (y_0p1 - y_0 - 0.01 * sig_BSM) / 0.1
     print '%.2g, %.2g, %.2g' % (sig_SM, sig_int, sig_BSM)
-    if plot:
+    if makePlots:
         fn_full = ROOT.TF1("fn_full", "([0] + x*[1] + x*x*[2])/[0]", 0, 1)
         fn_lin = ROOT.TF1("fn_lin", "([0] + x*[1])/[0]", 0, 1)
         fn_BSM = ROOT.TF1("fn_BSM", "([0] + x*x*[1])/[0]", 0, 1)

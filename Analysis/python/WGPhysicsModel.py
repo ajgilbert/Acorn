@@ -9,19 +9,26 @@ class WGModel(PhysicsModel):
                 self.ptBins = int(po.replace("ptBins=", ""))
             if po.startswith("phiBins="):
                 self.phiBins = int(po.replace("phiBins=", ""))
-            if po.startswith("eftMode="):
-                self.eftMode = bool(po.replace("eftMode=", ""))
+            if po.startswith("type="):
+                self.type = str(po.replace("type=", ""))
             if po.startswith("files="):
                 self.files = [tuple(X.split(':')) for X in po.replace("files=", "").split(',')]
 
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
-        if self.eftMode:
+        if self.type in ['eft']:
             self.modelBuilder.doVar("c3w[0,0,10]")
             pois = ['c3w']
             for filename, label in self.files:
                 print filename, label
                 self.ImportFile(filename, 'p', sublabel=label)
+        if self.type in ['pt_diff']:
+            pois = []
+            for c in ['p', 'n']:
+                for ptbin in range(self.ptBins):
+                        varname = "r_%s_%i" % (c, ptbin)
+                        pois.append(varname)
+                        self.modelBuilder.doVar("%s[1,0,10]" % varname)
         else:
             pois = []
             for c in ['p', 'n']:
@@ -54,7 +61,11 @@ class WGModel(PhysicsModel):
     def getYieldScale(self, bin, process):
         "Return the name of a RooAbsReal to scale this yield by or the two special values 1 and 0 (don't scale, and set to zero)"
         if self.DC.isSignal[process]:
-            scaler = process.replace('WG_', 'scale_')
+            if self.type in ['eft']:
+                scaler = process.replace('WG_', 'scale_')
+            elif self.type in ['pt_diff']:
+                scaler = process.replace('WG_', 'r_')
+                scaler=  scaler.replace('_met1', '')
             print 'Scaling %s/%s by %s' % (bin, process, scaler)
             return scaler
         return 1

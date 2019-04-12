@@ -28,6 +28,9 @@ namespace ac {
       tree_->Branch("gen_phi", &gen_phi_);
       tree_->Branch("true_phi", &true_phi_);
       tree_->Branch("lhe_true_phi", &lhe_true_phi_);
+      tree_->Branch("gen_phi_f", &gen_phi_f_);
+      tree_->Branch("true_phi_f", &true_phi_f_);
+      tree_->Branch("lhe_true_phi_f", &lhe_true_phi_f_);
       tree_->Branch("w_pt", &w_pt_);
       tree_->Branch("g_pt", &g_pt_);
       tree_->Branch("g_eta", &g_eta_);
@@ -109,14 +112,17 @@ namespace ac {
 
     // Define the gen_phi (using final state GenParticles + MET)
     gen_phi_ = gen_sys.Phi(parts.gen_lep->pdgId() < 0);
+    gen_phi_f_ = gen_sys.SymPhi(parts.gen_lep->pdgId() < 0);
 
     // Define the the true_phi (using final state GenParticles)
     true_phi_ = gen_true_sys.Phi(parts.gen_lep->pdgId() < 0);
+    true_phi_f_ = gen_true_sys.SymPhi(parts.gen_lep->pdgId() < 0);
 
     valid_mt_ = gen_sys.valid_mt;
 
     // Define the lhe_true_phi (using LHE particles)
     lhe_true_phi_ = lhe_sys.Phi(parts.lhe_lep->pdgId() < 0);
+    lhe_true_phi_f_ = lhe_sys.SymPhi(parts.lhe_lep->pdgId() < 0);
 
     tree_->Fill();
 

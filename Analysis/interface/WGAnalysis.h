@@ -20,8 +20,11 @@ class WGAnalysis : public ModuleBase {
 
   TTree * tree_;
   float gen_phi_;
+  float gen_phi_f_;
   float true_phi_;
+  float true_phi_f_;
   float lhe_true_phi_;
+  float lhe_true_phi_f_;
   unsigned type_;
   float wt_def_;
   float wt_C3w_0p0_;
