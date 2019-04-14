@@ -24,18 +24,6 @@ remap = {
 }
 
 
-# g_pt[]
-
-def GetBinning(binning_str):
-    if binning_str.startswith('['):
-        binning = [float(v) for v in binning_str[1:-1].split(',')]
-        binning = (len(binning) - 1, array('d', binning))
-    else:
-        binning = binning_str[1:-1].split(',')
-        binning = (int(binning[0]), float(binning[1]), float(binning[2]))
-    return binning
-
-
 def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=True, dropBSM=False, dropInt=False, wsp=None):
     if y_vals[0] == 0.:
         print '>> Skipping bin %s due to zero content' % label
@@ -115,14 +103,14 @@ parser.add_argument('--save-scalings', type=int, default=0, help="1: save absolu
 args = parser.parse_args()
 
 drawvar_x = args.draw_x[0]
-binning_x = GetBinning(args.draw_x[1])
+binning_x = BinningFromStr(args.draw_x[1])
 label_x = args.draw_x[2]
 
 is2D = False
 if args.draw_y is not None:
     is2D = True
     drawvar_y = args.draw_y[0]
-    binning_y = GetBinning(args.draw_y[1])
+    binning_y = BinningFromStr(args.draw_y[1])
 
 
 pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
@@ -131,7 +119,6 @@ pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
 fout = ROOT.TFile('%s_w_%s.root' % (args.output, pm_label), 'RECREATE')
 wsp = ROOT.RooWorkspace('w','w')
 hists = Node()
-
 
 
 # drawabs = True

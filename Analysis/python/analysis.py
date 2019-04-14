@@ -1,8 +1,8 @@
 import ROOT
 import time
 import re
+import math
 import hashlib
-# import json
 from array import array
 from pprint import pprint
 from collections import defaultdict, OrderedDict
@@ -481,8 +481,32 @@ def ReadTxtHist(filename, column=1, column_err=2, classname='TH1D', objname='his
     print hist.Integral()
     print hist.Integral('width')
 
-    # bin_edges = []
-    # bin_contents = []
-    # bin_errors = []
-    # for i in range(1, len(lines)):
 
+def BinningFromStr(binning_str):
+    if binning_str.startswith('['):
+        binning = [float(eval(v)) for v in binning_str[1:-1].split(',')]
+        binning = (len(binning) - 1, array('d', binning))
+    else:
+        binning = binning_str[1:-1].split(',')
+        binning = (int(binning[0]), float(eval(binning[1])), float(eval(binning[2])))
+    return binning
+
+
+def StrFromBinning(bins):
+    if isinstance(bins, list):
+        return '[%s]' % ','.join([str(x) for x in bins])
+    if isinstance(bins, tuple):
+        return '(%i,%f,%f)' % bins
+
+
+def BinEdgesFromStr(binning_str):
+    binning = BinningFromStr(binning_str)
+    if binning_str.startswith('['):
+        return list(binning[1])
+    else:
+        width = (float(binning[2]) - float(binning[1])) / float(binning[0])
+        binedges = []
+        for i in range(binning[0]):
+            binedges.append(float(binning[1]) + float(i) * width)
+        binedges.append(binning[2])
+        return binedges

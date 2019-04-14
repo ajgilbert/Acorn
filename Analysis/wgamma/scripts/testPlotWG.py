@@ -17,6 +17,7 @@ parser.add_argument('--task', default='eft_region', choices=['eft_region', 'base
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
+parser.add_argument('--extra-cfg', default=None)
 
 args = parser.parse_args()
 
@@ -153,6 +154,7 @@ def AddDYSplitting(node, label, sample, var_list, binning, sel, wt, components=[
     AddPhotonSplitting(node, label + '_XZG' + postfix, sample, var_list, binning, '(%s) && !(gen_is_zg && p0_truth==1)' % sel, wt, components=components)
     AddPhotonSplitting(node, label + '_IZG' + postfix, sample, var_list, binning, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt, components=components)
 
+
 def HistSum(label_list):
     return sum([node[X] for X in label_list[1:]], node[label_list[0]])
 
@@ -216,10 +218,25 @@ X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
 
 
 if args.task == 'eft_region':
-    pt_bins_min = [150, 210, 300, 420, 600, 850]
-    pt_bins_max = [210, 300, 420, 600, 850, 1200]
-    phi_bins_min = [0.00, 0.63, 1.26, 1.89, 2.52]
-    phi_bins_max = [0.63, 1.26, 1.89, 2.52, 3.15]
+    eft_defaults = {
+        'pt_bins': '[150,210,300,420,600,850,1200]',
+        # 'phi_var': 'abs(true_phi)',
+        # 'phi_bins': '(5,0.,math.pi)'
+        'phi_var': 'abs(gen_sphi)',
+        'phi_var_obs': 'abs(reco_sphi)',
+        'phi_bins': '(3,0.,math.pi/2.)'
+    }
+
+    if args.extra_cfg is not None:
+        eft_defaults.update(json.loads(args.extra_cfg))
+    pprint(eft_defaults)
+    pt_bins = BinEdgesFromStr(eft_defaults['pt_bins'])
+    phi_bins = BinEdgesFromStr(eft_defaults['phi_bins'])
+    pt_bins_min = pt_bins[:-1]
+    pt_bins_max = pt_bins[1:]
+    phi_bins_min = phi_bins[:-1]
+    phi_bins_max = phi_bins[1:]
+    phi_var = eft_defaults['phi_var']
 
     do_cats['e'].extend(['baseline_e_eft'])
     do_cats['m'].extend(['baseline_m_eft'])
@@ -249,17 +266,16 @@ if args.task == 'eft_region':
         X['n_gen_met1_%i' % (i)] = '$n_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
 
         for j in range(len(phi_bins_min)):
-            X['p_gen_%i_%i' % (i, j)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && abs(true_phi) >= %f && abs(true_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
-            X['n_gen_%i_%i' % (i, j)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && abs(true_phi) >= %f && abs(true_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
-            X['p_gen_met1_%i_%i' % (i, j)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && abs(true_phi) >= %f && abs(true_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
-            X['n_gen_met1_%i_%i' % (i, j)] = '$n_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && abs(true_phi) >= %f && abs(true_phi) < %f' % (pt_bins_min[i], pt_bins_max[i], phi_bins_min[j], phi_bins_max[j])
+            X['p_gen_%i_%i' % (i, j)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['n_gen_%i_%i' % (i, j)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['p_gen_met1_%i_%i' % (i, j)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['n_gen_met1_%i_%i' % (i, j)] = '$n_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
 
     drawvars = [
-        ('gen_p0_pt', pt_bins_min + [pt_bins_max[-1]]),
-        ('p0_pt', pt_bins_min + [pt_bins_max[-1]]),
-        ('abs(reco_phi)', (5, 0, 3.15)),
-        ('abs(gen_phi)', (5, 0, 3.15)),
-        ('abs(true_phi)', (5, 0, 3.15)),
+        ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
+        ('p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
+        (eft_defaults['phi_var'], BinningFromStr(eft_defaults['phi_bins'])),
+        (eft_defaults['phi_var_obs'], BinningFromStr(eft_defaults['phi_bins']))
     ]
 
     for chn in ['e', 'm']:
@@ -297,13 +313,14 @@ if args.task == 'eft_region':
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
             hists[chn]['XS'][var]['XS_WG_n_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
-            # Pick this up automatically
-            hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
-            hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
+            # # Pick this up automatically
+            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
+            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
+            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
+            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
+            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
+            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
+
 if args.task in ['baseline', 'electron_fakes']:
     if args.task == 'electron_fakes':
         pt_bins_min = [30, 35, 40, 60, 100]

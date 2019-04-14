@@ -7,25 +7,19 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--var', default='abs(reco_phi)')
 parser.add_argument('--year', default='2016')
+parser.add_argument('--label', default='default')
 parser.add_argument('--channel', default='m')
 parser.add_argument('--output', default='output/cards')
 parser.add_argument('--type', default='eft', choices=['eft', 'pt_diff'])
+parser.add_argument('--pt-bins', type=int, default=6)
+parser.add_argument('--phi-bins', type=int, default=5)
 args = parser.parse_args()
 
 cb = ch.CombineHarvester()
 
-
-# procs = {
-#   'sig'  : ['tH_YtMinus', 'tHW'],
-#   'sim'  : ['WZ', 'ZZ', 'ttW', 'ttZ', 'ttH'],
-#   'bkg'  : ['WZ','ZZ','ttW','ttZ','ttH','reducible']
-# }
-
-# cats = [(0, 'emt'), (1, 'mmt')]
-
-# masses = ['125']
 chn = args.channel
-n_pt_bins = 6
+n_pt_bins = args.pt_bins
+n_phi_bins = args.phi_bins
 wg_proc = 'WG_NLO'
 
 era = '13TeV_%s' % args.year
@@ -35,7 +29,7 @@ for c in ['p', 'n']:
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
         cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_ooa' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
         if args.type in ['eft']:
-            for phibin in range(5):
+            for phibin in range(n_phi_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_met1_%i_%i' % (c, ptbin, phibin)], [cat], True)
         if args.type in ['pt_diff']:
@@ -62,7 +56,7 @@ cb.cp().AddSyst(
 par = cb.GetParameter('lumiscale').set_frozen(True)
 
 print '>> Extracting histograms from input root files...'
-file = 'output_%s_eft_region_default.root' % args.year
+file = 'output_%s_eft_region_%s.root' % (args.year, args.label)
 cb.cp().ExtractShapes(
     file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 
