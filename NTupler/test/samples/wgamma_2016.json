@@ -199,6 +199,34 @@
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },
+    "WGToMuNuG_01J_5f_EFT": {
+      "dataset": "/WGToMuNuG_01J_5f_EFT_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/agilbert-RunIISummer16MiniAODv2-81a2c693d430d7f96872242e8057cc92/USER",
+      "attributes": ["submitgenonlyx"],
+      "events": 0,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-130": {
+      "dataset": "/WGToMuNuG_01J_5f_EFT_PtG-130_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/agilbert-RunIISummer16MiniAODv2-81a2c693d430d7f96872242e8057cc92/USER",
+      "attributes": ["submitgenonlyx"],
+      "events": 0,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-300": {
+      "dataset": "/WGToMuNuG_01J_5f_EFT_PtG-300_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/agilbert-RunIISummer16MiniAODv2-81a2c693d430d7f96872242e8057cc92/USER",
+      "attributes": ["submitgenonlyx"],
+      "events": 0,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-500": {
+      "dataset": "/WGToMuNuG_01J_5f_EFT_PtG-500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/agilbert-RunIISummer16MiniAODv2-81a2c693d430d7f96872242e8057cc92/USER",
+      "attributes": ["submitgenonlyx"],
+      "events": 0,
+      "config": "mc_genonly",
+      "inputDBS": "phys03"
+    },
     "ZGToLLG-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
       "attributes": ["submit_old"],
@@ -502,7 +530,7 @@
     "mc":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2"],
     "mc_no_lhe":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "hasLHE=0", "cores=2"],
     "mc_old":  ["year=2016_old", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2"],
-    "mc_genonly":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=1", "genOnly=1"]
+    "mc_genonly":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2", "genOnly=1"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",

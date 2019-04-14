@@ -509,6 +509,66 @@
           "xsec": 0.05124
         }
       }
+    },
+    "WGToMuNuG_01J_5f_EFT": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG_01J_5f_EFT"],
+      "xsec": 63.04,
+      "XSecSource": "After filter: final cross section = 6.304e+01 +- 2.461e-01 pb"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-130": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG_01J_5f_EFT_PtG-130"],
+      "xsec": 0.4621,
+      "XSecSource": "After filter: final cross section = 4.621e-01 +- 2.417e-03 pb"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-300": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG_01J_5f_EFT_PtG-300"],
+      "xsec": 0.1232,
+      "XSecSource": "After filter: final cross section = 1.232e-01 +- 6.722e-04 pb"
+    },
+    "WGToMuNuG_01J_5f_EFT_PtG-500": {
+      "attributes": ["wg_gen_v2"],
+      "inputs": ["WGToMuNuG_01J_5f_EFT_PtG-500"],
+      "xsec": 0.06529,
+      "XSecSource": "After filter: final cross section = 6.529e-02 +- 3.810e-04 pb"
+    },
+    "WGToMuNuG_01J_5f_EFT-stitched": {
+      "attributes": ["wg_gen_v3"],
+      "inputs": ["WGToMuNuG_01J_5f_EFT", "WGToMuNuG_01J_5f_EFT_PtG-130", "WGToMuNuG_01J_5f_EFT_PtG-300", "WGToMuNuG_01J_5f_EFT_PtG-500"],
+      "xsec": 63.04,
+      "stitching": {
+        "binned": ["photon_pt"],
+        "WGToMuNuG_01J_5f_EFT": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 0,
+          "xsec": 63.04
+        },
+        "WGToMuNuG_01J_5f_EFT_PtG-130": {
+          "target": false,
+          "min": [130.0],
+          "max": [],
+          "events": 0,
+          "xsec": 0.4621
+        },
+        "WGToMuNuG_01J_5f_EFT_PtG-300": {
+          "target": false,
+          "min": [300.0],
+          "max": [],
+          "events": 0,
+          "xsec": 0.1232
+        },
+        "WGToMuNuG_01J_5f_EFT_PtG-500": {
+          "target": false,
+          "min": [500.0],
+          "max": [],
+          "events": 0,
+          "xsec": 0.06529
+        }
+      }
     }
   },
   "config": {
