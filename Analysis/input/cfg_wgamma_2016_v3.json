@@ -544,28 +544,28 @@
           "target": true,
           "min": [],
           "max": [],
-          "events": 0,
+          "events": 6239625,
           "xsec": 63.04
         },
         "WGToMuNuG_01J_5f_EFT_PtG-130": {
           "target": false,
           "min": [130.0],
           "max": [],
-          "events": 0,
+          "events": 1160274,
           "xsec": 0.4621
         },
         "WGToMuNuG_01J_5f_EFT_PtG-300": {
           "target": false,
           "min": [300.0],
           "max": [],
-          "events": 0,
+          "events": 220703,
           "xsec": 0.1232
         },
         "WGToMuNuG_01J_5f_EFT_PtG-500": {
           "target": false,
           "min": [500.0],
           "max": [],
-          "events": 0,
+          "events": 207065,
           "xsec": 0.06529
         }
       }
