@@ -17,12 +17,17 @@ class WGModel(PhysicsModel):
     def doParametersOfInterest(self):
         """Create POI and other parameters, and define the POI set."""
         if self.type in ['eft']:
+            # Could measure c3w separately in:
+            # fully combined
+            # 2016, 2017, 2018
+            # electron channel, muon channel
+            # W+, W-
             self.modelBuilder.doVar("c3w[0,0,10]")
             pois = ['c3w']
             for filename, label in self.files:
                 print filename, label
                 self.ImportFile(filename, 'p', sublabel=label)
-        if self.type in ['pt_diff']:
+        elif self.type in ['pt_diff']:
             pois = []
             for c in ['p', 'n']:
                 for ptbin in range(self.ptBins):
@@ -46,14 +51,11 @@ class WGModel(PhysicsModel):
         for c in [sign]:
             for ptbin in range(self.ptBins):
                 for phibin in range(self.phiBins):
-                    name = '%s_w_%s_bin_%i_%i' % (sublabel, c, ptbin + 1, phibin + 1)
+                    name = '%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
                     # gr = fin.Get(name)
-                    sub = ''
-                    if sublabel != 'main':
-                        sub = str('_' + sublabel)
-                    print 'scale_%s%s_%i_%i' % (c, sub, ptbin, phibin)
+                    print 'scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
                     obj = w.function(name)
-                    obj.SetName('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin))
+                    obj.SetName('scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin))
                     # spline = ROOT.RooSpline1D('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin), '', self.modelBuilder.out.var('c3w'), gr.GetN(), gr.GetX(), gr.GetY(), 'CSPLINE')
                     self.modelBuilder.out._import(obj)
         fin.Close()

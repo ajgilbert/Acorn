@@ -27,15 +27,15 @@ for c in ['p', 'n']:
     for ptbin in range(n_pt_bins):
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
-        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_ooa' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
+        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
         if args.type in ['eft']:
             for phibin in range(n_phi_bins):
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_met1_%i_%i' % (c, ptbin, phibin)], [cat], True)
+                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
+                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
         if args.type in ['pt_diff']:
             for pt_truthbin in range(n_pt_bins):
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_met1_%i' % (c, pt_truthbin)], [cat], True)
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_%s_%i' % (c, pt_truthbin)], [cat], True)
+                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i' % (c, pt_truthbin)], [cat], True)
+                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i' % (c, pt_truthbin)], [cat], True)
 
 print '>> Adding systematic uncertainties...'
 

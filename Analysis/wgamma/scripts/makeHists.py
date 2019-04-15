@@ -294,21 +294,21 @@ if args.task == 'eft_region':
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
                     wt=X.get('$baseline_wt * wt_p0_fake'))
                 for P in [wg_sample]:
-                    hists[chn][sel][var]['WG_p_ooa'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_n_ooa'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_p_acc'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_n_acc'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_p_acc_met1'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc_met1'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_n_acc_met1'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc_met1'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_ooa_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_ooa'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_ooa_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_ooa'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_main_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_main_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_met1_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc_met1'), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var]['WG_met1_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc_met1'), wt=X.get('$baseline_wt'))
                     if sel[-1].isdigit():
                         chg = sel[0]
                         for i in range(len(pt_bins_min)):
-                            hists[chn][sel][var]['WG_%s_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
-                            hists[chn][sel][var]['WG_%s_met1_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
+                            hists[chn][sel][var]['WG_main_%s_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
+                            hists[chn][sel][var]['WG_met1_%s_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
                         for i in [int(sel[-1])]:
                             for j in range(len(phi_bins_min)):
-                                hists[chn][sel][var]['WG_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
-                                hists[chn][sel][var]['WG_%s_met1_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
+                                hists[chn][sel][var]['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
+                                hists[chn][sel][var]['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
         pdgid = '11' if chn == 'e' else '13'
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))

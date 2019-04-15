@@ -12,19 +12,8 @@ plot.ModTDRStyle()
 
 tname = 'WGAnalysis'
 
-samples = {
-    'WGSM': 'output/100718/wgamma_2016_v2/wg_gen/WpAToLNuA0j_5f_LO_MLM_pTA_300_0.root',
-    'WGTH': 'output/100718/wgamma_2016_v2/wg_gen/Theorists_0.root',
-    # 'WG': 'output/100718/wgamma_2016_v2/wg_gen/WGToMuNuG-EFT-madgraphMLM-stitched_0.root'
-    'WG': '/home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root'
-}
-# /home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root
-remap = {
-    'WG': 'WGToLNuG-EFT_pTA_300_inf-madgraphMLM'
-}
 
-
-def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=True, dropBSM=False, dropInt=False, wsp=None):
+def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=False, dropInt=False, wsp=None, binStr=''):
     if y_vals[0] == 0.:
         print '>> Skipping bin %s due to zero content' % label
         return
@@ -54,33 +43,44 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=True, dropBSM=Fa
         fn_BSM.SetParameter(0, sig_SM)
         fn_BSM.SetParameter(1, sig_BSM)
         canv = ROOT.TCanvas('%s' % (label), '%s' % (label))
+        plot.Set(gr, MarkerColor=2, LineColor=2, LineWidth=2)
         pads = plot.OnePad()
         gr.Draw('APC')
         gr.Print()
         if fn_full is not None:
+            plot.Set(fn_full, MarkerColor=2, LineColor=2, LineWidth=2)
             fn_full.Draw("SAME")
-            fn_lin.SetLineColor(4)
+            plot.Set(fn_lin, MarkerColor=4, LineColor=4, LineWidth=2)
             fn_lin.Draw('SAME')
-            fn_BSM.SetLineColor(8)
+            plot.Set(fn_BSM, MarkerColor=1, LineColor=1, LineWidth=2)
             fn_BSM.Draw('SAME')
             axis = plot.GetAxisHist(pads[0])
-            axis.SetMinimum(0)
-            axis.SetMaximum(2)
-            axis.GetXaxis().SetRangeUser(0, 1.0)
+            axis.SetMinimum(min(axis.GetMinimum(), fn_lin.Eval(1)))
+            # axis.SetMaximum(2)
+            plot.Set(axis.GetXaxis(), Title='C_{3W} (TeV^{-2})')
+            plot.Set(axis.GetYaxis(), Title='#sigma(C_{3W})/#sigma_{SM}')
+            legend = ROOT.TLegend(0.2, 0.86 - 0.04 * 3, 0.4, 0.91, '', 'NBNDC')
+            legend.AddEntry(fn_full, 'Full', 'L')
+            legend.AddEntry(fn_lin, 'Int. only', 'L')
+            legend.AddEntry(fn_BSM, 'BSM^2 only', 'L')
+            legend.Draw()
+            # axis.GetXaxis().SetRangeUser(0, 1.0)
         # WriteToTFile(gr, fout, '', 'w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1))
-        # plot.DrawTitle(pads[0], '[%g,%g],[%g,%g]' % (ymin, ymax, xmin, xmax), 3)
-        canv.Print('.png')
-        canv.Print('.pdf')
+        plot.DrawTitle(pads[0], '#scale[0.7]{#sigma/#sigma_{SM} = 1 + (%.2f)#upointC_{3W} + (%.2f)#upointC_{3W}^{2}}' % (sig_int, sig_BSM), 1)
+        plot.DrawTitle(pads[0], '#scale[0.7]{%s}' % binStr, 3)
+        canv.Print(plotdir + '/%s.png' % label)
+        canv.Print(plotdir + '/%s.pdf' % label)
     if dropInt:
         sig_int = 0.
     if dropBSM:
         sig_BSM = 0.
     if wsp is not None:
-        wsp.factory('expr::%s("%.3g+@0*%.3g+@0*@0*%.3g",c3w[0,0,10])' % (label, sig_SM, sig_int, sig_BSM))
+        wsp.factory('expr::%s("%.3g+@0*%.3g+@1*@0*@0*%.3g",c3w[0,0,10],withBSM[1])' % (label, sig_SM, sig_int, sig_BSM))
     return (sig_SM, sig_int, sig_BSM)
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--sample', default='')
 parser.add_argument('--draw-x', default='gen_phi', nargs=3)
 parser.add_argument('--draw-y', default=None, nargs=3)
 parser.add_argument('--unit-norm', action='store_true')
@@ -97,10 +97,13 @@ parser.add_argument('--n_eta', default='9999.')
 parser.add_argument('--nparts_max', default='10')
 parser.add_argument('--dr', default='3.0')
 parser.add_argument('--output', '-o', default='gen_plot')
+parser.add_argument('--label', default='gen_plot')
 parser.add_argument('--ratio-max', default=1.46, type=float)
 parser.add_argument('--save-scalings', type=int, default=0, help="1: save absolute 2: save relative")
-# parser.add_argument('--ratio', '-o', default='gen_plot')
+parser.add_argument('--plot-dir', default='.')
 args = parser.parse_args()
+
+plotdir = args.plot_dir
 
 drawvar_x = args.draw_x[0]
 binning_x = BinningFromStr(args.draw_x[1])
@@ -111,28 +114,14 @@ if args.draw_y is not None:
     is2D = True
     drawvar_y = args.draw_y[0]
     binning_y = BinningFromStr(args.draw_y[1])
-
+    label_y = args.draw_y[2]
 
 pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
 
 
-fout = ROOT.TFile('%s_w_%s.root' % (args.output, pm_label), 'RECREATE')
+fout = ROOT.TFile('%s_%s_%s.root' % (args.output, args.label, pm_label), 'RECREATE')
 wsp = ROOT.RooWorkspace('w','w')
 hists = Node()
-
-
-# drawabs = True
-# drawvar = 'lhe_phi1'
-# pt_bins = [150, 210, 300, 420, 600, 850, 1200]
-# if args.abs:
-#     drawvar = 'fabs(%s)' % args.draw
-#     binning = (5, 0, 3.15)
-# else:
-#     drawvar = '%s' % args.draw
-#     if 'phi' in drawvar:
-#         binning = (10, -3.15, 3.15)
-#     elif 'g_pt' in drawvar:
-#         binning = (20, 0, 1000)
 
 compute = [
     ('X_0p1', 0.1),
@@ -149,14 +138,12 @@ for name, sa, wt in [
         ('C3w_0p4', 'WG', 'wt_C3w_0p4*wt_def'),
         ('C3w_0p67', 'WG', 'wt_C3w_0p67*wt_def'),
         ('C3w_1p0', 'WG', 'wt_C3w_1p0*wt_def'),
-        # ('SM', 'WGSM', '1.0'),
-        # ('TH', 'WGTH', '1.0')
 ]:
     if args.charge == '0':
         charge_sel = '1'
     else:
         charge_sel = 'l_charge==%s' % args.charge
-    sel = '%s && nparts>=3 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && n_pt<%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
+    sel = '%s && nparts>=1 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && n_pt<%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
         charge_sel, args.nparts_max, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.n_pt_max, args.l_eta, args.n_eta, args.g_eta, args.dr)
     print sel
 
@@ -166,6 +153,9 @@ for name, sa, wt in [
         hists[name] = Hist('TH1D', binning_x, sa, [drawvar_x], sel=sel, wt=wt)
     hists[name + '_phi_reco'] = Hist('TH2D', (40, -3.15, 3.15, 40, -3.15, 3.15), sa, ['true_phi', 'gen_phi'], sel=sel, wt=wt)
 
+samples = {
+    'WG': args.sample
+}
 MultiDraw(hists, samples, tname)
 
 for label, val in compute:
@@ -178,7 +168,8 @@ if not is2D:
     for ib in xrange(1, hists['nominal'].GetNbinsX() + 1):
         y_vals = [hists[h].GetBinContent(ib) for h in y_labels]
         y_vals_err = [hists[h].GetBinError(ib) for h in y_labels]
-        bin_scalings.append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_w_%s_bin_%i' % (args.output, pm_label, ib), wsp=wsp))
+        bin_str = '%g #leq %s < %g' % (hists[h].GetXaxis().GetBinLowEdge(ib), label_x, hists[h].GetXaxis().GetBinUpEdge(ib))
+        bin_scalings.append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i' % (args.label, pm_label, ib - 1), wsp=wsp, binStr=bin_str))
         scale = bin_scalings[ib - 1]
         for label, val in compute:
             scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
@@ -190,7 +181,9 @@ else:
         for jb in xrange(1, hists['nominal'].GetNbinsY() + 1):
             y_vals = [hists[h].GetBinContent(ib, jb) for h in y_labels]
             y_vals_err = [hists[h].GetBinError(ib, jb) for h in y_labels]
-            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_w_%s_bin_%i_%i' % (args.output, pm_label, ib, jb), wsp=wsp))
+            bin_str = '%.4g #leq %s < %.4g' % (hists[h].GetXaxis().GetBinLowEdge(ib), label_x, hists[h].GetXaxis().GetBinUpEdge(ib))
+            bin_str +=', %.4g #leq %s < %.4g' % (hists[h].GetYaxis().GetBinLowEdge(jb), label_y, hists[h].GetYaxis().GetBinUpEdge(jb))
+            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i_%i' % (args.label, pm_label, ib - 1, jb - 1), wsp=wsp, binStr=bin_str))
             scale = bin_scalings[ib - 1][jb - 1]
             for label, val in compute:
                 scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
@@ -317,55 +310,6 @@ if not is2D:
     # ... and we're done
     canv.Print('.png')
     canv.Print('.pdf')
-
-
-# save_scalings = args.save_scalings
-
-
-# if save_scalings >= 1:
-#     if save_scalings == 2:
-#         for hname in ['nominal_2D', 'C3w_0p1_2D', 'C3w_0p2_2D', 'C3w_0p4_2D', 'C3w_1p0_2D']:
-#             htmp = hists[hname]
-#             for jb in xrange(1, htmp.GetNbinsY() + 1):
-#                 tot = 0.
-#                 for ib in xrange(1, htmp.GetNbinsX() + 1):
-#                     tot += htmp.GetBinContent(ib, jb)
-#                 for ib in xrange(1, htmp.GetNbinsX() + 1):
-#                     htmp.SetBinContent(ib, jb, htmp.GetBinContent(ib, jb) / tot)
-#                     htmp.SetBinError(ib, jb, htmp.GetBinError(ib, jb) / tot)
-
-#     for jb in xrange(1, hists['nominal_2D'].GetNbinsY() + 1):
-#         ymin = hists['nominal_2D'].GetYaxis().GetBinLowEdge(jb)
-#         ymax = hists['nominal_2D'].GetYaxis().GetBinUpEdge(jb)
-
-#         for ib in xrange(1, hists['nominal_2D'].GetNbinsX() + 1):
-#             xmin = hists['nominal_2D'].GetXaxis().GetBinLowEdge(ib)
-#             xmax = hists['nominal_2D'].GetXaxis().GetBinUpEdge(ib)
-#             npoints = 6
-#             gr = ROOT.TGraphErrors(npoints)
-#             nom = hists['nominal_2D'].GetBinContent(ib, jb)
-#             if nom != 0.:
-#                 gr.SetPoint(0, 0.0, hists['nominal_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPoint(1, 0.1, hists['C3w_0p1_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPoint(2, 0.2, hists['C3w_0p2_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPoint(3, 0.4, hists['C3w_0p4_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPoint(4, 0.67, hists['C3w_0p67_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPoint(5, 1.0, hists['C3w_1p0_2D'].GetBinContent(ib, jb) / nom)
-#                 gr.SetPointError(0, 0., hists['nominal_2D'].GetBinError(ib, jb) / nom)
-#                 gr.SetPointError(1, 0., hists['C3w_0p1_2D'].GetBinError(ib, jb) / nom)
-#                 gr.SetPointError(2, 0., hists['C3w_0p2_2D'].GetBinError(ib, jb) / nom)
-#                 gr.SetPointError(3, 0., hists['C3w_0p4_2D'].GetBinError(ib, jb) / nom)
-#                 gr.SetPointError(4, 0., hists['C3w_0p67_2D'].GetBinError(ib, jb) / nom)
-#                 gr.SetPointError(5, 0., hists['C3w_1p0_2D'].GetBinError(ib, jb) / nom)
-#             canv = ROOT.TCanvas('%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1), '%s_w_%s_gen_bin_%i_%i' % (args.output, pm_label, jb - 1, ib - 1))
-#             pads = plot.OnePad()
-#             gr.Draw('APC')
-#             gr.Print()
-#             WriteToTFile(gr, fout, '', 'w_%s_gen_bin_%i_%i' % (pm_label, jb - 1, ib - 1))
-#             plot.DrawTitle(pads[0], '[%g,%g],[%g,%g]' % (ymin, ymax, xmin, xmax), 3)
-#             canv.Print('.png')
-#             canv.Print('.pdf')
-
 
 
 for path, name, obj in hists.ListObjects():
