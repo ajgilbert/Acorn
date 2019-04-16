@@ -28,7 +28,7 @@ for c in ['p', 'n']:
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
         cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
-        if args.type in ['eft']:
+        if args.type in ['eft', 'pt_phi_diff']:
             for phibin in range(n_phi_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
@@ -62,6 +62,15 @@ cb.cp().ExtractShapes(
 
 # cb.SetAutoMCStats(cb, 0, True)
 cb.ForEachObj(lambda x: x.set_bin(x.bin() + '_' + args.year))
+
+
+def CorrectionNegativeYield(proc):
+    if proc.rate() < 0.:
+        print '%s,%s has negative yield %f' % (proc.bin(), proc.process(), proc.rate())
+        proc.set_rate(0.)
+
+
+cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
 
 writer = ch.CardWriter('$TAG/$BIN.txt',
                        '$TAG/common/$ANALYSIS.%s.%s.input.root' % (args.channel, args.year))

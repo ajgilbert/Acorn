@@ -224,7 +224,8 @@ if args.task == 'eft_region':
         # 'phi_bins': '(5,0.,math.pi)'
         'phi_var': 'abs(gen_sphi)',
         'phi_var_obs': 'abs(reco_sphi)',
-        'phi_bins': '(3,0.,math.pi/2.)'
+        'phi_bins': '(3,0.,math.pi/2.)',
+        'phi_bins_obs': '(6,0.,math.pi/2.)',
     }
 
     if args.extra_cfg is not None:
@@ -275,7 +276,7 @@ if args.task == 'eft_region':
         ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
         ('p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
         (eft_defaults['phi_var'], BinningFromStr(eft_defaults['phi_bins'])),
-        (eft_defaults['phi_var_obs'], BinningFromStr(eft_defaults['phi_bins']))
+        (eft_defaults['phi_var_obs'], BinningFromStr(eft_defaults['phi_bins_obs']))
     ]
 
     for chn in ['e', 'm']:
@@ -313,6 +314,8 @@ if args.task == 'eft_region':
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
             hists[chn]['XS'][var]['XS_WG_n_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['XS_WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['XS_WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
             # # Pick this up automatically
             # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
             # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))

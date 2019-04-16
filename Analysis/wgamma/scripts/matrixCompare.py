@@ -56,10 +56,10 @@ drawvars = [
 
 # This is the selection used by the MATRIX authors:
 # baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_l0_pt > 25 && abs(gen_l0_eta) < 2.5 && gen_met > 35 && gen_m0p0_dr > 0.7'
-baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_l0_pt > 15 && abs(gen_l0_eta) < 2.5'
+baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.6 && gen_l0_pt > 15 && abs(gen_l0_eta) < 999.0'
 for var, binning in drawvars:
     for sample in samples:
-        hists['inclusive'][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel='is_wg_gen && gen_pdgid == 11', wt='wt_def')
+        hists['inclusive'][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel='%s && gen_pdgid == 13' % baseline_sel, wt='wt_def')
 
 MultiDraw(hists, samples, tname, mt_cores=4)
 
@@ -83,8 +83,8 @@ for path, hname, obj in hists.ListObjects():
     obj.Scale(3.)
     obj.Scale(1., 'width')
 
-h_matrix_NLO_p = ReadTxtHist("/home/files/matrix/MATRIX_v1.0.2/run/ppexnea03_MATRIX/result/run_03/gnuplot/histograms/pT_gamma__NLO_QCD.hist")
-h_matrix_NLO_m = ReadTxtHist("/home/files/matrix/MATRIX_v1.0.2/run/ppenexa03_MATRIX/result/run_01/gnuplot/histograms/pT_gamma__NLO_QCD.hist")
+h_matrix_NLO_p = ReadTxtHist("/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.2/run/ppexnea03_MATRIX/result/run_NLO_prec_5E-4/gnuplot/histograms/pT_gamma__NLO_QCD.hist")
+h_matrix_NLO_m = ReadTxtHist("/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.2/run/ppenexa03_MATRIX/result/run_NLO_prec_5E-4/gnuplot/histograms/pT_gamma__NLO_QCD.hist")
 
 h_matrix_NLO = h_matrix_NLO_p.Clone()
 h_matrix_NLO.Add(h_matrix_NLO_m)
