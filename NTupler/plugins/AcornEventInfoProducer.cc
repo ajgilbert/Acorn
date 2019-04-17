@@ -217,7 +217,7 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       metfilter_bits[saveMetFilters_.size() + imet] = !(*bool_handle);
     }
     info->setMetFilters(metfilter_bits);
-    std::cout << toBinaryString(uint32_t(metfilter_bits.to_ulong())) << "\n";
+    // std::cout << toBinaryString(uint32_t(metfilter_bits.to_ulong())) << "\n";
   }
 
   std::vector<double> user_doubles;
