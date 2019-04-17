@@ -36,6 +36,10 @@ class EventInfo {
 
   inline std::vector<double> const& genWeights() const { return genWeights_; }
 
+  inline int npLO() const { return npLO_; }
+
+  inline int npNLO() const { return npNLO_; }
+
   inline double nominalLHEWeight() const { return nominalLHEWeight_; }
 
   inline std::map<unsigned, double> const& lheWeights() const { return lheWeights_; }
@@ -78,6 +82,10 @@ class EventInfo {
   }
 
   inline void setGenWeights(std::vector<double> const& genWeights) { genWeights_ = genWeights; }
+
+  inline void setNpLO(int const& npLO) { npLO_ = npLO; }
+
+  inline void setNpNLO(int const& npNLO) { npNLO_ = npNLO; }
 
   inline void setNominalLHEWeight(double const& nominalLHEWeight) {
     nominalLHEWeight_ = nominalLHEWeight;
@@ -137,6 +145,11 @@ class EventInfo {
   double nominalGenWeight_;
   // Will include PYTHIA weights, e.g. for PS+UE variations. Given relative to nominalGenWeight_
   std::vector<double> genWeights_;
+
+  // Values useful for determining which n-jet process the event
+  // belongs to in a jet-merged sample
+  int npLO_;
+  int npNLO_;
 
   // LHE weights (present only for samples with external generators)
   double nominalLHEWeight_;

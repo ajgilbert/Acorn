@@ -145,6 +145,10 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   if (includeLHEWeights_) {
     edm::Handle<LHEEventProduct> lhe_handle;
     event.getByToken(lheToken_, lhe_handle);
+
+    info->setNpLO(setVar("npLO", lhe_handle->npLO()));
+    info->setNpNLO(setVar("npNLO", lhe_handle->npNLO()));
+
     double nominalLHEWeight = 1.;
     if (lhe_handle->weights().size()) {
       // Very rarely, this weights() vector is empty (seen in a powheg sample)
