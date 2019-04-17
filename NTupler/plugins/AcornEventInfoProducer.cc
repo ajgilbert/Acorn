@@ -43,6 +43,10 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
   consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
   consumes<GenEventInfoProduct>({"generator"});
 
+  for (auto const& tag : config.getParameter<std::vector<edm::InputTag>>("saveMetFilterBools")) {
+    saveMetFilterBools_.emplace_back(consumes<bool>(tag));
+  }
+
   for (auto const& tag : config.getParameter<std::vector<edm::InputTag>>("userDoubles")) {
     userDoubleTokens_.emplace_back(consumes<double>(tag));
   }
@@ -184,12 +188,13 @@ void AcornEventInfoProducer::produce(edm::Event& event,
     }
   }
 
-  if (saveMetFilters_.size()) {
+  unsigned n_met_filters_to_save = saveMetFilters_.size() + saveMetFilterBools_.size();
+  if (n_met_filters_to_save > 0) {
     constexpr unsigned maxfilters = 32;
-    if (saveMetFilters_.size() > maxfilters) {
+    if (n_met_filters_to_save > maxfilters) {
       throw cms::Exception("TooManyMETFilters")
           << "Maximum MET filter flags to be saved is " << maxfilters << ", but "
-          << saveMetFilters_.size() << " were requested\n";
+          << n_met_filters_to_save << " were requested\n";
     }
     std::bitset<maxfilters> metfilter_bits;
     edm::Handle<edm::TriggerResults> metfilter_handle;
@@ -205,7 +210,14 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       // std::cout << imet << "\t" << triggerNames.triggerName(trg_idx) << "\t" << metfilter_handle->accept(trg_idx) << "\n";
       metfilter_bits[imet] = !metfilter_handle->accept(trg_idx);
     }
+    for (unsigned imet = 0; imet < saveMetFilterBools_.size(); ++ imet) {
+      edm::Handle<bool> bool_handle;
+      event.getByToken(saveMetFilterBools_[imet], bool_handle);
+      // Offset the index by the size of the metfilters saved from the TriggerResults
+      metfilter_bits[saveMetFilters_.size() + imet] = !(*bool_handle);
+    }
     info->setMetFilters(metfilter_bits);
+    std::cout << toBinaryString(uint32_t(metfilter_bits.to_ulong())) << "\n";
   }
 
   std::vector<double> user_doubles;

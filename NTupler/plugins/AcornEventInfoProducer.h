@@ -41,6 +41,7 @@ class AcornEventInfoProducer : public AcornBaseProducer<ac::EventInfo> {
   edm::EDGetTokenT<edm::TriggerResults> metfilterToken_;
   std::vector<std::string> saveMetFilters_;
   std::set<std::string> missedMetFilters_;
+  std::vector<edm::EDGetTokenT<bool>> saveMetFilterBools_;
   std::vector<edm::EDGetTokenT<double>> userDoubleTokens_;
   bool includeNumVertices_;
   edm::EDGetTokenT<edm::View<reco::Vertex>> vertexToken_;
