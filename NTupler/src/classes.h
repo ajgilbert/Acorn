@@ -13,6 +13,7 @@
 #include "Acorn/NTupler/interface/RunLumiMap.h"
 #include "Acorn/NTupler/interface/Track.h"
 #include "Acorn/NTupler/interface/Electron.h"
+#include "Acorn/NTupler/interface/PFJet.h"
 
 namespace { struct dictionary {
   ac::Candidate dummy1;
@@ -37,6 +38,8 @@ namespace { struct dictionary {
   std::vector<ac::Track> dummy20;
   ac::Electron dummy21;
   std::vector<ac::Electron> dummy22;
+  ac::PFJet dummy23;
+  std::vector<ac::PFJet> dummy24;
 
 };
 }

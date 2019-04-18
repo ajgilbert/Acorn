@@ -93,6 +93,11 @@ process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
     cut=cms.string("pt > 20 & abs(eta) < 3.5")
 )
 
+process.selectedJets = cms.EDFilter("PATJetRefSelector",
+    src=cms.InputTag("slimmedJets"),
+    cut=cms.string("pt > 30 & abs(eta) < 5.0")
+)
+
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
     input=cms.InputTag("selectedMuons"),
     branch=cms.string('muons'),
@@ -187,6 +192,18 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     takeIdsFromObjects=cms.bool(True)
 )
 
+### PFJets
+process.acPFJetProducer = cms.EDProducer('AcornPFJetProducer',
+    input=cms.InputTag("selectedJets"),
+    branch=cms.string('pfJets'),
+    select=cms.vstring('keep .* p4=12'),
+    jetID=cms.PSet(
+        version=cms.string('WINTER17'),
+        quality=cms.string('TIGHT')
+    )
+)
+
+### MET
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     input=cms.InputTag(*(["slimmedMETs"] + met_args)),
     branch=cms.string('pfType1Met'),
@@ -488,9 +505,11 @@ else:
         process.selectedElectrons +
         process.selectedMuons +
         process.selectedPhotons +
+        process.selectedJets +
         process.acElectronProducer +
         process.acMuonProducer +
         process.acPhotonProducer +
+        process.acPFJetProducer +
         process.acPFType1MetProducer +
         process.acTrackMetProducer +
         process.acPuppiMetProducer +

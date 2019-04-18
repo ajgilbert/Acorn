@@ -19,6 +19,8 @@
   <class name="std::vector<ac::Met>"/>
   <class name="ac::Track"/>
   <class name="std::vector<ac::Track>"/>
+  <class name="ac::PFJet"/>
+  <class name="std::vector<ac::PFJet>"/>
   <class name="std::map<unsigned, std::set<unsigned>>"/>
   <class name="RunLumiMap"/>
 </lcgdict>
