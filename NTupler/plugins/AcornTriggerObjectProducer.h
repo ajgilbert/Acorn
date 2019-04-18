@@ -39,6 +39,7 @@ class AcornTriggerObjectProducer : public AcornBaseProducer<std::vector<ac::Trig
   std::map<std::string, std::size_t> observedFilters_;
   HLTConfigProvider hltConfig_;
   std::set<std::string> observedHltMenus_;
+  std::vector<std::string> extraFilterLabels_;
 
   union ui64 {
     uint64_t one;

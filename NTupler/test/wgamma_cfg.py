@@ -302,9 +302,16 @@ for path in hlt_paths:
         branch=cms.string('triggerObjects_%s' % shortname),
         hltPath= cms.string(path),
         storeIfFired=cms.bool(True),
-        select=cms.vstring('keep .* p4=12')
+        select=cms.vstring('keep .* p4=12'),
+        extraFilterLabels=cms.vstring()
     ))
     process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
+
+# Adds an extra filter label for the HLT_Ele32_WPTight_Gsf_L1DoubleEG path, needed to
+# emulate HLT_Ele32_WPTight_Gsf in the portion of 2017 data that doesn't have it
+# More detail: https://twiki.cern.ch/twiki/bin/view/CMS/EgHLTRunIISummary#2017
+# and slide 22 of: https://indico.cern.ch/event/662751/contributions/2778365/attachments/1561439/2458438/egamma_workshop_triggerTalk.pdf
+process.ac_Ele32_WPTight_Gsf_L1DoubleEG_ObjectProducer.extraFilterLabels = cms.vstring('hltEGL1SingleEGOrFilter')
 
 
 metfilter_proc_data = {
@@ -364,7 +371,9 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'Flag_eeBadScFilter'
         ),
     saveMetFilterBools=cms.VInputTag(),
-    userDoubles=cms.VInputTag(),
+    userDoubles=cms.VInputTag(
+        cms.InputTag('fixedGridRhoFastjetAll')
+        ),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .* genWeights=10',
@@ -418,7 +427,7 @@ process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
 
 if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
     process.customInitialSeq += cms.Sequence(process.prefiringweight)
-    process.acEventInfoProducer.userDoubles = cms.VInputTag(
+    process.acEventInfoProducer.userDoubles += cms.VInputTag(
         cms.InputTag('prefiringweight:NonPrefiringProb'),
         cms.InputTag('prefiringweight:NonPrefiringProbUp'),
         cms.InputTag('prefiringweight:NonPrefiringProbDown')
