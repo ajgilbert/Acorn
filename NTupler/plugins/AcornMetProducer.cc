@@ -17,7 +17,8 @@ AcornMetProducer::AcornMetProducer(const edm::ParameterSet& config)
       inputToken_(consumes<edm::View<reco::MET>>(config.getParameter<edm::InputTag>("input"))),
       saveCorrectionLevels_(config.getParameter<std::vector<int>>("saveCorrectionLevels")),
       saveUncertaintyShifts_(config.getParameter<std::vector<int>>("saveUncertaintyShifts")),
-      saveGenMetFromPat_(config.getParameter<bool>("saveGenMetFromPat")) {}
+      saveGenMetFromPat_(config.getParameter<bool>("saveGenMetFromPat")),
+      skipMainMet_(config.getParameter<bool>("skipMainMet")) {}
 
 AcornMetProducer::~AcornMetProducer() { ; }
 
@@ -25,10 +26,13 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<edm::View<reco::MET>> met_handle;
   event.getByToken(inputToken_, met_handle);
 
-  output()->clear();
-  output()->resize(met_handle->size(), ac::Met());
+  // Number of MET objects to save from the main collection
+  unsigned n_from_main = skipMainMet_ ? 0 : met_handle->size();
 
-  for (unsigned i = 0; i < met_handle->size(); ++i) {
+  output()->clear();
+  output()->resize(n_from_main, ac::Met());
+
+  for (unsigned i = 0; i < n_from_main; ++i) {
     reco::MET const& src = met_handle->at(i);
 
     // Below we will use a pointer to access the MET properties. This pointer might be changed to a
@@ -67,6 +71,7 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       dest.setLevel(level);
       dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->corPt(level), 0., patsrc->corPhi(level), 0.)));
       dest.setSumEt(setVar("sumEt", patsrc->corSumEt(level)));
+      // std::cout << level << "\t" << dest.vector() << "\n";
       for (unsigned ishift = 0; ishift < saveUncertaintyShifts_.size(); ++ishift) {
         auto shift = pat::MET::METUncertainty(saveUncertaintyShifts_[ishift]);
         output()->push_back(ac::Met());
@@ -75,6 +80,7 @@ void AcornMetProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         dest.setShift(shift);
         dest.setVector(setVar("p4", ROOT::Math::PtEtaPhiMVector(patsrc->shiftedPt(shift, level), 0., patsrc->shiftedPhi(shift, level), 0.)));
         dest.setSumEt(setVar("sumEt", patsrc->shiftedSumEt(shift, level)));
+        // std::cout << level << "\t" << shift << "\t" << dest.vector() << "\n";
       }
     }
   }

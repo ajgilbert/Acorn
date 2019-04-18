@@ -192,8 +192,19 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(4),
-    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13)
+    saveCorrectionLevels=cms.vint32(1),
+    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13),
+    skipMainMet=cms.bool(True)
+)
+
+process.acTrackMetProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag(*(["slimmedMETs"] + met_args)),
+    branch=cms.string('trackMet'),
+    select=cms.vstring('keep .* p4=12', 'drop sumEt'),
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(12),
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(True)
 )
 
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
@@ -201,8 +212,9 @@ process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
     branch=cms.string('puppiMet'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(1, 4),
-    saveUncertaintyShifts=cms.vint32()
+    saveCorrectionLevels=cms.vint32(1),
+    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13),
+    skipMainMet=cms.bool(True)
 )
 
 process.acMCSequence = cms.Sequence(
@@ -245,7 +257,8 @@ process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
     select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(False),
     saveCorrectionLevels=cms.vint32(),
-    saveUncertaintyShifts=cms.vint32()
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(False)
 )
 
 process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
@@ -254,7 +267,19 @@ process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
     select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(True),
     saveCorrectionLevels=cms.vint32(),
-    saveUncertaintyShifts=cms.vint32()
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(False)
+)
+
+process.selectedGenJets = cms.EDFilter("GenJetRefSelector",
+    src=cms.InputTag("slimmedGenJets"),
+    cut=cms.string("pt > 15")
+)
+
+process.acGenJetProducer = cms.EDProducer('AcornCandidateProducer',
+    input=cms.InputTag("selectedGenJets"),
+    branch=cms.string('genJets'),
+    select=cms.vstring('keep .* p4=12')
 )
 
 
@@ -263,7 +288,9 @@ if isMC:
         process.selectedGenParticles +
         process.acGenParticleProducer +
         process.acGenMetFromPatProducer +
-        process.acPileupInfoProducer
+        process.acPileupInfoProducer +
+        process.selectedGenJets +
+        process.acGenJetProducer
     )
     if hasLHE:
         process.acMCSequence += cms.Sequence(
@@ -465,6 +492,7 @@ else:
         process.acMuonProducer +
         process.acPhotonProducer +
         process.acPFType1MetProducer +
+        process.acTrackMetProducer +
         process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +
