@@ -175,6 +175,14 @@ process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
     )
 )
 
+for pset in process.egmGsfElectronIDs.physicsObjectIDs:
+    idname = str(pset.idDefinition.idName.value())
+    if 'cutBasedElectronID-Fall17-94X-V2-' in idname:
+        for cut_pset in pset.idDefinition.cutFlow:
+            if cut_pset.cutName.value() == 'GsfEleRelPFIsoScaledCut':
+                print '>> Switching off isolation cut for %s' % idname
+                cut_pset.isIgnored = cms.bool(True)
+
 process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
