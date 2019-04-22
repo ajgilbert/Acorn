@@ -335,9 +335,9 @@
     }
   },
   "configs": {
-    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v6", "cores=2"],
-    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "cores=2"],
-    "mc_no_lhe":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v14", "hasLHE=0", "cores=2"]
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v11", "cores=2"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "cores=2"],
+    "mc_no_lhe":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "hasLHE=0", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",

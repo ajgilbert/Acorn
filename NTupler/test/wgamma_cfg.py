@@ -18,6 +18,8 @@ opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
 opts.register('genOnly', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as genOnly")
+opts.register('updateJECs', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Update JECs for jets and MET")
 opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
@@ -32,6 +34,7 @@ isMC = not isData
 genOnly = int(opts.genOnly)
 year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
+updateJECs = bool(opts.updateJECs)
 
 ################################################################
 # Standard setup
@@ -93,8 +96,9 @@ process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
     cut=cms.string("pt > 20 & abs(eta) < 3.5")
 )
 
+jetLabel = 'patJetsReapplyJECUpdatedJECs' if updateJECs else 'slimmedJets'
 process.selectedJets = cms.EDFilter("PATJetRefSelector",
-    src=cms.InputTag("slimmedJets"),
+    src=cms.InputTag(jetLabel),
     cut=cms.string("pt > 30 & abs(eta) < 5.0")
 )
 
@@ -106,25 +110,39 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 )
 
 process.customInitialSeq = cms.Sequence()
-met_proc = 'PAT'
-met_args = []
-### Re-run MET sequences for old 2016 MC (not 100% sure this gives the correct thing...)
-if year == '2016_old':
-    # met_proc = 'MAIN'  # i.e. take from our process
-    met_args = ['', 'MAIN']
-    runMetCorAndUncFromMiniAOD(process, isData=isData)
-    process.customInitialSeq += cms.Sequence(process.fullPatMetSequence)
+
+### Update the jets & MET in all years
+if updateJECs:
+    if year in ['2017']:
+        # This is the EE noise mitigation - for 2017 data & MC only!
+        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#Instructions_for_9_4_X_X_9_or_10
+        runMetCorAndUncFromMiniAOD(
+                process,
+                isData=isData,
+                fixEE2017=True,
+                fixEE2017Params={'userawPt': True, 'ptThreshold': 50.0, 'minEtaThreshold': 2.65, 'maxEtaThreshold': 3.139},
+                postfix="UpdatedJECs"
+        )
+    else:
+        runMetCorAndUncFromMiniAOD(
+                process,
+                isData=isData,
+                postfix="UpdatedJECs"
+        )
+
+
     makePuppiesFromMiniAOD(process, True)
     runMetCorAndUncFromMiniAOD(process,
                                isData=isData,
                                metType="Puppi",
-                               postfix="Puppi",
+                               postfix="PuppiUpdatedJECs",
                                jetFlavor="AK4PFPuppi",
                                )
-
     process.puppiNoLep.useExistingWeights = False
     process.puppi.useExistingWeights = False
-    process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppi)
+    # The sequence for PUPPI has to go first, then the normal MET, because of some overriding conflicts
+    process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppiUpdatedJECs)
+    process.customInitialSeq += cms.Sequence(process.fullPatMetSequenceUpdatedJECs)
 
 ### Setup for EGamma recipes
 if year in ['2016_old']:
@@ -204,8 +222,9 @@ process.acPFJetProducer = cms.EDProducer('AcornPFJetProducer',
 )
 
 ### MET
+metLabel = 'slimmedMETsUpdatedJECs' if updateJECs else 'slimmedMETs'
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(*(["slimmedMETs"] + met_args)),
+    input=cms.InputTag(metLabel),
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
@@ -214,8 +233,12 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     skipMainMet=cms.bool(True)
 )
 
+# Found that trackMet changed when updating JECs - probably due
+# to some difference in the track selection that's used. So for
+# now stick with the original (except 2016_old, because trackMet wasn't saved)
+trackMetLabel = 'slimmedMETsUpdatedJECs' if (year == '2016_old') else 'slimmedMETs'
 process.acTrackMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(*(["slimmedMETs"] + met_args)),
+    input=cms.InputTag(trackMetLabel),
     branch=cms.string('trackMet'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
@@ -224,8 +247,9 @@ process.acTrackMetProducer = cms.EDProducer('AcornMetProducer',
     skipMainMet=cms.bool(True)
 )
 
+puppiMetLabel = 'slimmedMETsPuppiUpdatedJECs' if updateJECs else 'slimmedMETsPuppi'
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(*(["slimmedMETsPuppi"] + met_args)),
+    input=cms.InputTag(puppiMetLabel),
     branch=cms.string('puppiMet'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
