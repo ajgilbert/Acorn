@@ -96,7 +96,6 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
 
-
     if (takeIdsFromObjects_) {
       if (pat_src) {
         dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron", pat_src->electronID(eleVetoIdLabel_)));
@@ -127,8 +126,8 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     dest.setDxy(setVar("dxy", src.gsfTrack()->dxy(firstVertex->position())));
     dest.setDz(setVar("dz", src.gsfTrack()->dz(firstVertex->position())));
-
-    dest.setVertex(setVar("vertex", src.vertex()));
+    dest.setScEta(setVar("scEta", src.superCluster()->eta()));
+    dest.setScEnergy(setVar("scEnergy", src.superCluster()->energy()));
 
   }
 }
