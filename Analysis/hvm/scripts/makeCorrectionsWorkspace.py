@@ -168,7 +168,10 @@ loc = 'hvm/inputs/muons/%s' % era
 if era == '2016':
     histsToWrap = [
         (loc + '/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio'),
-        (loc + '/EfficienciesAndSF_RunGtoH.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio')
+        (loc + '/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA', 'm_trg_bf_data_eff'),
+        (loc + '/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesMC/pt_abseta_MC', 'm_trg_mc_eff'),
+        (loc + '/EfficienciesAndSF_RunGtoH.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio'),
+        (loc + '/EfficienciesAndSF_RunGtoH.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA', 'm_trg_gh_data_eff')
     ]
     histsToWrapNewStyle = [
         (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_bf_ratio'),
@@ -183,6 +186,8 @@ if era == '2016':
 if era == '2017':
     histsToWrap = [
         (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/pt_abseta_ratio', 'm_trg_ratio'),
+        (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/efficienciesDATA/pt_abseta_DATA', 'm_trg_data_eff'),
+        (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/efficienciesMC/pt_abseta_MC', 'm_trg_mc_eff'),
         (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio'),
         (loc + '/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
     ]
@@ -191,7 +196,10 @@ if era == '2017':
 if era == '2018':
     histsToWrap = [
         (loc + '/EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_a_ratio'),
+        (loc + '/EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA', 'm_trg_a_data_eff'),
         (loc + '/EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bcd_ratio'),
+        (loc + '/EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA', 'm_trg_bcd_data_eff'),
+        (loc + '/EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/efficienciesMC/pt_abseta_MC', 'm_trg_mc_eff'),
         (loc + '/RunABCD_SF_ID.root:NUM_MediumID_DEN_TrackerMuons_pt_abseta', 'm_id_ratio'),
         (loc + '/RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
     ]
@@ -205,13 +213,17 @@ for task in histsToWrapNewStyle:
 
 if era == '2016':
     # Factor of 0.439 is the lumi of G+H
-    for t in ['trg','id', 'iso']:
+    for t in ['trg', 'id', 'iso']:
         w.factory('expr::m_%s_ratio("@0*(1-0.439) + @1*0.439", m_%s_bf_ratio, m_%s_gh_ratio)' % (t, t, t))
+
+    for t in ['trg']:
+        w.factory('expr::m_%s_data_eff("@0*(1-0.439) + @1*0.439", m_%s_bf_data_eff, m_%s_gh_data_eff)' % (t, t, t))
 
 if era == '2018':
     #Lumi up to HLT update was 8.95, total 59.74
     for t in ['trg']:
         w.factory('expr::m_%s_ratio("@0*(0.1498)+@1*(1-0.1498)", m_%s_a_ratio, m_%s_bcd_ratio)' % (t, t, t))
+        w.factory('expr::m_%s_data_eff("@0*(0.1498)+@1*(1-0.1498)", m_%s_a_data_eff, m_%s_bcd_data_eff)' % (t, t, t))
 
 w.factory('expr::m_idiso_ratio("@0*@1", m_id_ratio, m_iso_ratio)')
 
@@ -224,7 +236,7 @@ loc = 'hvm/inputs/electrons/%s' % era
 if era == '2016':
     histsToWrap = [
         (loc + '/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root:EGamma_SF2D', 'e_gsf_ratio'),
-        (loc + '/80X_2016_MVA80Xwp80.root:EGamma_SF2D', 'e_id_ratio')
+        (loc + '/2016LegacyReReco_ElectronMVA80_Fall17V2.root:EGamma_SF2D', 'e_id_ratio')
     ]
     histsToWrapInv = [
         (loc + '/ZEETP_2016_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data_eff'),
@@ -291,6 +303,6 @@ w.factory('expr::rhoiso_ratio_etainc("@0/@1", rho_iso_data_eff_etainc, rho_iso_m
 w.factory('expr::rhoiso_ratio("@0/@1", rho_iso_data_eff, rho_iso_mc_eff)')
 
 w.Print()
-w.writeToFile('hvm_corrections_%s_v3.root' % era)
+w.writeToFile('hvm_corrections_%s_v5.root' % era)
 w.Delete()
 
