@@ -196,7 +196,8 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
     relativeEAIsoFromUserData=cms.vstring('ElectronCutValues', 'GsfEleRelPFIsoScaledCut_0'),
-    takeIdsFromObjects=cms.bool(True)
+    takeIdsFromObjects=cms.bool(True),
+    energyCorrections=cms.vstring('ecalTrkEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
 
 ### Photons
@@ -215,7 +216,8 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     chargedIsolation=cms.string('phoChargedIsolation'),
     neutralHadronIsolation=cms.string('phoNeutralHadronIsolation'),
     photonIsolation=cms.string('phoPhotonIsolation'),
-    takeIdsFromObjects=cms.bool(True)
+    takeIdsFromObjects=cms.bool(True),
+    energyCorrections=cms.vstring('ecalEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
 
 ### PFJets
