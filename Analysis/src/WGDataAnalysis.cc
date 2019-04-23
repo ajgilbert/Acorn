@@ -37,6 +37,7 @@ int WGDataAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
     tree_->Branch("run", &run_);
+    tree_->Branch("metfilters", &metfilters_);
     tree_->Branch("gen_proc", &gen_proc_);
     tree_->Branch("gen_is_zg", &gen_is_zg_);
     tree_->Branch("n_vtx", &n_vtx_);
