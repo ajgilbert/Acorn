@@ -19,7 +19,7 @@
       "config": "data"
     },
     "SingleMuon-2018D-v2": {
-      "dataset": "/SingleMuon/Run2018D-PromptReco-v2/MINIAOD",
+      "dataset": "/SingleMuon/Run2018D-22Jan2019-v2/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
       "config": "data_prompt"
@@ -42,14 +42,8 @@
       "events": 0,
       "config": "data"
     },
-    "EGamma-2018D-v1": {
-      "dataset": "/EGamma/Run2018D-PromptReco-v1/MINIAOD",
-      "attributes": ["submit"],
-      "events": 0,
-      "config": "data_prompt"
-    },
     "EGamma-2018D-v2": {
-      "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
+      "dataset": "/EGamma/Run2018D-22Jan2019-v2/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
       "config": "data_prompt"
