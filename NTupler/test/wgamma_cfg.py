@@ -152,7 +152,7 @@ elif year in ['2016']:
 elif year in ['2017']:
     setupEgammaPostRecoSeq(process, runVID=True, era='2017-Nov17ReReco')
 elif year in ['2018']:
-    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2018-Prompt')
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=True, era='2018-Prompt')
 
 ### Electrons
 ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"

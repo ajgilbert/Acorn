@@ -283,10 +283,10 @@
     }
   },
   "configs": {
-    "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018Rereco_v1", "cores=2"],
-    "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v11", "cores=2"],
-    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "cores=2"],
-    "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "hasLHE=0", "cores=2"]
+    "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018ABC_v2", "cores=2"],
+    "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v13", "cores=2"],
+    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v18", "cores=2"],
+    "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v18", "hasLHE=0", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
