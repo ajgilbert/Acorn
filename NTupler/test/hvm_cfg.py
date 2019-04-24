@@ -322,6 +322,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     select=cms.vstring(
         'keep .*',
         'drop lheweights:.*',
+        'drop lheweightgroups:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
         'keep lheweights:dim6=10',
         ),

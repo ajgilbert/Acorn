@@ -456,21 +456,32 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     select=cms.vstring(
         'keep .* genWeights=10',
         'drop lheweights:.*',
+        'drop lheweightgroups:.*',
         'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
         'keep lheweights:dim6=10',
-        'keep lheweights:Member.0.*NNPDF31_nlo_hessian_pdfas=10',
-        'keep lheweights:Member.0.*NNPDF31_nnlo_hessian_pdfas=10',
-        'keep lheweights:Member.0.*NNPDF31_nlo_as_0118_nf_4=10',
-        'keep lheweights:Member.0.*NNPDF31_nnlo_as_0118_nf_4=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nlo_100_pdfas=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nnlo_100_pdfas=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nlo_nf4_30=10',
-        'keep lheweights:lhapdf.(305800|306000|320500|320900|90200|91200|92000)=10',
-        'keep lheweights:PDF.*(305800|306000|320500|320900|90200|91200|92000).MemberID.0=10'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
+
+if year in ['2016', '2016_old']:
+    process.acEventInfoProducer.select += cms.vstring(
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=10',  # 1
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=10',  # 2
+        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=10',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=10',  # 4
+        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=10',  # 5
+    )
+if year in ['2017', '2018']:
+    process.acEventInfoProducer.select += cms.vstring(
+        'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=10',  # 1
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=10',  # 2
+        'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=10',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=10',  # 4
+        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=10',  # 5
+        'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=10',  # 6
+    )
+
 
 if year in ['2017', '2018'] and genOnly == 0:
     process.customInitialSeq += process.ecalBadCalibReducedMINIAODFilter
@@ -478,13 +489,6 @@ if year in ['2017', '2018'] and genOnly == 0:
         cms.InputTag('ecalBadCalibReducedMINIAODFilter')
         )
 
-# 305800: NNPDF31_nlo_hessian_pdfas
-# 306000: NNPDF31_nnlo_hessian_pdfas
-# 320500: NNPDF31_nlo_as_0118_nf_4
-# 320900: NNPDF31_nnlo_as_0118_nf_4
-# 90200: PDF4LHC15_nlo_100_pdfas
-# 91200: PDF4LHC15_nnlo_100_pdfas
-# 92000: PDF4LHC15_nlo_nf4_30
 
 ### Prefiring weights - only needed for 2016 and 2017 MC
 prefiring_era_str = {
