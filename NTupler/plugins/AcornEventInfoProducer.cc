@@ -159,6 +159,7 @@ void AcornEventInfoProducer::endRun(edm::Run const& run, edm::EventSetup const& 
 void AcornEventInfoProducer::produce(edm::Event& event,
                                   const edm::EventSetup& setup) {
   ac::EventInfo * info = output();
+  *info = ac::EventInfo();
   info->setIsRealData(event.isRealData());
   info->setRun(event.run());
   info->setEvent(event.id().event());
@@ -183,7 +184,7 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
       auto it = savedLHEWeightIds.find(id);
       if (it != savedLHEWeightIds.end()) {
-        double weight = lhe_handle->weights()[i].wgt / nominalLHEWeight;
+        double weight = (lhe_handle->weights()[i].wgt / nominalLHEWeight) - 1.0;
         info->setLHEWeight(id, processVar(weight, it->second));
       }
     }

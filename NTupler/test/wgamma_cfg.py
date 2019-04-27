@@ -457,7 +457,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep .* genWeights=10',
         'drop lheweights:.*',
         'drop lheweightgroups:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6',
         'keep lheweights:dim6=10',
         ),
     includeNumVertices=cms.bool(True),
@@ -466,20 +466,20 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
 
 if year in ['2016', '2016_old']:
     process.acEventInfoProducer.select += cms.vstring(
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=10',  # 1
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=10',  # 2
-        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=10',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=10',  # 4
-        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=10',  # 5
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
+        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
+        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
     )
 if year in ['2017', '2018']:
     process.acEventInfoProducer.select += cms.vstring(
-        'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=10',  # 1
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=10',  # 2
-        'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=10',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=10',  # 4
-        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=10',  # 5
-        'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=10',  # 6
+        # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
+        # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
+        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
+        # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
     )
 
 
