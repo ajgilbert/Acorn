@@ -223,9 +223,9 @@ int WGDataAnalysis::PreAnalysis() {
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
     auto photons = event->GetPtrVec<ac::Photon>("photons");
 
-    // TODO: temporary hack
+    double rho = event->Get<double>("fixedGridRhoFastjetAll");
     for (Photon *p : photons) {
-      PhotonIsoCorrector(p, n_vtx_);
+      PhotonIsoCorrector(p, rho);
     }
     auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
     auto puppi_mets = event->GetPtrVec<ac::Met>("puppiMet");
@@ -261,7 +261,8 @@ int WGDataAnalysis::PreAnalysis() {
     // TODO: update with SC eta
     auto pre_electrons = ac::copy_keep_if(electrons, [](ac::Electron const* e) {
       return e->pt() > 35. && fabs(e->eta()) < 2.5 && e->isCutBasedMediumElectron() &&
-             (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) && ElectronIPCuts(e);
+             ElectronIsoFall17V2(e, 2) && (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) &&
+             ElectronIPCuts(e);
     });
 
     // At this stage apply the medium Photon ID without the charged iso cut
@@ -533,8 +534,8 @@ int WGDataAnalysis::PreAnalysis() {
           break;
         }
       }
-      if (info->userDoubles().size() >= 1) {
-        wt_pf_ = info->userDoubles().at(0);
+      if (year_ == 2016 || year_ == 2017) {
+        wt_pf_ = event->Get<double>("NonPrefiringProb");
       }
       if (m0) {
         wt_l0_ = RooFunc(fns_["m_idisotrk_ratio"], {l0_pt_, l0_eta_});
@@ -725,10 +726,7 @@ int WGDataAnalysis::PreAnalysis() {
 
   void WGDataAnalysis::PrintInfo() {}
 
-  void WGDataAnalysis::PhotonIsoCorrector(ac::Photon *p, unsigned nvertices) {
-    double nv = double(nvertices);
-    double rho = 0.291781 + nv * 0.736966 + nv * nv * -0.00152866;
-
+  void WGDataAnalysis::PhotonIsoCorrector(ac::Photon *p, double rho) {
     double a_eta = std::abs(p->scEta());
     double chiso = p->chargedIso();
     double neiso = p->neutralHadronIso();

@@ -9,6 +9,7 @@
 #include "Acorn/Analysis/interface/AnalysisSequence.h"
 #include "Acorn/Analysis/interface/AnalysisTools.h"
 #include "Acorn/NTupler/interface/json.hpp"
+#include "Acorn/NTupler/interface/EventInfo.h"
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
@@ -64,6 +65,7 @@ int main(int argc, char* argv[]) {
   json js = json::parse(argv[1]);
   json const& jsc = js;
   std::string s_year = boost::lexical_cast<std::string>(jsc["year"]);
+  int year = jsc["year"];
 
   // Should move to passing the list of files to process directly?
   // std::string outname = jsc["output"];
@@ -117,6 +119,18 @@ int main(int argc, char* argv[]) {
   std::string wgamma_label = "WGamma";
   if (sequences.count(wgamma_label)) {
     auto wgamma_fs = fs.at(wgamma_label).get();
+
+    std::vector<std::string> userDoubleNames = {"fixedGridRhoFastjetAll"};
+    if (year == 2016 || year == 2017) {
+        userDoubleNames.push_back("NonPrefiringProb");
+    }
+    wgamma_seq.BuildModule(ac::GenericModule("UserDoubleUnpacker").set_function([=](ac::TreeEvent* event) {
+        auto const& vals = event->GetPtr<ac::EventInfo>("eventInfo")->userDoubles();
+        for (unsigned i = 0; i < userDoubleNames.size(); ++i) {
+            event->Add(userDoubleNames[i], vals.at(i));
+        }
+        return 0;
+    }));
 
     if (jsc.count("stitching")) {
       wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));

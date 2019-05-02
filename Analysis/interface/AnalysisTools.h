@@ -122,6 +122,8 @@ bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_cha
 
 bool ElectronIPCuts(ac::Electron const* e);
 
+bool ElectronIsoFall17V2(ac::Electron const* e, unsigned wp);
+
 // Transverse mass
 double MT(Candidate const* cand1, Candidate const* cand2);
 }  // namespace ac

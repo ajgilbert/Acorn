@@ -90,6 +90,40 @@ double MT(Candidate const* cand1, Candidate const* cand2) {
   return 0.0;
 }
 
+bool ElectronIsoFall17V2(ac::Electron const* e, unsigned wp) {
+  bool eb = std::abs(e->scEta()) < 1.479;
+  double iso = e->relativeEAIso();
+  double pt = e->pt();
+  if (eb) {
+    if (wp == 0) {  // Veto
+      return iso < 0.198 + 0.506 / pt;
+    }
+    if (wp == 1) {  // Loose
+      return iso < 0.112 + 0.506 / pt;
+    }
+    if (wp == 2) {  // Medium
+      return iso < 0.0478 + 0.506 / pt;
+    }
+    if (wp == 3) {  // Tight
+      return iso < 0.0287 + 0.506 / pt;
+    }
+  } else {
+    if (wp == 0) {  // Veto
+      return iso < 0.203 + 0.963 / pt;
+    }
+    if (wp == 1) {  // Loose
+      return iso < 0.108 + 0.963 / pt;
+    }
+    if (wp == 2) {  // Medium
+      return iso < 0.0658 + 0.963 / pt;
+    }
+    if (wp == 3) {  // Tight
+      return iso < 0.0445 + 0.963 / pt;
+    }
+  }
+  return true;
+}
+
 bool PhotonIDIso(ac::Photon const* p, unsigned year, unsigned wp, bool apply_charged, bool apply_sigma) {
   double pt = p->pt();
   bool eb = std::abs(p->scEta()) < 1.4442;

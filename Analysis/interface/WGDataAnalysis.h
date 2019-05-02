@@ -164,7 +164,7 @@ class WGDataAnalysis : public ModuleBase {
 
   mutable TRandom3 rng;
 
-  void PhotonIsoCorrector(ac::Photon *p, unsigned nvertices);
+  void PhotonIsoCorrector(ac::Photon *p, double rho);
 
 
  public:
