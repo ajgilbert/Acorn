@@ -76,21 +76,21 @@
     },
     "WGToLNuG-amcatnloFXFX-PtG-130": {
       "dataset": "/WGToLNuG_01J_5f_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX-PtG-300": {
       "dataset": "/WGToLNuG_01J_5f_PtG-300_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX-PtG-500": {
       "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
@@ -144,26 +144,26 @@
       "config": "mc"
     },
     "VVTo2L2Nu-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WWTo1L1Nu2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WZTo2L2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WZTo1L3Nu-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -186,26 +186,26 @@
       "config": "mc"
     },
     "ZZTo2L2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WW-pythia": {
       "dataset": "/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
     "WZ-pythia": {
       "dataset": "/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
     "ZZ-pythia": {
       "dataset": "/ZZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
