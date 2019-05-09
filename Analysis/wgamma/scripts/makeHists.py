@@ -195,19 +195,24 @@ X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1'
 X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'
 X['mZ_veto_inv'] = 'abs(91.2 - l0p0_M) <= 15'
 
+# Veto specific boxes in photon phi-eta where we have e->gamma spikes
+if args.year == '2016':
+    X['p0_phi_veto'] = 'p0_phi > 2.268 && p0_phi < 2.772 && p0_eta > -2.04 && p0_eta < 0.84'
+if args.year == '2017':
+    X['p0_phi_veto'] = 'p0_phi > 2.646 && p0_phi < 3.15 && p0_eta > -0.60 && p0_eta < 1.68'
+if args.year == '2018':
+    X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
+
 # Analysis selection levels:
-X['baseline_m_nomt_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_e_nomt_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_m_nopix'] ='$baseline_m_nomt_nopix && l0met_mt>60'
-X['baseline_e_nopix'] ='$baseline_e_nomt_nopix && l0met_mt>60'
-X['baseline_m_nomt'] ='$baseline_m_nomt_nopix && $efake_veto_m'
-X['baseline_e_nomt'] ='$baseline_e_nomt_nopix && $efake_veto_e'
+X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
-X['baseline_m_mZ_veto'] ='$baseline_m'
-X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto'
-X['baseline_m_mZ_veto_t'] ='$baseline_m_mZ_veto && l0_tight'
-X['baseline_e_mZ_veto_t'] ='$baseline_e_mZ_veto && l0_tight'
+X['baseline_m_mZ_veto'] ='$baseline_m && (l0p0_M < 70 || l0p0_M > 100)'
+X['baseline_e_mZ_veto'] ='$baseline_e && (l0p0_M < 70 || l0p0_M > 110)'
+
+# Common fiducial region:
+
 
 # EFT region
 X['baseline_m_eft'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
@@ -341,8 +346,8 @@ if args.task in ['baseline', 'electron_fakes']:
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
-    do_cats['e'].extend(['baseline_e_nomt_nopix', 'baseline_e_nomt', 'baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto'])
-    do_cats['m'].extend(['baseline_m_nomt_nopix', 'baseline_m_nomt', 'baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto'])
+    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto'])
+    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto'])
 
     drawvars = [
         ('n_vtx', (30, 0., 60.)),
@@ -357,7 +362,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l1_eta', (20, -3.0, 3.0)),
         ('l0l1_M', (40, 60, 120)),
         ('l0l1_dr', (20, 0., 5.)),
-        ('met', (20, 0., 200.)),
+        ('met', (40, 0., 200.)),
         ('met_phi', (20, -3.15, 3.15)),
         ('xy_met', (20, 0., 200.)),
         ('xy_met_phi', (20, -3.15, 3.15)),
@@ -367,7 +372,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('p0_eta', (20, -3.0, 3.0)),
         ('p0_phi', (30, -3.15, 3.15)),
         ('l0p0_dr', (20, 0., 5.)),
-        ('l0p0_M', (20, 60, 120)),
+        ('l0p0_M', (40, 0, 200)),
         ('p0_chiso', (40, 0, 20.0)),
         ('p0_neiso', (40, 0, 20.0)),
         ('p0_phiso', (40, 0, 20.0)),
@@ -405,8 +410,8 @@ if args.task in ['baseline', 'electron_fakes']:
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}),
                     wt=X.get('$baseline_wt * wt_p0_fake'))
             for sample in samples:
-                hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(30, -3, 3, 30, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(30, -3, 3, 30, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+                hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+                hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
 
 
 if args.task == 'photon_fakes':
