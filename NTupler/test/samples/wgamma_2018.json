@@ -255,7 +255,8 @@
       "dataset": "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc",
+      "useFileSplitting": 2
     },
     "ST_t-channel_antitop_4f-powheg": {
       "dataset": "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
