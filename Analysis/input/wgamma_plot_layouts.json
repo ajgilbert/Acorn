@@ -32,7 +32,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
     },
@@ -82,7 +82,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -126,7 +126,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -170,7 +170,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -226,7 +226,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -258,7 +258,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },

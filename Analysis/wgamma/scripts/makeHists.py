@@ -155,6 +155,13 @@ def AddDYSplitting(node, label, sample, var_list, binning, sel, wt, components=[
     AddPhotonSplitting(node, label + '_IZG' + postfix, sample, var_list, binning, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt, components=components)
 
 
+def AddTTSplitting(node, label, sample, var_list, binning, sel, wt, components=['R', 'J', 'E'], postfix=''):
+    node[label + '_XTTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && !(p0_truth==1)' % sel), wt=X.get(wt))
+    node[label + '_ITTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (p0_truth==1)' % sel), wt=X.get(wt))
+    AddPhotonSplitting(node, label + '_XTTG' + postfix, sample, var_list, binning, '(%s) && !(p0_truth==1)' % sel, wt, components=components)
+    AddPhotonSplitting(node, label + '_ITTG' + postfix, sample, var_list, binning, '(%s) && (p0_truth==1)' % sel, wt, components=components)
+
+
 def HistSum(label_list):
     return sum([node[X] for X in label_list[1:]], node[label_list[0]])
 
@@ -295,6 +302,9 @@ if args.task == 'eft_region':
                 for P in dy_samples + zg_samples:
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
                 hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
@@ -404,6 +414,9 @@ if args.task in ['baseline', 'electron_fakes']:
                 for P in dy_samples + zg_samples:
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
 
                 hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
@@ -468,6 +481,11 @@ if args.task == 'photon_fakes':
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                     if 'iso_t_sig_t' in sel:
                         AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
+                    if 'iso_t_sig_t' in sel:
+                        AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
+
                     hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                     if 'iso_t_sig_t' in sel:
                         hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
@@ -521,21 +539,36 @@ for path, node in hists.ListNodes(withObjects=True):
 
     node['VV'] = HistSum(vv_samples)
     node['TTG'] = HistSum(ttg_samples)
+
+    ttg_ittg_samples = ['%s_ITTG' % lbl for lbl in ttg_samples]
+    ttg_xttg_samples = ['%s_XTTG' % lbl for lbl in ttg_samples]
+    tt_ittg_samples = ['%s_ITTG' % lbl for lbl in tt_samples]
+    tt_xttg_samples = ['%s_XTTG' % lbl for lbl in tt_samples]
+    node['TTG_ITTG'] = HistSum(ttg_ittg_samples)
+    node['TTG_XTTG'] = HistSum(ttg_xttg_samples)
     if year in ['2017', '2018']:
         node['TT'] = HistSum(tt_samples)
+        node['TT_ITTG'] = HistSum(tt_ittg_samples)
+        node['TT_XTTG'] = HistSum(tt_xttg_samples)
 
     for P in ['E', 'J', 'R']:
         node['VV_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in vv_samples])
         node['TTG_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in ttg_samples])
         if year in ['2017', '2018']:
             node['TT_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in tt_samples])
+    for P in ['R']:
+        node['TTG_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in ttg_samples])
+        node['TTG_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in ttg_samples])
+        if year in ['2017', '2018']:
+            node['TT_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in tt_samples])
+            node['TT_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in tt_samples])
 
-    node['Total_R'] = HistSum([wg_sample, 'TT_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
+    node['Total_R'] = HistSum([wg_sample, 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
     node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
     node['Total_J'] = HistSum(['W_J', 'TT_J', 'DY_J', 'VV_J'])
 
     if 'data_fakes' in node.d:
-        all_r_samples = [wg_sample, 'DY_XZG', 'ZG_IZG'] + tt_samples + vv_samples
+        all_r_samples = [wg_sample, 'DY_XZG', 'ZG_IZG'] + tt_xttg_samples + ttg_ittg_samples + vv_samples
         all_e_samples = dy_samples + w_samples + tt_samples + vv_samples
         node['Total_fw_R'] = HistSum([lbl + '_fw_R' for lbl in all_r_samples])
         node['Total_fw_E'] = HistSum([lbl + '_fw_E' for lbl in all_e_samples])
