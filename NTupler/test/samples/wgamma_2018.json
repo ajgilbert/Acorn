@@ -108,10 +108,11 @@
       "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext2-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc",
+      "useFileSplitting": 2
     },
     "WJetsToLNu-madgraphMLM": {
       "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
@@ -275,6 +276,12 @@
       "attributes": ["submit"],
       "events": 0,
       "config": "mc"
+    },
+    "DiPhotonJetsBox_MGG-80toInf": {
+      "dataset": "/DiPhotonJetsBox_MGG-80toInf_13TeV-Sherpa/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc_no_lhe"
     }
   },
   "configs": {

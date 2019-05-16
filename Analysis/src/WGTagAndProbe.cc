@@ -102,13 +102,13 @@ int WGTagAndProbe::PreAnalysis() {
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
 
     auto tags = ac::copy_keep_if(electrons, [](ac::Electron *e) {
-      return e->pt() > 35. && fabs(e->eta()) < 2.5 && e->isCutBasedMediumElectron() &&
-                   (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) && ElectronIPCuts(e);
+      return e->pt() > 35. && fabs(e->scEta()) < 2.5 && e->isCutBasedMediumElectron() &&
+                   (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) && ElectronIPCuts(e);
     });
 
     auto probes = ac::copy_keep_if(electrons, [](ac::Electron *e) {
-      return e->pt() > 35. && fabs(e->eta()) < 2.5 &&
-                   (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566);
+      return e->pt() > 35. && fabs(e->scEta()) < 2.5 &&
+                   (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566);
     });
 
     auto electron_pairs = ac::MakePairs(tags, probes);
@@ -134,14 +134,14 @@ int WGTagAndProbe::PreAnalysis() {
       ac::Electron const* ele_p = pair.second;
 
       t_pt_ = ele_t->pt();
-      t_eta_ = ele_t->eta();
+      t_eta_ = ele_t->scEta();
       t_phi_ = ele_t->phi();
       t_q_ = ele_t->charge();
       t_id_ = ele_t->isCutBasedMediumElectron() && ElectronIPCuts(ele_t);
       t_rand_ = (ele_t->charge() == +1) == req_pos;
 
       p_pt_ = ele_p->pt();
-      p_eta_ = ele_p->eta();
+      p_eta_ = ele_p->scEta();
       p_phi_ = ele_p->phi();
       p_q_ = ele_p->charge();
       p_id_ = ele_p->isCutBasedMediumElectron() && ElectronIPCuts(ele_p);

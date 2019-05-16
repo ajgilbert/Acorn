@@ -70,6 +70,8 @@ config.section_('Site')
 config.Site.storageSite = crab_settings['storageSite']
 if 'whiteList' in crab_settings:
   config.Site.whitelist = [str(x) for x in crab_settings['whiteList']]
+if 'blacklist' in crab_settings:
+  config.Site.blacklist = [str(x) for x in crab_settings['blacklist']]
 #config.Site.whitelist = ['T2_UK_London_IC', 'T2_CH_CERN', 'T2_FR_GRIF_LLR', 'T2_UK_SGrid_Bristol', 'T3_US_FNALLPC', 'T2_DE_DESY', 'T2_IT_Bari', 'T2_BE_IIHE', 'T2_US_UCSD', 'T2_US_MIT', 'T2_IT_Pisa', 'T2_US_Wisconsin', 'T2_US_Florida', 'T2_IT_Rome','T2_FR_IPHC']
 
 

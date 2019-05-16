@@ -52,9 +52,10 @@ bool IsFilterMatchedDR(Candidate const* cand, std::vector<TriggerObject*> const&
 LookupFilter::LookupFilter(std::map<unsigned, std::string> info) {
   info_ = info;
 }
+
 std::string LookupFilter::Lookup(unsigned search) const {
   if (info_.size() == 0) {
-    std::cerr << ">> Error in LookupFilter::Lookup, map is empty\n";
+    std::cerr << "Error in LookupFilter::Lookup, map is empty\n";
     return "";
   } else {
     // An iterator to the the first element in the container whose key is considered to go after k,

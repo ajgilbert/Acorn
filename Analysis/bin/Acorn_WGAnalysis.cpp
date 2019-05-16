@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include "boost/lexical_cast.hpp"
+#include "boost/algorithm/string.hpp"
 // Services
 #include "PhysicsTools/FWLite/interface/TFileService.h"
 #include "Acorn/Analysis/interface/AnalysisBase.h"
@@ -115,9 +116,17 @@ int main(int argc, char* argv[]) {
     dimuon_seq.InsertSequence("DiMuon", analysis);
   }
 
-  ac::Sequence wgamma_seq;
-  std::string wgamma_label = "WGamma";
-  if (sequences.count(wgamma_label)) {
+  std::map<std::string, ac::Sequence> wgamma_seqs;
+
+  for (auto const& seq : sequences) {
+    std::vector<std::string> as_vec;
+    boost::split(as_vec, seq, boost::is_any_of("_"));
+    if (!(as_vec.size() >= 1 && as_vec[0] == "WGamma")) continue;
+    std::string subseq;
+    if (as_vec.size() >= 2) subseq = as_vec[1];
+
+    ac::Sequence & wgamma_seq = wgamma_seqs[seq];
+    std::string wgamma_label = seq;
     auto wgamma_fs = fs.at(wgamma_label).get();
 
     std::vector<std::string> userDoubleNames = {"fixedGridRhoFastjetAll"};
@@ -143,6 +152,15 @@ int main(int argc, char* argv[]) {
           ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
     }
 
+
+    int correct_p_energy = -1;
+    int correct_e_energy = -1;
+    int correct_m_energy = -1;
+    if (subseq == "EGMCorr") {
+      correct_e_energy = 0;
+      correct_p_energy = 0;
+      correct_m_energy = 0;
+    }
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
@@ -151,10 +169,14 @@ int main(int argc, char* argv[]) {
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(ac::contains(jsc["attributes"], "do_wg_gen_vars"))
                              .set_check_is_zg(ac::contains(jsc["attributes"], "check_is_zg"))
-                             .set_do_presel(!ac::contains(jsc["attributes"], "no_presel")));
-
+                             .set_do_presel(!ac::contains(jsc["attributes"], "no_presel"))
+                             .set_correct_e_energy(correct_e_energy)
+                             .set_correct_p_energy(correct_p_energy)
+                             .set_correct_m_energy(correct_m_energy)
+                             .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt"));
     wgamma_seq.InsertSequence(wgamma_label, analysis);
   }
+
 
   ac::Sequence tp_seq;
   std::string tp_label = "TP";
