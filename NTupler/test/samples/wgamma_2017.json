@@ -52,15 +52,13 @@
       "dataset": "/SingleElectron/Run2017E-31Mar2018-v1/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
-      "config": "data",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_SingleElectron-2017E/results/notFinishedLumis.json"
+      "config": "data"
     },
     "SingleElectron-2017F": {
       "dataset": "/SingleElectron/Run2017F-31Mar2018-v1/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
-      "config": "data",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_SingleElectron-2017F/results/notFinishedLumis.json"
+      "config": "data"
     },
     "SinglePhoton-2017B": {
       "dataset": "/SinglePhoton/Run2017B-31Mar2018-v1/MINIAOD",
@@ -84,15 +82,13 @@
       "dataset": "/SinglePhoton/Run2017E-31Mar2018-v1/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
-      "config": "data",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_SinglePhoton-2017E/results/notFinishedLumis.json"
+      "config": "data"
     },
     "SinglePhoton-2017F": {
       "dataset": "/SinglePhoton/Run2017F-31Mar2018-v1/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
-      "config": "data",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_SinglePhoton-2017F/results/notFinishedLumis.json"
+      "config": "data"
     },
     "WGToLNuG-madgraphMLM": {
       "dataset": "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
@@ -105,8 +101,7 @@
       "attributes": ["submit"],
       "events": 0,
       "config": "mc",
-      "inputDBS": "phys03",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_WGToLNuG-madgraphMLM-PtG-130/results/notFinishedLumis.json"
+      "inputDBS": "phys03"
     },
     "WGToLNuG-madgraphMLM-PtG-500": {
       "dataset": "/WGToLNuG_PtG-500_TuneCP5_13TeV-madgraphMLM-pythia8/agilbert-RunIIFall17MiniAODv2-5f646ecd4e1c7a39ab0ed099ff55ceb9/USER",
@@ -150,25 +145,25 @@
     },
     "DYJetsToLL_M-50-madgraphMLM": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 48675378,
       "config": "mc"
     },
     "DYJetsToLL_M-50-madgraphMLM-ext1": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 49125561,
       "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX": {
-      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": [],
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 27413121,
       "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX-ext1": {
-      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
-      "attributes": [],
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 182359906,
       "config": "mc"
     },
@@ -188,8 +183,7 @@
       "dataset": "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_TTToSemiLeptonic-powheg/results/notFinishedLumis.json"
+      "config": "mc"
     },
     "TTToHadronic-powheg": {
       "dataset": "/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v2/MINIAODSIM",
@@ -255,29 +249,25 @@
       "dataset": "/TTGamma_SingleLeptFromT_TuneCP5_PSweights_13TeV_madgraph_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_TTGamma_SingleLeptFromT-madgraph/results/notFinishedLumis.json"
+      "config": "mc"
     },
     "TTGamma_SingleLeptFromTbar-madgraph": {
       "dataset": "/TTGamma_SingleLeptFromTbar_TuneCP5_PSweights_13TeV_madgraph_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_TTGamma_SingleLeptFromTbar-madgraph/results/notFinishedLumis.json"
+      "config": "mc"
     },
     "TTGamma_Dilept-madgraph": {
       "dataset": "/TTGamma_Dilept_TuneCP5_PSweights_13TeV_madgraph_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_TTGamma_Dilept-madgraph/results/notFinishedLumis.json"
+      "config": "mc"
     },
     "TTGamma_Hadronic-madgraph": {
       "dataset": "/TTGamma_Hadronic_TuneCP5_PSweights_13TeV_madgraph_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
-      "lumiMask": "wgamma_2017_v3/crab_wgamma_2017_v3_TTGamma_Hadronic-madgraph/results/notFinishedLumis.json"
+      "config": "mc"
     },
     "WZG-amcatnlo": {
       "dataset": "/WZG_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
