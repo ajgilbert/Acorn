@@ -72,6 +72,7 @@ config_by_setting = {
         '*/xy_met_phi': ('xy-corrected p_{T}^{miss} #phi', ''),
         '*/puppi_met': ('PUPPI p_{T}^{miss}', 'GeV'),
         '*/puppi_met_phi': ('PUPPI p_{T}^{miss} #phi', ''),
+        '*/gen_p0_pt': ('Gen. Photon p_{T}', 'GeV'),
         '*/p0_pt': ('Photon p_{T}', 'GeV'),
         '*/p0_eta': ('Photon #eta', ''),
         '*/p0_phi': ('Photon #phi', ''),
@@ -96,7 +97,8 @@ config_by_setting = {
         '*/wt_l1': ('Sub-leading lepton weight', ''),
         '*/wt_trg_l0': ('Lepton trigger weight', ''),
         '*/wt_p0': ('Photon weight', ''),
-        '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', '')
+        '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', ''),
+        '*/1': ('1', '')
     }
 }
 

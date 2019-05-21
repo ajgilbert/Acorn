@@ -10,7 +10,7 @@ parser.add_argument('--year', default='2016')
 parser.add_argument('--label', default='default')
 parser.add_argument('--channel', default='m')
 parser.add_argument('--output', default='output/cards')
-parser.add_argument('--type', default='eft', choices=['eft', 'pt_diff'])
+parser.add_argument('--type', default='eft_region', choices=['eft_region', 'pt_diff', 'fid_region'])
 parser.add_argument('--pt-bins', type=int, default=6)
 parser.add_argument('--phi-bins', type=int, default=5)
 args = parser.parse_args()
@@ -22,17 +22,21 @@ n_pt_bins = args.pt_bins
 n_phi_bins = args.phi_bins
 wg_proc = 'WG_NLO'
 
+charges = ['p', 'n']
+if args.type == 'fid_region':
+    charges = ['x']
+
 era = '13TeV_%s' % args.year
-for c in ['p', 'n']:
+for c in charges:
     for ptbin in range(n_pt_bins):
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
         cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
-        if args.type in ['eft', 'pt_phi_diff']:
+        if args.type in ['eft_region', 'pt_phi_diff']:
             for phibin in range(n_phi_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
-        if args.type in ['pt_diff']:
+        if args.type in ['pt_diff', 'fid_region']:
             for pt_truthbin in range(n_pt_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i' % (c, pt_truthbin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i' % (c, pt_truthbin)], [cat], True)
@@ -56,7 +60,7 @@ cb.cp().AddSyst(
 par = cb.GetParameter('lumiscale').set_frozen(True)
 
 print '>> Extracting histograms from input root files...'
-file = 'output_%s_eft_region_%s.root' % (args.year, args.label)
+file = 'output_%s_%s_%s.root' % (args.year, args.type, args.label)
 cb.cp().ExtractShapes(
     file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 

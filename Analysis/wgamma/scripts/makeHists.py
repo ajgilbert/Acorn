@@ -13,7 +13,7 @@ ROOT.TH1.AddDirectory(False)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'electron_fakes'])
+parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'electron_fakes', 'fid_region'])
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
@@ -204,8 +204,10 @@ X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1'
 X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1'
 
 # Selection to veto (or select) mZ region
-X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'
-X['mZ_veto_inv'] = 'abs(91.2 - l0p0_M) <= 15'
+X['mZ_veto_m'] = '(l0p0_M < 70 || l0p0_M > 100)'
+X['mZ_veto_e'] = '(l0p0_M < 70 || l0p0_M > 110)'
+X['mZ_veto_inv_m'] = '(l0p0_M >= 70 && l0p0_M <= 100)'
+X['mZ_veto_inv_e'] = '(l0p0_M >= 75 && l0p0_M <= 105)'
 
 # Veto specific boxes in photon phi-eta where we have e->gamma spikes
 if args.year == '2016':
@@ -220,21 +222,25 @@ X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 &&
 X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
-X['baseline_m_mZ_veto'] ='$baseline_m && (l0p0_M < 70 || l0p0_M > 100)'
-X['baseline_e_mZ_veto'] ='$baseline_e && (l0p0_M < 70 || l0p0_M > 110)'
+X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m'
+X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e'
 
 # Control regions
 X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_iso<0.15 && l0_pt>30 && l1_iso<0.15 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
 X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
 
 # Common fiducial region:
-X['fid_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && abs(l0_eta) < 2.4 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['fid_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && abs(l0_eta) && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
+if args.task == 'eft_region':
+    X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
+    X['fid_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto_e && $efake_veto_e'
+    X['gen_acc'] = 'gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+    X['gen_acc_met1'] = 'gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
 
-
-# EFT region
-X['baseline_m_eft'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
-X['baseline_e_eft'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto && $efake_veto_e'
+if args.task == 'fid_region':
+    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
+    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
+    X['gen_acc'] = 'gen_l0_pt>35 && gen_met>0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
+    X['gen_acc_met1'] = 'gen_l0_pt>35 && gen_met>0 && gen_met<0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
 
 # Event weights
 X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
@@ -263,40 +269,40 @@ if args.task == 'eft_region' or args.task == 'fid_region':
     phi_bins_max = phi_bins[1:]
     phi_var = eft_defaults['phi_var']
 
-    do_cats['e'].extend(['baseline_e_eft'])
-    do_cats['m'].extend(['baseline_m_eft'])
-
-    if args.task == 'eft_region':
-        X['gen_acc'] = 'gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
-        X['gen_acc_met1'] = 'gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
-    if args.task == 'fid_region':
-        X['gen_acc'] = 'gen_l0_pt>35 && gen_met>0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
-        X['gen_acc_met1'] = 'gen_l0_pt>35 && gen_met>0 && gen_met<0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
+    do_cats['e'].extend(['fid_e'])
+    do_cats['m'].extend(['fid_m'])
 
     X['p_gen_ooa'] = 'gen_l0_q==+1 && !$gen_acc'
     X['n_gen_ooa'] = 'gen_l0_q==-1 && !$gen_acc'
+    X['x_gen_ooa'] = '!$gen_acc'
 
     X['p_gen_acc'] = 'gen_l0_q==+1 && $gen_acc'
     X['n_gen_acc'] = 'gen_l0_q==-1 && $gen_acc'
+    X['x_gen_acc'] = '$gen_acc'
 
     X['p_gen_acc_met1'] = 'gen_l0_q==+1 && $gen_acc_met1'
     X['n_gen_acc_met1'] = 'gen_l0_q==-1 && $gen_acc_met1'
+    X['x_gen_acc_met1'] = '$gen_acc_met1'
 
     for i in range(len(pt_bins_min)):
         # Reconstructed categories
-        X['e_%i' % i] = '$baseline_e_eft && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['m_%i' % i] = '$baseline_m_eft && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_e_%i' % i] = '$fid_e && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_m_%i' % i] = '$fid_m && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
 
-        X['p_e_%i' % i] = '$baseline_e_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_e_%i' % i] = '$baseline_e_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['p_m_%i' % i] = '$baseline_m_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_m_%i' % i] = '$baseline_m_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        do_cats['e'].extend(['e_%i' % i, 'p_e_%i' % i, 'n_e_%i' % i])
-        do_cats['m'].extend(['m_%i' % i, 'p_m_%i' % i, 'n_m_%i' % i])
+        X['p_e_%i' % i] = '$fid_e && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_e_%i' % i] = '$fid_e && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['p_m_%i' % i] = '$fid_m && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_m_%i' % i] = '$fid_m && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        if args.task == 'eft_region':
+            do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
+            do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
+        if args.task == 'fid_region':
+            do_cats['e'].extend(['x_e_%i' % i])
+            do_cats['m'].extend(['x_m_%i' % i])
 
         # Gen level selections
-        X['gen_%i' % (i)] = '$gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['gen_met1_%i' % (i)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_gen_%i' % (i)] = '$gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_gen_met1_%i' % (i)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['p_gen_%i' % (i)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['n_gen_%i' % (i)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['p_gen_met1_%i' % (i)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
@@ -305,8 +311,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         for j in range(len(phi_bins_min)):
             X['p_gen_%i_%i' % (i, j)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['n_gen_%i_%i' % (i, j)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['x_gen_%i_%i' % (i, j)] = '$gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['p_gen_met1_%i_%i' % (i, j)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['n_gen_met1_%i_%i' % (i, j)] = '$n_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['x_gen_met1_%i_%i' % (i, j)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
 
     drawvars = [
         ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
@@ -334,12 +342,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
                     wt=X.get('$baseline_wt * wt_p0_fake'))
                 for P in [wg_sample]:
-                    hists[chn][sel][var]['WG_ooa_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_ooa_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_main_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_main_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_met1_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc_met1'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_met1_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc_met1'), wt=X.get('$baseline_wt'))
+                    for chg in ['p', 'n', 'x']:
+                        hists[chn][sel][var]['WG_ooa_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_ooa' % chg), wt=X.get('$baseline_wt'))
+                        hists[chn][sel][var]['WG_main_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc' % chg), wt=X.get('$baseline_wt'))
+                        hists[chn][sel][var]['WG_met1_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc_met1' % chg), wt=X.get('$baseline_wt'))
                     if sel[-1].isdigit():
                         chg = sel[0]
                         for i in range(len(pt_bins_min)):
@@ -353,15 +359,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
             hists[chn]['XS'][var]['XS_WG_n_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
+            hists[chn]['XS'][var]['XS_WG_x_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
-            # # Pick this up automatically
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['XS_WG_x_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
 
 if args.task in ['baseline', 'electron_fakes']:
     if args.task == 'electron_fakes':
@@ -375,8 +376,8 @@ if args.task in ['baseline', 'electron_fakes']:
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
                 label = '%g_%g_%g_%g' % (e_min, e_max, p_min, p_max)
                 label = label.replace('.', 'p')
-                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
-                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
