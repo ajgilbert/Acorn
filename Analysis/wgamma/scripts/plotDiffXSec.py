@@ -12,33 +12,73 @@ from Acorn.Analysis.plottemplates import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.TH1.AddDirectory(False)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--selection', default='eft_region')
+parser.add_argument('--scheme', default='phi_f_binned')
+parser.add_argument('--years', default='2016,2017,2018')
+parser.add_argument('--ratio', action='store_true')
+parser.add_argument('--charge', default='p')
+args = parser.parse_args()
+
+
 plot.ModTDRStyle(width=1000)
 ROOT.gStyle.SetEndErrorSize(0)
 
+def DivideGraphByHist(gr, hist):
+    res = gr.Clone()
+    for i in xrange(gr.GetN()):
+        res.GetY()[i] = res.GetY()[i] / hist.GetBinContent(i + 1)
+    if type(res) is ROOT.TGraphAsymmErrors:
+        for i in xrange(gr.GetN()):
+            res.GetEYhigh()[i] = res.GetEYhigh()[i]/hist.GetBinContent(i + 1)
+            res.GetEYlow()[i] = res.GetEYlow()[i]/hist.GetBinContent(i + 1)
+    return res
 
-def SetupPads(split_points, gaps_left, gaps_right):
+
+def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
     pads = []
+    ratio_pads = []
     l_margin = ROOT.gStyle.GetPadLeftMargin()
     r_margin = ROOT.gStyle.GetPadRightMargin()
+    t_margin = ROOT.gStyle.GetPadTopMargin()
+    b_margin = ROOT.gStyle.GetPadBottomMargin()
     usable_width = 1. - l_margin - r_margin
+    usable_height = 1. - t_margin - b_margin
     for i in xrange(len(split_points)+1):
         pad = ROOT.TPad('pad%i'%i, '', 0., 0., 1., 1.)
+        pad_l_margin = l_margin + sum(split_points[0:i]) * usable_width + gaps_left[i-1]
+        pad_r_margin = (1. - sum(split_points[0:i+1])) * usable_width + r_margin + gaps_right[i]
         if i > 0:
-            pad.SetLeftMargin(l_margin + sum(split_points[0:i]) * usable_width + gaps_left[i-1])
+            pad.SetLeftMargin(pad_l_margin)
         if i < len(split_points):
-            pad.SetRightMargin((1. - sum(split_points[0:i+1])) * usable_width + r_margin + gaps_right[i])
+            pad.SetRightMargin(pad_r_margin)
         print pad.GetLeftMargin(), pad.GetRightMargin()
+        if ratio is not None:
+            pad.SetBottomMargin(b_margin + usable_height * ratio)
         pad.SetFillStyle(4000)
         pad.Draw()
         pads.append(pad)
+        if ratio is not None:
+            padr = ROOT.TPad('r_pad%i'%i, '', 0., 0., 1., 1.)
+            if i > 0:
+                padr.SetLeftMargin(pad_l_margin)
+            if i < len(split_points):
+                padr.SetRightMargin(pad_r_margin)
+            padr.SetTopMargin(1 - (b_margin + usable_height * ratio))
+            padr.SetFillStyle(4000)
+            padr.Draw()
+            ratio_pads.append(padr)
+
+
     pads[0].cd()
     # pads.reverse()
-    return pads
+    return pads, ratio_pads
 
 
 
-years = ['2016']
-chg = 'p'
+years = args.years.split(',')
+chg = args.charge
 
 ref_hists = {}
 
@@ -48,9 +88,9 @@ corr_factors = {
     '2017': 191.4 / 229.92,
     '2018': 191.4 / 229.92
 }
-
+# output_2018_fid_region_fid_pt_binned.root
 for yr in years:
-    f_ref = ROOT.TFile('output_%s_eft_region_phi_f_binned.root' % yr)
+    f_ref = ROOT.TFile('output_%s_%s_%s.root' % (yr, args.selection, args.scheme))
     h_ref_m = Node()
     TDirToNode(f_ref, 'm/XS/2D', h_ref_m)
     h_ref_e = Node()
@@ -63,7 +103,8 @@ for yr in years:
     h_xs.Add(h_xs_e)
 
     # Scale from pb to fb, then a factor 3/2 since we only added e + mu, and we want all l
-    h_xs.Scale(1000. * (3. / 2.))
+    h_xs.Scale(1. * (3. / 2.))
+    # h_xs.Scale(1000. * (3. / 2.))
     h_xs.Scale(corr_factors[yr])
     h_xs.Print("range")
     h_xs.Scale(1, 'width')
@@ -71,17 +112,19 @@ for yr in years:
 
     ref_hists[yr] = h_xs
 
-n_bins_pt = ref_hists['2016'].GetNbinsX()
-n_bins_phi = ref_hists['2016'].GetNbinsY()
+n_bins_pt = ref_hists[years[0]].GetNbinsX()
+n_bins_phi = ref_hists[years[0]].GetNbinsY()
 width = 1. / n_bins_phi
 
 canv = ROOT.TCanvas('diff_xsec', 'diff_xsec')
 
-
-pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0])
+ratio = None
+if args.ratio:
+    ratio = 0.4
+pads, ratio_pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0], ratio=ratio)
 
 xsec_results = {}
-with open('phi_f_binned.json') as jsonfile:
+with open('%s.json' % args.scheme) as jsonfile:
     xsec_results = json.load(jsonfile)['xsec2D']
 
 ref_hists_1D = []
@@ -103,14 +146,14 @@ for i in range(n_bins_phi):
         # ex_hi.append(h_1D.GetXaxis().GetBinWidth(j + 1) / 2.)
         ex_lo.append(0.)
         ex_hi.append(0.)
-        poi_res = xsec_results['r_p_%i_%i' % (j, i)]
+        poi_res = xsec_results['r_%s_%i' % (chg, j)]
         y_vals.append(h_1D.GetBinContent(j + 1) * poi_res['Val'])
         ey_hi.append(h_1D.GetBinContent(j + 1) * poi_res['ErrorHi'])
         ey_lo.append(h_1D.GetBinContent(j + 1) * poi_res['ErrorLo'] * -1.)
     obs_graphs.append(ROOT.TGraphAsymmErrors(len(x_vals), array('d', x_vals), array('d', y_vals), array('d', ex_lo), array('d', ex_hi), array('d', ey_lo), array('d', ey_hi)))
 
 h_axes = [h.Clone() for h in ref_hists_1D]
-
+r_h_axes = [h.Clone() for h in ref_hists_1D]
 
 legend = ROOT.TLegend(0.74, 0.74, 0.94, 0.86, '', 'NBNDC')
 
@@ -125,8 +168,10 @@ latex.SetTextAlign(22)
 
 for i, h in enumerate(h_axes):
     h.Reset()
-    h.SetMinimum(5E-5)
-    h.SetMaximum(8E-1)
+    # h.SetMinimum(5E-5)
+    # h.SetMaximum(8E-1)
+    h.SetMinimum(1E-2)
+    h.SetMaximum(5E-0)
     pads[i].cd()
     pads[i].SetLogy(True)
     h.Draw()
@@ -153,8 +198,34 @@ for i, h in enumerate(h_axes):
     pad_width = 1. - pads[i].GetLeftMargin() - pads[i].GetRightMargin()
     latex.DrawLatexNDC(pads[i].GetLeftMargin() + pad_width / 2., 0.9, '%.2f #leq |#phi_{f}| < %.2f' % (ref_hists[yr].GetYaxis().GetBinLowEdge(i + 1), ref_hists[yr].GetYaxis().GetBinUpEdge(i + 1)))
 
+r_ref_hists_1D = []
+r_obs_graphs = []
+
+if args.ratio:
+    for i, h in enumerate(r_h_axes):
+        h.Reset()
+        # h.SetMinimum(5E-5)
+        # h.SetMaximum(8E-1)
+        h.SetMinimum(0.8)
+        h.SetMaximum(1.2)
+        ratio_pads[i].cd()
+        h.GetXaxis().SetNdivisions(510)
+        h.GetXaxis().ChangeLabel(-1, -1., -1., -1, -1, -1, ' ')
+        h.Draw()
+        r_ref_hists_1D.append(plot.MakeRatioHist(ref_hists_1D[i], ref_hists_1D[i], True, False))
+        r_obs_graphs.append(DivideGraphByHist(obs_graphs[i], ref_hists_1D[i]))
+        r_ref_hists_1D[i].Draw('E2SAME')
+        r_ref_hists_1D[i].SetMarkerSize(0)
+        r_obs_graphs[i].Draw('SAMEP')
+        # r_ref_hists_1D[i].Draw('LSAME')
+
 latex.SetTextSize(0.05)
-latex.DrawLatexNDC(0.17, 0.17, 'W^{+}(#rightarrowl^{+}#nu)#gamma')
+chg_labels = {
+    'p': '+',
+    'n': '-',
+    'x': '#pm'
+}
+latex.DrawLatexNDC(0.17, 0.17, 'W^{%s}(#rightarrowl^{%s}#nu)#gamma' % (chg_labels[args.charge], chg_labels[args.charge]))
 
 legend.Draw()
 
@@ -228,7 +299,7 @@ legend.Draw()
 
 pads[0].cd()
 plot.DrawCMSLogo(pads[0], 'CMS', 'Internal', 0, 0.24, 0.035, 1.2, cmsTextSize=0.9)
-plot.DrawTitle(pads[2], '136.9 fb^{-1} (13 TeV)', 3)
+plot.DrawTitle(pads[0], '136.9 fb^{-1} (13 TeV)', 3)
 
 
 canv.Print('.png')
