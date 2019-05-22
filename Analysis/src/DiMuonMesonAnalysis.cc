@@ -41,8 +41,11 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     tree_->Branch("wt_pu", &wt_pu_);
     tree_->Branch("wt_1", &wt_1_);
     tree_->Branch("wt_2", &wt_2_);
-    tree_->Branch("wt_trg1", &wt_trg1_);
-    tree_->Branch("wt_trg2", &wt_trg2_);
+    tree_->Branch("wt_trg", &wt_trg_);
+    tree_->Branch("eff_trg1_data", &eff_trg1_data_);
+    tree_->Branch("eff_trg2_data", &eff_trg2_data_);
+    tree_->Branch("eff_trg1_mc", &eff_trg1_mc_);
+    tree_->Branch("eff_trg2_mc", &eff_trg2_mc_);
     tree_->Branch("highestpt_pair_id_1", &highestpt_pair_id_1_);
     tree_->Branch("highestpt_pair_id_2", &highestpt_pair_id_2_);
     tree_->Branch("highestpt_pair_dR", &highestpt_pair_dR_);
@@ -98,8 +101,10 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
   fns_["m_idiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_idiso_ratio")->functor(ws_->argSet("m_pt,m_eta")));
-  fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_trg_data_eff"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_trg_data_eff")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_trg_mc_eff"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_trg_mc_eff")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["rhoiso_ratio_etainc"] = std::shared_ptr<RooFunctor>(
     ws_->function("rhoiso_ratio_etainc")->functor(ws_->argSet("rho_pt,rho_eta")));
 
@@ -151,7 +156,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     });
 
     ac::keep_if(veto_electrons, [](ac::Electron const* e) {
-      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron() && fabs(e->eta())>1.44 && fabs(e->eta())<1.56;
+      return e->pt() > 5. && fabs(e->eta()) < 2.1 && e->isMVAwp90Electron() && (fabs(e->eta())<1.44 || fabs(e->eta())>1.56);
     });
 
 
@@ -214,8 +219,11 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       wt_pu_ = 1.;
       wt_1_ = 1.;
       wt_2_ = 1.;
-      wt_trg1_ = 1.;
-      wt_trg2_ = 1.;
+      wt_trg_ = 1.;
+      eff_trg1_data_ =1.;
+      eff_trg2_data_ =1.;
+      eff_trg1_mc_ =1.;
+      eff_trg2_mc_ =1.;
 
       if (!is_data_) {
         auto const& pu_info = event->GetPtrVec<PileupInfo>("pileupInfo");
@@ -227,8 +235,16 @@ int DiMuonMesonAnalysis::PreAnalysis() {
         }
         wt_1_ = RooFunc(fns_["m_idiso_ratio"], {pt_1_, eta_1_});
         wt_2_ = RooFunc(fns_["m_idiso_ratio"], {pt_2_, eta_2_});
-        wt_trg1_ = RooFunc(fns_["m_trg_ratio"], {pt_1_, eta_1_});
-        wt_trg2_ = RooFunc(fns_["m_trg_ratio"], {pt_2_, eta_2_});
+        if( (year_ == 2016 && pt_2_<27.) || (year_==2017 && pt_2_<30.) || (year_==2018 && pt_2_<27.)){
+            eff_trg2_data_ = 0.;
+            eff_trg2_mc_ = 0.;
+        } else {
+            eff_trg2_data_ = RooFunc(fns_["m_trg_data_eff"],{pt_2_, eta_2_});
+            eff_trg2_mc_ = RooFunc(fns_["m_trg_mc_eff"],{pt_2_, eta_2_});
+        }
+        eff_trg1_data_ = RooFunc(fns_["m_trg_data_eff"],{pt_1_, eta_1_});
+        eff_trg1_mc_ = RooFunc(fns_["m_trg_mc_eff"],{pt_1_, eta_1_});
+        wt_trg_ = (eff_trg1_data_ + eff_trg2_data_ + eff_trg1_data_*eff_trg2_data_)/(eff_trg1_mc_ + eff_trg2_mc_ + eff_trg1_mc_*eff_trg2_mc_);
       }
 
       highestpt_pair_id_1_ = 0;
