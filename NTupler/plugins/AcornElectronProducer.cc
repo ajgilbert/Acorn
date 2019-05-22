@@ -39,7 +39,8 @@ AcornElectronProducer::AcornElectronProducer(const edm::ParameterSet& config)
       eleHEEPIdMapToken_(
           consumes<edm::ValueMap<bool>>(config.getParameter<edm::InputTag>("eleHEEPIdMap"))),
       relativeEAIsoFromUserData_(config.getParameter<std::vector<std::string>>("relativeEAIsoFromUserData")),
-      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")) {
+      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")),
+      energyCorrectionLabels_(config.getParameter<std::vector<std::string>>("energyCorrections")) {
   eleVetoIdLabel_ = config.getParameter<edm::InputTag>("eleVetoIdMap").label();
   eleLooseIdLabel_ = config.getParameter<edm::InputTag>("eleLooseIdMap").label();
   eleMediumIdLabel_ = config.getParameter<edm::InputTag>("eleMediumIdMap").label();
@@ -96,7 +97,6 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
 
-
     if (takeIdsFromObjects_) {
       if (pat_src) {
         dest.setIsCutBasedVetoElectron(setVar("isCutBasedVetoElectron", pat_src->electronID(eleVetoIdLabel_)));
@@ -127,8 +127,16 @@ void AcornElectronProducer::produce(edm::Event& event, const edm::EventSetup& se
 
     dest.setDxy(setVar("dxy", src.gsfTrack()->dxy(firstVertex->position())));
     dest.setDz(setVar("dz", src.gsfTrack()->dz(firstVertex->position())));
+    dest.setScEta(setVar("scEta", src.superCluster()->eta()));
+    dest.setScEnergy(setVar("scEnergy", src.superCluster()->energy()));
 
-    dest.setVertex(setVar("vertex", src.vertex()));
+    if (pat_src) {
+      std::vector<float> corrections(energyCorrectionLabels_.size(), 0.);
+      for (unsigned il = 0; il < energyCorrectionLabels_.size(); ++il) {
+        corrections[il] = setVar("energyCorrections", pat_src->userFloat(energyCorrectionLabels_[il]));
+      }
+      dest.setEnergyCorrections(corrections);
+    }
 
   }
 }

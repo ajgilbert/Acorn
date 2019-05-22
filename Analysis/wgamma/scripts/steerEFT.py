@@ -1,8 +1,14 @@
 import subprocess
 import json
 import glob
+import argparse
 from Acorn.Analysis.analysis import *
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--config', default='fid_pt_binned')
+parser.add_argument('--steps', default='')
+parser.add_argument('--years', default='2016,2017,2018')
+args = parser.parse_args()
 
 def call(args):
     print subprocess.list2cmdline(args)
@@ -10,13 +16,24 @@ def call(args):
 
 
 configs = {
+    "fid_pt_binned": {
+        'pt_bins': '[30,40,50,60,80,100]',
+        # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
     "phi_binned": {
         'pt_bins': '[150,210,300,420,600,850,1200]',
         'phi_var': 'abs(true_phi)',
         'phi_var_label': '|#phi|',
         'phi_var_obs': 'abs(reco_phi)',
         'phi_bins': '(5,0.,math.pi)',
-        'phi_bins_obs': '(5,0.,math.pi)'
+        'phi_bins_obs': '(5,0.,math.pi)',
+        'task_name': 'eft_region'
     },
     "phi_f_binned": {
         'pt_bins': '[150,210,300,420,600,850,1200]',
@@ -24,7 +41,8 @@ configs = {
         'phi_var_label': '|#phi_{f}|',
         'phi_var_obs': 'abs(reco_phi_f)',
         'phi_bins': '(3,0.,math.pi/2.)',
-        'phi_bins_obs': '(3,0.,math.pi/2.)'
+        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'task_name': 'eft_region'
     },
     "puppi_phi_f_binned": {
         'pt_bins': '[150,210,300,420,600,850,1200]',
@@ -32,7 +50,8 @@ configs = {
         'phi_var_label': '|#phi_{f}|',
         'phi_var_obs': 'abs(reco_puppi_phi_f)',
         'phi_bins': '(3,0.,math.pi/2.)',
-        'phi_bins_obs': '(3,0.,math.pi/2.)'
+        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'task_name': 'eft_region'
     },
     "pt_binned": {
         'pt_bins': '[150,210,300,420,600,850,1200]',
@@ -41,36 +60,42 @@ configs = {
         'phi_var_obs': 'p0_pt',
         'phi_bins': '(5,0.,math.pi)',
         'phi_bins_obs': '(5,0.,math.pi)',
-        'using_label': 'phi_binned'
+        'using_label': 'phi_binned',
+        'task_name': 'eft_region'
     },
 }
 
-label = 'phi_f_binned'
-using_label = label if 'using_label' not in configs[label] else configs[label]['using_label']
-pt_bins = configs[label]['pt_bins']
-phi_var = configs[label]['phi_var']
-phi_var_label = configs[label]['phi_var_label']
-phi_var_obs = configs[label]['phi_var_obs']
-phi_bins = configs[label]['phi_bins']
+label = args.config
+config = configs[label]
+
+using_label = label if 'using_label' not in config else config['using_label']
+pt_bins = config['pt_bins']
+phi_var = config['phi_var']
+phi_var_label = config['phi_var_label']
+phi_var_obs = config['phi_var_obs']
+phi_bins = config['phi_bins']
+phi_bins_obs = config['phi_bins_obs']
 
 n_pt_bins = len(BinEdgesFromStr(pt_bins)) - 1
 n_phi_bins = len(BinEdgesFromStr(phi_bins)) - 1
 
-steps = [
-    # 'makeEFTScaling',
-    'makeHists',
-    # 'setupDatacards',
-    # 'T2W',
-    # 'limitsVsPtMax'
-    # 'xsec2D',
-    # 'xsec2DPlot'
-]
+# steps = [
+#     # 'makeEFTScaling',
+#     'makeHists',
+#     # 'setupDatacards',
+#     # 'T2W',
+#     # 'limitsVsPtMax'
+#     # 'xsec2D',
+#     # 'xsec2DPlot'
+# ]
+steps = args.steps.split(',')
 
-years = [
-    '2016',
-    # '2017',
-    # '2018'
-]
+years = args.years.split(',')
+# years = [
+#     # '2016',
+#     # '2017',
+#     '2018'
+# ]
 
 if 'makeEFTScaling' in steps:
     for sample, sample_type in [
@@ -108,12 +133,16 @@ if 'makeHists' in steps:
         'pt_bins': pt_bins,
         'phi_var': phi_var,
         'phi_var_obs': phi_var_obs,
-        'phi_bins': phi_bins
+        'phi_bins': phi_bins,
+        'phi_bins_obs': phi_bins_obs
     }
     print json.dumps(testplot_args)
     for yr in years:
-        call(['python', 'wgamma/scripts/makeHists.py', '--task', 'eft_region',
-              '--indir', '/home/files/190412-full/wgamma_%s_v3/WGamma_' % yr,
+        # call(['python', 'wgamma/scripts/makeHists.py', '--task', 'eft_region',
+        #       '--indir', '/home/files/190412-full/wgamma_%s_v3/WGamma_' % yr,
+        #       '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
+        call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
+              '--indir', 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190513-full/wgamma_%s_v4/WGamma_' % yr,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
 
 
@@ -122,7 +151,7 @@ if 'setupDatacards' in steps:
         for chn in ['e', 'm']:
             call(['python', 'wgamma/scripts/setupDatacards.py', '--var', phi_var_obs,
                   '--output', 'output/cards/%s' % label, '--label', using_label,
-                  '--year', yr, '--channel', chn, '--type', 'eft',
+                  '--year', yr, '--channel', chn, '--type', config['task_name'],
                   '--pt-bins', '%i' % n_pt_bins,
                   '--phi-bins', '%i' % n_phi_bins
                   ])
@@ -140,17 +169,18 @@ if 'T2W' in steps:
     #       '--PO', 'type=eft', '--PO',
     #       'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
 
-    # call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-    #      ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-    #       '--PO', 'ptBins=%i' % n_pt_bins,
-    #       '--PO', 'phiBins=%i' % n_phi_bins,
-    #       '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
-
-    call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-         ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-          '--PO', 'ptBins=%i' % n_pt_bins,
-          '--PO', 'phiBins=%i' % n_phi_bins,
-          '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
+    if label == 'fid_pt_binned':
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+              '--PO', 'ptBins=%i' % n_pt_bins,
+              '--PO', 'phiBins=%i' % n_phi_bins,
+              '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
+    else:
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+              '--PO', 'ptBins=%i' % n_pt_bins,
+              '--PO', 'phiBins=%i' % n_phi_bins,
+              '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
 
 if 'limitsVsPtMax' in steps:
     for bsm_label, bsm_setting in [('withBSM', 1), ('noBSM', 0)]:
@@ -164,26 +194,31 @@ if 'limitsVsPtMax' in steps:
               glob.glob('higgsCombine.%s.%s.*.root' % (label, bsm_label)))
 
 
-if 'xsec2D' in steps:
-    allPOIs = []
-    for i in range(n_pt_bins):
+allPOIs = []
+for i in range(n_pt_bins):
+    if label == 'fid_pt_binned':
+        allPOIs.append('r_x_%i' % i)
+    else:
         for j in range(n_phi_bins):
             allPOIs.append('r_p_%i_%i' % (i, j))
             allPOIs.append('r_n_%i_%i' % (i, j))
-    initPOIs = ','.join([('%s=1' % X) for X in allPOIs])
 
+if 'xsec2D' in steps:
+    initPOIs = ','.join([('%s=1' % X) for X in allPOIs])
     genStr = 'P;n;;' + ';'.join(['%s,%s' % (X, X) for X in allPOIs])
 
-    call(['combineTool.py', '-M', 'MultiDimFit', 'combined_pt_phi_diff_%s.root' % label, '-t', '-1',
-          '--algo', 'grid', '--setParameters', initPOIs, '--floatOtherPOIs', '1',
+    if label == 'fid_pt_binned':
+        wsp = 'pt_diff'
+        rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
+    else:
+        wsp = 'pt_phi_diff'
+        rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
+
+    call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
+          '--algo', 'grid', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
           '--generate', genStr, '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4'])
 
 if 'xsec2DPlot' in steps:
-    allPOIs = []
-    for i in range(n_pt_bins):
-        for j in range(n_phi_bins):
-            allPOIs.append('r_p_%i_%i' % (i, j))
-            allPOIs.append('r_n_%i_%i' % (i, j))
 
     call(['rm', '%s.json' % label])
 

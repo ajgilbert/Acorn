@@ -13,7 +13,7 @@ ROOT.TH1.AddDirectory(False)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'electron_fakes'])
+parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'electron_fakes', 'fid_region'])
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
@@ -87,7 +87,7 @@ remaps = {
         'GG': 'DiPhotonJetsBox_MGG-80toInf'
     },
     "2018": {
-        'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'DY': 'DYJetsToLL_M-50-amcatnloFXFX',
         'ZG': 'ZGToLLG-amcatnloFXFX',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'EGamma',
@@ -97,9 +97,14 @@ remaps = {
         'WG': 'WGToLNuG-madgraphMLM-stitched',
         'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
-        'WW': 'WW-pythia',
-        'WZ': 'WZ-pythia',
-        'ZZ': 'ZZ-pythia',
+        'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
+        'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
+        # 'WZTo1L1Nu2Q': 'WZTo1L1Nu2Q-amcatnloFXFX',
+        'WZTo1L3Nu': 'WZTo1L3Nu-amcatnloFXFX',
+        'WZTo2L2Q': 'WZTo2L2Q-amcatnloFXFX',
+        'WZTo3LNu': 'WZTo3LNu-amcatnloFXFX',
+        'ZZTo2L2Q': 'ZZTo2L2Q-amcatnloFXFX',
+        'ZZTo4L': 'ZZTo4L-powheg',
         'ST_s': 'ST_s-channel_4f-amcatnlo',
         'ST_t_antitop': 'ST_t-channel_antitop_4f-powheg',
         'ST_t_top': 'ST_t-channel_top_4f-powheg',
@@ -129,7 +134,7 @@ if year == '2017':
     vv_samples = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
 if year == '2018':
-    vv_samples = ['WW', 'WZ', 'ZZ', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
+    vv_samples = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
 
 all_samples = wg_samples + w_samples + ttg_samples + tt_samples + zg_samples + dy_samples + vv_samples
@@ -153,6 +158,13 @@ def AddDYSplitting(node, label, sample, var_list, binning, sel, wt, components=[
     node[label + '_IZG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (gen_is_zg && p0_truth==1)' % sel), wt=X.get(wt))
     AddPhotonSplitting(node, label + '_XZG' + postfix, sample, var_list, binning, '(%s) && !(gen_is_zg && p0_truth==1)' % sel, wt, components=components)
     AddPhotonSplitting(node, label + '_IZG' + postfix, sample, var_list, binning, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt, components=components)
+
+
+def AddTTSplitting(node, label, sample, var_list, binning, sel, wt, components=['R', 'J', 'E'], postfix=''):
+    node[label + '_XTTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && !(p0_truth==1)' % sel), wt=X.get(wt))
+    node[label + '_ITTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (p0_truth==1)' % sel), wt=X.get(wt))
+    AddPhotonSplitting(node, label + '_XTTG' + postfix, sample, var_list, binning, '(%s) && !(p0_truth==1)' % sel, wt, components=components)
+    AddPhotonSplitting(node, label + '_ITTG' + postfix, sample, var_list, binning, '(%s) && (p0_truth==1)' % sel, wt, components=components)
 
 
 def HistSum(label_list):
@@ -192,32 +204,50 @@ X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1'
 X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1'
 
 # Selection to veto (or select) mZ region
-X['mZ_veto'] = 'abs(91.2 - l0p0_M) > 15'
-X['mZ_veto_inv'] = 'abs(91.2 - l0p0_M) <= 15'
+X['mZ_veto_m'] = '(l0p0_M < 70 || l0p0_M > 100)'
+X['mZ_veto_e'] = '(l0p0_M < 70 || l0p0_M > 110)'
+X['mZ_veto_inv_m'] = '(l0p0_M >= 70 && l0p0_M <= 100)'
+X['mZ_veto_inv_e'] = '(l0p0_M >= 75 && l0p0_M <= 105)'
+
+# Veto specific boxes in photon phi-eta where we have e->gamma spikes
+if args.year == '2016':
+    X['p0_phi_veto'] = 'p0_phi > 2.268 && p0_phi < 2.772 && p0_eta > -2.04 && p0_eta < 0.84'
+if args.year == '2017':
+    X['p0_phi_veto'] = 'p0_phi > 2.646 && p0_phi < 3.15 && p0_eta > -0.60 && p0_eta < 1.68'
+if args.year == '2018':
+    X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nomt_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_e_nomt_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_m_nopix'] ='$baseline_m_nomt_nopix && l0met_mt>60'
-X['baseline_e_nopix'] ='$baseline_e_nomt_nopix && l0met_mt>60'
-X['baseline_m_nomt'] ='$baseline_m_nomt_nopix && $efake_veto_m'
-X['baseline_e_nomt'] ='$baseline_e_nomt_nopix && $efake_veto_e'
+X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
-X['baseline_m_mZ_veto'] ='$baseline_m'
-X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto'
-X['baseline_m_mZ_veto_t'] ='$baseline_m_mZ_veto && l0_tight'
-X['baseline_e_mZ_veto_t'] ='$baseline_e_mZ_veto && l0_tight'
+X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m'
+X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e'
 
-# EFT region
-X['baseline_m_eft'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
-X['baseline_e_eft'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto && $efake_veto_e'
+# Control regions
+X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_iso<0.15 && l0_pt>30 && l1_iso<0.15 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
+X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
+
+# Common fiducial region:
+if args.task == 'eft_region':
+    X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
+    X['fid_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto_e && $efake_veto_e'
+    X['gen_acc'] = 'gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+    X['gen_acc_met1'] = 'gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+
+if args.task == 'fid_region':
+    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
+    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
+    X['gen_acc'] = 'gen_l0_pt>35 && gen_met>0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
+    X['gen_acc_met1'] = 'gen_l0_pt>35 && gen_met>0 && gen_met<0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
 
 # Event weights
 X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
+X['cr_zll_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_l1*wt_pf'
 
 
-if args.task == 'eft_region':
+if args.task == 'eft_region' or args.task == 'fid_region':
     eft_defaults = {
         'pt_bins': '[150,210,300,420,600,850,1200]',
         # 'phi_var': 'abs(true_phi)',
@@ -239,28 +269,40 @@ if args.task == 'eft_region':
     phi_bins_max = phi_bins[1:]
     phi_var = eft_defaults['phi_var']
 
-    do_cats['e'].extend(['baseline_e_eft'])
-    do_cats['m'].extend(['baseline_m_eft'])
+    do_cats['e'].extend(['fid_e'])
+    do_cats['m'].extend(['fid_m'])
 
-    X['p_gen_ooa'] = 'gen_l0_q==+1 && !(gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0)'
-    X['n_gen_ooa'] = 'gen_l0_q==-1 && !(gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0)'
+    X['p_gen_ooa'] = 'gen_l0_q==+1 && !$gen_acc'
+    X['n_gen_ooa'] = 'gen_l0_q==-1 && !$gen_acc'
+    X['x_gen_ooa'] = '!$gen_acc'
 
-    X['p_gen_acc'] = 'gen_l0_q==+1 && gen_l0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
-    X['n_gen_acc'] = 'gen_l0_q==-1 && gen_l0_pt>80 && gen_met>80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+    X['p_gen_acc'] = 'gen_l0_q==+1 && $gen_acc'
+    X['n_gen_acc'] = 'gen_l0_q==-1 && $gen_acc'
+    X['x_gen_acc'] = '$gen_acc'
 
-    X['p_gen_acc_met1'] = 'gen_l0_q==+1 && gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
-    X['n_gen_acc_met1'] = 'gen_l0_q==-1 && gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+    X['p_gen_acc_met1'] = 'gen_l0_q==+1 && $gen_acc_met1'
+    X['n_gen_acc_met1'] = 'gen_l0_q==-1 && $gen_acc_met1'
+    X['x_gen_acc_met1'] = '$gen_acc_met1'
 
     for i in range(len(pt_bins_min)):
         # Reconstructed categories
-        X['p_e_%i' % i] = '$baseline_e_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_e_%i' % i] = '$baseline_e_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['p_m_%i' % i] = '$baseline_m_eft && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        X['n_m_%i' % i] = '$baseline_m_eft && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
-        do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
-        do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
+        X['x_e_%i' % i] = '$fid_e && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_m_%i' % i] = '$fid_m && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+
+        X['p_e_%i' % i] = '$fid_e && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_e_%i' % i] = '$fid_e && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['p_m_%i' % i] = '$fid_m && l0_q==+1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['n_m_%i' % i] = '$fid_m && l0_q==-1 && p0_pt>=%f && p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        if args.task == 'eft_region':
+            do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
+            do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
+        if args.task == 'fid_region':
+            do_cats['e'].extend(['x_e_%i' % i])
+            do_cats['m'].extend(['x_m_%i' % i])
 
         # Gen level selections
+        X['x_gen_%i' % (i)] = '$gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
+        X['x_gen_met1_%i' % (i)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['p_gen_%i' % (i)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['n_gen_%i' % (i)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
         X['p_gen_met1_%i' % (i)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f' % (pt_bins_min[i], pt_bins_max[i])
@@ -269,8 +311,10 @@ if args.task == 'eft_region':
         for j in range(len(phi_bins_min)):
             X['p_gen_%i_%i' % (i, j)] = '$p_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['n_gen_%i_%i' % (i, j)] = '$n_gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['x_gen_%i_%i' % (i, j)] = '$gen_acc && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['p_gen_met1_%i_%i' % (i, j)] = '$p_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
             X['n_gen_met1_%i_%i' % (i, j)] = '$n_gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
+            X['x_gen_met1_%i_%i' % (i, j)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
 
     drawvars = [
         ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
@@ -290,17 +334,18 @@ if args.task == 'eft_region':
                 for P in dy_samples + zg_samples:
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
                 hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
                     wt=X.get('$baseline_wt * wt_p0_fake'))
                 for P in [wg_sample]:
-                    hists[chn][sel][var]['WG_ooa_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_ooa_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_ooa'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_main_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_main_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_met1_p'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $p_gen_acc_met1'), wt=X.get('$baseline_wt'))
-                    hists[chn][sel][var]['WG_met1_n'] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $n_gen_acc_met1'), wt=X.get('$baseline_wt'))
+                    for chg in ['p', 'n', 'x']:
+                        hists[chn][sel][var]['WG_ooa_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_ooa' % chg), wt=X.get('$baseline_wt'))
+                        hists[chn][sel][var]['WG_main_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc' % chg), wt=X.get('$baseline_wt'))
+                        hists[chn][sel][var]['WG_met1_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc_met1' % chg), wt=X.get('$baseline_wt'))
                     if sel[-1].isdigit():
                         chg = sel[0]
                         for i in range(len(pt_bins_min)):
@@ -314,15 +359,10 @@ if args.task == 'eft_region':
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
             hists[chn]['XS'][var]['XS_WG_n_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
+            hists[chn]['XS'][var]['XS_WG_x_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
-            # # Pick this up automatically
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_0' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=0 && abs(gen_sphi)<(TMath::Pi()/6)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_1' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/6) && abs(gen_sphi)<(TMath::Pi()/3)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_p_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
-            # hists[chn]['XS'][var]['XS_WG_n_%s_acc_sphi_2' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $n_gen_acc && abs(gen_sphi)>=(TMath::Pi()/3) && abs(gen_sphi)<(TMath::Pi()/2)' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['XS_WG_x_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
 
 if args.task in ['baseline', 'electron_fakes']:
     if args.task == 'electron_fakes':
@@ -336,13 +376,18 @@ if args.task in ['baseline', 'electron_fakes']:
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
                 label = '%g_%g_%g_%g' % (e_min, e_max, p_min, p_max)
                 label = label.replace('.', 'p')
-                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
-                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
-    do_cats['e'].extend(['baseline_e_nomt_nopix', 'baseline_e_nomt', 'baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto'])
-    do_cats['m'].extend(['baseline_m_nomt_nopix', 'baseline_m_nomt', 'baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto'])
+    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'cr_Zee'])
+    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'cr_Zmm'])
+
+    cat_to_wt = {
+        'cr_Zee': '$cr_zll_wt',
+        'cr_Zmm': '$cr_zll_wt'
+    }
 
     drawvars = [
         ('n_vtx', (30, 0., 60.)),
@@ -355,32 +400,34 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l0_iso', (40, 0, 2.0)),
         ('l1_pt', (40, 0., 150.)),
         ('l1_eta', (20, -3.0, 3.0)),
-        ('l0l1_M', (40, 60, 120)),
-        ('l0l1_dr', (20, 0., 5.)),
-        ('met', (20, 0., 200.)),
+        ('l0l1_M', (60, 60, 120)),
+        ('l0l1_pt', (80, 0, 200)),
+        # ('l0l1_dr', (20, 0., 5.)),
+        ('met', (40, 0., 200.)),
         ('met_phi', (20, -3.15, 3.15)),
-        ('xy_met', (20, 0., 200.)),
-        ('xy_met_phi', (20, -3.15, 3.15)),
+        # ('xy_met', (20, 0., 200.)),
+        # ('xy_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
         ('puppi_met_phi', (20, -3.15, 3.15)),
         ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300]),
         ('p0_eta', (20, -3.0, 3.0)),
         ('p0_phi', (30, -3.15, 3.15)),
         ('l0p0_dr', (20, 0., 5.)),
-        ('l0p0_M', (20, 60, 120)),
+        ('l0p0_M', (40, 0, 200)),
         ('p0_chiso', (40, 0, 20.0)),
-        ('p0_neiso', (40, 0, 20.0)),
-        ('p0_phiso', (40, 0, 20.0)),
-        ('p0_hovere', (20, 0., 0.5)),
+        # ('p0_neiso', (40, 0, 20.0)),
+        # ('p0_phiso', (40, 0, 20.0)),
+        # ('p0_hovere', (20, 0., 0.5)),
         ('p0_sigma', (30, 0., 0.06)),
         ('p0_haspix', (2, -0.5, 1.5)),
         ('p0_eveto', (2, -0.5, 1.5)),
         ('p0_truth', (7, -0.5, 6.5)),
-        ('wt_def', (100, 0, 2)),
-        ('wt_pu', (100, 0, 2)),
-        ('wt_l0', (100, 0, 2)),
-        ('wt_trg_l0', (100, 0, 2)),
-        ('wt_p0', (100, 0, 2)),
+        ('wt_def', (100, 0.8, 1.2)),
+        ('wt_pu', (100, 0.5, 1.5)),
+        ('wt_l0', (100, 0.8, 1.2)),
+        ('wt_l1', (100, 0.8, 1.2)),
+        ('wt_trg_l0', (100, 0.8, 1.2)),
+        ('wt_p0', (100, 0.8, 1.2)),
         ('wt_p0_e_fake', (100, 0, 4))
     ]
     if args.task == 'electron_fakes':
@@ -391,22 +438,30 @@ if args.task in ['baseline', 'electron_fakes']:
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
             for var, binning in drawvars:
+                wt = '$baseline_wt'
+                if sel in cat_to_wt:
+                    wt = cat_to_wt[sel]
+                if var.startswith('wt_'):
+                    wt = '1.0'
                 for sample in samples:
-                    hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+                    hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get(wt))
                 for P in all_samples:
-                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'])
+                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt)
+                    AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R', 'E'])
                 for P in dy_samples + zg_samples:
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt)
+                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt, components=['R'])
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R'], postfix='_fw')
 
-                hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+                hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get(wt))
                 hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
                     sel=X.get('$' + sel, override={"sig_t": "$sig_l"}),
-                    wt=X.get('$baseline_wt * wt_p0_fake'))
+                    wt=X.get('%s * wt_p0_fake' % wt))
             for sample in samples:
-                hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(30, -3, 3, 30, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(30, -3, 3, 30, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
+                hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
+                hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
 
 
 if args.task == 'photon_fakes':
@@ -463,6 +518,11 @@ if args.task == 'photon_fakes':
                     AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
                     if 'iso_t_sig_t' in sel:
                         AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
+                for P in tt_samples + ttg_samples:
+                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
+                    if 'iso_t_sig_t' in sel:
+                        AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
+
                     hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
                     if 'iso_t_sig_t' in sel:
                         hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
@@ -472,7 +532,7 @@ if args.task == 'photon_fakes':
 
 MultiDraw(hists, samples, tname, mt_cores=4, mt_thresh=1)
 
-with open('input/cfg_wgamma_%s_v3.json' % year) as jsonfile:
+with open('input/cfg_wgamma_%s_v4.json' % year) as jsonfile:
     cfg = json.load(jsonfile)
     sample_cfg = cfg['samples']
 
@@ -516,21 +576,36 @@ for path, node in hists.ListNodes(withObjects=True):
 
     node['VV'] = HistSum(vv_samples)
     node['TTG'] = HistSum(ttg_samples)
+
+    ttg_ittg_samples = ['%s_ITTG' % lbl for lbl in ttg_samples]
+    ttg_xttg_samples = ['%s_XTTG' % lbl for lbl in ttg_samples]
+    tt_ittg_samples = ['%s_ITTG' % lbl for lbl in tt_samples]
+    tt_xttg_samples = ['%s_XTTG' % lbl for lbl in tt_samples]
+    node['TTG_ITTG'] = HistSum(ttg_ittg_samples)
+    node['TTG_XTTG'] = HistSum(ttg_xttg_samples)
     if year in ['2017', '2018']:
         node['TT'] = HistSum(tt_samples)
+        node['TT_ITTG'] = HistSum(tt_ittg_samples)
+        node['TT_XTTG'] = HistSum(tt_xttg_samples)
 
     for P in ['E', 'J', 'R']:
         node['VV_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in vv_samples])
         node['TTG_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in ttg_samples])
         if year in ['2017', '2018']:
             node['TT_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in tt_samples])
+    for P in ['R']:
+        node['TTG_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in ttg_samples])
+        node['TTG_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in ttg_samples])
+        if year in ['2017', '2018']:
+            node['TT_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in tt_samples])
+            node['TT_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in tt_samples])
 
-    node['Total_R'] = HistSum([wg_sample, 'TT_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
+    node['Total_R'] = HistSum([wg_sample, 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
     node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
     node['Total_J'] = HistSum(['W_J', 'TT_J', 'DY_J', 'VV_J'])
 
     if 'data_fakes' in node.d:
-        all_r_samples = [wg_sample, 'DY_XZG', 'ZG_IZG'] + tt_samples + vv_samples
+        all_r_samples = [wg_sample, 'DY_XZG', 'ZG_IZG'] + tt_xttg_samples + ttg_ittg_samples + vv_samples
         all_e_samples = dy_samples + w_samples + tt_samples + vv_samples
         node['Total_fw_R'] = HistSum([lbl + '_fw_R' for lbl in all_r_samples])
         node['Total_fw_E'] = HistSum([lbl + '_fw_E' for lbl in all_e_samples])

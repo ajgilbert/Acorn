@@ -33,6 +33,7 @@ class AcornMetProducer : public AcornBaseProducer<std::vector<ac::Met>> {
   std::vector<int> saveCorrectionLevels_;
   std::vector<int> saveUncertaintyShifts_;
   bool saveGenMetFromPat_;
+  bool skipMainMet_;
 };
 
 

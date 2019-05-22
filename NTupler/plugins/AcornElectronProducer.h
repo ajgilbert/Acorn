@@ -55,6 +55,8 @@ class AcornElectronProducer : public AcornBaseProducer<std::vector<ac::Electron>
   // instead of reading from external ValueMaps
   bool takeIdsFromObjects_;
 
+  std::vector<std::string> energyCorrectionLabels_;
+
   void printCutFlowResult(vid::CutFlowResult const& cutflow);
 
 };

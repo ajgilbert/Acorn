@@ -32,7 +32,7 @@
     },
     {
       "name": "TT_R",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
     },
@@ -46,6 +46,44 @@
       "name": "W_F",
       "entries": ["W_F"],
       "legend": "W#rightarrowl#nu (fake #gamma)",
+      "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG"],
+      "legend": "#gamma#gamma",
+      "color": [1]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_NLO"],
+      "legend": "W(#rightarrowl#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "pure_mc_zll": [
+    {
+      "name": "VV",
+      "entries": ["VV"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY",
+      "entries": ["DY"],
+      "legend": "Z#rightarrowll",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TT"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "W",
+      "entries": ["W"],
+      "legend": "W#rightarrowl#nu",
       "color": [78,89,140]
     },
     {
@@ -82,7 +120,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -126,7 +164,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -170,7 +208,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -188,19 +226,19 @@
     },
     {
       "name": "WG_OOA",
-      "entries": ["WG_p_ooa", "WG_n_ooa"],
+      "entries": ["WG_ooa_p", "WG_ooa_n"],
       "legend": "W(#rightarrowl#nu)#gamma (out)",
       "color": 12
     },
     {
       "name": "WG_MET1",
-      "entries": ["WG_p_acc_met1", "WG_n_acc_met1"],
+      "entries": ["WG_met1_p", "WG_met1_n"],
       "legend": "W(#rightarrowl#nu)#gamma (met sdb.)",
       "color": 11
     },
     {
       "name": "WG",
-      "entries": ["WG_p_acc", "WG_n_acc"],
+      "entries": ["WG_main_p", "WG_main_n"],
       "legend": "W(#rightarrowl#nu)#gamma (in)",
       "color": [108,190,237]
     }
@@ -226,7 +264,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
@@ -258,7 +296,7 @@
     },
     {
       "name": "TT",
-      "entries": ["TT_R", "TT_E"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },

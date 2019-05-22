@@ -19,7 +19,7 @@
       "config": "data"
     },
     "SingleMuon-2018D-v2": {
-      "dataset": "/SingleMuon/Run2018D-PromptReco-v2/MINIAOD",
+      "dataset": "/SingleMuon/Run2018D-22Jan2019-v2/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
       "config": "data_prompt"
@@ -42,14 +42,8 @@
       "events": 0,
       "config": "data"
     },
-    "EGamma-2018D-v1": {
-      "dataset": "/EGamma/Run2018D-PromptReco-v1/MINIAOD",
-      "attributes": ["submit"],
-      "events": 0,
-      "config": "data_prompt"
-    },
     "EGamma-2018D-v2": {
-      "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
+      "dataset": "/EGamma/Run2018D-22Jan2019-v2/MINIAOD",
       "attributes": ["submit"],
       "events": 0,
       "config": "data_prompt"
@@ -82,21 +76,21 @@
     },
     "WGToLNuG-amcatnloFXFX-PtG-130": {
       "dataset": "/WGToLNuG_01J_5f_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX-PtG-300": {
       "dataset": "/WGToLNuG_01J_5f_PtG-300_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX-PtG-500": {
       "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
@@ -114,10 +108,11 @@
       "config": "mc"
     },
     "DYJetsToLL_M-50-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext2-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc",
+      "useFileSplitting": 2
     },
     "WJetsToLNu-madgraphMLM": {
       "dataset": "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
@@ -150,26 +145,26 @@
       "config": "mc"
     },
     "VVTo2L2Nu-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WWTo1L1Nu2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WZTo2L2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WZTo1L3Nu-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -192,26 +187,26 @@
       "config": "mc"
     },
     "ZZTo2L2Q-amcatnloFXFX": {
-      "dataset": "",
-      "attributes": [],
+      "dataset": "/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
     "WW-pythia": {
       "dataset": "/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
     "WZ-pythia": {
       "dataset": "/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
     "ZZ-pythia": {
       "dataset": "/ZZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
-      "attributes": ["submit"],
+      "attributes": [],
       "events": 0,
       "config": "mc_no_lhe"
     },
@@ -261,7 +256,8 @@
       "dataset": "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc",
+      "useFileSplitting": 2
     },
     "ST_t-channel_antitop_4f-powheg": {
       "dataset": "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
@@ -280,13 +276,19 @@
       "attributes": ["submit"],
       "events": 0,
       "config": "mc"
+    },
+    "DiPhotonJetsBox_MGG-80toInf": {
+      "dataset": "/DiPhotonJetsBox_MGG-80toInf_13TeV-Sherpa/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc_no_lhe"
     }
   },
   "configs": {
-    "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018Rereco_v1", "cores=2"],
-    "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v11", "cores=2"],
-    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "cores=2"],
-    "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v12", "hasLHE=0", "cores=2"]
+    "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Sep2018ABC_v2", "cores=2"],
+    "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v13", "cores=2"],
+    "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v18", "cores=2"],
+    "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v18", "hasLHE=0", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",

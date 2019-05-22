@@ -189,8 +189,10 @@ if era == '2017':
 
 if era == '2018':
     histsToWrap = [
-        (loc + '/RunABCD_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio'),
-        (loc + '/RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ID.root:NUM_MediumID_DEN_TrackerMuons_pt_abseta', 'm_id_ratio'),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_early_ratio'),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio'),
     ]
     histsToWrapNewStyle = []
 
@@ -211,7 +213,8 @@ if era == '2017':
 if era == '2018':
     w.factory('expr::m_trk_ratio("1", m_eta[0])')
     for t in ['trg']:
-        w.factory('expr::m_%s_ratio("1", m_pt[0], m_eta[0])' % (t))
+        w.factory('expr::m_%s_ratio("@0*(1-0.85) + @1*0.85", m_%s_early_ratio, m_%s_late_ratio)' % (t, t, t))
+
 
 w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
 

@@ -94,7 +94,10 @@ h_matrix_NLO = VariableRebin(h_matrix_NLO, pt_binning)
 h_matrix_NLO.Scale(1., 'width')
 
 hists['inclusive']['gen_p0_pt']['WG-NLO'].Print("range")
+print hists['inclusive']['gen_p0_pt']['WG-NLO'].Integral('width')
 h_matrix_NLO.Print("range")
+print h_matrix_NLO.Integral('width')
+
 
 # canv = ROOT.TCanvas('test', 'test')
 # pads = plot.TwoPadSplit(0.27, 0.01, 0.01)

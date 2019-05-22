@@ -37,6 +37,11 @@ class Electron : public Candidate {
   inline double dxy() const { return dxy_; }
   inline double dz() const { return dz_; }
 
+  inline double scEta() const {return scEta_;}
+  inline double scEnergy() const {return scEnergy_;}
+
+  inline std::vector<float> const& energyCorrections() const { return energyCorrections_; }
+
   inline ROOT::Math::XYZPoint vertex() const { return vertex_; }
 
   inline void setIsCutBasedVetoElectron(bool const& isCutBasedVetoElectron) { isCutBasedVetoElectron_ = isCutBasedVetoElectron; }
@@ -53,6 +58,11 @@ class Electron : public Candidate {
 
   inline void setDxy(double const& dxy) { dxy_ = dxy; }
   inline void setDz(double const& dz) { dz_ = dz; }
+
+  inline void setScEta(double const& scEta) {scEta_ = scEta;}
+  inline void setScEnergy(double const& scEnergy) {scEnergy_ = scEnergy;}
+
+  inline void setEnergyCorrections(std::vector<float> const& energyCorrections) { energyCorrections_ = energyCorrections; }
 
   inline void setVertex(ROOT::Math::XYZPoint const& vertex) { vertex_ = vertex; }
 
@@ -72,6 +82,11 @@ class Electron : public Candidate {
 
   double dxy_;
   double dz_;
+
+  double scEta_;
+  double scEnergy_;
+
+  std::vector<float> energyCorrections_;
 
   ROOT::Math::XYZPoint vertex_;
 

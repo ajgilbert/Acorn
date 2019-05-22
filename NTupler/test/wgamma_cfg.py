@@ -18,6 +18,8 @@ opts.register('isData', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as data?")
 opts.register('genOnly', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Process as genOnly")
+opts.register('updateJECs', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Update JECs for jets and MET")
 opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
@@ -32,6 +34,7 @@ isMC = not isData
 genOnly = int(opts.genOnly)
 year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
+updateJECs = bool(opts.updateJECs)
 
 ################################################################
 # Standard setup
@@ -93,6 +96,12 @@ process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
     cut=cms.string("pt > 20 & abs(eta) < 3.5")
 )
 
+jetLabel = 'patJetsReapplyJECUpdatedJECs' if updateJECs else 'slimmedJets'
+process.selectedJets = cms.EDFilter("PATJetRefSelector",
+    src=cms.InputTag(jetLabel),
+    cut=cms.string("pt > 30 & abs(eta) < 5.0")
+)
+
 process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
     input=cms.InputTag("selectedMuons"),
     branch=cms.string('muons'),
@@ -101,25 +110,39 @@ process.acMuonProducer = cms.EDProducer('AcornMuonProducer',
 )
 
 process.customInitialSeq = cms.Sequence()
-met_proc = 'PAT'
-met_args = []
-### Re-run MET sequences for old 2016 MC (not 100% sure this gives the correct thing...)
-if year == '2016_old':
-    # met_proc = 'MAIN'  # i.e. take from our process
-    met_args = ['', 'MAIN']
-    runMetCorAndUncFromMiniAOD(process, isData=isData)
-    process.customInitialSeq += cms.Sequence(process.fullPatMetSequence)
+
+### Update the jets & MET in all years
+if updateJECs:
+    if year in ['2017']:
+        # This is the EE noise mitigation - for 2017 data & MC only!
+        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#Instructions_for_9_4_X_X_9_or_10
+        runMetCorAndUncFromMiniAOD(
+                process,
+                isData=isData,
+                fixEE2017=True,
+                fixEE2017Params={'userawPt': True, 'ptThreshold': 50.0, 'minEtaThreshold': 2.65, 'maxEtaThreshold': 3.139},
+                postfix="UpdatedJECs"
+        )
+    else:
+        runMetCorAndUncFromMiniAOD(
+                process,
+                isData=isData,
+                postfix="UpdatedJECs"
+        )
+
+
     makePuppiesFromMiniAOD(process, True)
     runMetCorAndUncFromMiniAOD(process,
                                isData=isData,
                                metType="Puppi",
-                               postfix="Puppi",
+                               postfix="PuppiUpdatedJECs",
                                jetFlavor="AK4PFPuppi",
                                )
-
     process.puppiNoLep.useExistingWeights = False
     process.puppi.useExistingWeights = False
-    process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppi)
+    # The sequence for PUPPI has to go first, then the normal MET, because of some overriding conflicts
+    process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppiUpdatedJECs)
+    process.customInitialSeq += cms.Sequence(process.fullPatMetSequenceUpdatedJECs)
 
 ### Setup for EGamma recipes
 if year in ['2016_old']:
@@ -129,7 +152,7 @@ elif year in ['2016']:
 elif year in ['2017']:
     setupEgammaPostRecoSeq(process, runVID=True, era='2017-Nov17ReReco')
 elif year in ['2018']:
-    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2018-Prompt')
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=True, era='2018-Prompt')
 
 ### Electrons
 ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"
@@ -152,11 +175,19 @@ process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
     )
 )
 
+for pset in process.egmGsfElectronIDs.physicsObjectIDs:
+    idname = str(pset.idDefinition.idName.value())
+    if 'cutBasedElectronID-Fall17-94X-V2-' in idname:
+        for cut_pset in pset.idDefinition.cutFlow:
+            if cut_pset.cutName.value() == 'GsfEleRelPFIsoScaledCut':
+                print '>> Switching off isolation cut for %s' % idname
+                cut_pset.isIgnored = cms.bool(True)
+
 process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
     branch=cms.string('electrons'),
-    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12'),
+    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12 energyCorrections=12'),
     eleVetoIdMap=cms.InputTag(ele_veto_id),
     eleLooseIdMap=cms.InputTag(ele_loose_id),
     eleMediumIdMap=cms.InputTag(ele_medium_id),
@@ -165,7 +196,8 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
     relativeEAIsoFromUserData=cms.vstring('ElectronCutValues', 'GsfEleRelPFIsoScaledCut_0'),
-    takeIdsFromObjects=cms.bool(True)
+    takeIdsFromObjects=cms.bool(True),
+    energyCorrections=cms.vstring('ecalTrkEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
 
 ### Photons
@@ -176,7 +208,7 @@ photon_tight_id = "cutBasedPhotonID-Fall17-94X-V2-tight"
 process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     input=cms.InputTag("selectedPhotons"),
     branch=cms.string('photons'),
-    select=cms.vstring('keep .* p4=12 scEta=12 hadTowOverEm=12 full5x5SigmaIetaIeta=12 .*Iso=12'),
+    select=cms.vstring('keep .* p4=12 scEta=12 hadTowOverEm=12 full5x5SigmaIetaIeta=12 .*Iso=12 energyCorrections=12'),
     phoLooseIdMap=cms.InputTag(photon_loose_id),
     phoMediumIdMap=cms.InputTag(photon_medium_id),
     phoTightIdMap=cms.InputTag(photon_tight_id),
@@ -184,25 +216,56 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     chargedIsolation=cms.string('phoChargedIsolation'),
     neutralHadronIsolation=cms.string('phoNeutralHadronIsolation'),
     photonIsolation=cms.string('phoPhotonIsolation'),
-    takeIdsFromObjects=cms.bool(True)
+    takeIdsFromObjects=cms.bool(True),
+    energyCorrections=cms.vstring('ecalEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
 
+### PFJets
+process.acPFJetProducer = cms.EDProducer('AcornPFJetProducer',
+    input=cms.InputTag("selectedJets"),
+    branch=cms.string('pfJets'),
+    select=cms.vstring('keep .* p4=12'),
+    jetID=cms.PSet(
+        version=cms.string('WINTER17'),
+        quality=cms.string('TIGHT')
+    )
+)
+
+### MET
+metLabel = 'slimmedMETsUpdatedJECs' if updateJECs else 'slimmedMETs'
 process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(*(["slimmedMETs"] + met_args)),
+    input=cms.InputTag(metLabel),
     branch=cms.string('pfType1Met'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(4),
-    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13)
+    saveCorrectionLevels=cms.vint32(1),
+    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13),
+    skipMainMet=cms.bool(True)
 )
 
+# Found that trackMet changed when updating JECs - probably due
+# to some difference in the track selection that's used. So for
+# now stick with the original (except 2016_old, because trackMet wasn't saved)
+trackMetLabel = 'slimmedMETsUpdatedJECs' if (year == '2016_old') else 'slimmedMETs'
+process.acTrackMetProducer = cms.EDProducer('AcornMetProducer',
+    input=cms.InputTag(trackMetLabel),
+    branch=cms.string('trackMet'),
+    select=cms.vstring('keep .* p4=12', 'drop sumEt'),
+    saveGenMetFromPat=cms.bool(False),
+    saveCorrectionLevels=cms.vint32(12),
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(True)
+)
+
+puppiMetLabel = 'slimmedMETsPuppiUpdatedJECs' if updateJECs else 'slimmedMETsPuppi'
 process.acPuppiMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(*(["slimmedMETsPuppi"] + met_args)),
+    input=cms.InputTag(puppiMetLabel),
     branch=cms.string('puppiMet'),
     select=cms.vstring('keep .* p4=12', 'drop sumEt'),
     saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(1, 4),
-    saveUncertaintyShifts=cms.vint32()
+    saveCorrectionLevels=cms.vint32(1),
+    saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13),
+    skipMainMet=cms.bool(True)
 )
 
 process.acMCSequence = cms.Sequence(
@@ -245,7 +308,8 @@ process.acGenMetProducer = cms.EDProducer('AcornMetProducer',
     select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(False),
     saveCorrectionLevels=cms.vint32(),
-    saveUncertaintyShifts=cms.vint32()
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(False)
 )
 
 process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
@@ -254,7 +318,19 @@ process.acGenMetFromPatProducer = cms.EDProducer('AcornMetProducer',
     select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(True),
     saveCorrectionLevels=cms.vint32(),
-    saveUncertaintyShifts=cms.vint32()
+    saveUncertaintyShifts=cms.vint32(),
+    skipMainMet=cms.bool(False)
+)
+
+process.selectedGenJets = cms.EDFilter("GenJetRefSelector",
+    src=cms.InputTag("slimmedGenJets"),
+    cut=cms.string("pt > 15")
+)
+
+process.acGenJetProducer = cms.EDProducer('AcornCandidateProducer',
+    input=cms.InputTag("selectedGenJets"),
+    branch=cms.string('genJets'),
+    select=cms.vstring('keep .* p4=12')
 )
 
 
@@ -263,7 +339,9 @@ if isMC:
         process.selectedGenParticles +
         process.acGenParticleProducer +
         process.acGenMetFromPatProducer +
-        process.acPileupInfoProducer
+        process.acPileupInfoProducer +
+        process.selectedGenJets +
+        process.acGenJetProducer
     )
     if hasLHE:
         process.acMCSequence += cms.Sequence(
@@ -302,9 +380,16 @@ for path in hlt_paths:
         branch=cms.string('triggerObjects_%s' % shortname),
         hltPath= cms.string(path),
         storeIfFired=cms.bool(True),
-        select=cms.vstring('keep .* p4=12')
+        select=cms.vstring('keep .* p4=12'),
+        extraFilterLabels=cms.vstring()
     ))
     process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
+
+# Adds an extra filter label for the HLT_Ele32_WPTight_Gsf_L1DoubleEG path, needed to
+# emulate HLT_Ele32_WPTight_Gsf in the portion of 2017 data that doesn't have it
+# More detail: https://twiki.cern.ch/twiki/bin/view/CMS/EgHLTRunIISummary#2017
+# and slide 22 of: https://indico.cern.ch/event/662751/contributions/2778365/attachments/1561439/2458438/egamma_workshop_triggerTalk.pdf
+process.ac_Ele32_WPTight_Gsf_L1DoubleEG_ObjectProducer.extraFilterLabels = cms.vstring('hltEGL1SingleEGOrFilter')
 
 
 metfilter_proc_data = {
@@ -319,6 +404,33 @@ metfilter_proc_mc = {
     "2018": "PAT"
 }
 metfilter_proc = metfilter_proc_data if isData else metfilter_proc_mc
+
+
+# Recommended extra metfilter to run on top of minioad in 2017 and 2018
+# https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#How_to_run_ecal_BadCalibReducedM
+process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
+
+baddetEcallist = cms.vuint32(
+    [872439604,872422825,872420274,872423218,
+     872423215,872416066,872435036,872439336,
+     872420273,872436907,872420147,872439731,
+     872436657,872420397,872439732,872439339,
+     872439603,872422436,872439861,872437051,
+     872437052,872420649,872422436,872421950,
+     872437185,872422564,872421566,872421695,
+     872421955,872421567,872437184,872421951,
+     872421694,872437056,872437057,872437313])
+
+
+process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
+    "EcalBadCalibFilter",
+    EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+    ecalMinEt        = cms.double(50.),
+    baddetEcal    = baddetEcallist,
+    taggingMode = cms.bool(True),
+    debug = cms.bool(False)
+    )
+
 
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
@@ -336,34 +448,47 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'Flag_BadChargedCandidateFilter',
         'Flag_eeBadScFilter'
         ),
-    userDoubles=cms.VInputTag(),
+    saveMetFilterBools=cms.VInputTag(),
+    userDoubles=cms.VInputTag(
+        cms.InputTag('fixedGridRhoFastjetAll')
+        ),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .* genWeights=10',
         'drop lheweights:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=10',
+        'drop lheweightgroups:.*',
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6',
         'keep lheweights:dim6=10',
-        'keep lheweights:Member.0.*NNPDF31_nlo_hessian_pdfas=10',
-        'keep lheweights:Member.0.*NNPDF31_nnlo_hessian_pdfas=10',
-        'keep lheweights:Member.0.*NNPDF31_nlo_as_0118_nf_4=10',
-        'keep lheweights:Member.0.*NNPDF31_nnlo_as_0118_nf_4=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nlo_100_pdfas=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nnlo_100_pdfas=10',
-        'keep lheweights:Member.0.*PDF4LHC15_nlo_nf4_30=10',
-        'keep lheweights:lhapdf.(305800|306000|320500|320900|90200|91200|92000)=10',
-        'keep lheweights:PDF.*(305800|306000|320500|320900|90200|91200|92000).MemberID.0=10'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
 
-# 305800: NNPDF31_nlo_hessian_pdfas
-# 306000: NNPDF31_nnlo_hessian_pdfas
-# 320500: NNPDF31_nlo_as_0118_nf_4
-# 320900: NNPDF31_nnlo_as_0118_nf_4
-# 90200: PDF4LHC15_nlo_100_pdfas
-# 91200: PDF4LHC15_nnlo_100_pdfas
-# 92000: PDF4LHC15_nlo_nf4_30
+if year in ['2016', '2016_old']:
+    process.acEventInfoProducer.select += cms.vstring(
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
+        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
+        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
+        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
+    )
+if year in ['2017', '2018']:
+    process.acEventInfoProducer.select += cms.vstring(
+        # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
+        # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
+        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
+        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
+        # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
+    )
+
+
+if year in ['2017', '2018'] and genOnly == 0:
+    process.customInitialSeq += process.ecalBadCalibReducedMINIAODFilter
+    process.acEventInfoProducer.saveMetFilterBools = cms.VInputTag(
+        cms.InputTag('ecalBadCalibReducedMINIAODFilter')
+        )
+
 
 ### Prefiring weights - only needed for 2016 and 2017 MC
 prefiring_era_str = {
@@ -384,7 +509,7 @@ process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
 
 if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
     process.customInitialSeq += cms.Sequence(process.prefiringweight)
-    process.acEventInfoProducer.userDoubles = cms.VInputTag(
+    process.acEventInfoProducer.userDoubles += cms.VInputTag(
         cms.InputTag('prefiringweight:NonPrefiringProb'),
         cms.InputTag('prefiringweight:NonPrefiringProbUp'),
         cms.InputTag('prefiringweight:NonPrefiringProbDown')
@@ -418,10 +543,13 @@ else:
         process.selectedElectrons +
         process.selectedMuons +
         process.selectedPhotons +
+        process.selectedJets +
         process.acElectronProducer +
         process.acMuonProducer +
         process.acPhotonProducer +
+        process.acPFJetProducer +
         process.acPFType1MetProducer +
+        process.acTrackMetProducer +
         process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +

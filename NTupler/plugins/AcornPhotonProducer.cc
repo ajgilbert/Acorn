@@ -29,7 +29,8 @@ AcornPhotonProducer::AcornPhotonProducer(const edm::ParameterSet& config)
       chargedIsolationLabel_(config.getParameter<std::string>("chargedIsolation")),
       neutralHadronIsolationLabel_(config.getParameter<std::string>("neutralHadronIsolation")),
       photonIsolationLabel_(config.getParameter<std::string>("photonIsolation")),
-      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")) {
+      takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")),
+      energyCorrectionLabels_(config.getParameter<std::vector<std::string>>("energyCorrections")) {
 
   phoLooseIdLabel_ = config.getParameter<edm::InputTag>("phoLooseIdMap").label();
   phoMediumIdLabel_ = config.getParameter<edm::InputTag>("phoMediumIdMap").label();
@@ -111,6 +112,14 @@ void AcornPhotonProducer::produce(edm::Event& event,
 
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
+
+    if (pat_src) {
+      std::vector<float> corrections(energyCorrectionLabels_.size(), 0.);
+      for (unsigned il = 0; il < energyCorrectionLabels_.size(); ++il) {
+        corrections[il] = setVar("energyCorrections", pat_src->userFloat(energyCorrectionLabels_[il]));
+      }
+      dest.setEnergyCorrections(corrections);
+    }
   }
 }
 

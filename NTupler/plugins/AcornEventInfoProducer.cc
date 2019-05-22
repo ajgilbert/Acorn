@@ -43,6 +43,10 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
   consumes<LHERunInfoProduct, edm::InRun>({lheTag_});
   consumes<GenEventInfoProduct>({"generator"});
 
+  for (auto const& tag : config.getParameter<std::vector<edm::InputTag>>("saveMetFilterBools")) {
+    saveMetFilterBools_.emplace_back(consumes<bool>(tag));
+  }
+
   for (auto const& tag : config.getParameter<std::vector<edm::InputTag>>("userDoubles")) {
     userDoubleTokens_.emplace_back(consumes<double>(tag));
   }
@@ -59,15 +63,19 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
   edm::Handle<LHERunInfoProduct> lhe_info;
   run.getByLabel(lheTag_, lhe_info);
   int record = 0;
+  bool keepGroup = false;
+  VarRule groupVarRule;
   // We need to be able to match something like:
   // <weight id="rwgt_100004">set param_card dim6 1 1.6 # orig: 0.0\n</weight>
   // Also need to catch id='X' (MG2.6.X) and id="X"
   std::regex rgx(R"(<weight.*id=[\"\'][^\d]*(\d+)[\"\'].*>([\s\S]*)</weight>)");
+  std::regex rgx_group(R"(<weightgroup(.*)>)");
   for (auto it = lhe_info->headers_begin(); it != lhe_info->headers_end();
        ++it) {
     std::vector<std::string>::const_iterator iLt = it->begin();
     for (; iLt != it->end(); ++iLt) {
       std::string line = *iLt;
+      // std::cout << line;
       // Fix for some headers produced with MG 2.6.X, the < and >
       // have been replaced with &lt; and &gt; everywhere
       boost::replace_all(line, "&lt;", "<");
@@ -79,11 +87,22 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         // therefore record is now an int, incremented for each <weightgroup> and
         // decremented for each </weightgroup>.
         record += 1;
+        std::smatch rgx_match;
+        std::regex_search(line, rgx_match, rgx_group);
+        if (rgx_match.size() == 2) {
+          // std::cout << " -- " << std::string(rgx_match[1]) << "\n";
+          groupVarRule = getVarRule("lheweightgroups:" + std::string(rgx_match[1]));
+          if (!groupVarRule.zeroed) {
+            keepGroup = true;
+            // std::cout << " -- Keeping group\n";
+          }
+        }
         continue;
       }
       if (line.find("</weightgroup") != std::string::npos) {
         lheWeightLabels_.push_back(line);
         lheWeightWasKept_.push_back(false);
+        keepGroup = false;
         if (record > 0) record -= 1;
         continue;
       }
@@ -104,12 +123,16 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
         if (rgx_match.size() == 3) {
           std::vector<std::string> split_label = ac::TrimAndSplitString(rgx_match[2]);
           split_label.push_back(ac::TrimString(rgx_match[2])); // Also add the full string
+          unsigned id = boost::lexical_cast<int>(rgx_match[1]);
           bool keep = false;
+          if (keepGroup) {
+            keep = true;
+            savedLHEWeightIds[id] = groupVarRule;
+          }
           for (auto const& x : split_label) {
             auto rule = getVarRule("lheweights:" + x);
             if (!rule.zeroed) {
               // std::cout << x << " matched " << rule.original << "\n";
-              unsigned id = boost::lexical_cast<int>(rgx_match[1]);
               savedLHEWeightIds[id] = rule;
               keep = true;
               break;
@@ -136,6 +159,7 @@ void AcornEventInfoProducer::endRun(edm::Run const& run, edm::EventSetup const& 
 void AcornEventInfoProducer::produce(edm::Event& event,
                                   const edm::EventSetup& setup) {
   ac::EventInfo * info = output();
+  *info = ac::EventInfo();
   info->setIsRealData(event.isRealData());
   info->setRun(event.run());
   info->setEvent(event.id().event());
@@ -145,6 +169,10 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   if (includeLHEWeights_) {
     edm::Handle<LHEEventProduct> lhe_handle;
     event.getByToken(lheToken_, lhe_handle);
+
+    info->setNpLO(setVar("npLO", lhe_handle->npLO()));
+    info->setNpNLO(setVar("npNLO", lhe_handle->npNLO()));
+
     double nominalLHEWeight = 1.;
     if (lhe_handle->weights().size()) {
       // Very rarely, this weights() vector is empty (seen in a powheg sample)
@@ -156,7 +184,7 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
       auto it = savedLHEWeightIds.find(id);
       if (it != savedLHEWeightIds.end()) {
-        double weight = lhe_handle->weights()[i].wgt / nominalLHEWeight;
+        double weight = (lhe_handle->weights()[i].wgt / nominalLHEWeight) - 1.0;
         info->setLHEWeight(id, processVar(weight, it->second));
       }
     }
@@ -180,12 +208,13 @@ void AcornEventInfoProducer::produce(edm::Event& event,
     }
   }
 
-  if (saveMetFilters_.size()) {
+  unsigned n_met_filters_to_save = saveMetFilters_.size() + saveMetFilterBools_.size();
+  if (n_met_filters_to_save > 0) {
     constexpr unsigned maxfilters = 32;
-    if (saveMetFilters_.size() > maxfilters) {
+    if (n_met_filters_to_save > maxfilters) {
       throw cms::Exception("TooManyMETFilters")
           << "Maximum MET filter flags to be saved is " << maxfilters << ", but "
-          << saveMetFilters_.size() << " were requested\n";
+          << n_met_filters_to_save << " were requested\n";
     }
     std::bitset<maxfilters> metfilter_bits;
     edm::Handle<edm::TriggerResults> metfilter_handle;
@@ -201,7 +230,14 @@ void AcornEventInfoProducer::produce(edm::Event& event,
       // std::cout << imet << "\t" << triggerNames.triggerName(trg_idx) << "\t" << metfilter_handle->accept(trg_idx) << "\n";
       metfilter_bits[imet] = !metfilter_handle->accept(trg_idx);
     }
+    for (unsigned imet = 0; imet < saveMetFilterBools_.size(); ++ imet) {
+      edm::Handle<bool> bool_handle;
+      event.getByToken(saveMetFilterBools_[imet], bool_handle);
+      // Offset the index by the size of the metfilters saved from the TriggerResults
+      metfilter_bits[saveMetFilters_.size() + imet] = !(*bool_handle);
+    }
     info->setMetFilters(metfilter_bits);
+    // std::cout << toBinaryString(uint32_t(metfilter_bits.to_ulong())) << "\n";
   }
 
   std::vector<double> user_doubles;

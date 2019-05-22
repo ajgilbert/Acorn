@@ -27,7 +27,8 @@ AcornTriggerObjectProducer::AcornTriggerObjectProducer(edm::ParameterSet const& 
           consumes<edm::TriggerResults>(config.getParameter<edm::InputTag>("triggerResults"))),
       hltConfigProcess_(config.getParameter<std::string>("hltConfigProcess")),
       hltPath_(config.getParameter<std::string>("hltPath")),
-      storeIfFired_(config.getParameter<bool>("storeIfFired")) {}
+      storeIfFired_(config.getParameter<bool>("storeIfFired")),
+      extraFilterLabels_(config.getParameter<std::vector<std::string>>("extraFilterLabels")) {}
 
 AcornTriggerObjectProducer::~AcornTriggerObjectProducer() { ; }
 
@@ -69,7 +70,7 @@ void AcornTriggerObjectProducer::produce(edm::Event& event, const edm::EventSetu
   std::set<std::string> path_filters;
   std::vector<std::string> const& filt_vec = hltConfig_.saveTagsModules(full_name);
   for (unsigned i = 0; i < filt_vec.size(); ++i) path_filters.insert(filt_vec[i]);
-
+  for (unsigned i = 0; i < extraFilterLabels_.size(); ++i) path_filters.insert(extraFilterLabels_[i]);
 
   for (unsigned i = 0; i < trigobj_handle->size(); ++i) {
     pat::TriggerObjectStandAlone src = trigobj_handle->at(i);

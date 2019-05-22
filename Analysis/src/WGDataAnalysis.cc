@@ -29,59 +29,81 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       is_data_(true),
       do_wg_gen_vars_(false),
       check_is_zg_(false),
-      do_presel_(true) {}
+      do_presel_(true),
+      var_set_(1),
+      correct_e_energy_(-1),
+      correct_p_energy_(-1),
+      correct_m_energy_(-1) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
 
 int WGDataAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
-    tree_->Branch("run", &run_);
+    // var sets:
+    // 0 = everything
+    // 1 = Core WG
+    // 2 =
+
+    // Non-core vars
+    if (var_set_ == 0) {
+      tree_->Branch("run", &run_);
+    }
+    // tree_->Branch("gen_proc", &gen_proc_);
     tree_->Branch("metfilters", &metfilters_);
-    tree_->Branch("gen_proc", &gen_proc_);
     tree_->Branch("gen_is_zg", &gen_is_zg_);
     tree_->Branch("n_vtx", &n_vtx_);
     tree_->Branch("n_pre_m", &n_pre_m_);
     tree_->Branch("n_pre_e", &n_pre_e_);
     tree_->Branch("n_veto_m", &n_veto_m_);
     tree_->Branch("n_veto_e", &n_veto_e_);
+
     tree_->Branch("l0_pt", &l0_pt_);
     tree_->Branch("l0_eta", &l0_eta_);
     tree_->Branch("l0_phi", &l0_phi_);
     tree_->Branch("l0_iso", &l0_iso_);
-    tree_->Branch("l0_tkiso", &l0_tkiso_);
-    tree_->Branch("l0_tight", &l0_tight_);
     tree_->Branch("l0_trg", &l0_trg_);
-    tree_->Branch("l0_trg_2", &l0_trg_2_);
     tree_->Branch("l0_q", &l0_q_);
     tree_->Branch("l0_pdgid", &l0_pdgid_);
+    if (var_set_ == 0) {
+      tree_->Branch("l0_tight", &l0_tight_);
+      tree_->Branch("l0_trg_2", &l0_trg_2_);
+    }
+    // tree_->Branch("l0_tkiso", &l0_tkiso_);
+
     tree_->Branch("l1_pt", &l1_pt_);
     tree_->Branch("l1_eta", &l1_eta_);
     tree_->Branch("l1_phi", &l1_phi_);
     tree_->Branch("l1_iso", &l1_iso_);
     tree_->Branch("l0l1_M", &l0l1_M_);
     tree_->Branch("l0l1_dr", &l0l1_dr_);
+    tree_->Branch("l0l1_pt", &l0l1_pt_);
     tree_->Branch("l0l1_os", &l0l1_os_);
+
     tree_->Branch("n_pre_p", &n_pre_p_);
     tree_->Branch("p0_pt", &p0_pt_);
     tree_->Branch("p0_eta", &p0_eta_);
     tree_->Branch("p0_phi", &p0_phi_);
     tree_->Branch("p0_chiso", &p0_chiso_);
-    tree_->Branch("p0_neiso", &p0_neiso_);
-    tree_->Branch("p0_phiso", &p0_phiso_);
-    tree_->Branch("p0_hovere", &p0_hovere_);
+    if (var_set_ == 0) {
+      tree_->Branch("p0_neiso", &p0_neiso_);
+      tree_->Branch("p0_phiso", &p0_phiso_);
+      tree_->Branch("p0_hovere", &p0_hovere_);
+    }
     tree_->Branch("p0_sigma", &p0_sigma_);
     tree_->Branch("p0_haspix", &p0_haspix_);
     tree_->Branch("p0_eveto", &p0_eveto_);
     tree_->Branch("p0_medium_noch", &p0_medium_noch_);
     tree_->Branch("p0_medium", &p0_medium_);
-    tree_->Branch("p0_tight", &p0_tight_);
-    tree_->Branch("p0_fsr", &p0_fsr_);
+    if (var_set_ == 0) {
+      tree_->Branch("p0_tight", &p0_tight_);
+      tree_->Branch("p0_fsr", &p0_fsr_);
+    }
     tree_->Branch("p0_truth", &p0_truth_);
     tree_->Branch("met", &met_);
     tree_->Branch("met_phi", &met_phi_);
-    tree_->Branch("xy_met", &xy_met_);
-    tree_->Branch("xy_met_phi", &xy_met_phi_);
+    // tree_->Branch("xy_met", &xy_met_);
+    // tree_->Branch("xy_met_phi", &xy_met_phi_);
     tree_->Branch("puppi_met", &puppi_met_);
     tree_->Branch("puppi_met_phi", &puppi_met_phi_);
     tree_->Branch("l0met_mt", &l0met_mt_);
@@ -90,12 +112,12 @@ int WGDataAnalysis::PreAnalysis() {
     tree_->Branch("l0p0_M", &l0p0_M_);
     tree_->Branch("reco_phi", &reco_phi_);
     tree_->Branch("reco_phi_f", &reco_phi_f_);
-    tree_->Branch("reco_xy_phi", &reco_xy_phi_);
-    tree_->Branch("reco_xy_phi_f", &reco_xy_phi_f_);
+    // tree_->Branch("reco_xy_phi", &reco_xy_phi_);
+    // tree_->Branch("reco_xy_phi_f", &reco_xy_phi_f_);
     tree_->Branch("reco_puppi_phi", &reco_puppi_phi_);
     tree_->Branch("reco_puppi_phi_f", &reco_puppi_phi_f_);
-    tree_->Branch("n_vm", &n_vm_);
-    tree_->Branch("vm_p0_dr", &vm_p0_dr_);
+    // tree_->Branch("n_vm", &n_vm_);
+    // tree_->Branch("vm_p0_dr", &vm_p0_dr_);
     tree_->Branch("wt_def", &wt_def_);
     tree_->Branch("wt_pf", &wt_pf_);
     tree_->Branch("wt_pu", &wt_pu_);
@@ -207,6 +229,10 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("p_fake_ratio_m_chn")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_e_chn"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio_e_chn")->functor(ws_->argSet("p_pt,p_eta")));
+
+  if (rc_file_ != "") {
+    rc_.init(rc_file_);
+  }
   return 0;
   }
 
@@ -224,14 +250,52 @@ int WGDataAnalysis::PreAnalysis() {
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
     auto photons = event->GetPtrVec<ac::Photon>("photons");
 
-    // TODO: temporary hack
+    double rho = event->Get<double>("fixedGridRhoFastjetAll");
     for (Photon *p : photons) {
-      PhotonIsoCorrector(p, n_vtx_);
+      PhotonIsoCorrector(p, rho);
+    }
+    if (correct_p_energy_ >= 0) {
+      for (Photon *p : photons) {
+        p->setVector(p->vector() * (p->energyCorrections().at(correct_p_energy_) / p->energy()));
+      }
+    }
+    if (correct_e_energy_ >= 0) {
+      for (Electron *e : electrons) {
+        e->setVector(e->vector() * (e->energyCorrections().at(correct_e_energy_) / e->energy()));
+      }
+    }
+    if (correct_m_energy_ >= 0) {
+      auto muons_to_correct = ac::copy_keep_if(muons, [](ac::Muon const* m) {
+        return m->pt() > 15. && fabs(m->eta()) < 2.4;
+      });
+      if (is_data_) {
+        for (Muon *m : muons_to_correct) {
+          m->setVector(m->vector() * rc_.kScaleDT(m->charge(), m->pt(), m->eta(), m->phi()));
+        }
+      } else if (muons_to_correct.size() > 0) {
+        auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
+        auto gen_muons = ac::copy_keep_if(gen_parts, [&](ac::GenParticle *p) {
+          return ac::IsMuon(*p) && p->status() == 1 && p->pt() > 10.0;
+        });
+        for (Muon *m : muons_to_correct) {
+          auto matched_muons = ac::copy_keep_if(gen_muons, [&](ac::GenParticle *p) {
+            return ac::DeltaR(m, p) < 0.3;
+          });
+          boost::range::sort(matched_muons, DescendingPt);
+          if (matched_muons.size() > 0) {
+            m->setVector(m->vector() * rc_.kSpreadMC(m->charge(), m->pt(), m->eta(), m->phi(),
+                                                     matched_muons.at(0)->pt()));
+          }
+        }
+
+      }
+
     }
     auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
     auto puppi_mets = event->GetPtrVec<ac::Met>("puppiMet");
 
     // Sub-process classification - maybe move this into a separate module
+    /*
     if (gen_classify_ == "DY") {
       auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
       unsigned n_ele = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
@@ -253,16 +317,17 @@ int WGDataAnalysis::PreAnalysis() {
         gen_proc_ = 3;
       }
     }
+    */
 
     auto pre_muons = ac::copy_keep_if(muons, [](ac::Muon const* m) {
       return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && fabs(m->dxy()) < 0.05 &&
              fabs(m->dz()) < 0.2;
     });
 
-    // TODO: update with SC eta
     auto pre_electrons = ac::copy_keep_if(electrons, [](ac::Electron const* e) {
-      return e->pt() > 35. && fabs(e->eta()) < 2.5 && e->isCutBasedMediumElectron() &&
-             (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) && ElectronIPCuts(e);
+      return e->pt() > 35. && fabs(e->scEta()) < 2.5 && e->isCutBasedMediumElectron() &&
+             ElectronIsoFall17V2(e, 2) && (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) &&
+             ElectronIPCuts(e);
     });
 
     // At this stage apply the medium Photon ID without the charged iso cut
@@ -278,8 +343,9 @@ int WGDataAnalysis::PreAnalysis() {
     });
 
     auto veto_electrons = ac::copy_keep_if(electrons, [](ac::Electron const* e) {
-      return e->pt() > 10. && fabs(e->eta()) < 2.5 && e->isCutBasedLooseElectron() &&
-             (fabs(e->eta()) < 1.4442 || fabs(e->eta()) > 1.566) && ElectronIPCuts(e);
+      return e->pt() > 10. && fabs(e->scEta()) < 2.5 && e->isCutBasedLooseElectron() &&
+             ElectronIsoFall17V2(e, 1) && (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) &&
+             ElectronIPCuts(e);
     });
 
     boost::range::sort(pre_muons, DescendingPt);
@@ -320,7 +386,10 @@ int WGDataAnalysis::PreAnalysis() {
     ac::Photon* p0 = pre_photons.size() ? pre_photons[0] : nullptr;
 
     // Here are the conditions for skipping this event and not writing anything to the tree
-    if (do_presel_ && (l0 == nullptr || p0 == nullptr)) {
+    bool wg_presel = (l0 != nullptr) && (p0 != nullptr);
+    bool mm_presel = (pre_muons.size() >= 2);
+    bool ee_presel = (pre_electrons.size() >= 2);
+    if (do_presel_ && !(wg_presel || mm_presel || ee_presel)) {
       return 1;
     }
 
@@ -331,14 +400,14 @@ int WGDataAnalysis::PreAnalysis() {
     n_veto_m_ = veto_muons.size();
     n_veto_e_ = veto_electrons.size();
 
-    // Always remove m0 from the list of veto muons
-    if (m0) {
-      ac::keep_if(veto_muons, [&](ac::Muon *m) {
-        return m != m0;
-      });
-    }
+    // // Always remove m0 from the list of veto muons
+    // if (m0) {
+    //   ac::keep_if(veto_muons, [&](ac::Muon *m) {
+    //     return m != m0;
+    //   });
+    // }
 
-    n_vm_ = veto_muons.size();
+    // n_vm_ = veto_muons.size();
 
     // Calculate the truth vars for W+g events
     if (do_wg_gen_vars_) {
@@ -363,14 +432,14 @@ int WGDataAnalysis::PreAnalysis() {
         gen_p0_pt_ = parts.gen_pho->pt();
         gen_p0_eta_ = parts.gen_pho->eta();
         gen_l0_q_ = parts.gen_lep->charge();
-        gen_phi_ = reduceMantissaToNbits(gen_sys.Phi(parts.gen_lep->charge() > 0), 12);
-        gen_phi_f_ = reduceMantissaToNbits(gen_sys.SymPhi(parts.gen_lep->charge() > 0), 12);
+        gen_phi_ = gen_sys.Phi(parts.gen_lep->charge() > 0);
+        gen_phi_f_ = gen_sys.SymPhi(parts.gen_lep->charge() > 0);
         gen_l0_pt_ = parts.gen_lep->pt();
         gen_l0_eta_ = parts.gen_lep->eta();
         gen_met_ = gen_met->pt();
-        gen_l0p0_dr_ = reduceMantissaToNbits(ac::DeltaR(parts.gen_lep, parts.gen_pho), 12);
-        true_phi_ = reduceMantissaToNbits(gen_true_sys.Phi(parts.gen_lep->charge() > 0), 12);
-        true_phi_f_ = reduceMantissaToNbits(gen_true_sys.SymPhi(parts.gen_lep->charge() > 0), 12);
+        gen_l0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
+        true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
+        true_phi_f_ = gen_true_sys.SymPhi(parts.gen_lep->charge() > 0);
 
         // Now try and match to the reco objects, if they exist
         if (l0 && ac::DeltaR(l0, parts.gen_lep) < 0.3) {
@@ -386,9 +455,9 @@ int WGDataAnalysis::PreAnalysis() {
     met_ = met->pt();
     met_phi_ = met->phi();
 
-    ac::Met* xy_met = mets.at(1);
-    xy_met_ = xy_met->pt();
-    xy_met_phi_ = xy_met->phi();
+    // ac::Met* xy_met = mets.at(1);
+    // xy_met_ = xy_met->pt();
+    // xy_met_phi_ = xy_met->phi();
 
     ac::Met* puppi_met = puppi_mets.at(0);
     puppi_met_ = puppi_met->pt();
@@ -400,7 +469,6 @@ int WGDataAnalysis::PreAnalysis() {
       l0_phi_ = l0->phi();
       l0_q_ = l0->charge();
       l0met_mt_ = ac::MT(l0, met);
-      l0met_mt_ = reduceMantissaToNbits(l0met_mt_, 12);
 
       if (m0) {
         l0_iso_ = MuonPFIso(m0);
@@ -452,8 +520,8 @@ int WGDataAnalysis::PreAnalysis() {
       }
     }
 
-    if (m0 && muons.size() >= 2) {
-      ac::Muon* m1 = muons[1];
+    if (m0 && pre_muons.size() >= 2) {
+      ac::Muon* m1 = pre_muons[1];
       l1_pt_ = m1->pt();
       l1_eta_ = m1->eta();
       l1_phi_ = m1->phi();
@@ -462,8 +530,9 @@ int WGDataAnalysis::PreAnalysis() {
       l0l1_M_ = (m0->vector() + m1->vector()).M();
       l0l1_dr_ = DeltaR(m0, m1);
       l0l1_os_ = m0->charge() != m1->charge();
-    } else if (e0 && electrons.size() >= 2) {
-      ac::Electron* e1 = electrons[1];
+      l0l1_pt_ = (m0->vector() + m1->vector()).pt();
+    } else if (e0 && pre_electrons.size() >= 2) {
+      ac::Electron* e1 = pre_electrons[1];
       l1_pt_ = e1->pt();
       l1_eta_ = e1->eta();
       l1_phi_ = e1->phi();
@@ -472,9 +541,8 @@ int WGDataAnalysis::PreAnalysis() {
       l0l1_M_ = (e0->vector() + e1->vector()).M();
       l0l1_dr_ = DeltaR(e0, e1);
       l0l1_os_ = e0->charge() != e1->charge();
+      l0l1_pt_ = (e0->vector() + e1->vector()).pt();
     }
-    l0l1_M_ = reduceMantissaToNbits(l0l1_M_, 12);
-    l0l1_dr_ = reduceMantissaToNbits(l0l1_dr_, 12);
 
     if (p0) {
       p0_pt_ = p0->pt();
@@ -491,30 +559,30 @@ int WGDataAnalysis::PreAnalysis() {
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
 
-      if (n_vm_ >= 1) {
-        boost::range::sort(veto_muons, [&](ac::Muon* x1, ac::Muon* x2) {
-          return DeltaR(x1, p0) < DeltaR(x2, p0);
-        });
-        vm_p0_dr_ = ac::DeltaR(veto_muons[0], p0);
-      }
+      // if (n_vm_ >= 1) {
+      //   boost::range::sort(veto_muons, [&](ac::Muon* x1, ac::Muon* x2) {
+      //     return DeltaR(x1, p0) < DeltaR(x2, p0);
+      //   });
+      //   vm_p0_dr_ = ac::DeltaR(veto_muons[0], p0);
+      // }
     }
 
     if (p0 && l0) {
-      l0p0_dr_ =  reduceMantissaToNbits(ac::DeltaR(l0, p0), 12);
-      l0p0_dphi_ = reduceMantissaToNbits(ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector()), 12);
-      l0p0_M_ = reduceMantissaToNbits((l0->vector() + p0->vector()).M(), 12);
+      l0p0_dr_ =  ac::DeltaR(l0, p0);
+      l0p0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector());
+      l0p0_M_ = (l0->vector() + p0->vector()).M();
 
       WGSystem reco_sys = ProduceWGSystem(*l0, *met, *p0, true, rng, false);
-      reco_phi_ = reduceMantissaToNbits(reco_sys.Phi(l0->charge()), 7);
-      reco_phi_f_ = reduceMantissaToNbits(reco_sys.SymPhi(l0->charge()), 7);
+      reco_phi_ = reco_sys.Phi(l0->charge());
+      reco_phi_f_ = reco_sys.SymPhi(l0->charge());
 
-      WGSystem reco_xy_sys = ProduceWGSystem(*l0, *xy_met, *p0, true, rng, false);
-      reco_xy_phi_ = reduceMantissaToNbits(reco_xy_sys.Phi(l0->charge()), 7);
-      reco_xy_phi_f_ = reduceMantissaToNbits(reco_xy_sys.SymPhi(l0->charge()), 7);
+      // WGSystem reco_xy_sys = ProduceWGSystem(*l0, *xy_met, *p0, true, rng, false);
+      // reco_xy_phi_ = reduceMantissaToNbits(reco_xy_sys.Phi(l0->charge()), 7);
+      // reco_xy_phi_f_ = reduceMantissaToNbits(reco_xy_sys.SymPhi(l0->charge()), 7);
 
       WGSystem reco_puppi_sys = ProduceWGSystem(*l0, *puppi_met, *p0, true, rng, false);
-      reco_puppi_phi_ = reduceMantissaToNbits(reco_puppi_sys.Phi(l0->charge()), 7);
-      reco_puppi_phi_f_ = reduceMantissaToNbits(reco_puppi_sys.SymPhi(l0->charge()), 7);
+      reco_puppi_phi_ = reco_puppi_sys.Phi(l0->charge());
+      reco_puppi_phi_f_ = reco_puppi_sys.SymPhi(l0->charge());
 
       if (m0) {
         wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_m_chn"], {p0_pt_, p0->scEta()});
@@ -534,19 +602,23 @@ int WGDataAnalysis::PreAnalysis() {
           break;
         }
       }
-      if (info->userDoubles().size() >= 1) {
-        wt_pf_ = info->userDoubles().at(0);
+      if (year_ == 2016 || year_ == 2017) {
+        wt_pf_ = event->Get<double>("NonPrefiringProb");
       }
       if (m0) {
         wt_l0_ = RooFunc(fns_["m_idisotrk_ratio"], {l0_pt_, l0_eta_});
         wt_trg_l0_ = RooFunc(fns_["m_trg_ratio"], {l0_pt_, l0_eta_});
       }
       if (e0) {
-        wt_l0_ = RooFunc(fns_["e_gsfidiso_ratio"], {l0_pt_, l0_eta_});
-        wt_trg_l0_ = RooFunc(fns_["e_trg_ratio"], {l0_pt_, l0_eta_});
+        // For electrons the SFs are binned in scEta instead of eta
+        wt_l0_ = RooFunc(fns_["e_gsfidiso_ratio"], {l0_pt_, e0->scEta()});
+        wt_trg_l0_ = RooFunc(fns_["e_trg_ratio"], {l0_pt_, e0->scEta()});
       }
-      if (m0 && muons.size() >= 2) {
+      if (m0 && pre_muons.size() >= 2) {
         wt_l1_ = RooFunc(fns_["m_idisotrk_ratio"], {l1_pt_, l1_eta_});
+      }
+      if (e0 && pre_electrons.size() >= 2) {
+        wt_l1_ = RooFunc(fns_["e_gsfidiso_ratio"], {l1_pt_, pre_electrons[1]->scEta()});
       }
       auto genparts = event->GetPtrVec<ac::GenParticle>("genParticles");
       if (p0) {
@@ -623,6 +695,7 @@ int WGDataAnalysis::PreAnalysis() {
         }
       }
     }
+    CompressVars();
     tree_->Fill();
     return 0;
   }
@@ -652,6 +725,7 @@ int WGDataAnalysis::PreAnalysis() {
     l1_iso_ = 0.;
     l0l1_M_ = 0.;
     l0l1_dr_ = 0.;
+    l0l1_pt_ = 0.;
     l0l1_os_ = false;
     n_pre_p_ = 0;
     p0_pt_ = 0.;
@@ -720,16 +794,32 @@ int WGDataAnalysis::PreAnalysis() {
     // gen_n2_pt_ = 0.;
   }
 
+  void WGDataAnalysis::CompressVars() {
+    for (float* var :
+         {&l0_pt_,     &l0_iso_,    &l0met_mt_,  &l1_pt_,     &l1_iso_,      &met_,
+          &puppi_met_, &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
+          &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
+          &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_,
+          &l0p0_dphi_, &l0p0_M_}) {
+      *var = reduceMantissaToNbitsRounding(*var, 10);
+    }
+    for (float* var :
+         {&l0_eta_,          &l0_phi_,     &l1_eta_,     &l1_phi_,     &met_phi_,
+          &puppi_met_phi_,   &lhe_l0_eta_, &lhe_p0_eta_, &gen_p0_eta_, &gen_phi_,
+          &gen_phi_f_,       &gen_l0_eta_, &true_phi_,   &true_phi_f_, &p0_eta_,
+          &p0_phi_,          &l0p0_dphi_,  &reco_phi_,   &reco_phi_f_, &reco_puppi_phi_,
+          &reco_puppi_phi_f_}) {
+      *var = reduceMantissaToNbitsRounding(*var, 8);
+    }
+  }
+
   int WGDataAnalysis::PostAnalysis() {
     return 0;
   }
 
   void WGDataAnalysis::PrintInfo() {}
 
-  void WGDataAnalysis::PhotonIsoCorrector(ac::Photon *p, unsigned nvertices) {
-    double nv = double(nvertices);
-    double rho = 0.291781 + nv * 0.736966 + nv * nv * -0.00152866;
-
+  void WGDataAnalysis::PhotonIsoCorrector(ac::Photon *p, double rho) {
     double a_eta = std::abs(p->scEta());
     double chiso = p->chargedIso();
     double neiso = p->neutralHadronIso();

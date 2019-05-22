@@ -21,7 +21,7 @@ class WGModel(PhysicsModel):
     def doParametersOfInterest(self):
         self.years = ['2016', '2017', '2018']
         self.channels = ['e', 'm']
-        self.signs = ['p', 'n']
+        self.signs = ['x']
         """Create POI and other parameters, and define the POI set."""
         if self.type in ['eft']:
             # Could measure c3w separately in:
@@ -89,7 +89,11 @@ class WGModel(PhysicsModel):
                 scaler = 'scale_%s_%s_%s_%s_%s_%s' % (yr, region, chn, sgn, ptbin, phibin)
             elif self.type in ['pt_diff']:
                 sgn, chn, ptbin, yr = bin.split('_')
-                proc, region, sgn, ptbin, phibin = process.split('_')
+                p_args = process.split('_')
+                if len(p_args) == 4:
+                    proc, region, sgn, ptbin = p_args
+                if len(p_args) == 5:
+                    proc, region, sgn, ptbin, phibin = p_args
                 scaler = 'r_%s_%s' % (sgn, ptbin)
             elif self.type in ['pt_phi_diff']:
                 sgn, chn, ptbin, yr = bin.split('_')

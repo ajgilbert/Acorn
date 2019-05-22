@@ -13,6 +13,7 @@
 #include "Acorn/Analysis/interface/ModuleBase.h"
 #include "Acorn/Analysis/interface/AnalysisTools.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
+#include "Acorn/Analysis/interface/RoccoR.h"
 
 namespace ac {
 
@@ -26,6 +27,11 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_zg)
   CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
+  CLASS_MEMBER(WGDataAnalysis, int, var_set)
+  CLASS_MEMBER(WGDataAnalysis, int, correct_e_energy)
+  CLASS_MEMBER(WGDataAnalysis, int, correct_p_energy)
+  CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
+  CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
 
   LookupFilter filters_IsoMu24_;
   LookupFilter filters_IsoTkMu24_;
@@ -39,6 +45,8 @@ class WGDataAnalysis : public ModuleBase {
 
   std::shared_ptr<RooWorkspace> ws_;
   std::map<std::string, std::shared_ptr<RooFunctor>> fns_;
+
+  RoccoR rc_;
 
   TTree* tree_;
 
@@ -77,6 +85,7 @@ class WGDataAnalysis : public ModuleBase {
   // di-muon variables
   float l0l1_M_;
   float l0l1_dr_;
+  float l0l1_pt_;
   bool l0l1_os_;
 
   // number of reco'd photons (no ID/Iso beyond miniaod presel)
@@ -164,7 +173,7 @@ class WGDataAnalysis : public ModuleBase {
 
   mutable TRandom3 rng;
 
-  void PhotonIsoCorrector(ac::Photon *p, unsigned nvertices);
+  void PhotonIsoCorrector(ac::Photon *p, double rho);
 
 
  public:
@@ -177,6 +186,8 @@ class WGDataAnalysis : public ModuleBase {
   virtual void PrintInfo();
 
   void SetDefaults();
+
+  void CompressVars();
 };
 }  // namespace ac
 
