@@ -28,6 +28,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("DiElectronMesonAnalysis", "DiElectronMesonAnalysis");
     tree_->Branch("electron_overlaps",&electron_overlaps_);
+    tree_->Branch("veto_muons",&veto_muons_);
+    tree_->Branch("veto_electrons",&veto_electrons_);
     tree_->Branch("muon_overlaps",&muon_overlaps_);
     tree_->Branch("pt_1", &pt_1_);
     tree_->Branch("pt_2", &pt_2_);
@@ -38,6 +40,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("dr_ll", &dr_ll_);
     tree_->Branch("trg_1", &trg_1_);
     tree_->Branch("trg_2", &trg_2_);
+    tree_->Branch("trg_3", &trg_3_);
     tree_->Branch("wt_pu", &wt_pu_);
     tree_->Branch("wt_1", &wt_1_);
     tree_->Branch("wt_2", &wt_2_);
@@ -156,6 +159,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     }
 
     if (electrons.size()==2 && veto_electrons.size() == 2 && z_cand.charge() == 0 && veto_muons.size()==0) {
+      veto_muons_ = veto_muons.size();
+      veto_electrons_ = veto_electrons.size();
 
       electron_overlaps_=0;
       muon_overlaps_=0;
@@ -195,7 +200,19 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       } else {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
         trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>35;
-        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>35;
+        trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[1]->pt()>35;
+        auto const& trg_objs_double = event->GetPtrVec<TriggerObject>("triggerObjects_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
+        trg_3_ = IsFilterMatchedDR(electrons[0],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter", 0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter", 0.3)&&IsFilterMatchedDR(electrons[0],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&electrons[0]->pt()<35;
+
+//hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter = cms.EDFilter( "HLTEgammaGenericFilter",
+//    saveTags = cms.bool( True ),
+//    ncandcut = cms.int32( 1 ),
+//hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter = cms.EDFilter( "HLTEgammaGenericFilter",
+//    saveTags = cms.bool( True ),
+//    ncandcut = cms.int32( 2 ),
+//hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter = cms.EDFilter( "HLT2PhotonPhotonDZ",
+//    saveTags = cms.bool( True ),
+//HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v
       }
 
       wt_pu_ = 1.;
@@ -295,9 +312,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
        highestpt_pair_looser_iso_-=highestpt_pair_1_pt_;
        highestpt_pair_looser_iso_-=highestpt_pair_2_pt_;
       }
-      if(highestpt_pair_pt_>20.){
-          wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
-      } else wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {21., std::abs(highestpt_pair_eta_)});
+      wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
 
       tree_->Fill();
     }

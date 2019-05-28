@@ -28,7 +28,9 @@ int DiMuonMesonAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("DiMuonMesonAnalysis", "DiMuonMesonAnalysis");
     tree_->Branch("electron_overlaps",&electron_overlaps_);
+    tree_->Branch("veto_electrons",&veto_electrons_);
     tree_->Branch("muon_overlaps",&muon_overlaps_);
+    tree_->Branch("veto_muons",&veto_muons_);
     tree_->Branch("pt_1", &pt_1_);
     tree_->Branch("pt_2", &pt_2_);
     tree_->Branch("eta_1", &eta_1_);
@@ -42,6 +44,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
     tree_->Branch("wt_1", &wt_1_);
     tree_->Branch("wt_2", &wt_2_);
     tree_->Branch("wt_trg", &wt_trg_);
+    tree_->Branch("wt_rhoiso", &wt_rhoiso_);
     tree_->Branch("eff_trg1_data", &eff_trg1_data_);
     tree_->Branch("eff_trg2_data", &eff_trg2_data_);
     tree_->Branch("eff_trg1_mc", &eff_trg1_mc_);
@@ -170,7 +173,9 @@ int DiMuonMesonAnalysis::PreAnalysis() {
       z_cand.setCharge(muons[0]->charge() + muons[1]->charge());
     }
 
-    if (muons.size() == 2 && veto_muons.size() == 2 && z_cand.charge() == 0 && veto_electrons.size()==0) {
+    if (muons.size() == 2 && veto_muons.size() == 2 && z_cand.charge() == 0 && veto_electrons.size()==0 ) {
+      veto_muons_ = veto_muons.size();
+      veto_electrons_ = veto_electrons.size();
       electron_overlaps_=0;
       muon_overlaps_=0;
       for(unsigned j=0; j<tracks.size(); j++){
@@ -313,9 +318,7 @@ int DiMuonMesonAnalysis::PreAnalysis() {
        highestpt_pair_looser_iso_-=highestpt_pair_1_pt_;
        highestpt_pair_looser_iso_-=highestpt_pair_2_pt_;
       }
-      if(highestpt_pair_pt_>20.){
-          wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
-      } else wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {21., std::abs(highestpt_pair_eta_)});
+      wt_rhoiso_ = RooFunc(fns_["rhoiso_ratio_etainc"], {highestpt_pair_pt_, std::abs(highestpt_pair_eta_)});
       tree_->Fill();
     }
 

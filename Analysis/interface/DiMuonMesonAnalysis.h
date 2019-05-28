@@ -32,6 +32,8 @@ class DiMuonMesonAnalysis : public ModuleBase {
 
   TTree* tree_;
   int  electron_overlaps_;
+  int veto_muons_;
+  int veto_electrons_;
   int  muon_overlaps_;
   float pt_1_;
   float pt_2_;

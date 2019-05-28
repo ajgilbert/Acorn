@@ -33,6 +33,8 @@ class DiElectronMesonAnalysis : public ModuleBase {
   TTree* tree_;
   int  electron_overlaps_;
   int  muon_overlaps_;
+  int  veto_muons_;
+  int  veto_electrons_;
   float pt_1_;
   float pt_2_;
   float eta_1_;
@@ -42,6 +44,7 @@ class DiElectronMesonAnalysis : public ModuleBase {
   float dr_ll_;
   bool trg_1_;
   bool trg_2_;
+  bool trg_3_;
   float wt_pu_;
   float wt_1_;
   float wt_2_;
