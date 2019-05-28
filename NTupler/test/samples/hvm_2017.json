@@ -2,31 +2,31 @@
   "samples": {
     "DoubleMuon-2017B": {
       "dataset": "/DoubleMuon/Run2017B-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2017C": {
       "dataset": "/DoubleMuon/Run2017C-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2017D": {
       "dataset": "/DoubleMuon/Run2017D-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2017E": {
       "dataset": "/DoubleMuon/Run2017E-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2017F": {
       "dataset": "/DoubleMuon/Run2017F-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
@@ -50,9 +50,10 @@
     },
     "SingleMuon-2017E": {
       "dataset": "/SingleMuon/Run2017E-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["submit","resub"],
       "events": -1,
-      "config": "data"
+      "config": "data",
+      "lumiMask": "./PROD-25042019-17/crab_PROD-25042019-17_SingleMuon-2017E/results/notFinishedLumis.json"
     },
     "SingleMuon-2017F": {
       "dataset": "/SingleMuon/Run2017F-31Mar2018-v1/MINIAOD",
@@ -92,31 +93,31 @@
     },
     "DoubleEG-2017B": {
       "dataset": "/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleEG-2017C": {
       "dataset": "/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleEG-2017D": {
       "dataset": "/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit", "submitpilot"],
+      "attributes": ["sub", "submitpilot"],
       "events": -1,
       "config": "data"
     },
     "DoubleEG-2017E": {
       "dataset": "/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleEG-2017F": {
       "dataset": "/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
@@ -162,13 +163,15 @@
     }
   },
   "configs": {
-    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v11", "cores=1"],
-    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "cores=1"]
+    "data": ["year=2017", "isData=1", "globalTag=94X_dataRun2_v11", "cores=2"],
+    "mc":  ["year=2017", "isData=0", "globalTag=94X_mc2017_realistic_v17", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_DE_DESY",
     "voGroup": "dcms",
     "outputDir" : "/store/user/adewit/HVMData/",
-    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"]
+    "inputFiles": ["../../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"],
+    "maxMemoryMB": 3900,
+    "numCores": 2
   }
 }

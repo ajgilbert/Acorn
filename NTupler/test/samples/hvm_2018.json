@@ -2,25 +2,25 @@
   "samples": {
     "DoubleMuon-2018A": {
       "dataset": "/DoubleMuon/Run2018A-17Sep2018-v2/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2018B": {
       "dataset": "/DoubleMuon/Run2018B-17Sep2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2018C": {
       "dataset": "/DoubleMuon/Run2018C-17Sep2018-v1/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "data"
     },
     "DoubleMuon-2018D": {
       "dataset": "/DoubleMuon/Run2018D-PromptReco-v2/MINIAOD",
-      "attributes": ["submit"],
+      "attributes": ["sub"],
       "events": -1,
       "config": "promptdata"
     },

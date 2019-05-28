@@ -145,7 +145,7 @@ elif opts.year in ['2016']:
 elif opts.year in ['2017']:
     setupEgammaPostRecoSeq(process, runVID=True, era='2017-Nov17ReReco')
 elif opts.year in ['2018']:
-    setupEgammaPostRecoSeq(process, runEnergyCorrections=False, era='2018-Prompt')
+    setupEgammaPostRecoSeq(process, runEnergyCorrections=True, era='2018-Prompt')
 
 ### Electrons
 ele_veto_id = "cutBasedElectronID-Fall17-94X-V2-veto"
@@ -181,7 +181,8 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     eleMVAwp90IdMap=cms.InputTag(ele_mva_wp90_id),
     eleHEEPIdMap=cms.InputTag(ele_heep_id),
     relativeEAIsoFromUserData=cms.vstring('ElectronCutValues', 'GsfEleRelPFIsoScaledCut_0'),
-    takeIdsFromObjects=cms.bool(True)
+    takeIdsFromObjects=cms.bool(True),
+    energyCorrections=cms.vstring('ecalTrkEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
 
 
@@ -191,6 +192,7 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     select=cms.vstring('keep .* p4=12'),
     saveGenMetFromPat=cms.bool(False),
     saveCorrectionLevels=cms.vint32(),
+    skipMainMet=cms.bool(False),
     saveUncertaintyShifts=cms.vint32()
 )
 
@@ -305,6 +307,7 @@ for path in hlt_paths:
         branch=cms.string('triggerObjects_%s' % shortname),
         hltPath= cms.string(path),
         storeIfFired=cms.bool(True),
+        extraFilterLabels=cms.vstring(),
         select=cms.vstring('keep .* p4=12')
     ))
     process.acTriggerObjectSequence += cms.Sequence(getattr(process, 'ac_%s_ObjectProducer' % shortname))
@@ -318,6 +321,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     metFilterResults=cms.InputTag("TriggerResults", "", "PAT"), # NB will sometimes need "RECO" instead of "PAT"
     saveMetFilters=cms.vstring(),
     userDoubles=cms.VInputTag(),
+    saveMetFilterBools=cms.VInputTag(),
     branch=cms.string('eventInfo'),
     select=cms.vstring(
         'keep .*',
