@@ -43,17 +43,18 @@ mc_H_mass.Sumw2()
 
 #intree_data.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
 #intree_mc.Draw("highestpt_pair_reco_higgs_mass>>mc_H_mass","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
-intree_data.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
-intree_data_doub.Draw("highestpt_pair_reco_higgs_mass>>+data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
+intree_data.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1>30")
+#intree_data_doub.Draw("highestpt_pair_reco_higgs_mass>>+data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1<30")
 intree_mc.Draw("highestpt_pair_reco_higgs_mass>>mc_H_mass","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
 
 
 print "data yield in anti-isolated region: ", data_H_mass_antiiso.Integral()
 #print "data yield in isolated region: ",intree_data.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
-print "data yield in isolated region (SL): ",intree_data.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
-print "data yield in isolated region (DL): ",intree_data_doub.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
+print "data yield in isolated region (SL): ",intree_data.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1>30")
+print "data yield in isolated region (DL): ",intree_data_doub.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1<30")
 #data_H_mass_antiiso.Scale(31915./data_H_mass_antiiso.Integral())
-data_H_mass_antiiso.Scale(60811./data_H_mass_antiiso.Integral())
+data_H_mass_antiiso.Scale(31450./data_H_mass_antiiso.Integral())
+#data_H_mass_antiiso.Scale(31965./data_H_mass_antiiso.Integral())
 #data_H_mass_antiiso.Scale(14648.0/data_H_mass_antiiso.Integral())
 
 
@@ -102,20 +103,20 @@ mc_H_mass_ee.Sumw2()
 
 #intree_data.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
 #intree_mc.Draw("highestpt_pair_reco_higgs_mass>>mc_H_mass","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
-intree_data_ee.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso_ee","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
-intree_data_doub_ee.Draw("highestpt_pair_reco_higgs_mass>>+data_H_mass_antiiso_ee","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
+intree_data_ee.Draw("highestpt_pair_reco_higgs_mass>>data_H_mass_antiiso_ee","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1>38")
+#intree_data_doub_ee.Draw("highestpt_pair_reco_higgs_mass>>+data_H_mass_antiiso_ee","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso>1.0&&highestpt_pair_looser_iso<2.0&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1<38")
 intree_mc_ee.Draw("highestpt_pair_reco_higgs_mass>>mc_H_mass_ee","highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
 
 
 print "data yield in anti-isolated region: ", data_H_mass_antiiso_ee.Integral()
 #print "data yield in isolated region: ",intree_data.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&(highestpt_pair_mass>0.5&&highestpt_pair_mass<1.)")
-print "data yield in isolated region (SL): ",intree_data_ee.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
-print "data yield in isolated region (DL): ",intree_data_doub_ee.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)")
+print "data yield in isolated region (SL): ",intree_data_ee.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1>38")
+print "data yield in isolated region (DL): ",intree_data_doub_ee.GetEntries("highestpt_pair_looser_iso>-1&&highestpt_pair_looser_iso<0.5&&highestpt_pair_reco_higgs_mass>120&&highestpt_pair_reco_higgs_mass<140&&(trg_1||trg_2)&&m_ll>60&&m_ll<120&&(highestpt_pair_1_pt>10||highestpt_pair_2_pt>10)&&pt_1<38")
 
-data_H_mass_antiiso_ee.Scale(29920./data_H_mass_antiiso_ee.Integral())
+data_H_mass_antiiso_ee.Scale(14159./data_H_mass_antiiso_ee.Integral())
+#data_H_mass_antiiso_ee.Scale(15140./data_H_mass_antiiso_ee.Integral())
 #data_H_mass_antiiso_ee.Scale(14952./data_H_mass_antiiso_ee.Integral())
 #data_H_mass_antiiso.Scale(14648.0/data_H_mass_antiiso.Integral())
-
 
 ams_binned_ee=0;
 for i in range(1,21):

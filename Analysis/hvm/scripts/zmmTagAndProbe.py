@@ -19,7 +19,7 @@ bin_cfgs = [
         'tag': 't_id && t_rand && t_trg ',
         'probe': 'p_trk_iso<0.5',
         'binvar_x': 'p_pt',
-        'bins_x': [20., 25., 30., 35., 40., 45., 50., 100.],
+        'bins_x': [10., 15., 20., 25., 30., 35., 40., 45., 50., 100.],
         #'bins_x': [5., 6., 7., 8., 9., 10., 11., 12.],
         'binvar_y': 'abs(p_eta)',
         'bins_y': [0, 2.4]
@@ -32,7 +32,7 @@ bin_cfgs = [
         'tag': 't_id && t_rand && t_trg',
         'probe': 'p_trk_iso<0.5',
         'binvar_x': 'p_pt',
-        'bins_x': [20., 25., 30., 35., 40., 45., 50.,  100.],
+        'bins_x': [10., 15., 20., 25., 30., 35., 40., 45., 50.,  100.],
         #'bins_x': [5., 6., 7., 8., 9., 10., 11., 12.],
         'binvar_y': 'abs(p_eta)',
         'bins_y': [0, 0.9, 1.2, 2.1, 2.5]
@@ -92,7 +92,7 @@ remaps = {
 
 remap = remaps['2016']
 #prefix = '/nfs/dust/cms/user/dewita/CMSSW_9_4_13/src/Acorn/Analysis/output-zmmtp/PROD-29032018-16/'
-prefix = '/nfs/dust/cms/user/dewita/CMSSW_10_2_10/src/Acorn/Analysis/output-zmmtp/PROD-29032019-18/'
+prefix = '/nfs/dust/cms/user/dewita/CMSSW_9_4_13/src/Acorn/Analysis/output-zmmtp/PROD-03052019-18/'
 
 samples = {}
 for sa in remap:
@@ -111,7 +111,7 @@ hists = Node()
 # sys.exit(0)
 
 for sample in remap:
-    outfile = ROOT.TFile('ZMMTP_2018_%s.root' % sample, 'RECREATE')
+    outfile = ROOT.TFile('ZMMTPlowpt_2018_%s.root' % sample, 'RECREATE')
 
     hists = Node()
     for cfg in bin_cfgs:
@@ -122,7 +122,7 @@ for sample in remap:
             # drawlist.append((cfg['var'], '((%s) && !(%s) && (%s)) * wt' % (b, cfg['probe'], cfg['tag'])))
             # drawlist.append((cfg['var'], '((%s) && (%s) && (%s)) * wt' % (b, cfg['probe'], cfg['tag'])))
 
-    MultiDraw(hists, samples, 'HVMTagAndProbe', mt_cores=4)
+    MultiDraw(hists, samples, 'HVMMMTagAndProbe', mt_cores=4)
 
     # hists = trees[sample].Draw(drawlist, compiled=True)
 
