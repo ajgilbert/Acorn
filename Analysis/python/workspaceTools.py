@@ -155,6 +155,30 @@ def ProcessDESYLeptonSFs(filename, postfix, name):
     return result
 
 
+def HistErr(hist, err_factor=1.0, clone=True, do_ratio=True):
+    if clone:
+        hist_clone = hist.Clone()
+    else:
+        hist_clone = hist
+    ndim = hist.GetDimension()
+    if ndim == 1:
+        for i in xrange(1, hist.GetNbinsX() + 1):
+            if do_ratio:
+                if hist.GetBinContent(i) > 0.:
+                    hist_clone.SetBinContent(i, err_factor * hist.GetBinError(i) / hist.GetBinContent(i))
+            else:
+                hist_clone.SetBinContent(i, hist.GetBinContent(i) + hist.GetBinError(i) * err_factor)
+    if ndim == 2:
+        for i in xrange(1, hist.GetNbinsX() + 1):
+            for j in xrange(1, hist.GetNbinsY() + 1):
+                if do_ratio:
+                    if hist.GetBinContent(i, j) > 0.:
+                        hist_clone.SetBinContent(i, j, err_factor * hist.GetBinError(i, j) / hist.GetBinContent(i, j))
+                else:
+                    hist_clone.SetBinContent(i, j, hist.GetBinContent(i, j) + hist.GetBinError(i, j) * err_factor)
+    hist.Print('range')
+    hist_clone.Print('range')
+    return hist_clone
 
 # file = ROOT.TFile('input/scale_factors/Muon_SF_spring16temp.root')
 # hists = []

@@ -164,16 +164,16 @@ if args.debug:
 ## Muons
 ###############################################################################
 loc = 'wgamma/inputs/muons/%s' % era
+wrapvars_def = ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])']
+wrapvars_new = ['m_eta', 'm_pt']
 if era == '2016':
     histsToWrap = [
-        (loc + '/trigger/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio'),
-        (loc + '/trigger/EfficienciesAndSF_Period4.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio')
-    ]
-    histsToWrapNewStyle = [
-        (loc + '/id/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_bf_ratio'),
-        (loc + '/id/RunGH_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_gh_ratio'),
-        (loc + '/iso/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_bf_ratio'),
-        (loc + '/iso/RunGH_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_gh_ratio')
+        (loc + '/trigger/EfficienciesAndSF_RunBtoF.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_bf_ratio', wrapvars_def),
+        (loc + '/trigger/EfficienciesAndSF_Period4.root:IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_gh_ratio', wrapvars_def),
+        (loc + '/id/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_bf_ratio', wrapvars_new),
+        (loc + '/id/RunGH_SF_ID.root:NUM_MediumID_DEN_genTracks_eta_pt', 'm_id_gh_ratio', wrapvars_new),
+        (loc + '/iso/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_bf_ratio', wrapvars_new),
+        (loc + '/iso/RunGH_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_gh_ratio', wrapvars_new)
     ]
 
     muon_trk_eff_hist = TGraphAsymmErrorsToTH1D(GetFromTFile(loc + '/track/Tracking_EfficienciesAndSF_BCDEFGH.root:ratio_eff_eta3_dr030e030_corr'))
@@ -181,26 +181,29 @@ if era == '2016':
 
 if era == '2017':
     histsToWrap = [
-        (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/pt_abseta_ratio', 'm_trg_ratio'),
-        (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio'),
-        (loc + '/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
+        (loc + '/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root:IsoMu27_PtEtaBins/pt_abseta_ratio', 'm_trg_ratio', wrapvars_def),
+        (loc + '/RunBCDEF_SF_ID.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio', wrapvars_def),
+        (loc + '/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio', wrapvars_def),
     ]
-    histsToWrapNewStyle = []
 
 if era == '2018':
     histsToWrap = [
-        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ID.root:NUM_MediumID_DEN_TrackerMuons_pt_abseta', 'm_id_ratio'),
-        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio'),
-        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_early_ratio'),
-        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio'),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ID.root:NUM_MediumID_DEN_TrackerMuons_pt_abseta', 'm_id_ratio', wrapvars_def),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ID.root:NUM_MediumID_DEN_TrackerMuons_pt_abseta', 'm_id_ratio_err', wrapvars_def, +1.0),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio', wrapvars_def),
+        (loc + '/EfficienciesStudies_2018_rootfiles_RunABCD_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio_err', wrapvars_def, +1.0),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_early_ratio', wrapvars_def),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_early_ratio_err', wrapvars_def, +1.0),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio', wrapvars_def),
+        (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio_err', wrapvars_def, +1.0),
     ]
-    histsToWrapNewStyle = []
 
 for task in histsToWrap:
-    SafeWrapHist(w, ['m_pt', 'expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])'], GetFromTFile(task[0]), name=task[1])
+    if len(task) > 3:
+        SafeWrapHist(w, task[2], HistErr(GetFromTFile(task[0]), task[3]), name=task[1])
+    else:
+        SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
-for task in histsToWrapNewStyle:
-    SafeWrapHist(w, ['m_eta', 'm_pt'], GetFromTFile(task[0]), name=task[1])
 
 if era == '2016':
     # Factor of 0.439 is the lumi of G+H
@@ -212,11 +215,12 @@ if era == '2017':
 
 if era == '2018':
     w.factory('expr::m_trk_ratio("1", m_eta[0])')
-    for t in ['trg']:
-        w.factory('expr::m_%s_ratio("@0*(1-0.85) + @1*0.85", m_%s_early_ratio, m_%s_late_ratio)' % (t, t, t))
+    w.factory('expr::m_trg_ratio("@0*(1-0.85) + @1*0.85", m_trg_early_ratio, m_trg_late_ratio)')
+    w.factory('expr::m_trg_ratio_err("TMath::Sqrt(@0*@0*@1*@1*0.15*0.15 + @2*@2*@3*@3*0.85*0.85)/@4", m_trg_early_ratio, m_trg_early_ratio_err, m_trg_late_ratio, m_trg_late_ratio_err, m_trg_ratio)')
 
 
 w.factory('expr::m_idisotrk_ratio("@0*@1*@2", m_id_ratio, m_iso_ratio, m_trk_ratio)')
+w.factory('expr::m_idisotrk_ratio_err("TMath::Sqrt(@0*@0+@1*@1)", m_id_ratio_err, m_iso_ratio_err)')
 
 
 ###############################################################################
@@ -242,15 +246,21 @@ if era == '2017':
 if era == '2018':
     histsToWrap = [
         (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'e_gsf_ratio', ['e_eta', 'e_pt']),
+        (loc + '/egammaEffi.txt_EGM2D.root:EGamma_SF2D', 'e_gsf_ratio_err', ['e_eta', 'e_pt'], +1.0),
         (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio', ['e_eta', 'e_pt']),
+        (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio_err', ['e_eta', 'e_pt'], +1.0),
         (loc + '/ZeeTP_2018_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
         (loc + '/ZeeTP_2018_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])'])
     ]
 
 for task in histsToWrap:
-    SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
+    if len(task) > 3:
+        SafeWrapHist(w, task[2], HistErr(GetFromTFile(task[0]), task[3]), name=task[1])
+    else:
+        SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
 w.factory('expr::e_gsfidiso_ratio("@0*@1", e_gsf_ratio, e_id_ratio)')
+w.factory('expr::e_gsfidiso_ratio_err("TMath::Sqrt(@0*@0+@1*@1)", e_gsf_ratio_err, e_id_ratio_err)')
 w.factory('expr::e_trg_ratio("@0/@1", e_trg_data, e_trg_mc)')
 
 ###############################################################################
@@ -276,13 +286,17 @@ if era == '2017':
 if era == '2018':
     histsToWrap = [
         (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
         (loc + '/EFakesTP_2018_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         (loc + '/EFakesTP_2018_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
 
     ]
 
 for task in histsToWrap:
-    SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
+    if len(task) > 3:
+        SafeWrapHist(w, task[2], HistErr(GetFromTFile(task[0]), task[3]), name=task[1])
+    else:
+        SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
 w.factory('expr::e_p_fake_ratio("@0/@1", e_p_fake_data, e_p_fake_mc)')
 

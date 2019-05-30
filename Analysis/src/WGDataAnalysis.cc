@@ -136,6 +136,17 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_sc_4", &wt_sc_4_);
       tree_->Branch("wt_sc_5", &wt_sc_5_);
 
+      tree_->Branch("wt_pu_hi", &wt_pu_hi_);
+      tree_->Branch("wt_pu_lo", &wt_pu_lo_);
+      tree_->Branch("wt_pf_hi", &wt_pf_hi_);
+      tree_->Branch("wt_pf_lo", &wt_pf_lo_);
+      tree_->Branch("wt_l0_hi", &wt_l0_hi_);
+      tree_->Branch("wt_l0_lo", &wt_l0_lo_);
+      tree_->Branch("wt_trg_l0_hi", &wt_trg_l0_hi_);
+      tree_->Branch("wt_trg_l0_lo", &wt_trg_l0_lo_);
+      tree_->Branch("wt_p0_hi", &wt_p0_hi_);
+      tree_->Branch("wt_p0_lo", &wt_p0_lo_);
+
       tree_->Branch("is_wg_gen", &is_wg_gen_);
       tree_->Branch("gen_nparts", &gen_nparts_);
 
@@ -231,14 +242,22 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
   fns_["m_idisotrk_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_idisotrk_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_idisotrk_ratio_err")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_trg_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_trg_ratio_err")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+  fns_["e_gsfidiso_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_gsfidiso_ratio_err")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["e_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_trg_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_id_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_id_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["e_p_fake_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_m_chn"] = std::shared_ptr<RooFunctor>(
@@ -630,11 +649,17 @@ int WGDataAnalysis::PreAnalysis() {
       }
       if (m0) {
         wt_l0_ = RooFunc(fns_["m_idisotrk_ratio"], {l0_pt_, l0_eta_});
+        wt_l0_hi_ = 1.0 + RooFunc(fns_["m_idisotrk_ratio_err"], {l0_pt_, l0_eta_});
+        wt_l0_lo_ = 1.0 - RooFunc(fns_["m_idisotrk_ratio_err"], {l0_pt_, l0_eta_});
         wt_trg_l0_ = RooFunc(fns_["m_trg_ratio"], {l0_pt_, l0_eta_});
+        wt_trg_l0_hi_ = 1.0 + RooFunc(fns_["m_trg_ratio_err"], {l0_pt_, l0_eta_});
+        wt_trg_l0_lo_ = 1.0 - RooFunc(fns_["m_trg_ratio_err"], {l0_pt_, l0_eta_});
       }
       if (e0) {
         // For electrons the SFs are binned in scEta instead of eta
         wt_l0_ = RooFunc(fns_["e_gsfidiso_ratio"], {l0_pt_, e0->scEta()});
+        wt_l0_hi_ = 1.0 + RooFunc(fns_["e_gsfidiso_ratio_err"], {l0_pt_, e0->scEta()});
+        wt_l0_lo_ = 1.0 - RooFunc(fns_["e_gsfidiso_ratio_err"], {l0_pt_, e0->scEta()});
         wt_trg_l0_ = RooFunc(fns_["e_trg_ratio"], {l0_pt_, e0->scEta()});
       }
       if (m0 && pre_muons.size() >= 2) {
@@ -696,6 +721,8 @@ int WGDataAnalysis::PreAnalysis() {
         }
         if (ac::contains({1, 2, 4, 5}, p0_truth_)) {
           wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
+          wt_p0_hi_ = 1.0 + RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
+          wt_p0_lo_ = 1.0 - RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
         }
         if (ac::contains({2}, p0_truth_) && !p0->hasPixelSeed() && p0->passElectronVeto()) {
           wt_p0_e_fake_ = RooFunc(fns_["e_p_fake_ratio"], {p0_pt_, p0->eta()});
@@ -809,6 +836,16 @@ int WGDataAnalysis::PreAnalysis() {
     wt_sc_3_ = 1.;
     wt_sc_4_ = 1.;
     wt_sc_5_ = 1.;
+    wt_pu_hi_ = 1.;
+    wt_pu_lo_ = 1.;
+    wt_pf_hi_ = 1.;
+    wt_pf_lo_ = 1.;
+    wt_l0_hi_ = 1.;
+    wt_l0_lo_ = 1.;
+    wt_trg_l0_hi_ = 1.;
+    wt_trg_l0_lo_ = 1.;
+    wt_p0_hi_ = 1.;
+    wt_p0_lo_ = 1.;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
     gen_nparts_ = 0;

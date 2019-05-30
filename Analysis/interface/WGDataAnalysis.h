@@ -147,12 +147,24 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_fake_; // Photon fake factor
   float wt_p0_e_fake_; // Electron -> photon fake factor
 
+  // event weights for systematics (relative to nominal)
   float wt_sc_0_;
   float wt_sc_1_;
   float wt_sc_2_;
   float wt_sc_3_;
   float wt_sc_4_;
   float wt_sc_5_;
+
+  float wt_pu_hi_;
+  float wt_pu_lo_;
+  float wt_pf_hi_;
+  float wt_pf_lo_;
+  float wt_l0_hi_;
+  float wt_l0_lo_;
+  float wt_trg_l0_hi_;
+  float wt_trg_l0_lo_;
+  float wt_p0_hi_;
+  float wt_p0_lo_;
 
   // truth variables for Wgamma events
   bool is_wg_gen_;
