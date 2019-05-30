@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 #include "boost/range/algorithm_ext/erase.hpp"
+#include "boost/lexical_cast.hpp"
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
 #include "RooWorkspace.h"
@@ -44,6 +45,16 @@ Container copy_keep_if(Container const& target, Pred pred) {
   Container res = target;
   keep_if(res, pred);
   return res;
+}
+
+template <class T>
+T ReadAttrValue(std::vector<std::string> const& vals, std::string name) {
+  for (auto const& val : vals) {
+    if (val.rfind(name+":", 0) == 0) {
+      return boost::lexical_cast<T>(val.substr(name.length() + 1));
+    }
+  }
+  return T();
 }
 
 bool DescendingPt(Candidate const* c1, Candidate const* c2);

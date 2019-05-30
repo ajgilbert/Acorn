@@ -38,9 +38,9 @@ inprefix = args.input
 outdir = args.output
 # inprefix = '/home/files'
 indirs = {
-    '2016': inprefix + '/wgamma_2016_v3/WGamma_',
-    '2017': inprefix + '/wgamma_2017_v3/WGamma_',
-    '2018': inprefix + '/wgamma_2018_v3/WGamma_',
+    '2016': inprefix + '/wgamma_2016_v4/WGamma_',
+    '2017': inprefix + '/wgamma_2017_v4/WGamma_',
+    '2018': inprefix + '/wgamma_2018_v4/WGamma_',
 }
 
 samples = {
@@ -106,7 +106,8 @@ if not args.load:
         X['elec_match'] = '$elec_id && gen_l0_match'
         X['muon_iso'] = '$muon_id && l0_iso < 0.15'
         X['elec_iso'] = '$elec_id'
-        X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
+        X['muon_trg'] = '$muon_iso && l0_trg'
+        # X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
         X['elec_trg'] = '$elec_iso && l0_trg'
         X['muon_trg_2'] = '$muon_iso && l0_trg'
         X['elec_trg_2'] = '$elec_iso && l0_trg'
@@ -141,9 +142,9 @@ if not args.load:
                 hists[year][label][sa]['e_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_e && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
 
             for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
-                for sa in ['WG']:
+                for sa in ['WG-NLO']:
                     hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['phi_f_xy_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_xy_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
@@ -163,9 +164,9 @@ if not args.load:
                 obj.Scale(scale)
 
         for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
-            for sa in ['WG']:
+            for sa in ['WG-NLO']:
                 NormTH2InColumns(hists[year]['phi_f_response'][sa][sel])
-                NormTH2InColumns(hists[year]['phi_f_xy_response'][sa][sel])
+                NormTH2InColumns(hists[year]['phi_f_tk_response'][sa][sel])
                 NormTH2InColumns(hists[year]['phi_f_puppi_response'][sa][sel])
 
 

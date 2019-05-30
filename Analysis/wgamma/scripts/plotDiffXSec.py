@@ -25,6 +25,17 @@ args = parser.parse_args()
 plot.ModTDRStyle(width=1000)
 ROOT.gStyle.SetEndErrorSize(0)
 
+def DoScaleEnvelope(node, nominal):
+    h = node[nominal].Clone()
+    h_alts = []
+    for i in range(6):
+        h_alts.append(node[nominal + '__sc_%i' % i])
+    for ix in xrange(1, h.GetNbinsX() + 1):
+        for iy in xrange(1, h.GetNbinsY() + 1):
+            max_dev = max([abs(x.GetBinContent(ix, iy) - h.GetBinContent(ix, iy)) for x in h_alts])
+            h.SetBinError(ix, iy, max_dev)
+    return h
+
 def DivideGraphByHist(gr, hist):
     res = gr.Clone()
     for i in xrange(gr.GetN()):
@@ -89,6 +100,9 @@ corr_factors = {
     '2018': 191.4 / 229.92
 }
 # output_2018_fid_region_fid_pt_binned.root
+
+doScaleUncert = True
+
 for yr in years:
     f_ref = ROOT.TFile('output_%s_%s_%s.root' % (yr, args.selection, args.scheme))
     h_ref_m = Node()
@@ -96,8 +110,12 @@ for yr in years:
     h_ref_e = Node()
     TDirToNode(f_ref, 'e/XS/2D', h_ref_e)
 
-    h_xs_m = h_ref_m['XS_WG_%s_m_acc' % chg]
-    h_xs_e = h_ref_e['XS_WG_%s_e_acc' % chg]
+    if doScaleUncert:
+        h_xs_m = DoScaleEnvelope(h_ref_m, 'XS_WG_%s_m_acc' % chg)
+        h_xs_e = DoScaleEnvelope(h_ref_e, 'XS_WG_%s_e_acc' % chg)
+    else:
+        h_xs_m = h_ref_m['XS_WG_%s_m_acc' % chg]
+        h_xs_e = h_ref_e['XS_WG_%s_e_acc' % chg]
 
     h_xs = h_xs_m.Clone()
     h_xs.Add(h_xs_e)

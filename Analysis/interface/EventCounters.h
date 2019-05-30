@@ -9,10 +9,15 @@ namespace ac {
 class EventCounters : public ModuleBase {
  private:
   CLASS_MEMBER(EventCounters, fwlite::TFileService *, fs)
+
+ private:
   TH1D *out;
+  std::vector<TH1D *> extra_sets;
+  std::vector<bool> extra_sets_relative;
 
  public:
   EventCounters(std::string const &name);
+  EventCounters & AddWeightSet(std::string label, unsigned n_weights, bool is_relative);
   virtual ~EventCounters();
 
   virtual int PreAnalysis();

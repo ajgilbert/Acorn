@@ -42,14 +42,17 @@ task = job_mgr.task_name
 for sample in SAMPLES:
     if args.attributes not in SAMPLES[sample]['attributes']:
         continue
+    filtered_seqs = list(sequences)
+    if 'sequences' in SAMPLES[sample]:
+        filtered_seqs = [X for X in filtered_seqs if X in SAMPLES[sample]['sequences']]
     cfg = {
-        'sequences': sequences,
+        'sequences': filtered_seqs,
         'filelists': ['filelists/%s_%s.txt' % (args.production, x) for x in SAMPLES[sample]['inputs']],
         'outdir': full_outdir,
         'attributes': SAMPLES[sample]['attributes']
     }
     output_cfgs = []
-    for seq in sequences:
+    for seq in filtered_seqs:
         cfg['output_%s' % seq] = '%s_%s.root' % (seq, sample)
         output_cfgs.append('output_%s' % seq)
     cfg.update(incfg['config'])

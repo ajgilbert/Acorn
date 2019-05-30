@@ -15,6 +15,7 @@
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
 #include "Acorn/Analysis/interface/WGDataAnalysis.h"
+#include "Acorn/Analysis/interface/WGAnalysisTools.h"
 #include "Acorn/Analysis/interface/WGTagAndProbe.h"
 #include "Acorn/Analysis/interface/DiMuonAnalysis.h"
 #include "Acorn/Analysis/interface/EventCounters.h"
@@ -145,22 +146,49 @@ int main(int argc, char* argv[]) {
       wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
     }
 
-    wgamma_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(wgamma_fs));
+
+    int scale_weights = ac::ReadAttrValue<int>(jsc["attributes"], "scale_weights");
+    if (scale_weights > 0) {
+      wgamma_seq.BuildModule(ac::GenericModule("ScaleWeightUnpacker").set_function([=](ac::TreeEvent* event) {
+          auto const* info = event->GetPtr<ac::EventInfo>("eventInfo");
+          event->Add("scale_weights", ac::ExtractScaleVariations(*info, scale_weights));
+          return 0;
+      }));
+    }
+
+    auto counters = ac::EventCounters("EventCounters").set_fs(wgamma_fs);
+    if (scale_weights > 0) {
+      counters.AddWeightSet("scale_weights", 6, true);
+    }
+    wgamma_seq.BuildModule(counters);
 
     if (is_data) {
       wgamma_seq.BuildModule(
           ac::LumiMask("LumiMask").set_fs(wgamma_fs).set_input_file(jsc["data_json"]));
     }
 
+    // Keep baseline set of vars
+    int var_set = 1;
+    // Unless this is some systematic variation - in which case keep only the core ones
+    if (subseq != "") var_set = 0;
 
-    int correct_p_energy = -1;
-    int correct_e_energy = -1;
-    int correct_m_energy = -1;
-    if (subseq == "EGMCorr") {
-      correct_e_energy = 0;
-      correct_p_energy = 0;
-      correct_m_energy = 0;
+    int correct_p_energy = 0;
+    int correct_e_energy = 0;
+    int correct_m_energy = 0;
+    if (subseq == "EGMNoCorr") {
+      correct_e_energy = -1;
+      correct_p_energy = -1;
+      correct_m_energy = -1;
     }
+    if (subseq == "EScaleHi") correct_e_energy = 1;
+    if (subseq == "EScaleLo") correct_e_energy = 2;
+    if (subseq == "PScaleHi") correct_p_energy = 1;
+    if (subseq == "PScaleLo") correct_p_energy = 2;
+    if (subseq == "MScaleHi") correct_m_energy = 1;
+    if (subseq == "MScaleLo") correct_m_energy = 2;
+
+    std::cout << ac::ReadAttrValue<int>(jsc["attributes"], "scale_weights") << "\n";
+
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
@@ -173,7 +201,9 @@ int main(int argc, char* argv[]) {
                              .set_correct_e_energy(correct_e_energy)
                              .set_correct_p_energy(correct_p_energy)
                              .set_correct_m_energy(correct_m_energy)
-                             .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt"));
+                             .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt")
+                             .set_scale_weights(scale_weights)
+                             .set_var_set(var_set));
     wgamma_seq.InsertSequence(wgamma_label, analysis);
   }
 

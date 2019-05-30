@@ -237,4 +237,30 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
     return p.pdgId() == 22;
   }
 
+
+  std::vector<double> ExtractScaleVariations(ac::EventInfo const& info, int version) {
+    std::vector<double> res(6, 0.0);
+    if (version == 1) {
+      /*
+      (*)       <weight id="1001"> dyn=  -1 muR=0.10000E+01 muF=0.10000E+01 </weight>
+      (*)       <weight id="1002"> dyn=  -1 muR=0.20000E+01 muF=0.10000E+01 </weight>
+      (*)       <weight id="1003"> dyn=  -1 muR=0.50000E+00 muF=0.10000E+01 </weight>
+      (*)       <weight id="1004"> dyn=  -1 muR=0.10000E+01 muF=0.20000E+01 </weight>
+      (*)       <weight id="1005"> dyn=  -1 muR=0.20000E+01 muF=0.20000E+01 </weight>
+      (*)       <weight id="1006"> dyn=  -1 muR=0.50000E+00 muF=0.20000E+01 </weight>
+      (*)       <weight id="1007"> dyn=  -1 muR=0.10000E+01 muF=0.50000E+00 </weight>
+      (*)       <weight id="1008"> dyn=  -1 muR=0.20000E+01 muF=0.50000E+00 </weight>
+      (*)       <weight id="1009"> dyn=  -1 muR=0.50000E+00 muF=0.50000E+00 </weight>
+      */
+        res[0] = 1.0 + info.lheWeights().at(1002);  // 2.0  1.0
+        res[1] = 1.0 + info.lheWeights().at(1003);  // 0.5  1.0
+        res[2] = 1.0 + info.lheWeights().at(1004);  // 1.0  2.0
+        res[3] = 1.0 + info.lheWeights().at(1005);  // 2.0  2.0
+        res[4] = 1.0 + info.lheWeights().at(1007);  // 1.0  0.5
+        res[5] = 1.0 + info.lheWeights().at(1009);  // 0.5  0.5
+    }
+    return res;
+  }
+
+
 }  // namespace ac

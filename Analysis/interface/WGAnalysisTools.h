@@ -16,6 +16,7 @@
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/TriggerObject.h"
 #include "Acorn/NTupler/interface/Muon.h"
+#include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/Photon.h"
 
 namespace ac {
@@ -74,6 +75,7 @@ bool IsNeutrino(ac::GenParticle const& p);
 bool IsLepton(ac::GenParticle const& p);
 bool IsPhoton(ac::GenParticle const& p);
 
+std::vector<double> ExtractScaleVariations(ac::EventInfo const& info, int version);
 
 }
 #endif

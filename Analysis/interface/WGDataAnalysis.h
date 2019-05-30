@@ -31,6 +31,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, int, correct_e_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_p_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
+  CLASS_MEMBER(WGDataAnalysis, int, scale_weights)
   CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
 
   LookupFilter filters_IsoMu24_;
@@ -111,8 +112,8 @@ class WGDataAnalysis : public ModuleBase {
   // met
   float met_;
   float met_phi_;
-  float xy_met_;
-  float xy_met_phi_;
+  float tk_met_;
+  float tk_met_phi_;
   float puppi_met_;
   float puppi_met_phi_;
 
@@ -125,8 +126,8 @@ class WGDataAnalysis : public ModuleBase {
   float l0p0_M_;
   float reco_phi_;
   float reco_phi_f_;
-  float reco_xy_phi_;
-  float reco_xy_phi_f_;
+  float reco_tk_phi_;
+  float reco_tk_phi_f_;
   float reco_puppi_phi_;
   float reco_puppi_phi_f_;
 
@@ -145,6 +146,13 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
   float wt_p0_e_fake_; // Electron -> photon fake factor
+
+  float wt_sc_0_;
+  float wt_sc_1_;
+  float wt_sc_2_;
+  float wt_sc_3_;
+  float wt_sc_4_;
+  float wt_sc_5_;
 
   // truth variables for Wgamma events
   bool is_wg_gen_;

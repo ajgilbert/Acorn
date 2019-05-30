@@ -363,6 +363,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         hists[chn]['XS']['2D']['XS_WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_x_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
+        for i_sc in range(6):
+            hists[chn]['XS']['2D']['XS_WG_p_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
+            hists[chn]['XS']['2D']['XS_WG_n_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
+            hists[chn]['XS']['2D']['XS_WG_x_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
 
 if args.task in ['baseline', 'electron_fakes']:
     if args.task == 'electron_fakes':
@@ -405,8 +409,8 @@ if args.task in ['baseline', 'electron_fakes']:
         # ('l0l1_dr', (20, 0., 5.)),
         ('met', (40, 0., 200.)),
         ('met_phi', (20, -3.15, 3.15)),
-        # ('xy_met', (20, 0., 200.)),
-        # ('xy_met_phi', (20, -3.15, 3.15)),
+        ('tk_met', (40, 0., 200.)),
+        ('tk_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
         ('puppi_met_phi', (20, -3.15, 3.15)),
         ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300]),

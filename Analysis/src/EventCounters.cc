@@ -31,10 +31,27 @@ int EventCounters::Execute(TreeEvent* event) {
     // neg
     out->Fill(3.5, w);
   }
+  for (unsigned i = 0; i < extra_sets.size(); ++i) {
+    auto const& weights = event->Get<std::vector<double>>(extra_sets[i]->GetName());
+    for (unsigned b = 0; b < weights.size(); ++b) {
+      if (extra_sets_relative[i]) {
+        extra_sets[i]->Fill(float(b) + 0.5, weights[b] * w);
+      } else {
+        extra_sets[i]->Fill(float(b) + 0.5, weights[b]);
+      }
+    }
+  }
   return 0;
 }
 
 int EventCounters::PostAnalysis() { return 0; }
 
 void EventCounters::PrintInfo() { ; }
+
+EventCounters & EventCounters::AddWeightSet(std::string label, unsigned n_weights, bool is_relative) {
+  extra_sets.push_back(fs_->make<TH1D>(label.c_str(), label.c_str(), n_weights, 0., double(n_weights)));
+  extra_sets_relative.push_back(is_relative);
+  return *this;
+}
+
 }  // namespace ac
