@@ -317,6 +317,12 @@
       "events": 0,
       "config": "mc"
     },
+    "DiPhotonJetsBox_MGG-40to80": {
+      "dataset": "/DiPhotonJetsBox_M40_80-Sherpa/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc_no_lhe"
+    },
     "DiPhotonJetsBox_MGG-80toInf": {
       "dataset": "/DiPhotonJetsBox_MGG-80toInf_13TeV-Sherpa/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM",
       "attributes": ["submit"],
