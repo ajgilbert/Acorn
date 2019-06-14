@@ -117,4 +117,7 @@ for sample in sorted(samples['samples']):
     if args.verbosity >= 1:
         print config2
     if (args.submit):
-        submit(config2)
+        p = Process(target=submit, args=(config2,))
+        p.start()
+        p.join()
+        # submit(config2)
