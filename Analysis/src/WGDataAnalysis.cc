@@ -146,6 +146,8 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_trg_l0_lo", &wt_trg_l0_lo_);
       tree_->Branch("wt_p0_hi", &wt_p0_hi_);
       tree_->Branch("wt_p0_lo", &wt_p0_lo_);
+      tree_->Branch("wt_p0_e_fake_hi", &wt_p0_e_fake_hi_);
+      tree_->Branch("wt_p0_e_fake_lo", &wt_p0_e_fake_lo_);
 
       tree_->Branch("is_wg_gen", &is_wg_gen_);
       tree_->Branch("gen_nparts", &gen_nparts_);
@@ -260,6 +262,8 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("p_id_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["e_p_fake_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["e_p_fake_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_m_chn"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio_m_chn")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_e_chn"] = std::shared_ptr<RooFunctor>(
@@ -290,8 +294,15 @@ int WGDataAnalysis::PreAnalysis() {
       PhotonIsoCorrector(p, rho);
     }
     if (correct_p_energy_ >= 0) {
-      for (Photon *p : photons) {
-        p->setVector(p->vector() * (p->energyCorrections().at(correct_p_energy_) / p->energy()));
+      if (year_ == 2018) {
+        double corr_fac_2018 = correct_p_energy_ == 1 ? 1.002 : 0.998;
+        for (Photon *p : photons) {
+          p->setVector(p->vector() * corr_fac_2018);
+        }
+      } else {
+        for (Photon *p : photons) {
+          p->setVector(p->vector() * (p->energyCorrections().at(correct_p_energy_) / p->energy()));
+        }
       }
     }
     if (correct_e_energy_ >= 0) {
@@ -646,6 +657,8 @@ int WGDataAnalysis::PreAnalysis() {
       }
       if (year_ == 2016 || year_ == 2017) {
         wt_pf_ = event->Get<double>("NonPrefiringProb");
+        wt_pf_lo_ = event->Get<double>("NonPrefiringProbUp") / wt_pf_;
+        wt_pf_hi_ = event->Get<double>("NonPrefiringProbDown") / wt_pf_;
       }
       if (m0) {
         wt_l0_ = RooFunc(fns_["m_idisotrk_ratio"], {l0_pt_, l0_eta_});
@@ -726,6 +739,8 @@ int WGDataAnalysis::PreAnalysis() {
         }
         if (ac::contains({2}, p0_truth_) && !p0->hasPixelSeed() && p0->passElectronVeto()) {
           wt_p0_e_fake_ = RooFunc(fns_["e_p_fake_ratio"], {p0_pt_, p0->eta()});
+          wt_p0_e_fake_hi_ = 1.0 + RooFunc(fns_["e_p_fake_ratio_err"], {p0_pt_, p0->eta()});
+          wt_p0_e_fake_lo_ = 1.0 - RooFunc(fns_["e_p_fake_ratio_err"], {p0_pt_, p0->eta()});
         }
       }
 
@@ -846,6 +861,8 @@ int WGDataAnalysis::PreAnalysis() {
     wt_trg_l0_lo_ = 1.;
     wt_p0_hi_ = 1.;
     wt_p0_lo_ = 1.;
+    wt_p0_e_fake_hi_ = 1.;
+    wt_p0_e_fake_lo_ = 1.;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
     gen_nparts_ = 0;

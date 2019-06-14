@@ -21,6 +21,8 @@ parser.add_argument('--sequences', '-s', default='WGamma',
                     help='List of sequences to run')
 parser.add_argument('--tmp', '-t', default='',
                     help='Write the job output in a temporary location')
+parser.add_argument('--merge-tasks', '-m', action='store_true',
+                    help='Merge all tasks into one big submission')
 
 args = parser.parse_args()
 job_mgr.set_args(args)
@@ -65,5 +67,10 @@ for sample in SAMPLES:
         files_per_job=args.files_per_job,
         output_cfgs=output_cfgs,
         tempdir=args.tmp)
-    job_mgr.task_name = task + '-' + sample
+
+    if not args.merge_tasks:
+        job_mgr.task_name = task + '-' + sample
+        job_mgr.flush_queue()
+
+if args.merge_tasks:
     job_mgr.flush_queue()

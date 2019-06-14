@@ -50,7 +50,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG"],
+      "entries": ["GG", "GG_L"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -88,7 +88,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG"],
+      "entries": ["GG", "GG_L"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -132,7 +132,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG"],
+      "entries": ["GG", "GG_L"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -176,9 +176,9 @@
     },
     {
       "name": "GG",
-      "entries": ["GG"],
+      "entries": ["GG", "GG_L"],
       "legend": "#gamma#gamma",
-      "color": [1]
+      "color": 1
     },
     {
       "name": "WG",
@@ -220,7 +220,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG"],
+      "entries": ["GG", "GG_L"],
       "legend": "#gamma#gamma",
       "color": [1]
     },

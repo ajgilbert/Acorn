@@ -22,6 +22,8 @@ plot.ModTDRStyle(width=1200, l=0.35, r=0.15)
 # Apparently I don't need to do this...
 # ROOT.gSystem.Load('lib/libICHiggsTauTau.so')
 
+# Suppress the warnings
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 if args.plot_dir != '':
     os.system('mkdir -p %s' % args.plot_dir)
@@ -150,6 +152,14 @@ for b in bins:
     wsp.var("numTot").setVal(yield_tot)
     wsp.var("efficiency").setVal(yield_pass/yield_tot)
 
+    # sig_only = True
+    # if sig_only:
+    #     wsp.var('fSigAll').setVal(1)
+    #     wsp.var('fSigAll').setConstant(True)
+    #     wsp.var('effBkg').setConstant(True)
+    #     wsp.var('lf').setConstant(True)
+    #     wsp.var('lp').setConstant(True)
+
     wsp.pdf("model").fitTo(wsp.data(dat),
                            ROOT.RooFit.Minimizer("Minuit2", "Scan"),
                            ROOT.RooFit.Offset(True),
@@ -162,20 +172,47 @@ for b in bins:
                            ROOT.RooFit.Extended(True),
                            ROOT.RooFit.PrintLevel(-1))
 
+    minos_args = ROOT.RooArgSet(wsp.var('efficiency'))
     fitres = wsp.pdf("model").fitTo(wsp.data(dat),
                                     ROOT.RooFit.Minimizer("Minuit2", "Migrad"),
                                     ROOT.RooFit.Offset(True),
                                     ROOT.RooFit.Extended(True),
-                                    ROOT.RooFit.PrintLevel(-1),
-                                    ROOT.RooFit.Save())
-                           #ROOT.RooFit.Minos())
+                                    ROOT.RooFit.PrintLevel(0),
+                                    ROOT.RooFit.Save(),
+                                    ROOT.RooFit.Minos(True),
+                                    ROOT.RooFit.Minos(minos_args)
+                                    )
+
+    covQual = fitres.covQual()
+    resCodes = {}
+    print covQual
+    for i in range(fitres.numStatusHistory()):
+        resCodes[fitres.statusLabelHistory(i)] = fitres.statusCodeHistory(i)
+
+
+    if resCodes['MINOS'] == 0:
+        # If MINOS was successful then use that:
+        err = (wsp.var('efficiency').getErrorHi() - wsp.var('efficiency').getErrorLo()) / 2.
+    elif covQual == 3:
+        # Otherwise try the HESSE error
+        err = wsp.var('efficiency').getError()
+    else:
+        # Failing that do a back-of-the-envelope based on the fitted event yields
+        num = wsp.function('nSignalPass').getVal()
+        den = num + wsp.function('nSignalFail').getVal()
+        eff = num / den
+        lower = eff - ROOT.TEfficiency.ClopperPearson(den, num, 0.68, False)
+        upper = ROOT.TEfficiency.ClopperPearson(den, num, 0.68, True) - eff
+        # print wsp.var('efficiency').getVal(), (num / den)
+        # print lower, upper
+        err = (lower + upper) / 2.
 
     fitres.Print()
 
-    res.append((dat, wsp.var('efficiency').getVal(), wsp.var('efficiency').getError()))
+    res.append((dat, wsp.var('efficiency').getVal(), err))
 
     hist.SetBinContent(b[0], b[1], wsp.var('efficiency').getVal())
-    hist.SetBinError(b[0], b[1], wsp.var('efficiency').getError())
+    hist.SetBinError(b[0], b[1], err)
 
     canv = ROOT.TCanvas('%s' % (label), "%s" % (label))
     pad_left = ROOT.TPad('left', '', 0., 0., 0.5, 1.)

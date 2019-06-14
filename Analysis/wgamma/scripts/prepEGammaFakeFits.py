@@ -9,7 +9,9 @@ ROOT.TH1.AddDirectory(0)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-y', '--year', default='2016')
-parser.add_argument('--bkg-sub', action='store_true')
+parser.add_argument('-i', '--input', default='output_2016_electron_fakes.root')
+parser.add_argument('--bkg-sub', type=float, default=0.0)
+parser.add_argument('--label', default='nominal')
 # parser.add_argument('-o', default='2016', choices=['2016', '2017', '2018'])
 # parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
 args = parser.parse_args()
@@ -21,7 +23,7 @@ if args.bkg_sub:
 
 name = 'EGammaFakes'
 
-fin = ROOT.TFile('output_%s_electron_fakes.root' % args.year)
+fin = ROOT.TFile(args.input)
 
 pt_bins = [30, 35, 40, 60, 100, 200]
 eta_bins = [0, 1.4442, 2.5]
@@ -31,7 +33,7 @@ hist.GetXaxis().SetTitle('p_pt')
 hist.GetYaxis().SetTitle('abs(p_eta)')
 
 for sample in ['data_obs', 'DY_E']:
-    outfile = ROOT.TFile('EFakesTP_%s_%s.root' % (args.year, sample), 'RECREATE')
+    outfile = ROOT.TFile('EFakesTP_%s_%s_%s.root' % (args.year, sample, args.label), 'RECREATE')
     wsp = ROOT.RooWorkspace('wsp_'+name, '')
     var = wsp.factory('m_ll[100,75,125]')
 
@@ -51,15 +53,15 @@ for sample in ['data_obs', 'DY_E']:
             h_pass = fin.Get('e/pass_%s/l0p0_M/%s' % (dirname, sample))
 
 
-            if args.bkg_sub and sample == 'data_obs':
+            if args.bkg_sub > 0.0 and sample == 'data_obs':
                 h_pass_bkg = fin.Get('e/pass_%s/l0p0_M/%s' % (dirname, sub_bkgs[0]))
                 h_fail_bkg = fin.Get('e/fail_%s/l0p0_M/%s' % (dirname, sub_bkgs[0]))
                 for bkg in sub_bkgs[1:]:
                     h_pass_bkg.Add(fin.Get('e/pass_%s/l0p0_M/%s' % (dirname, bkg)))
                     h_fail_bkg.Add(fin.Get('e/fail_%s/l0p0_M/%s' % (dirname, bkg)))
 
-                h_fail.Add(h_fail_bkg, -1)
-                h_pass.Add(h_pass_bkg, -1)
+                h_fail.Add(h_fail_bkg, -1. * args.bkg_sub)
+                h_pass.Add(h_pass_bkg, -1. * args.bkg_sub)
 
                 for ibin in xrange(1, h_fail.GetNbinsX() + 1):
                     if h_fail.GetBinContent(ibin) < 0.:

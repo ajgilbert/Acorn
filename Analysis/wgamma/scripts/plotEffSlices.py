@@ -19,6 +19,7 @@ parser.add_argument(
     '--output', '-o', default='efficiency', help="""Name of the output
     plot without file extension""")
 parser.add_argument('--title', default='Muon ID Efficiency')
+parser.add_argument('--title-right', default='12.9 fb^{-1} (13 TeV)')
 parser.add_argument('--y-range', default='0,1')
 parser.add_argument('--ratio-y-range', default='0.92,1.08')
 parser.add_argument('--binned-in', default='#eta')
@@ -92,7 +93,7 @@ for i in xrange(1, hist.GetNbinsY()+1):
     legend.Draw()
 
     plot.DrawCMSLogo(pads[0], 'CMS', 'Internal', 0, 0.16, 0.035, 1.2, cmsTextSize=0.9)
-    plot.DrawTitle(pads[1], '12.9 fb^{-1} (13 TeV)', 3)
+    plot.DrawTitle(pads[0], args.title_right, 3)
 
     if args.ratio_to is not None:
         pads[1].cd()
@@ -101,6 +102,7 @@ for i in xrange(1, hist.GetNbinsY()+1):
         for slice in slices:
             ratios.append(slice.Clone())
             ratios[-1].Divide(slices[args.ratio_to])
+            ratios[-1].Print("range")
         ratios[0].Draw('AXIS')
         plot.SetupTwoPadSplitAsRatio(pads,
                                      plot.GetAxisHist(pads[0]),

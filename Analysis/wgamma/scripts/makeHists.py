@@ -29,7 +29,7 @@ year = args.year
 
 remaps = {
     "2016": {
-        'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'DY': 'DYJetsToLL_M-50-amcatnloFXFX',
         'ZG': 'ZGToLLG-amcatnloFXFX',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
@@ -54,10 +54,11 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
-        'GG': 'DiPhotonJetsBox_MGG-80toInf'
+        'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'GG_L': 'DiPhotonJetsBox_MGG-40to80'
     },
     "2017": {
-        'DY': 'DYJetsToLL_M-50-madgraphMLM',
+        'DY': 'DYJetsToLL_M-50-amcatnloFXFX',
         'ZG': 'ZGToLLG-amcatnloFXFX',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
@@ -84,7 +85,8 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
-        'GG': 'DiPhotonJetsBox_MGG-80toInf'
+        'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'GG_L': 'DiPhotonJetsBox_MGG-40to80'
     },
     "2018": {
         'DY': 'DYJetsToLL_M-50-amcatnloFXFX',

@@ -176,10 +176,23 @@ def HistErr(hist, err_factor=1.0, clone=True, do_ratio=True):
                         hist_clone.SetBinContent(i, j, err_factor * hist.GetBinError(i, j) / hist.GetBinContent(i, j))
                 else:
                     hist_clone.SetBinContent(i, j, hist.GetBinContent(i, j) + hist.GetBinError(i, j) * err_factor)
-    hist.Print('range')
-    hist_clone.Print('range')
+    # hist.Print('range')
+    # hist_clone.Print('range')
     return hist_clone
 
+
+def HistSystVariations(h_nominal, h_lo, h_hi, keepNominalErr=True, doRelative=True):
+    res = h_nominal.Clone()
+    for i in xrange(1, h_nominal.GetNbinsX() + 1):
+        for j in xrange(1, h_nominal.GetNbinsY() + 1):
+            v_nom = h_nominal.GetBinContent(i, j)
+            v_err = h_nominal.GetBinError(i, j)
+            v_hi = h_hi.GetBinContent(i, j)
+            v_lo = h_lo.GetBinContent(i, j)
+            v_av_syst = (abs(v_hi - v_nom) + abs(v_lo - v_nom)) / 2.
+            v_err_new = math.sqrt(math.pow(v_err, 2) + math.pow(v_av_syst, 2))
+            res.SetBinError(i, j, v_err_new)
+    return res
 # file = ROOT.TFile('input/scale_factors/Muon_SF_spring16temp.root')
 # hists = []
 # hists.append(file.Get('Mu22_Data_Eff'))

@@ -165,6 +165,8 @@ class WGDataAnalysis : public ModuleBase {
   float wt_trg_l0_lo_;
   float wt_p0_hi_;
   float wt_p0_lo_;
+  float wt_p0_e_fake_hi_;
+  float wt_p0_e_fake_lo_;
 
   // truth variables for Wgamma events
   bool is_wg_gen_;
