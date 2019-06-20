@@ -128,6 +128,13 @@
       "config": "mc",
       "inputDBS": "phys03"
     },
+    "HZphi-Long": {
+      "dataset": "/hvm-miniaod-280519/adewit-crab_hvm-miniaod-phi-280519-mm2017-692976c2d086f569d9a779b5701b870f/USER",
+      "attributes": ["submit","phionly"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
     "HZOmega-Long": {
       "dataset": "/hvm-miniaod-121018/adewit-crab_hvm-miniaod-omega-121018-692976c2d086f569d9a779b5701b870f/USER",
       "attributes": ["submit"],
@@ -138,6 +145,13 @@
     "HZrho-Zee": {
       "dataset" : "/hvm-miniaod-161118/adewit-crab_hvm-miniaod-rho-zee-161118-692976c2d086f569d9a779b5701b870f/USER",
       "attributes": ["submit"],
+      "events": -1,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "HZphi-Zee": {
+      "dataset" : "/hvm-miniaod-280519/adewit-crab_hvm-miniaod-phi-280519-ee2017-re-692976c2d086f569d9a779b5701b870f/USER",
+      "attributes": ["submit","phionly"],
       "events": -1,
       "config": "mc",
       "inputDBS": "phys03"
