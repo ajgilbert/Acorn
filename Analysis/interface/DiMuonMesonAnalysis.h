@@ -45,6 +45,9 @@ class DiMuonMesonAnalysis : public ModuleBase {
   bool trg_1_;
   bool trg_2_;
   float wt_pu_;
+  float wt_pf_;
+  float wt_pf_up_;
+  float wt_pf_down_;
   float wt_1_;
   float wt_2_;
   float wt_trg_;
@@ -58,6 +61,8 @@ class DiMuonMesonAnalysis : public ModuleBase {
   float highestpt_pair_dR_;
   float highestpt_pair_mass_;
   float highestpt_pair_pt_;
+  float highestpt_pair_mass_kaon_;
+  float highestpt_pair_pt_kaon_;
   float highestpt_pair_eta_;
   float highestpt_pair_phi_;
   float highestpt_pair_1_phi_;
@@ -70,8 +75,11 @@ class DiMuonMesonAnalysis : public ModuleBase {
   unsigned highestpt_pair_id_2_;
   float highestpt_pair_reco_higgs_mass_;
   float highestpt_pair_reco_higgs_pt_;
+  float highestpt_pair_reco_higgs_mass_kaon_;
+  float highestpt_pair_reco_higgs_pt_kaon_;
   int nAddEle_;
   float Zrho_dphi_;
+  bool matchestracks_;
 
  public:
   DiMuonMesonAnalysis(std::string const& name);

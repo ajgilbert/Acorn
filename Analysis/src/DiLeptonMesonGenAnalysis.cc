@@ -125,10 +125,10 @@ namespace ac {
           if(part->pdgId()==25&&part->statusFlags().isLastCopy()){
               higgs_daughters = part->daughters();
               for ( unsigned int i = 0; i < higgs_daughters.size(); i++){
-                if( abs(gen_parts.at(higgs_daughters.at(i))->pdgId())== 113 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==223){
+                if( abs(gen_parts.at(higgs_daughters.at(i))->pdgId())== 113 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==223 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==333){
                   rho_daughters = gen_parts.at(higgs_daughters.at(i))->daughters();
                   for ( unsigned int j =0; j < rho_daughters.size(); j++){
-                    if(abs(gen_parts.at(rho_daughters.at(j))->pdgId())==211) pions_from_meson.push_back(gen_parts.at(rho_daughters.at(j)));
+                    if(abs(gen_parts.at(rho_daughters.at(j))->pdgId())==211 || abs(gen_parts.at(rho_daughters.at(j))->pdgId())==321) pions_from_meson.push_back(gen_parts.at(rho_daughters.at(j)));
                   }
                }
             }
@@ -190,7 +190,12 @@ namespace ac {
             reco_trk_charge_2_ = tracks.at(i)->charge();
             reco_trk_id_2_ = i;
             reco_trk_dR_=DeltaRDiTrack(tracks.at(i),tracks.at(reco_trk_id_1_));
-            reco_trk_mass_=(tracks.at(i)->vector()+tracks.at(reco_trk_id_1_)->vector()).M();
+            auto v1 = ROOT::Math::PtEtaPhiMVector(tracks.at(i)->vector());
+            v1.SetM(0.493);
+            auto v2 = ROOT::Math::PtEtaPhiMVector(tracks.at(reco_trk_id_1_)->vector());
+            v2.SetM(0.493);
+            reco_trk_mass_=(v1+v2).M();
+            //reco_trk_mass_=((tracks.at(i)->vector()).SetM(0.493)+(tracks.at(reco_trk_id_1_)->vector()).SetM(0.493)).M();
             reco_trk_pt_=(tracks.at(i)->vector()+tracks.at(reco_trk_id_1_)->vector()).pt();
             if(muons.size()==2){
               reco_higgs_mass_=(muons.at(0)->vector()+muons.at(1)->vector()+tracks.at(i)->vector()+tracks.at(reco_trk_id_1_)->vector()).M();
@@ -215,6 +220,8 @@ namespace ac {
         for ( unsigned i=0; i<tracksforiso.size() ; i++){
             if(DeltaRTrackPair(tracks.at(reco_trk_id_1_),tracks.at(reco_trk_id_2_),tracksforiso.at(i))<0.3) reco_trk_looser_iso_+=tracksforiso.at(i)->pt();
         }
+       reco_trk_looser_iso_-=reco_trk_pt_1_;
+       reco_trk_looser_iso_-=reco_trk_pt_2_;
       }
       tree_->Fill();
     }

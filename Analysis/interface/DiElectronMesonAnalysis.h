@@ -35,6 +35,7 @@ class DiElectronMesonAnalysis : public ModuleBase {
   int  muon_overlaps_;
   int  veto_muons_;
   int  veto_electrons_;
+  float drnarrow_;
   float pt_1_;
   float pt_2_;
   float eta_1_;
@@ -43,9 +44,13 @@ class DiElectronMesonAnalysis : public ModuleBase {
   float pt_ll_;
   float dr_ll_;
   bool trg_1_;
+  bool matchestracks_;
   bool trg_2_;
   bool trg_3_;
   float wt_pu_;
+  float wt_pf_;
+  float wt_pf_up_;
+  float wt_pf_down_;
   float wt_1_;
   float wt_2_;
   float wt_trg_;
@@ -59,6 +64,8 @@ class DiElectronMesonAnalysis : public ModuleBase {
   float highestpt_pair_dR_;
   float highestpt_pair_mass_;
   float highestpt_pair_pt_;
+  float highestpt_pair_mass_kaon_;
+  float highestpt_pair_pt_kaon_;
   float highestpt_pair_eta_;
   float highestpt_pair_phi_;
   float highestpt_pair_1_phi_;
@@ -71,6 +78,8 @@ class DiElectronMesonAnalysis : public ModuleBase {
   unsigned highestpt_pair_id_2_;
   float highestpt_pair_reco_higgs_mass_;
   float highestpt_pair_reco_higgs_pt_;
+  float highestpt_pair_reco_higgs_mass_kaon_;
+  float highestpt_pair_reco_higgs_pt_kaon_;
   int nAddEle_;
   float Zrho_dphi_;
 

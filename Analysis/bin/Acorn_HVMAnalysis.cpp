@@ -8,6 +8,7 @@
 #include "Acorn/Analysis/interface/AnalysisBase.h"
 #include "Acorn/Analysis/interface/AnalysisSequence.h"
 #include "Acorn/NTupler/interface/json.hpp"
+#include "Acorn/NTupler/interface/EventInfo.h"
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/HVMGenAnalysis.h"
@@ -109,11 +110,24 @@ int main(int argc, char* argv[]) {
   
   ac::Sequence dimuon_seq;
   if (sequences.count("DiLeptonMeson") ){
+
     dimuon_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(fs.get()));
     if (is_data) {
       dimuon_seq.BuildModule(
           ac::LumiMask("LumiMask").set_fs(fs.get()).set_input_file(jsc["data_json"]));
     }
+
+    if (jsc["year"] == 2016 || jsc["year"] == 2017) {
+        std::vector<std::string> userDoubleNames = {"NonPrefiringProb","NonPrefiringProbUp","NonPrefiringProbDown"};
+        dimuon_seq.BuildModule(ac::GenericModule("UserDoubleUnpacker").set_function([=](ac::TreeEvent* event) {
+            auto const& vals = event->GetPtr<ac::EventInfo>("eventInfo")->userDoubles();
+            for (unsigned i = 0; i < userDoubleNames.size(); ++i) {
+                event->Add(userDoubleNames[i], vals.at(i));
+            }
+            return 0;
+        }));
+    }
+
     dimuon_seq.BuildModule(ac::DiMuonMesonAnalysis("DiMuonMesonAnalysis")
                              .set_fs(fs.get())
                              .set_year(jsc["year"])

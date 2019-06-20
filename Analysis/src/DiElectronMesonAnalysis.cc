@@ -31,6 +31,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("veto_muons",&veto_muons_);
     tree_->Branch("veto_electrons",&veto_electrons_);
     tree_->Branch("muon_overlaps",&muon_overlaps_);
+    tree_->Branch("matchestracks",&matchestracks_);
+    tree_->Branch("drnarrow",&drnarrow_);
     tree_->Branch("pt_1", &pt_1_);
     tree_->Branch("pt_2", &pt_2_);
     tree_->Branch("eta_1", &eta_1_);
@@ -42,6 +44,7 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("trg_2", &trg_2_);
     tree_->Branch("trg_3", &trg_3_);
     tree_->Branch("wt_pu", &wt_pu_);
+    tree_->Branch("wt_pf", &wt_pf_);
     tree_->Branch("wt_1", &wt_1_);
     tree_->Branch("wt_2", &wt_2_);
     tree_->Branch("wt_trg", &wt_trg_);
@@ -62,11 +65,15 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     tree_->Branch("highestpt_pair_2_phi", &highestpt_pair_2_phi_);
     tree_->Branch("highestpt_pair_2_pt", &highestpt_pair_2_pt_);
     tree_->Branch("highestpt_pair_mass", &highestpt_pair_mass_);
+    tree_->Branch("highestpt_pair_mass_kaon", &highestpt_pair_mass_kaon_);
     tree_->Branch("highestpt_pair_pt", &highestpt_pair_pt_);
+    tree_->Branch("highestpt_pair_pt_kaon", &highestpt_pair_pt_kaon_);
     tree_->Branch("highestpt_pair_iso", &highestpt_pair_iso_);
     tree_->Branch("highestpt_pair_looser_iso", &highestpt_pair_looser_iso_);
     tree_->Branch("highestpt_pair_reco_higgs_mass", &highestpt_pair_reco_higgs_mass_);
     tree_->Branch("highestpt_pair_reco_higgs_pt", &highestpt_pair_reco_higgs_pt_);
+    tree_->Branch("highestpt_pair_reco_higgs_mass_kaon", &highestpt_pair_reco_higgs_mass_kaon_);
+    tree_->Branch("highestpt_pair_reco_higgs_pt_kaon", &highestpt_pair_reco_higgs_pt_kaon_);
     tree_->Branch("Zrho_dphi",&Zrho_dphi_);
     tree_->Print();
   }
@@ -128,9 +135,6 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     std::vector<ac::Electron *> all_electrons = event->GetPtrVec<ac::Electron>("electrons");
     std::vector<ac::Track *> tracks = event->GetPtrVec<ac::Track>("Tracks");
     std::vector<ac::Track *> tracksforiso = event->GetPtrVec<ac::Track>("TracksForIso");
-    std::vector<int> higgs_daughters;
-    std::vector<int> rho_daughters;
-    std::vector<GenParticle *> pions_from_meson;
 
 
 
@@ -148,6 +152,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       return e->pt() > 20. && fabs(e->eta()) < 2.1 && e->isMVAwp80Electron() &&(fabs(e->eta())<1.44 || fabs(e->eta())>1.56);
     });
 
+
+
     boost::range::sort(electrons, DescendingPt);
     boost::range::sort(tracks, DescendingTrackPt);
     boost::range::sort(tracksforiso, DescendingTrackPt);
@@ -159,6 +165,31 @@ int DiElectronMesonAnalysis::PreAnalysis() {
     }
 
     if (electrons.size()==2 && veto_electrons.size() == 2 && z_cand.charge() == 0 && veto_muons.size()==0) {
+    if(year_==2016 || year_==2017){
+      wt_pf_ = event->Get<double>("NonPrefiringProb");
+      wt_pf_up_ = event->Get<double>("NonPrefiringProbUp");
+      wt_pf_down_ = event->Get<double>("NonPrefiringProbDown");
+    }
+    /*std::vector<GenParticle *> gen_parts;
+    std::vector<GenParticle *> pions;
+    std::vector<int> higgs_daughters;
+    std::vector<int> rho_daughters;
+    std::vector<GenParticle *> pions_from_meson;
+    gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
+    for (auto const& part : gen_parts) {
+      if(part->pdgId()==25&&part->statusFlags().isLastCopy()){
+          higgs_daughters = part->daughters();
+          for ( unsigned int i = 0; i < higgs_daughters.size(); i++){
+            if( abs(gen_parts.at(higgs_daughters.at(i))->pdgId())== 113 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==223 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==333){
+              rho_daughters = gen_parts.at(higgs_daughters.at(i))->daughters();
+              for ( unsigned int j =0; j < rho_daughters.size(); j++){
+                if(abs(gen_parts.at(rho_daughters.at(j))->pdgId())==211 || abs(gen_parts.at(rho_daughters.at(j))->pdgId())==321) pions_from_meson.push_back(gen_parts.at(rho_daughters.at(j)));
+              }
+           }
+        }
+      }
+   }*/
+
       veto_muons_ = veto_muons.size();
       veto_electrons_ = veto_electrons.size();
 
@@ -201,8 +232,8 @@ int DiElectronMesonAnalysis::PreAnalysis() {
         auto const& trg_objs = event->GetPtrVec<TriggerObject>("triggerObjects_Ele32_WPTight_Gsf");
         trg_1_ = IsFilterMatchedDR(electrons[0], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[0]->pt()>35;
         trg_2_ = IsFilterMatchedDR(electrons[1], trg_objs, filters_Ele32_.Lookup(trg_lookup), 0.3)&&electrons[1]->pt()>35;
-        auto const& trg_objs_double = event->GetPtrVec<TriggerObject>("triggerObjects_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
-        trg_3_ = IsFilterMatchedDR(electrons[0],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter", 0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter", 0.3)&&IsFilterMatchedDR(electrons[0],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&electrons[0]->pt()<35;
+        //auto const& trg_objs_double = event->GetPtrVec<TriggerObject>("triggerObjects_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
+        //trg_3_ = IsFilterMatchedDR(electrons[0],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter", 0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double, "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter", 0.3)&&IsFilterMatchedDR(electrons[0],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&IsFilterMatchedDR(electrons[1],trg_objs_double,"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",0.3)&&electrons[0]->pt()<35;
 
 //hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter = cms.EDFilter( "HLTEgammaGenericFilter",
 //    saveTags = cms.bool( True ),
@@ -258,9 +289,14 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       highestpt_pair_2_phi_ = -99;
       highestpt_pair_dR_=-99;
       highestpt_pair_mass_=-99;
+      highestpt_pair_mass_kaon_=-99;
       highestpt_pair_pt_=-99;
+      highestpt_pair_pt_kaon_=-99;
       highestpt_pair_reco_higgs_mass_=-99;
       highestpt_pair_reco_higgs_pt_=-99;
+      highestpt_pair_reco_higgs_mass_kaon_=-99;
+      highestpt_pair_reco_higgs_pt_kaon_=-99;
+
 
 
       std::vector<std::pair<std::pair<unsigned,unsigned>,double>> track_drs;
@@ -280,14 +316,23 @@ int DiElectronMesonAnalysis::PreAnalysis() {
       highestpt_pair_iso_ = -99; 
       highestpt_pair_looser_iso_ = -99; 
       wt_rhoiso_ = 1.;
+      matchestracks_=0.;
+      drnarrow_=-1.;
+      if(track_drs.size()>0){
+       drnarrow_ = track_drs.at(0).second;
+      }
       if(track_drs_smallcone.size()>0){
        highestpt_pair_id_1_=track_drs_smallcone.at(0).first.first;
        highestpt_pair_id_2_=track_drs_smallcone.at(0).first.second;
        highestpt_pair_reco_higgs_mass_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).M();
+       highestpt_pair_reco_higgs_mass_kaon_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector(0.493677)+tracks.at(highestpt_pair_id_2_)->vector(0.493677)).M();
        highestpt_pair_reco_higgs_pt_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector()+tracks.at(highestpt_pair_id_2_)->vector()).pt();
+       highestpt_pair_reco_higgs_pt_kaon_=(electrons.at(0)->vector()+electrons.at(1)->vector()+tracks.at(highestpt_pair_id_1_)->vector(0.493677)+tracks.at(highestpt_pair_id_2_)->vector(0.493677)).pt();
        highestpt_pair_dR_=DeltaRDiTrack(tracks.at(track_drs_smallcone.at(0).first.first),tracks.at(track_drs_smallcone.at(0).first.second));
        highestpt_pair_mass_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).M();
+       highestpt_pair_mass_kaon_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector(0.493677)+tracks.at(track_drs_smallcone.at(0).first.second)->vector(0.493677)).M();
        highestpt_pair_pt_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).pt();
+       highestpt_pair_pt_kaon_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector(0.493677)+tracks.at(track_drs_smallcone.at(0).first.second)->vector(0.493677)).pt();
        highestpt_pair_eta_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).eta();
        highestpt_pair_phi_=(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector()).phi();
        highestpt_pair_1_eta_=tracks.at(track_drs_smallcone.at(0).first.first)->eta();
@@ -298,6 +343,9 @@ int DiElectronMesonAnalysis::PreAnalysis() {
        highestpt_pair_2_pt_=tracks.at(track_drs_smallcone.at(0).first.second)->pt();
        highestpt_pair_iso_=0;
        highestpt_pair_looser_iso_=0;
+       /*if(pions_from_meson.size()>1&&((DeltaRTrack(tracks.at(highestpt_pair_id_1_),pions_from_meson.at(0))<0.005&&DeltaRTrack(tracks.at(highestpt_pair_id_2_),pions_from_meson.at(1))<0.005)||(DeltaRTrack(tracks.at(highestpt_pair_id_1_),pions_from_meson.at(1))<0.005&&DeltaRTrack(tracks.at(highestpt_pair_id_2_),pions_from_meson.at(0))<0.005))){ 
+           matchestracks_=1;
+       }*/
        Zrho_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(tracks.at(track_drs_smallcone.at(0).first.first)->vector()+tracks.at(track_drs_smallcone.at(0).first.second)->vector(),z_cand.vector());
        for (unsigned i=0; i <tracks.size(); i++){
          if( i!=highestpt_pair_id_1_ && i!=highestpt_pair_id_2_){

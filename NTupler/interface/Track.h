@@ -30,8 +30,8 @@ class Track {
   virtual void Print() const;
 
   inline ThreeVector const& momentum() const { return momentum_; }
-  inline Vector vector() const {
-    return Vector(ROOT::Math::PtEtaPhiMVector(pt(), eta(), phi(), 0.13957018));
+  inline Vector vector(double mass=0.13957018) const {
+    return Vector(ROOT::Math::PtEtaPhiMVector(pt(), eta(), phi(), mass));
   }
 
   inline Point const& ref_point() const { return ref_point_; }

@@ -125,7 +125,7 @@ namespace ac {
       if(part->pdgId()==25&&part->statusFlags().isLastCopy()){
           higgs_daughters = part->daughters();
           for ( unsigned int i = 0; i < higgs_daughters.size(); i++){
-            if( abs(gen_parts.at(higgs_daughters.at(i))->pdgId())== 113 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==223){
+            if( abs(gen_parts.at(higgs_daughters.at(i))->pdgId())== 113 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==223 || abs(gen_parts.at(higgs_daughters.at(i))->pdgId())==333){
               meson_index = higgs_daughters.at(i);
               rho_daughters = gen_parts.at(higgs_daughters.at(i))->daughters();
               genres_mass_ = gen_parts.at(higgs_daughters.at(i))->M();
