@@ -132,13 +132,13 @@
     },
     {
       "name": "GG",
-      "entries": ["GG", "GG_L"],
+      "entries": ["GG_R", "GG_L_R"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
     {
       "name": "WG",
-      "entries": ["WG_NLO"],
+      "entries": ["WG_R"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
@@ -176,13 +176,13 @@
     },
     {
       "name": "GG",
-      "entries": ["GG", "GG_L"],
+      "entries": ["GG_R", "GG_L_R"],
       "legend": "#gamma#gamma",
       "color": 1
     },
     {
       "name": "WG",
-      "entries": ["WG_NLO"],
+      "entries": ["WG_R"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
@@ -220,7 +220,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG", "GG_L"],
+      "entries": ["GG_R", "GG_L_R"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -240,6 +240,38 @@
       "name": "WG",
       "entries": ["WG_main_p", "WG_main_n"],
       "legend": "W(#rightarrowl#nu)#gamma (in)",
+      "color": [108,190,237]
+    }
+  ],
+  "fake_weighted": [
+    {
+      "name": "VV",
+      "entries": ["VV_R_fw", "VV_E_fw"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R_fw", "ZG_IZG_R_fw"],
+      "legend": "Z#rightarrowll (prompt #gamma)",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E_fw"],
+      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R_fw", "TT_XTTG_R_fw", "TT_E_fw"],
+      "legend": "t#bar{t}",
+      "color": [187,10,33]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_R_fw"],
+      "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
   ],

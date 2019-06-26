@@ -142,7 +142,7 @@ if 'makeHists' in steps:
         #       '--indir', '/home/files/190412-full/wgamma_%s_v3/WGamma_' % yr,
         #       '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
-              '--indir', 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190513-full/wgamma_%s_v4/WGamma_' % yr,
+              '--indir', 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190613-full/wgamma_%s_v4/WGamma_' % yr,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
 
 

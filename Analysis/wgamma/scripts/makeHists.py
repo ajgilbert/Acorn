@@ -34,8 +34,8 @@ remaps = {
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
         'TT': 'TT-powheg',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -65,8 +65,8 @@ remaps = {
         'TT_SL': 'TTToSemiLeptonic-powheg',
         'TT_Had': 'TTToHadronic-powheg',
         'TT_DL': 'TTTo2L2Nu-powheg',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -96,8 +96,8 @@ remaps = {
         'TT_SL': 'TTToSemiLeptonic-powheg',
         'TT_Had': 'TTToHadronic-powheg',
         'TT_DL': 'TTTo2L2Nu-powheg',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG_NLO': 'WGToLNuG-amcatnloFXFX-stitched',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        'WG': 'WGToLNuG-amcatnloFXFX-stitched',
         'W': 'WJetsToLNu-madgraphMLM',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
@@ -122,51 +122,116 @@ remaps = {
 
 remap = remaps[year]
 
-wg_sample = 'WG_NLO'
-wg_samples = ['WG', 'WG_NLO']
-w_samples = ['W']
-ttg_samples = ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar']
-zg_samples = ['ZG']
-dy_samples = ['DY']
+wg_sample = 'WG'
+
+# Combine samples together at the end
+groups = {
+    'WG': ['WG'],
+    'W': ['W'],
+    'DY': ['DY'],
+    'ZG': ['ZG'],
+    'TT': ['TT_SL', 'TT_Had', 'TT_DL'],
+    'TTG': ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar'],
+    'VV': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top'],
+    'GG': ['GG'],
+    'GG_L': ['GG_L']
+}
 
 if year == '2016':
-    vv_samples = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
-    tt_samples = ['TT']
-if year == '2017':
-    vv_samples = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
-    tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
+    groups['TT'] = ['TT']
 if year == '2018':
-    vv_samples = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
-    tt_samples = ['TT_SL', 'TT_Had', 'TT_DL']
-
-all_samples = wg_samples + w_samples + ttg_samples + tt_samples + zg_samples + dy_samples + vv_samples
+    groups['VV'] = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
 
 samples = {}
 for sa in remap:
     samples[sa] = (prefix + remap[sa] + '.root')
 
+main_wt_systs = [
+    ('wt_l0', 'CMS_eff_l')
+]
 
-def AddPhotonSplitting(node, label, sample, var_list, binning, sel, wt, components=['R', 'J', 'E']):
-    if 'R' in components:
-        node['%s_R' % label] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_isprompt' % sel), wt=X.get(wt))
-    if 'J' in components:
-        node['%s_J' % label] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_isjet' % sel), wt=X.get(wt))
-    if 'E' in components:
-        node['%s_E' % label] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && $p0_iselec' % sel), wt=X.get(wt))
+# Naming scheme for processes
+# [MAIN]_[IZG]_[R/F/E]_[fw]_[CMS_eff_lUp]
+
+def ApplyDYSplitting(hlist, components=['XZG', 'IZG']):
+    res = []
+    for label, sel, wt in hlist:
+        if 'XZG' in components:
+            res.append(('%s_XZG' % label, '(%s) && !(gen_is_zg && p0_truth==1)' % sel, wt))
+        if 'IZG' in components:
+            res.append(('%s_IZG' % label, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt))
+    return res
 
 
-def AddDYSplitting(node, label, sample, var_list, binning, sel, wt, components=['R', 'J', 'E'], postfix=''):
-    node[label + '_XZG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && !(gen_is_zg && p0_truth==1)' % sel), wt=X.get(wt))
-    node[label + '_IZG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (gen_is_zg && p0_truth==1)' % sel), wt=X.get(wt))
-    AddPhotonSplitting(node, label + '_XZG' + postfix, sample, var_list, binning, '(%s) && !(gen_is_zg && p0_truth==1)' % sel, wt, components=components)
-    AddPhotonSplitting(node, label + '_IZG' + postfix, sample, var_list, binning, '(%s) && (gen_is_zg && p0_truth==1)' % sel, wt, components=components)
+def ApplyTTSplitting(hlist, components=['XTTG', 'ITTG']):
+    res = []
+    for label, sel, wt in hlist:
+        if 'XTTG' in components:
+            res.append(('%s_XTTG' % label, '(%s) && !(p0_truth==1)' % sel, wt))
+        if 'ITTG' in components:
+            res.append(('%s_ITTG' % label, '(%s) && (p0_truth==1)' % sel, wt))
+    return res
 
 
-def AddTTSplitting(node, label, sample, var_list, binning, sel, wt, components=['R', 'J', 'E'], postfix=''):
-    node[label + '_XTTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && !(p0_truth==1)' % sel), wt=X.get(wt))
-    node[label + '_ITTG' + postfix] = Hist('TH1F', sample=sample, var=var_list, binning=binning, sel=X.get('(%s) && (p0_truth==1)' % sel), wt=X.get(wt))
-    AddPhotonSplitting(node, label + '_XTTG' + postfix, sample, var_list, binning, '(%s) && !(p0_truth==1)' % sel, wt, components=components)
-    AddPhotonSplitting(node, label + '_ITTG' + postfix, sample, var_list, binning, '(%s) && (p0_truth==1)' % sel, wt, components=components)
+def ApplyPhotonSplitting(hlist, components=['R', 'J', 'E']):
+    res = []
+    for label, sel, wt in hlist:
+        if 'R' in components:
+            res.append(('%s_R' % label, '(%s) && $p0_isprompt' % sel, wt))
+        if 'J' in components:
+            res.append(('%s_J' % label, '(%s) && $p0_isjet' % sel, wt))
+        if 'E' in components:
+            res.append(('%s_E' % label, '(%s) && $p0_iselec' % sel, wt))
+    return res
+
+
+def ApplySystWeightSplitting(hlist, wt_systs=[]):
+    res = []
+    for label, sel, wt in hlist:
+        # res.append((label, sel, wt))
+        for wt_expr, wt_name in wt_systs:
+            res.append(('%s_%sUp' % (label, wt_name), sel, '(%s) * %s_hi' % (wt, wt_expr)))
+            res.append(('%s_%sDown' % (label, wt_name), sel, '(%s) * %s_lo' % (wt, wt_expr)))
+    return res
+
+
+def ApplyPostFix(hlist, postfix):
+    res = []
+    for label, sel, wt in hlist:
+        res.append(('%s_%s' % (label, postfix), sel, wt))
+    return res
+
+
+def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], doFakes=True):
+    # Standard treatment for most MC samples
+    for grp in groups:
+        for P in groups[grp]:
+            if grp == 'DY':
+                hlist = ApplyPhotonSplitting(ApplyDYSplitting([(P, sel, wt)], components=['XZG']), components=['R'])
+                hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E']))
+            elif grp == 'ZG':
+                hlist = ApplyPhotonSplitting(ApplyDYSplitting([(P, sel, wt)], components=['IZG']), components=['R'])
+            elif grp == 'TT':
+                hlist = ApplyPhotonSplitting(ApplyTTSplitting([(P, sel, wt)], components=['XTTG']), components=['R'])
+                hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E']))
+            elif grp == 'TTG':
+                hlist = ApplyPhotonSplitting(ApplyTTSplitting([(P, sel, wt)], components=['ITTG']), components=['R'])
+            else:
+                hlist = ApplyPhotonSplitting([(P, sel, wt)])
+            hlist_fw = []
+            if doFakes:
+                hlist_fw = ApplyPostFix(hlist, 'fw')
+            hlist.extend(ApplySystWeightSplitting(hlist, wt_systs))
+            # pprint(hlist)
+            # pprint(hlist_fw)
+            for H in hlist:
+                node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
+            for H in hlist_fw:
+                node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"sig_t": "$sig_l"}), wt=X.get('(%s) * wt_p0_fake' % H[2]))
+
+    node['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel), wt='1')
+    if doFakes:
+        node['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"sig_t": "$sig_l"}), wt='wt_p0_fake')
 
 
 def HistSum(label_list):
@@ -328,35 +393,39 @@ if args.task == 'eft_region' or args.task == 'fid_region':
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
             for var, binning in drawvars:
-                for sample in samples:
-                    hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                for P in all_samples:
-                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'])
-                for P in dy_samples + zg_samples:
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
-                for P in tt_samples + ttg_samples:
-                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
-                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
-                hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
-                    sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
-                    wt=X.get('$baseline_wt * wt_p0_fake'))
-                for P in [wg_sample]:
-                    for chg in ['p', 'n', 'x']:
-                        hists[chn][sel][var]['WG_ooa_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_ooa' % chg), wt=X.get('$baseline_wt'))
-                        hists[chn][sel][var]['WG_main_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc' % chg), wt=X.get('$baseline_wt'))
-                        hists[chn][sel][var]['WG_met1_%s' % chg] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc_met1' % chg), wt=X.get('$baseline_wt'))
-                    if sel[-1].isdigit():
-                        chg = sel[0]
-                        for i in range(len(pt_bins_min)):
-                            hists[chn][sel][var]['WG_main_%s_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
-                            hists[chn][sel][var]['WG_met1_%s_%i' % (chg, i)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
-                        for i in [int(sel[-1])]:
-                            for j in range(len(phi_bins_min)):
-                                hists[chn][sel][var]['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
-                                hists[chn][sel][var]['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=P, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
+                xnode = hists[chn][sel][var]
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs)
+                wg_hlist = []
+                for chg in ['p', 'n', 'x']:
+                    wg_hlist.extend([
+                        ('WG_ooa_%s' % chg, '$' + sel + ' && $%s_gen_ooa' % chg, '$baseline_wt'),
+                        ('WG_main_%s' % chg, '$' + sel + ' && $%s_gen_acc' % chg, '$baseline_wt'),
+                        ('WG_met1_%s' % chg, '$' + sel + ' && $%s_gen_acc_met1' % chg, '$baseline_wt'),
+                        ])
+                    # xnode['WG_ooa_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_ooa' % chg), wt=X.get('$baseline_wt'))
+                    # xnode['WG_main_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc' % chg), wt=X.get('$baseline_wt'))
+                    # xnode['WG_met1_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc_met1' % chg), wt=X.get('$baseline_wt'))
+                if sel[-1].isdigit():
+                    chg = sel[0]
+                    for i in range(len(pt_bins_min)):
+                        wg_hlist.extend([
+                            ('WG_main_%s_%i' % (chg, i), '$' + sel + ' && $%s_gen_%i' % (chg, i), '$baseline_wt'),
+                            ('WG_met1_%s_%i' % (chg, i), '$' + sel + ' && $%s_gen_met1_%i' % (chg, i), '$baseline_wt'),
+                            ])
+                        # xnode['WG_main_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
+                        # xnode['WG_met1_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
+                    for i in [int(sel[-1])]:
+                        for j in range(len(phi_bins_min)):
+                            wg_hlist.extend([
+                                ('WG_main_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j), '$baseline_wt'),
+                                ('WG_met1_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j), '$baseline_wt'),
+                                ])
+                            # xnode['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
+                            # xnode['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
+                wg_hlist.extend(ApplySystWeightSplitting(wg_hlist, main_wt_systs))
+                for H in wg_hlist:
+                    xnode[H[0]] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
+
         pdgid = '11' if chn == 'e' else '13'
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
@@ -371,12 +440,14 @@ if args.task == 'eft_region' or args.task == 'fid_region':
             hists[chn]['XS']['2D']['XS_WG_x_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
 
 if args.task in ['baseline', 'electron_fakes']:
+    wt_systs = list(main_wt_systs)
     if args.task == 'electron_fakes':
         pt_bins_min = [30, 35, 40, 60, 100]
         pt_bins_max = [35, 40, 60, 100, 200]
         eta_bins_min = [0, 1.4442]
         eta_bins_max = [1.4442, 2.5]
         X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
+        wt_systs = []
 
         for e_min, e_max in zip(eta_bins_min, eta_bins_max):
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
@@ -420,11 +491,11 @@ if args.task in ['baseline', 'electron_fakes']:
         ('p0_phi', (30, -3.15, 3.15)),
         ('l0p0_dr', (20, 0., 5.)),
         ('l0p0_M', (40, 0, 200)),
-        ('p0_chiso', (40, 0, 20.0)),
+        ('p0_chiso', (40, 0, 2.0)),
         # ('p0_neiso', (40, 0, 20.0)),
         # ('p0_phiso', (40, 0, 20.0)),
         # ('p0_hovere', (20, 0., 0.5)),
-        ('p0_sigma', (30, 0., 0.06)),
+        ('p0_sigma', (60, 0., 0.06)),
         ('p0_haspix', (2, -0.5, 1.5)),
         ('p0_eveto', (2, -0.5, 1.5)),
         ('p0_truth', (7, -0.5, 6.5)),
@@ -449,22 +520,11 @@ if args.task in ['baseline', 'electron_fakes']:
                     wt = cat_to_wt[sel]
                 if var.startswith('wt_'):
                     wt = '1.0'
-                for sample in samples:
-                    hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get(wt))
-                for P in all_samples:
-                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt)
-                    AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R', 'E'])
-                for P in dy_samples + zg_samples:
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt)
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R', 'E'], postfix='_fw')
-                for P in tt_samples + ttg_samples:
-                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, wt, components=['R'])
-                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '%s * wt_p0_fake' % wt, components=['R'], postfix='_fw')
-
-                hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get(wt))
-                hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
-                    sel=X.get('$' + sel, override={"sig_t": "$sig_l"}),
-                    wt=X.get('%s * wt_p0_fake' % wt))
+                if 'mZ_veto' in sel:
+                    actual_wt_systs = wt_systs
+                else:
+                    actual_wt_systs = list()
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs)
             for sample in samples:
                 hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
                 hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
@@ -478,9 +538,6 @@ if args.task == 'photon_fakes':
     X['barrel_e'] = '$baseline_e_mZ_veto && $p0_eb'
     X['endcap_e'] = '$baseline_e_mZ_veto && $p0_ee'
 
-    # do_cats['e'].extend(['baseline_e_mZ_veto', 'barrel_e', 'endcap_e'])
-    # do_cats['m'].extend(['baseline_m_mZ_veto', 'barrel_m', 'endcap_m'])
-
     for chn in ['e', 'm']:
         for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
             X['%s_iso_l' % S] = '$%s && $iso_l' % S
@@ -489,7 +546,6 @@ if args.task == 'photon_fakes':
             X['%s_iso_l_sig_l' % S] = '$%s && $iso_l && $sig_l' % S
             X['%s_iso_t_sig_l' % S] = '$%s && $iso_t && $sig_l' % S
             X['%s_iso_t_sig_t' % S] = '$%s && $iso_t && $sig_t' % S
-            # X['%s_p0_medium' % S] = '$%s && p0_medium' % S
             do_cats[chn].extend(['%s_iso_l' % S, '%s_sig_l' % S, '%s_iso_l_sig_t' % S, '%s_iso_l_sig_l' % S, '%s_iso_t_sig_l' % S, '%s_iso_t_sig_t' % S])
 
     drawvars = [
@@ -514,27 +570,8 @@ if args.task == 'photon_fakes':
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
             for var, binning in drawvars:
-                for sample in samples:
-                    hists[chn][sel][var][sample] = Hist('TH1F', sample=sample, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                for P in all_samples:
-                    AddPhotonSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    if 'iso_t_sig_t' in sel:
-                        AddPhotonSplitting(hists[chn][sel][var], P + '_fw', P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'])
-                for P in dy_samples + zg_samples:
-                    AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt')
-                    if 'iso_t_sig_t' in sel:
-                        AddDYSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R', 'E'], postfix='_fw')
-                for P in tt_samples + ttg_samples:
-                    AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, '$' + sel, '$baseline_wt', components=['R'])
-                    if 'iso_t_sig_t' in sel:
-                        AddTTSplitting(hists[chn][sel][var], P, P, [var], binning, X.get('$' + sel, override={"sig_t": "$sig_l"}), '$baseline_wt * wt_p0_fake', components=['R'], postfix='_fw')
-
-                    hists[chn][sel][var]['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning, sel=X.get('$' + sel), wt=X.get('$baseline_wt'))
-                    if 'iso_t_sig_t' in sel:
-                        hists[chn][sel][var]['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=[var], binning=binning,
-                            sel=X.get('$' + sel, override={"sig_t": "$sig_l"}, printlevel=0),
-                            wt=X.get('$baseline_wt * wt_p0_fake'))
-
+                doFakes = ('iso_t_sig_t' in sel)
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=doFakes)
 
 MultiDraw(hists, samples, tname, mt_cores=4, mt_thresh=1)
 
@@ -570,8 +607,8 @@ for chn in ['e', 'm']:
             scale = tgt_lumi * xsec / events
             print '%-50s %-20.1f %-12.2f %-12.2f' % (remap[sample], events, xsec, scale)
 
-
-fout = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label), 'RECREATE')
+# fin = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label))
+# TDirToNode(fin, node=hists)
 
 for path, node in hists.ListNodes(withObjects=True):
     print path
@@ -580,47 +617,23 @@ for path, node in hists.ListNodes(withObjects=True):
     if 'XS' in path.split('/'):
         continue
 
-    node['VV'] = HistSum(vv_samples)
-    node['TTG'] = HistSum(ttg_samples)
+    for grp, grplist in groups.iteritems():
+        if len(grplist) <= 1:
+            continue
+        suffixes = [g.replace(grplist[0] + '_', '') for g in node.d.keys() if g.startswith(grplist[0] + '_')]
+        for suf in suffixes:
+            node[grp + '_' + suf] = HistSum([g + '_' + suf for g in grplist])
 
-    ttg_ittg_samples = ['%s_ITTG' % lbl for lbl in ttg_samples]
-    ttg_xttg_samples = ['%s_XTTG' % lbl for lbl in ttg_samples]
-    tt_ittg_samples = ['%s_ITTG' % lbl for lbl in tt_samples]
-    tt_xttg_samples = ['%s_XTTG' % lbl for lbl in tt_samples]
-    node['TTG_ITTG'] = HistSum(ttg_ittg_samples)
-    node['TTG_XTTG'] = HistSum(ttg_xttg_samples)
-    if year in ['2017', '2018']:
-        node['TT'] = HistSum(tt_samples)
-        node['TT_ITTG'] = HistSum(tt_ittg_samples)
-        node['TT_XTTG'] = HistSum(tt_xttg_samples)
-
-    for P in ['E', 'J', 'R']:
-        node['VV_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in vv_samples])
-        node['TTG_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in ttg_samples])
-        if year in ['2017', '2018']:
-            node['TT_%s' % P] = HistSum(['%s_%s' % (lbl, P) for lbl in tt_samples])
-    for P in ['R']:
-        node['TTG_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in ttg_samples])
-        node['TTG_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in ttg_samples])
-        if year in ['2017', '2018']:
-            node['TT_ITTG_%s' % P] = HistSum(['%s_ITTG_%s' % (lbl, P) for lbl in tt_samples])
-            node['TT_XTTG_%s' % P] = HistSum(['%s_XTTG_%s' % (lbl, P) for lbl in tt_samples])
-
-    node['Total_R'] = HistSum([wg_sample, 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
+    node['Total_R'] = HistSum(['WG_R', 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
     node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
     node['Total_J'] = HistSum(['W_J', 'TT_J', 'DY_J', 'VV_J'])
 
     if 'data_fakes' in node.d:
-        all_r_samples = [wg_sample, 'DY_XZG', 'ZG_IZG'] + tt_xttg_samples + ttg_ittg_samples + vv_samples
-        all_e_samples = dy_samples + w_samples + tt_samples + vv_samples
-        node['Total_fw_R'] = HistSum([lbl + '_fw_R' for lbl in all_r_samples])
-        node['Total_fw_E'] = HistSum([lbl + '_fw_E' for lbl in all_e_samples])
-        node['data_fakes_sub'] = node['data_fakes'] - (node['Total_fw_R'] + node['Total_fw_E'])
+        node['Total_R_fw'] = HistSum(['WG_R_fw', 'TT_XTTG_R_fw', 'TTG_ITTG_R_fw', 'DY_XZG_R_fw', 'ZG_IZG_R_fw', 'VV_R_fw'])
+        node['Total_E_fw'] = HistSum(['W_E_fw', 'TT_E_fw', 'DY_E_fw', 'VV_E_fw'])
+        node['data_fakes_sub'] = node['data_fakes'] - (node['Total_R_fw'] + node['Total_E_fw'])
         CapNegativeBins(node['data_fakes_sub'])
 
-    for S in ['Total', 'W', 'TT', 'DY', 'VV']:
-        node['%s_F' % S] = HistSum(['%s_E' % S, '%s_J' % S])
-
+fout = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label), 'RECREATE')
 NodeToTDir(fout, hists)
-
 fout.Close()

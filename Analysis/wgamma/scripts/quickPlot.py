@@ -98,7 +98,8 @@ config_by_setting = {
         '*/wt_trg_l0': ('Lepton trigger weight', ''),
         '*/wt_p0': ('Photon weight', ''),
         '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', ''),
-        '*/1': ('1', '')
+        '*/1': ('1', ''),
+        '*/0.5': ('0.5', '')
     }
 }
 
@@ -109,6 +110,9 @@ variants_by_path = [
     #         "layout": "pure_mc"
     #     }),
     ("*/p0_pt", {
+            "prefix": "logy_",
+            "logy": True}),
+    ("*/p0_chiso", {
             "prefix": "logy_",
             "logy": True}),
     ("*/p0_pt", {
