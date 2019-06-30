@@ -26,12 +26,12 @@ charges = ['p', 'n']
 if args.type == 'fid_region':
     charges = ['x']
 
-era = '13TeV_%s' % args.year
+era = '%s' % args.year
 for c in charges:
     for ptbin in range(n_pt_bins):
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
-        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_R', 'TT_E', 'GG', 'data_fakes'], [cat], False)
+        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', 'data_fakes_sub'], [cat], False)
         if args.type in ['eft_region', 'pt_phi_diff']:
             for phibin in range(n_phi_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
@@ -43,30 +43,51 @@ for c in charges:
 
 print '>> Adding systematic uncertainties...'
 
+# https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#SummaryTable
 cb.cp().AddSyst(
-    cb, 'lumi_$ERA', 'lnN', ch.SystMap()(1.026))
+    cb, 'lumi_$ERA', 'lnN', ch.SystMap('era')
+    (['2016'], 1.023)
+    (['2017'], 1.025)
+    (['2018'], 1.023))
 
-cb.cp().signals().AddSyst(
-    cb, 'eff_$ERA', 'lnN', ch.SystMap()(1.1))
+cb_no_fakes = cb.cp().process(['data_fakes_sub'], False)
 
-cb.cp().process(['WG_p_ooa', 'WG_n_ooa', 'VV_R', 'DY_XZG_R', 'ZG_IZG_R', 'TT_R']).AddSyst(
-    cb, 'eff_$ERA', 'lnN', ch.SystMap()(1.1))
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_eff_$CHANNEL', 'shape', ch.SystMap()(1.0))
 
-cb.cp().process(['data_fakes']).AddSyst(
-    cb, 'fakes_$ERA', 'lnN', ch.SystMap()(1.1))
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_trigger_$CHANNEL', 'shape', ch.SystMap()(1.0))
+
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_eff_p', 'shape', ch.SystMap()(1.0))
+
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_scale_p', 'shape', ch.SystMap()(1.0))
+
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_ele_fake_p', 'shape', ch.SystMap()(1.0))
+
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_prefiring', 'shape', ch.SystMap()(1.0))
+
+
+# cb.cp().process(['WG_p_ooa', 'WG_n_ooa', 'VV_R', 'DY_XZG_R', 'ZG_IZG_R', 'TT_R']).AddSyst(
+#     cb, 'eff_$ERA', 'lnN', ch.SystMap()(1.1))
+
+cb.cp().process(['data_fakes_sub']).AddSyst(
+    cb, 'fakes_$ERA', 'lnN', ch.SystMap()(1.05))
 
 cb.cp().AddSyst(
     cb, 'lumiscale', 'rateParam', ch.SystMap()(1.0))
 par = cb.GetParameter('lumiscale').set_frozen(True)
 
 print '>> Extracting histograms from input root files...'
-file = 'output_%s_%s_%s.root' % (args.year, args.type, args.label)
+file = 'output_%s_%s_%s_merged.root' % (args.year, args.type, args.label)
 cb.cp().ExtractShapes(
     file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 
 # cb.SetAutoMCStats(cb, 0, True)
 cb.ForEachObj(lambda x: x.set_bin(x.bin() + '_' + args.year))
-
 
 def CorrectionNegativeYield(proc):
     if proc.rate() < 0.:
@@ -75,6 +96,8 @@ def CorrectionNegativeYield(proc):
 
 
 cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
+cb.SetAutoMCStats(cb, 0.)
+# cb.PrintAll()
 
 writer = ch.CardWriter('$TAG/$BIN.txt',
                        '$TAG/common/$ANALYSIS.%s.%s.input.root' % (args.channel, args.year))

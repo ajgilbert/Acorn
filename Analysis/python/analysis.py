@@ -77,7 +77,10 @@ def TDirToNode(file, startdir='', node=None, onlyDirs=False):
     return node
 
 
-def NodeToTDir(file, node):
+def NodeToTDir(file, node, postfix=None):
+    post = ''
+    if postfix is not None:
+        post = postfix
     startdir = ROOT.gDirectory.GetPath()
     for path, subnode in node.ListNodes():
         file.cd()
@@ -88,9 +91,9 @@ def NodeToTDir(file, node):
                     ROOT.gDirectory.mkdir(as_vec[i])
                 ROOT.gDirectory.cd(as_vec[i])
         for opath, name, obj in subnode.ListObjects(depth=0):
-            if not ROOT.gDirectory.FindKey(name):
-                obj.SetName(name)
-                ROOT.gDirectory.WriteTObject(obj, name)
+            if not ROOT.gDirectory.FindKey(name + post):
+                obj.SetName(name + post)
+                ROOT.gDirectory.WriteTObject(obj, name + post)
         ROOT.gDirectory.cd(startdir)
 
 

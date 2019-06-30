@@ -58,6 +58,8 @@ if era == '2016':
                 1.37491e-05, 1.34255e-05, 1.33987e-05, 1.34061e-05, 1.34211e-05,
                 1.34177e-05, 1.32959e-05, 1.33287e-05]
     h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2016_v3.root:pileup')
+    h_data_hi = GetFromTFile('wgamma/inputs/pileup_wgamma_2016_v3_hi.root:pileup')
+    h_data_lo = GetFromTFile('wgamma/inputs/pileup_wgamma_2016_v3_lo.root:pileup')
 
 if era == '2017':
     mc_edges = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
@@ -92,6 +94,8 @@ if era == '2017':
                 1.57888581037e-07, 1.2114867431e-07, 7.49518929908e-08, 4.6060444984e-08,
                 2.81008884326e-08, 1.70121486128e-08, 1.02159894812e-08]
     h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2017_v3.root:pileup')
+    h_data_hi = GetFromTFile('wgamma/inputs/pileup_wgamma_2017_v3_hi.root:pileup')
+    h_data_lo = GetFromTFile('wgamma/inputs/pileup_wgamma_2017_v3_lo.root:pileup')
 
 if era == '2018':
     mc_edges = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
@@ -122,7 +126,9 @@ if era == '2018':
                 5.350694e-07, 3.808318e-07, 2.781785e-07, 2.098661e-07, 1.642811e-07,
                 1.312835e-07, 1.081326e-07, 9.141993e-08, 7.890983e-08, 6.91468e-08,
                 6.119019e-08, 5.443693e-08, 4.85036e-08, 4.31486e-08, 3.822112e-08]
-    h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2018_v3.root:pileup')
+    h_data = GetFromTFile('wgamma/inputs/pileup_wgamma_2018_v4.root:pileup')
+    h_data_hi = GetFromTFile('wgamma/inputs/pileup_wgamma_2018_v4_hi.root:pileup')
+    h_data_lo = GetFromTFile('wgamma/inputs/pileup_wgamma_2018_v4_lo.root:pileup')
 
 print len(mc_edges), len(mc_probs)
 
@@ -145,12 +151,18 @@ for i in range(len(mc_edges)):
 #     h_data = h_data_new
 
 h_data.Scale(1. / h_data.Integral())
+h_data_hi.Scale(1. / h_data_hi.Integral())
+h_data_lo.Scale(1. / h_data_lo.Integral())
 h_mc.Scale(1. / h_mc.Integral())
 
 SafeWrapHist(w, ['pu_int'], h_data, name='pileup_data')
+SafeWrapHist(w, ['pu_int'], h_data_hi, name='pileup_data_hi')
+SafeWrapHist(w, ['pu_int'], h_data_lo, name='pileup_data_lo')
 SafeWrapHist(w, ['pu_int'], h_mc, name='pileup_mc')
 
 w.factory('expr::pileup_ratio("@0/@1", pileup_data, pileup_mc)')
+w.factory('expr::pileup_ratio_hi("@0/@1", pileup_data_hi, pileup_mc)')
+w.factory('expr::pileup_ratio_lo("@0/@1", pileup_data_lo, pileup_mc)')
 
 if args.debug:
     print '>> Debug pileup weights:'
@@ -329,10 +341,6 @@ for task in histsToWrap:
         SafeWrapHist(w, task[2], HistErr(GetFromTFile(task[0]), task[3]), name=task[1])
     else:
         SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
-
-if era in ['2016', '2017']:
-    w.factory('expr::e_p_fake_ratio("@0/@1", e_p_fake_data, e_p_fake_mc)')
-    w.factory('expr::e_p_fake_ratio_err("0.0", p_pt, p_eta)')
 
 
 ###############################################################################

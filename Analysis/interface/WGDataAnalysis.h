@@ -31,6 +31,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, int, correct_e_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_p_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
+  CLASS_MEMBER(WGDataAnalysis, int, shift_met)
   CLASS_MEMBER(WGDataAnalysis, int, scale_weights)
   CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
 

@@ -177,6 +177,7 @@ int main(int argc, char* argv[]) {
     int correct_p_energy = 0;
     int correct_e_energy = 0;
     int correct_m_energy = 0;
+    int shift_met = 0;
     if (subseq == "EGMNoCorr") {
       correct_e_energy = -1;
       correct_p_energy = -1;
@@ -188,6 +189,10 @@ int main(int argc, char* argv[]) {
     if (subseq == "PScaleLo") correct_p_energy = 2;
     if (subseq == "MScaleHi") correct_m_energy = 1;
     if (subseq == "MScaleLo") correct_m_energy = 2;
+    if (subseq == "MetJesHi") shift_met = 1;
+    if (subseq == "MetJesLo") shift_met = 2;
+    if (subseq == "MetUncHi") shift_met = 3;
+    if (subseq == "MetUncLo") shift_met = 4;
 
     std::cout << ac::ReadAttrValue<int>(jsc["attributes"], "scale_weights") << "\n";
 
@@ -203,6 +208,7 @@ int main(int argc, char* argv[]) {
                              .set_correct_e_energy(correct_e_energy)
                              .set_correct_p_energy(correct_p_energy)
                              .set_correct_m_energy(correct_m_energy)
+                             .set_shift_met(shift_met)
                              .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt")
                              .set_scale_weights(scale_weights)
                              .set_var_set(var_set));

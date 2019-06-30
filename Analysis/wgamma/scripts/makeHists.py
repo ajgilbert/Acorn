@@ -17,6 +17,8 @@ parser.add_argument('--task', default='eft_region', choices=['eft_region', 'base
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
+parser.add_argument('--indir-data', default=None)
+parser.add_argument('--syst', default=None)
 parser.add_argument('--extra-cfg', default=None)
 
 args = parser.parse_args()
@@ -55,6 +57,7 @@ remaps = {
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
         'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'GG_NLO': 'DiPhotonJets_MGG-80toInf',
         'GG_L': 'DiPhotonJetsBox_MGG-40to80'
     },
     "2017": {
@@ -133,22 +136,45 @@ groups = {
     'TT': ['TT_SL', 'TT_Had', 'TT_DL'],
     'TTG': ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar'],
     'VV': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top'],
-    'GG': ['GG'],
-    'GG_L': ['GG_L']
+    'GG': ['GG', 'GG_L']
 }
 
 if year == '2016':
     groups['TT'] = ['TT']
+    groups['GG'] = ['GG_NLO', 'GG_L']
+
 if year == '2018':
     groups['VV'] = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
+    groups['GG'] = ['GG']
 
 samples = {}
 for sa in remap:
-    samples[sa] = (prefix + remap[sa] + '.root')
+    if 'data_obs' in sa and args.indir_data is not None:
+        samples[sa] = (args.indir_data + remap[sa] + '.root')
+    else:
+        samples[sa] = (prefix + remap[sa] + '.root')
 
-main_wt_systs = [
-    ('wt_l0', 'CMS_eff_l')
-]
+main_wt_systs = {
+    'e': [
+        ('wt_pf', 'CMS_prefiring'),
+        ('wt_l0', 'CMS_eff_e'),
+        ('wt_trg_l0', 'CMS_trigger_e'),
+        ('wt_p0', 'CMS_eff_p'),
+        ('wt_p0_e_fake', 'CMS_ele_fake_p'),
+    ],
+    'm': [
+        ('wt_pf', 'CMS_prefiring'),
+        ('wt_l0', 'CMS_eff_m'),
+        ('wt_trg_l0', 'CMS_trigger_m'),
+        ('wt_p0', 'CMS_eff_p'),
+        ('wt_p0_e_fake', 'CMS_ele_fake_p'),
+    ]
+}
+
+
+if args.syst is not None:
+    # No weight-based systematics in this case
+    main_wt_systs = {'e': [], 'm': []}
 
 # Naming scheme for processes
 # [MAIN]_[IZG]_[R/F/E]_[fw]_[CMS_eff_lUp]
@@ -394,7 +420,7 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         for sel in do_cats[chn]:
             for var, binning in drawvars:
                 xnode = hists[chn][sel][var]
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs)
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs[chn])
                 wg_hlist = []
                 for chg in ['p', 'n', 'x']:
                     wg_hlist.extend([
@@ -422,10 +448,13 @@ if args.task == 'eft_region' or args.task == 'fid_region':
                                 ])
                             # xnode['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
                             # xnode['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
-                wg_hlist.extend(ApplySystWeightSplitting(wg_hlist, main_wt_systs))
+                wg_hlist.extend(ApplySystWeightSplitting(wg_hlist, main_wt_systs[chn]))
                 for H in wg_hlist:
                     xnode[H[0]] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
 
+        # Rest of this only for the nominal run
+        if args.syst is not None:
+            continue
         pdgid = '11' if chn == 'e' else '13'
         for var, binning in drawvars:
             hists[chn]['XS'][var]['XS_WG_p_%s_acc' % chn] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
@@ -440,14 +469,14 @@ if args.task == 'eft_region' or args.task == 'fid_region':
             hists[chn]['XS']['2D']['XS_WG_x_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
 
 if args.task in ['baseline', 'electron_fakes']:
-    wt_systs = list(main_wt_systs)
+    wt_systs = dict(main_wt_systs)
     if args.task == 'electron_fakes':
         pt_bins_min = [30, 35, 40, 60, 100]
         pt_bins_max = [35, 40, 60, 100, 200]
         eta_bins_min = [0, 1.4442]
         eta_bins_max = [1.4442, 2.5]
         X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
-        wt_systs = []
+        wt_systs = {'e': [], 'm': []}
 
         for e_min, e_max in zip(eta_bins_min, eta_bins_max):
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
@@ -482,8 +511,8 @@ if args.task in ['baseline', 'electron_fakes']:
         # ('l0l1_dr', (20, 0., 5.)),
         ('met', (40, 0., 200.)),
         ('met_phi', (20, -3.15, 3.15)),
-        ('tk_met', (40, 0., 200.)),
-        ('tk_met_phi', (20, -3.15, 3.15)),
+        # ('tk_met', (40, 0., 200.)),
+        # ('tk_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
         ('puppi_met_phi', (20, -3.15, 3.15)),
         ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300]),
@@ -521,7 +550,7 @@ if args.task in ['baseline', 'electron_fakes']:
                 if var.startswith('wt_'):
                     wt = '1.0'
                 if 'mZ_veto' in sel:
-                    actual_wt_systs = wt_systs
+                    actual_wt_systs = wt_systs[chn]
                 else:
                     actual_wt_systs = list()
                 StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs)
@@ -609,6 +638,7 @@ for chn in ['e', 'm']:
 
 # fin = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label))
 # TDirToNode(fin, node=hists)
+doCleanup = True
 
 for path, node in hists.ListNodes(withObjects=True):
     print path
@@ -622,7 +652,11 @@ for path, node in hists.ListNodes(withObjects=True):
             continue
         suffixes = [g.replace(grplist[0] + '_', '') for g in node.d.keys() if g.startswith(grplist[0] + '_')]
         for suf in suffixes:
-            node[grp + '_' + suf] = HistSum([g + '_' + suf for g in grplist])
+            sum_list = [g + '_' + suf for g in grplist]
+            node[grp + '_' + suf] = HistSum(sum_list)
+            if doCleanup:
+                for hname in sum_list:
+                    del node.d[hname]
 
     node['Total_R'] = HistSum(['WG_R', 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
     node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
@@ -634,6 +668,7 @@ for path, node in hists.ListNodes(withObjects=True):
         node['data_fakes_sub'] = node['data_fakes'] - (node['Total_R_fw'] + node['Total_E_fw'])
         CapNegativeBins(node['data_fakes_sub'])
 
+
 fout = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label), 'RECREATE')
-NodeToTDir(fout, hists)
+NodeToTDir(fout, hists, args.syst)
 fout.Close()

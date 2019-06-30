@@ -34,6 +34,7 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       correct_e_energy_(-1),
       correct_p_energy_(-1),
       correct_m_energy_(-1),
+      shift_met_(-1),
       scale_weights_(0) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
@@ -87,8 +88,8 @@ int WGDataAnalysis::PreAnalysis() {
 
       tree_->Branch("met", &met_);
       tree_->Branch("met_phi", &met_phi_);
-      tree_->Branch("tk_met", &tk_met_);
-      tree_->Branch("tk_met_phi", &tk_met_phi_);
+      // tree_->Branch("tk_met", &tk_met_);
+      // tree_->Branch("tk_met_phi", &tk_met_phi_);
       tree_->Branch("puppi_met", &puppi_met_);
       tree_->Branch("puppi_met_phi", &puppi_met_phi_);
 
@@ -99,8 +100,8 @@ int WGDataAnalysis::PreAnalysis() {
 
       tree_->Branch("reco_phi", &reco_phi_);
       tree_->Branch("reco_phi_f", &reco_phi_f_);
-      tree_->Branch("reco_tk_phi", &reco_tk_phi_);
-      tree_->Branch("reco_tk_phi_f", &reco_tk_phi_f_);
+      // tree_->Branch("reco_tk_phi", &reco_tk_phi_);
+      // tree_->Branch("reco_tk_phi_f", &reco_tk_phi_f_);
       tree_->Branch("reco_puppi_phi", &reco_puppi_phi_);
       tree_->Branch("reco_puppi_phi_f", &reco_puppi_phi_f_);
 
@@ -281,10 +282,6 @@ int WGDataAnalysis::PreAnalysis() {
 
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
-    run_ = info->run();
-    n_vtx_ = info->numVertices();
-    metfilters_ = info->metfilters().to_ulong();
-
     auto muons = event->GetPtrVec<ac::Muon>("muons");
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
     auto photons = event->GetPtrVec<ac::Photon>("photons");
@@ -345,7 +342,7 @@ int WGDataAnalysis::PreAnalysis() {
     }
     auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
     auto puppi_mets = event->GetPtrVec<ac::Met>("puppiMet");
-    auto tk_mets = event->GetPtrVec<ac::Met>("trackMet");
+    // auto tk_mets = event->GetPtrVec<ac::Met>("trackMet");
 
     // Sub-process classification - maybe move this into a separate module
     /*
@@ -442,7 +439,8 @@ int WGDataAnalysis::PreAnalysis() {
     bool wg_presel = (l0 != nullptr) && (p0 != nullptr);
     bool mm_presel = (pre_muons.size() >= 2);
     bool ee_presel = (pre_electrons.size() >= 2);
-    if (do_presel_ && !(wg_presel || mm_presel || ee_presel)) {
+    bool reco_event = (wg_presel || mm_presel || ee_presel);
+    if (do_presel_ && !reco_event) {
       return 1;
     }
 
@@ -504,17 +502,29 @@ int WGDataAnalysis::PreAnalysis() {
       }
     }
 
-    ac::Met* met = mets.at(0);
-    met_ = met->pt();
-    met_phi_ = met->phi();
+    unsigned use_met = 0;
+    if (shift_met_ >= 0) {
+      use_met = shift_met_;
+    }
 
-    ac::Met* tk_met = tk_mets.at(0);
-    tk_met_ = tk_met->pt();
-    tk_met_phi_ = tk_met->phi();
+    ac::Met* met = mets.at(use_met);
 
-    ac::Met* puppi_met = puppi_mets.at(0);
-    puppi_met_ = puppi_met->pt();
-    puppi_met_phi_ = puppi_met->phi();
+    // ac::Met* tk_met = tk_mets.at(0);
+    // tk_met_ = tk_met->pt();
+    // tk_met_phi_ = tk_met->phi();
+
+    ac::Met* puppi_met = puppi_mets.at(use_met);
+
+    if (reco_event) {
+      run_ = info->run();
+      n_vtx_ = info->numVertices();
+      metfilters_ = info->metfilters().to_ulong();
+
+      met_ = met->pt();
+      met_phi_ = met->phi();
+      puppi_met_ = puppi_met->pt();
+      puppi_met_phi_ = puppi_met->phi();
+    }
 
     if (l0) {
       l0_pt_ = l0->pt();
@@ -629,9 +639,9 @@ int WGDataAnalysis::PreAnalysis() {
       reco_phi_ = reco_sys.Phi(l0->charge());
       reco_phi_f_ = reco_sys.SymPhi(l0->charge());
 
-      WGSystem reco_tk_sys = ProduceWGSystem(*l0, *tk_met, *p0, true, rng, false);
-      reco_tk_phi_ = reco_tk_sys.Phi(l0->charge());
-      reco_tk_phi_f_ = reco_tk_sys.SymPhi(l0->charge());
+      // WGSystem reco_tk_sys = ProduceWGSystem(*l0, *tk_met, *p0, true, rng, false);
+      // reco_tk_phi_ = reco_tk_sys.Phi(l0->charge());
+      // reco_tk_phi_f_ = reco_tk_sys.SymPhi(l0->charge());
 
       WGSystem reco_puppi_sys = ProduceWGSystem(*l0, *puppi_met, *p0, true, rng, false);
       reco_puppi_phi_ = reco_puppi_sys.Phi(l0->charge());

@@ -132,7 +132,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG_R", "GG_L_R"],
+      "entries": ["GG_NLO_R", "GG_L_R"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -176,7 +176,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG_R", "GG_L_R"],
+      "entries": ["GG_NLO_R", "GG_L_R"],
       "legend": "#gamma#gamma",
       "color": 1
     },

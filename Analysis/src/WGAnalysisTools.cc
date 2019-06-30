@@ -259,6 +259,60 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
         res[4] = 1.0 + info.lheWeights().at(1007);  // 1.0  0.5
         res[5] = 1.0 + info.lheWeights().at(1009);  // 0.5  0.5
     } else if (version == 2) {
+      // Special one for 2016 WG stitched. Inclusive sample and pt-binned have different weight
+      // layouts...
+
+      // For the inclusive
+      if (info.lheWeights().size() > 150) {
+        /*
+        (*) <weight id="1106" MUR="2.0" MUF="1.0" PDF="292200" > MUR=2.0  </weight>
+        (*) <weight id="1107" MUR="0.5" MUF="1.0" PDF="292200" > MUR=0.5  </weight>
+        (*) <weight id="1108" MUR="1.0" MUF="2.0" PDF="292200" > MUF=2.0  </weight>
+        (*) <weight id="1109" MUR="2.0" MUF="2.0" PDF="292200" > MUR=2.0 MUF=2.0  </weight>
+        (*) <weight id="1110" MUR="0.5" MUF="2.0" PDF="292200" > MUR=0.5 MUF=2.0  </weight>
+        (*) <weight id="1111" MUR="1.0" MUF="0.5" PDF="292200" > MUF=0.5  </weight>
+        (*) <weight id="1112" MUR="2.0" MUF="0.5" PDF="292200" > MUR=2.0 MUF=0.5  </weight>
+        (*) <weight id="1113" MUR="0.5" MUF="0.5" PDF="292200" > MUR=0.5 MUF=0.5  </weight>
+        */
+        res[0] = 1.0 + info.lheWeights().at(1106);  // 2.0  1.0
+        res[1] = 1.0 + info.lheWeights().at(1107);  // 0.5  1.0
+        res[2] = 1.0 + info.lheWeights().at(1108);  // 1.0  2.0
+        res[3] = 1.0 + info.lheWeights().at(1109);  // 2.0  2.0
+        res[4] = 1.0 + info.lheWeights().at(1111);  // 1.0  0.5
+        res[5] = 1.0 + info.lheWeights().at(1113);  // 0.5  0.5
+      } else {
+        /*
+        (*) <weight id="1002" MUR="2.0" MUF="1.0" PDF="292200" > MUR=2.0  </weight>
+        (*) <weight id="1003" MUR="0.5" MUF="1.0" PDF="292200" > MUR=0.5  </weight>
+        (*) <weight id="1004" MUR="1.0" MUF="2.0" PDF="292200" > MUF=2.0  </weight>
+        (*) <weight id="1005" MUR="2.0" MUF="2.0" PDF="292200" > MUR=2.0 MUF=2.0  </weight>
+        (*) <weight id="1007" MUR="1.0" MUF="0.5" PDF="292200" > MUF=0.5  </weight>
+        (*) <weight id="1009" MUR="0.5" MUF="0.5" PDF="292200" > MUR=0.5 MUF=0.5  </weight>
+        */
+        res[0] = 1.0 + info.lheWeights().at(1002);  // 2.0  1.0
+        res[1] = 1.0 + info.lheWeights().at(1003);  // 0.5  1.0
+        res[2] = 1.0 + info.lheWeights().at(1004);  // 1.0  2.0
+        res[3] = 1.0 + info.lheWeights().at(1005);  // 2.0  2.0
+        res[4] = 1.0 + info.lheWeights().at(1007);  // 1.0  0.5
+        res[5] = 1.0 + info.lheWeights().at(1009);  // 0.5  0.5
+      }
+    } else if (version == 3) {
+      /*
+      (*)       <weight id="1002"> muR=0.10000E+01 muF=0.20000E+01 </weight>
+      (*)       <weight id="1003"> muR=0.10000E+01 muF=0.50000E+00 </weight>
+      (*)       <weight id="1004"> muR=0.20000E+01 muF=0.10000E+01 </weight>
+      (*)       <weight id="1005"> muR=0.20000E+01 muF=0.20000E+01 </weight>
+      (*)       <weight id="1007"> muR=0.50000E+00 muF=0.10000E+01 </weight>
+      (*)       <weight id="1009"> muR=0.50000E+00 muF=0.50000E+00 </weight>
+      */
+      res[0] = 1.0 + info.lheWeights().at(1004);  // 2.0  1.0
+      res[1] = 1.0 + info.lheWeights().at(1007);  // 0.5  1.0
+      res[2] = 1.0 + info.lheWeights().at(1002);  // 1.0  2.0
+      res[3] = 1.0 + info.lheWeights().at(1005);  // 2.0  2.0
+      res[4] = 1.0 + info.lheWeights().at(1003);  // 1.0  0.5
+      res[5] = 1.0 + info.lheWeights().at(1009);  // 0.5  0.5
+    } else if (version == 4) {
+      // Like the first option in version 2 above
       /*
       (*) <weight id="1106" MUR="2.0" MUF="1.0" PDF="292200" > MUR=2.0  </weight>
       (*) <weight id="1107" MUR="0.5" MUF="1.0" PDF="292200" > MUR=0.5  </weight>
@@ -275,7 +329,6 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
       res[3] = 1.0 + info.lheWeights().at(1109);  // 2.0  2.0
       res[4] = 1.0 + info.lheWeights().at(1111);  // 1.0  0.5
       res[5] = 1.0 + info.lheWeights().at(1113);  // 0.5  0.5
-
     }
     return res;
   }
