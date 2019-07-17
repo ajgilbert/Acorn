@@ -1,6 +1,6 @@
 import ROOT
 import json
-# import sys
+import sys
 from pprint import pprint
 from collections import defaultdict
 import argparse
@@ -221,6 +221,14 @@ def ApplySystWeightSplitting(hlist, wt_systs=[]):
     return res
 
 
+def ApplyScaleWeightSplitting(hlist):
+    res = []
+    for label, sel, wt in hlist:
+        for i in xrange(6):
+            res.append(('%s_scale_%i' % (label, i), sel, '(%s) * wt_sc_%i' % (wt, i)))
+    return res
+
+
 def ApplyPostFix(hlist, postfix):
     res = []
     for label, sel, wt in hlist:
@@ -247,7 +255,10 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
             hlist_fw = []
             if doFakes:
                 hlist_fw = ApplyPostFix(hlist, 'fw')
-            hlist.extend(ApplySystWeightSplitting(hlist, wt_systs))
+            hlist_init = list(hlist)
+            hlist.extend(ApplySystWeightSplitting(hlist_init, wt_systs))
+            if grp == 'WG':
+                hlist.extend(ApplyScaleWeightSplitting(hlist_init))
             # pprint(hlist)
             # pprint(hlist_fw)
             for H in hlist:
@@ -268,6 +279,20 @@ def CapNegativeBins(h):
     for ibin in xrange(1, h.GetNbinsX() + 1):
         if h.GetBinContent(ibin) < 0.:
             h.SetBinContent(ibin, 0.)
+
+
+def MakeScaleEnvelope(node, label):
+    h = node[label]
+    h_hi = node[label].Clone()
+    h_lo = node[label].Clone()
+    h_alts = []
+    for i in range(6):
+        h_alts.append(node[label + '_scale_%i' % i])
+    for ix in xrange(1, h.GetNbinsX() + 1):
+        max_dev = max([abs(x.GetBinContent(ix) - h.GetBinContent(ix)) for x in h_alts])
+        h_hi.SetBinContent(ix, h_hi.GetBinContent(ix) + max_dev)
+        h_lo.SetBinContent(ix, max(0., h_lo.GetBinContent(ix) - max_dev))
+    return h_hi, h_lo
 
 
 hists = Node()
@@ -636,6 +661,11 @@ for chn in ['e', 'm']:
             scale = tgt_lumi * xsec / events
             print '%-50s %-20.1f %-12.2f %-12.2f' % (remap[sample], events, xsec, scale)
 
+# fout = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label), 'RECREATE')
+# NodeToTDir(fout, hists, args.syst)
+# fout.Close()
+# sys.exit(0)
+
 # fin = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label))
 # TDirToNode(fin, node=hists)
 doCleanup = True
@@ -648,15 +678,22 @@ for path, node in hists.ListNodes(withObjects=True):
         continue
 
     for grp, grplist in groups.iteritems():
-        if len(grplist) <= 1:
-            continue
         suffixes = [g.replace(grplist[0] + '_', '') for g in node.d.keys() if g.startswith(grplist[0] + '_')]
+        scale_variations = []
         for suf in suffixes:
-            sum_list = [g + '_' + suf for g in grplist]
-            node[grp + '_' + suf] = HistSum(sum_list)
-            if doCleanup:
-                for hname in sum_list:
-                    del node.d[hname]
+            if len(grplist) > 1:
+                sum_list = [g + '_' + suf for g in grplist]
+                node[grp + '_' + suf] = HistSum(sum_list)
+                if doCleanup:
+                    for hname in sum_list:
+                        del node.d[hname]
+            if '_scale_0' in suf:
+                scale_hi, scale_lo = MakeScaleEnvelope(node, grp + '_' + suf.replace('_scale_0', ''))
+                node[grp + '_' + suf.replace('_scale_0', '_QCDScaleUp')] = scale_hi
+                node[grp + '_' + suf.replace('_scale_0', '_QCDScaleDown')] = scale_lo
+                # scale_variations.append(suf.replace('_scale_0', ''))
+
+
 
     node['Total_R'] = HistSum(['WG_R', 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
     node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])

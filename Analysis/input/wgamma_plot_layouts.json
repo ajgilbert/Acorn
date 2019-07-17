@@ -64,37 +64,37 @@
   "pure_mc_zll": [
     {
       "name": "VV",
-      "entries": ["VV"],
+      "entries": ["VV_R", "VV_E", "VV_J"],
       "legend": "Diboson",
       "color": [138,201,38]
     },
     {
       "name": "DY",
-      "entries": ["DY"],
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "DY_E", "DY_J"],
       "legend": "Z#rightarrowll",
       "color": [255,202,58]
     },
     {
       "name": "TT",
-      "entries": ["TT"],
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E", "TT_J"],
       "legend": "t#bar{t}",
       "color": [187,10,33]
     },
     {
       "name": "W",
-      "entries": ["W"],
+      "entries": ["W_E", "W_J"],
       "legend": "W#rightarrowl#nu",
       "color": [78,89,140]
     },
     {
       "name": "GG",
-      "entries": ["GG", "GG_L"],
+      "entries": ["GG_R", "GG_E", "GG_J"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
     {
       "name": "WG",
-      "entries": ["WG_NLO"],
+      "entries": ["WG_R"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }
@@ -132,7 +132,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG_NLO_R", "GG_L_R"],
+      "entries": ["GG_R"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
@@ -176,7 +176,7 @@
     },
     {
       "name": "GG",
-      "entries": ["GG_NLO_R", "GG_L_R"],
+      "entries": ["GG_R"],
       "legend": "#gamma#gamma",
       "color": 1
     },
@@ -214,13 +214,13 @@
     },
     {
       "name": "data_fakes",
-      "entries": ["data_fakes"],
+      "entries": ["data_fakes_sub"],
       "legend": "Non-prompt/fake #gamma",
       "color": [78,89,140]
     },
     {
       "name": "GG",
-      "entries": ["GG_R", "GG_L_R"],
+      "entries": ["GG_R"],
       "legend": "#gamma#gamma",
       "color": [1]
     },

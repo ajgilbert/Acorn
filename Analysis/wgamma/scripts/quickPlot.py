@@ -91,6 +91,9 @@ config_by_setting = {
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
         '*/abs(gen_phi)': ('Gen. #phi', ''),
         '*/abs(true_phi)': ('True #phi', ''),
+        '*/abs(reco_phi_f)': ('Reconstructed #phi_{f}', ''),
+        '*/abs(gen_phi_f)': ('Gen. #phi_{f}', ''),
+        '*/abs(true_phi_f)': ('True #phi_{f}', ''),
         '*/wt_def': ('Default weight', ''),
         '*/wt_pu': ('Pileup weight', ''),
         '*/wt_l0': ('Lepton weight', ''),
@@ -100,6 +103,10 @@ config_by_setting = {
         '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', ''),
         '*/1': ('1', ''),
         '*/0.5': ('0.5', '')
+    },
+    "layout": {
+        'm/cr_Zmm/*': 'pure_mc_zll',
+        'e/cr_Zee/*': 'pure_mc_zll',
     }
 }
 

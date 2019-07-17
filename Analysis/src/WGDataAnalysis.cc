@@ -42,6 +42,10 @@ WGDataAnalysis::~WGDataAnalysis() { ; }
 int WGDataAnalysis::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("WGDataAnalysis", "WGDataAnalysis");
+    // The default AutoFlush (30MB) seems to cause large
+    // memory usage at times (probably due to some branches
+    // being basically empty). Reduce it by a factor of 10 here:
+    tree_->SetAutoFlush(-3000000);
     // var sets:
     // 0 = essential
     // 1 = nominal
@@ -162,6 +166,10 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("lhe_l0_eta", &lhe_l0_eta_);
       tree_->Branch("lhe_p0_pt", &lhe_p0_pt_);
       tree_->Branch("lhe_p0_eta", &lhe_p0_eta_);
+      // tree_->Branch("lhe_l0p0_dr", &lhe_l0p0_dr_);
+      // tree_->Branch("lhe_p0j_dr", &lhe_p0j_dr_);
+      // tree_->Branch("lhe_j_pt", &lhe_j_pt_);
+      tree_->Branch("lhe_frixione", &lhe_frixione_);
     }
 
     if (var_set_ >= 2) {
@@ -243,6 +251,10 @@ int WGDataAnalysis::PreAnalysis() {
   f.Close();
   fns_["pileup_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("pileup_ratio")->functor(ws_->argSet("pu_int")));
+  fns_["pileup_ratio_hi"] = std::shared_ptr<RooFunctor>(
+    ws_->function("pileup_ratio_hi")->functor(ws_->argSet("pu_int")));
+  fns_["pileup_ratio_lo"] = std::shared_ptr<RooFunctor>(
+    ws_->function("pileup_ratio_lo")->functor(ws_->argSet("pu_int")));
   fns_["m_idisotrk_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_idisotrk_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_idisotrk_ratio_err"] = std::shared_ptr<RooFunctor>(
@@ -475,6 +487,29 @@ int WGDataAnalysis::PreAnalysis() {
       if (parts.lhe_pho) {
         lhe_p0_pt_ = parts.lhe_pho->pt();
         lhe_p0_eta_ = parts.lhe_pho->eta();
+        auto lhe_partons = ac::copy_keep_if(lhe_parts, [](ac::GenParticle *p) {
+          unsigned apdgid = std::abs(p->pdgId());
+          return p->status() == 1 && ((apdgid >= 1 && apdgid <= 6) || apdgid == 21);
+        });
+        boost::range::sort(lhe_partons, [&](ac::GenParticle* x1, ac::GenParticle* x2) {
+          return DeltaR(x1, parts.lhe_pho) < DeltaR(x2, parts.lhe_pho);
+        });
+        if (lhe_partons.size() > 0) {
+          lhe_p0j_dr_ = DeltaR(parts.lhe_pho, lhe_partons[0]);
+          lhe_j_pt_ = lhe_partons[0]->pt();
+        }
+        double frixione_sum = 0.;
+        double frixione_dr = 0.4;
+        for (auto const& ip : lhe_partons) {
+          double dr = DeltaR(ip, parts.lhe_pho);
+          if (dr >= frixione_dr) {
+            break;
+          }
+          frixione_sum += ip->pt();
+          if (frixione_sum > (parts.lhe_pho->pt() * ((1. - std::cos(dr)) / (1. - std::cos(frixione_dr))))) {
+            lhe_frixione_ = false;
+          }
+        }
       }
       if (parts.ok) {
         is_wg_gen_ = true;
@@ -662,6 +697,8 @@ int WGDataAnalysis::PreAnalysis() {
       for (PileupInfo const* pu : pu_info) {
         if (pu->bunchCrossing() == 0) {
           wt_pu_ = RooFunc(fns_["pileup_ratio"], {pu->trueNumInteractions()});
+          wt_pu_hi_ = RooFunc(fns_["pileup_ratio_hi"], {pu->trueNumInteractions()}) / wt_pu_;
+          wt_pu_lo_ = RooFunc(fns_["pileup_ratio_lo"], {pu->trueNumInteractions()}) / wt_pu_;
           break;
         }
       }
@@ -781,7 +818,11 @@ int WGDataAnalysis::PreAnalysis() {
       }
     }
     CompressVars();
+    //if (nproc == 10000) {
+    //  tree_->OptimizeBaskets(10E6, 1.1, "d");
+    //}
     tree_->Fill();
+    //++nproc;
     return 0;
   }
 
@@ -882,6 +923,10 @@ int WGDataAnalysis::PreAnalysis() {
     lhe_l0_eta_ = 0.;
     lhe_p0_pt_ = 0.;
     lhe_p0_eta_ = 0.;
+    lhe_l0p0_dr_ = 0.;
+    lhe_p0j_dr_ = -1.;
+    lhe_j_pt_ = -1.;
+    lhe_frixione_ = true;
     gen_p0_pt_ = 0.;
     gen_p0_eta_ = 0.;
     gen_phi_ = 0.;

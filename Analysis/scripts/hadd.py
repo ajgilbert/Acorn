@@ -9,7 +9,7 @@ job_mgr = Jobs()
 parser = argparse.ArgumentParser()
 job_mgr.attach_job_args(parser)
 
-parser.add_argument('dir',
+parser.add_argument('path',
                     help='root directory')
 parser.add_argument('--recursive', '-r', action='store_true',
                     help='hadd recursively in subdirectories')
@@ -23,8 +23,8 @@ parser.add_argument('--remote-dir', default=None,
 args = parser.parse_args()
 job_mgr.set_args(args)
 
-indir = args.dir
-outdir = args.dir
+indir = args.path
+outdir = args.path
 is_remote = False
 if args.remote_dir is not None:
     is_remote = True

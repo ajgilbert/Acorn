@@ -179,6 +179,11 @@ class WGDataAnalysis : public ModuleBase {
   float lhe_l0_eta_;
   float lhe_p0_pt_;
   float lhe_p0_eta_;
+  float lhe_l0p0_dr_;
+  float lhe_p0j_dr_;
+  float lhe_j_pt_;
+  bool lhe_frixione_;
+
   float gen_l0_pt_;
   float gen_l0_eta_;
   float gen_p0_pt_;

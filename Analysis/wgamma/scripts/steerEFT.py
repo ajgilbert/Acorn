@@ -138,16 +138,15 @@ if 'makeHists' in steps:
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190613-full/wgamma_%s_v4/WGamma_' % yr
-        # call(['python', 'wgamma/scripts/makeHists.py', '--task', 'eft_region',
-        #       '--indir', '/home/files/190412-full/wgamma_%s_v3/WGamma_' % yr,
-        #       '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
+        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190630-full/wgamma_%s_v4/WGamma_' % yr
         # call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
         #       '--indir', indir,
         #       '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
-          ('PScaleLo_', '_CMS_scale_pDown'),
-          ('PScaleHi_', '_CMS_scale_pUp'),
+          ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          # ('PScaleLo_', '_CMS_scale_pDown'),
+          # ('PScaleHi_', '_CMS_scale_pUp'),
         ]
         for syst_file, syst_name in do_systs:
             call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
@@ -172,25 +171,25 @@ if 'T2W' in steps:
         for sgn in ['p', 'n']:
             infiles.append('%s_LO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
 
-    # call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-    #      ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-    #       '--PO', 'ptBins=%i' % n_pt_bins,
-    #       '--PO', 'phiBins=%i' % n_phi_bins,
-    #       '--PO', 'type=eft', '--PO',
-    #       'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
+    call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+         ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+          '--PO', 'ptBins=%i' % n_pt_bins,
+          '--PO', 'phiBins=%i' % n_phi_bins,
+          '--PO', 'type=eft', '--PO',
+          'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
 
-    if label == 'fid_pt_binned':
-        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-              '--PO', 'ptBins=%i' % n_pt_bins,
-              '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
-    else:
-        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-              '--PO', 'ptBins=%i' % n_pt_bins,
-              '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
+    # if label == 'fid_pt_binned':
+    #     call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+    #          ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+    #           '--PO', 'ptBins=%i' % n_pt_bins,
+    #           '--PO', 'phiBins=%i' % n_phi_bins,
+    #           '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
+    # else:
+    #     call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+    #          ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+    #           '--PO', 'ptBins=%i' % n_pt_bins,
+    #           '--PO', 'phiBins=%i' % n_phi_bins,
+    #           '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
 
 if 'limitsVsPtMax' in steps:
     for bsm_label, bsm_setting in [('withBSM', 1), ('noBSM', 0)]:

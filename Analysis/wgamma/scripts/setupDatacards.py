@@ -68,7 +68,10 @@ cb_no_fakes.cp().AddSyst(
     cb, 'CMS_ele_fake_p', 'shape', ch.SystMap()(1.0))
 
 cb_no_fakes.cp().AddSyst(
-    cb, 'CMS_prefiring', 'shape', ch.SystMap()(1.0))
+    cb, 'CMS_scale_p', 'shape', ch.SystMap()(1.0))
+
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_scale_met_jes', 'shape', ch.SystMap()(1.0))
 
 
 # cb.cp().process(['WG_p_ooa', 'WG_n_ooa', 'VV_R', 'DY_XZG_R', 'ZG_IZG_R', 'TT_R']).AddSyst(
@@ -96,7 +99,7 @@ def CorrectionNegativeYield(proc):
 
 
 cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
-cb.SetAutoMCStats(cb, 0.)
+cb.SetAutoMCStats(cb, 0., True)
 # cb.PrintAll()
 
 writer = ch.CardWriter('$TAG/$BIN.txt',
