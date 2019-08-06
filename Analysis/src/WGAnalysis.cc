@@ -40,6 +40,8 @@ namespace ac {
       tree_->Branch("l_eta", &l_eta_);
       tree_->Branch("l_charge", &l_charge_);
       tree_->Branch("l_g_dr", &l_g_dr_);
+      tree_->Branch("l_g_dphi", &l_g_dphi_);
+      tree_->Branch("w_g_dphi", &w_g_dphi_);
       tree_->Branch("type", &type_);
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
@@ -108,6 +110,8 @@ namespace ac {
     n_pt_  = gen_sys.neutrino.pt();
     n_eta_  = gen_sys.neutrino.eta();
     l_g_dr_ = ROOT::Math::VectorUtil::DeltaR(gen_sys.charged_lepton, gen_sys.photon);
+    l_g_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(gen_sys.charged_lepton, gen_sys.photon);
+    w_g_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(gen_sys.w_system, gen_sys.photon);
     type_ = (parts.lhe_lep->spin() * parts.lhe_neu->spin()) > 0.;
 
     // Define the gen_phi (using final state GenParticles + MET)

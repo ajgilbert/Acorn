@@ -336,7 +336,7 @@ if args.year == '2018':
     X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
+X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
 X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
@@ -344,20 +344,20 @@ X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m'
 X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e'
 
 # Control regions
-X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_iso<0.15 && l0_pt>30 && l1_iso<0.15 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
+X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
 X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
 
 # Common fiducial region:
 if args.task == 'eft_region':
-    X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && l0_iso<0.15 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
+    X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
     X['fid_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto_e && $efake_veto_e'
     X['gen_acc'] = 'gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
     X['gen_acc_met1'] = 'gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
 
 if args.task == 'fid_region':
-    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
-    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4'
-    X['gen_acc'] = 'gen_l0_pt>35 && gen_met>0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
+    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4 && puppi_met>0'
+    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4 && puppi_met>0'
+    X['gen_acc'] = 'gen_l0_pt>35 && abs(gen_l0_eta)<2.4 && gen_met>0 && gen_p0_pt>30 && (gen_p0_eta)<2.5 && gen_l0p0_dr>0.7'
     X['gen_acc_met1'] = 'gen_l0_pt>35 && gen_met>0 && gen_met<0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
 
 # Event weights
@@ -528,7 +528,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l0_pt', (40, 0., 150.)),
         ('l0_eta', (20, -3.0, 3.0)),
         ('l0_phi', (20, -3.15, 3.15)),
-        ('l0_iso', (40, 0, 2.0)),
+        # ('l0_iso', (40, 0, 2.0)),
         ('l1_pt', (40, 0., 150.)),
         ('l1_eta', (20, -3.0, 3.0)),
         ('l0l1_M', (60, 60, 120)),

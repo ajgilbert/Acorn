@@ -53,7 +53,9 @@ int WGDataAnalysis::PreAnalysis() {
 
     if (var_set_ >= 0) {
       tree_->Branch("metfilters", &metfilters_);
-      tree_->Branch("gen_is_zg", &gen_is_zg_);
+      if (check_is_zg_) {
+        tree_->Branch("gen_is_zg", &gen_is_zg_);
+      }
       tree_->Branch("n_vtx", &n_vtx_);
 
       tree_->Branch("n_pre_m", &n_pre_m_);
@@ -64,15 +66,13 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("l0_pt", &l0_pt_);
       tree_->Branch("l0_eta", &l0_eta_);
       tree_->Branch("l0_phi", &l0_phi_);
-      tree_->Branch("l0_iso", &l0_iso_);
+      // tree_->Branch("l0_iso", &l0_iso_);
       tree_->Branch("l0_trg", &l0_trg_);
       tree_->Branch("l0_q", &l0_q_);
       tree_->Branch("l0_pdgid", &l0_pdgid_);
 
       tree_->Branch("l1_pt", &l1_pt_);
-      tree_->Branch("l1_eta", &l1_eta_);
-      tree_->Branch("l1_phi", &l1_phi_);
-      tree_->Branch("l1_iso", &l1_iso_);
+      // tree_->Branch("l1_iso", &l1_iso_);
       tree_->Branch("l0l1_M", &l0l1_M_);
       tree_->Branch("l0l1_dr", &l0l1_dr_);
       tree_->Branch("l0l1_pt", &l0l1_pt_);
@@ -91,15 +91,12 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("p0_truth", &p0_truth_);
 
       tree_->Branch("met", &met_);
-      tree_->Branch("met_phi", &met_phi_);
       // tree_->Branch("tk_met", &tk_met_);
       // tree_->Branch("tk_met_phi", &tk_met_phi_);
       tree_->Branch("puppi_met", &puppi_met_);
-      tree_->Branch("puppi_met_phi", &puppi_met_phi_);
 
-      tree_->Branch("l0met_mt", &l0met_mt_);
       tree_->Branch("l0p0_dr", &l0p0_dr_);
-      tree_->Branch("l0p0_dphi", &l0p0_dphi_);
+      // tree_->Branch("l0p0_dphi", &l0p0_dphi_);
       tree_->Branch("l0p0_M", &l0p0_M_);
 
       tree_->Branch("reco_phi", &reco_phi_);
@@ -119,21 +116,32 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_p0_fake", &wt_p0_fake_);
       tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
 
-      tree_->Branch("gen_p0_pt", &gen_p0_pt_);
-      tree_->Branch("gen_p0_eta", &gen_p0_eta_);
-      tree_->Branch("gen_phi", &gen_phi_);
-      tree_->Branch("gen_phi_f", &gen_phi_f_);
-      tree_->Branch("true_phi", &true_phi_);
-      tree_->Branch("true_phi_f", &true_phi_f_);
+      if (do_wg_gen_vars_) {
+        tree_->Branch("gen_p0_pt", &gen_p0_pt_);
+        tree_->Branch("gen_p0_eta", &gen_p0_eta_);
+        tree_->Branch("gen_phi", &gen_phi_);
+        tree_->Branch("gen_phi_f", &gen_phi_f_);
+        tree_->Branch("true_phi", &true_phi_);
+        tree_->Branch("true_phi_f", &true_phi_f_);
 
-      tree_->Branch("gen_l0_q", &gen_l0_q_);
-      tree_->Branch("gen_l0_pt", &gen_l0_pt_);
-      tree_->Branch("gen_l0_eta", &gen_l0_eta_);
-      tree_->Branch("gen_met", &gen_met_);
-      tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
+        tree_->Branch("gen_l0_q", &gen_l0_q_);
+        tree_->Branch("gen_l0_pt", &gen_l0_pt_);
+        tree_->Branch("gen_l0_eta", &gen_l0_eta_);
+        tree_->Branch("gen_met", &gen_met_);
+        tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
+      }
     }
 
     if (var_set_ >= 1) {
+
+      tree_->Branch("l1_eta", &l1_eta_);
+      tree_->Branch("l1_phi", &l1_phi_);
+
+      tree_->Branch("met_phi", &met_phi_);
+      tree_->Branch("puppi_met_phi", &puppi_met_phi_);
+
+      tree_->Branch("l0met_mt", &l0met_mt_);
+
       tree_->Branch("wt_sc_0", &wt_sc_0_);
       tree_->Branch("wt_sc_1", &wt_sc_1_);
       tree_->Branch("wt_sc_2", &wt_sc_2_);
@@ -154,22 +162,24 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_p0_e_fake_hi", &wt_p0_e_fake_hi_);
       tree_->Branch("wt_p0_e_fake_lo", &wt_p0_e_fake_lo_);
 
-      tree_->Branch("is_wg_gen", &is_wg_gen_);
-      tree_->Branch("gen_nparts", &gen_nparts_);
+      if (do_wg_gen_vars_) {
+        tree_->Branch("is_wg_gen", &is_wg_gen_);
+        tree_->Branch("gen_nparts", &gen_nparts_);
 
-      tree_->Branch("gen_pdgid", &gen_pdgid_);
+        tree_->Branch("gen_pdgid", &gen_pdgid_);
 
-      tree_->Branch("gen_l0_match", &gen_l0_match_);
-      tree_->Branch("gen_p0_match", &gen_p0_match_);
+        tree_->Branch("gen_l0_match", &gen_l0_match_);
+        tree_->Branch("gen_p0_match", &gen_p0_match_);
 
-      tree_->Branch("lhe_l0_pt", &lhe_l0_pt_);
-      tree_->Branch("lhe_l0_eta", &lhe_l0_eta_);
-      tree_->Branch("lhe_p0_pt", &lhe_p0_pt_);
-      tree_->Branch("lhe_p0_eta", &lhe_p0_eta_);
-      // tree_->Branch("lhe_l0p0_dr", &lhe_l0p0_dr_);
-      // tree_->Branch("lhe_p0j_dr", &lhe_p0j_dr_);
-      // tree_->Branch("lhe_j_pt", &lhe_j_pt_);
-      tree_->Branch("lhe_frixione", &lhe_frixione_);
+        tree_->Branch("lhe_l0_pt", &lhe_l0_pt_);
+        tree_->Branch("lhe_l0_eta", &lhe_l0_eta_);
+        tree_->Branch("lhe_p0_pt", &lhe_p0_pt_);
+        tree_->Branch("lhe_p0_eta", &lhe_p0_eta_);
+        // tree_->Branch("lhe_l0p0_dr", &lhe_l0p0_dr_);
+        // tree_->Branch("lhe_p0j_dr", &lhe_p0j_dr_);
+        // tree_->Branch("lhe_j_pt", &lhe_j_pt_);
+        tree_->Branch("lhe_frixione", &lhe_frixione_);
+      }
     }
 
     if (var_set_ >= 2) {
@@ -382,8 +392,8 @@ int WGDataAnalysis::PreAnalysis() {
     */
 
     auto pre_muons = ac::copy_keep_if(muons, [](ac::Muon const* m) {
-      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && fabs(m->dxy()) < 0.05 &&
-             fabs(m->dz()) < 0.2;
+      return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15 &&
+             fabs(m->dxy()) < 0.05 && fabs(m->dz()) < 0.2;
     });
 
     auto pre_electrons = ac::copy_keep_if(electrons, [](ac::Electron const* e) {
@@ -441,7 +451,7 @@ int WGDataAnalysis::PreAnalysis() {
 
     if (l0) {
       ac::keep_if(pre_photons, [&](ac::Photon const* p) {
-        return DeltaR(p, l0) > 0.3;
+        return DeltaR(p, l0) > 0.7;
       });
     }
 
@@ -948,7 +958,7 @@ int WGDataAnalysis::PreAnalysis() {
           &puppi_met_, &tk_met_,    &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
           &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
           &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_,
-          &l0p0_dphi_, &l0p0_M_}) {
+          &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_}) {
       *var = reduceMantissaToNbitsRounding(*var, 10);
     }
     for (float* var :
