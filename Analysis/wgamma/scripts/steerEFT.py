@@ -138,7 +138,7 @@ if 'makeHists' in steps:
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190630-full/wgamma_%s_v4/WGamma_' % yr
+        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190729-full/wgamma_%s_v4/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])

@@ -92,6 +92,7 @@ config_by_setting = {
         '*/abs(gen_phi)': ('Gen. #phi', ''),
         '*/abs(true_phi)': ('True #phi', ''),
         '*/abs(reco_phi_f)': ('Reconstructed #phi_{f}', ''),
+        '*/abs(reco_puppi_phi_f)': ('Reconstructed #phi_{f}', ''),
         '*/abs(gen_phi_f)': ('Gen. #phi_{f}', ''),
         '*/abs(true_phi_f)': ('True #phi_{f}', ''),
         '*/wt_def': ('Default weight', ''),

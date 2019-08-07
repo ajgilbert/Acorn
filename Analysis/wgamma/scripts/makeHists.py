@@ -88,7 +88,7 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
-        'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'GG_LO': 'DiPhotonJetsBox_MGG-80toInf',
         'GG_L': 'DiPhotonJetsBox_MGG-40to80'
     },
     "2018": {
@@ -136,7 +136,7 @@ groups = {
     'TT': ['TT_SL', 'TT_Had', 'TT_DL'],
     'TTG': ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar'],
     'VV': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top'],
-    'GG': ['GG', 'GG_L']
+    'GG': ['GG_LO', 'GG_L']
 }
 
 if year == '2016':
@@ -318,8 +318,8 @@ X['sig_t'] = '($p0_eb && p0_sigma < 0.01015) || ($p0_ee && p0_sigma < 0.0272)'
 X['sig_l'] = '($p0_eb && p0_sigma > 0.01015) || ($p0_ee && p0_sigma > 0.0272)'
 
 # Selections for vetoing e->photon fakes
-X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1'
-X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1'
+X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
+X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
 
 # Selection to veto (or select) mZ region
 X['mZ_veto_m'] = '(l0p0_M < 70 || l0p0_M > 100)'
@@ -336,12 +336,12 @@ if args.year == '2018':
     X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && met>0 && p0_pt>30 && l0p0_dr>0.7'
-X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && met>0 && p0_pt>30 && l0p0_dr>0.7 && !$p0_phi_veto'
+X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
-X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m'
-X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e'
+X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
+X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met>40'
 
 # Control regions
 X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
@@ -349,16 +349,20 @@ X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && l0_pt>30 && l1_pt>30 && 
 
 # Common fiducial region:
 if args.task == 'eft_region':
-    X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
-    X['fid_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto_e && $efake_veto_e'
-    X['gen_acc'] = 'gen_l0_pt>80 && gen_met>40 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
-    X['gen_acc_met1'] = 'gen_l0_pt>80 && gen_met>40 && gen_met<80 && gen_p0_pt>150 && gen_l0p0_dr>3.0'
+    # X['fid_m'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $efake_veto_m'
+    # X['fid_e'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>80 && met>80 && p0_pt>150 && l0p0_dr>3.0 && $mZ_veto_e && $efake_veto_e'
+    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
+    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
+    X['gen_core'] = 'gen_l0_pt>80 && abs(gen_l0_eta)<2.5 && gen_met>40 && gen_p0_pt>150 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>3.0'
+    X['gen_acc'] = '$gen_core && gen_met>80'
+    X['gen_acc_met1'] = '$gen_core && gen_met>40 && gen_met<=80'
+    X['gen_ooa'] = '!$gen_core'
 
 if args.task == 'fid_region':
-    X['fid_m'] ='$baseline_m_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4 && puppi_met>0'
-    X['fid_e'] ='$baseline_e_mZ_veto && l0_pt>35 && abs(l0_eta) < 2.4 && puppi_met>0'
-    X['gen_acc'] = 'gen_l0_pt>35 && abs(gen_l0_eta)<2.4 && gen_met>0 && gen_p0_pt>30 && (gen_p0_eta)<2.5 && gen_l0p0_dr>0.7'
-    X['gen_acc_met1'] = 'gen_l0_pt>35 && gen_met>0 && gen_met<0 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
+    X['fid_m'] ='$baseline_m_mZ_veto'
+    X['fid_e'] ='$baseline_e_mZ_veto'
+    X['gen_acc'] = 'gen_l0_pt>30 && abs(gen_l0_eta)<2.5 && gen_met>40 && gen_p0_pt>30 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>0.7'
+    X['gen_acc_met1'] = 'gen_l0_pt>30 && gen_met>0 && gen_met<40 && gen_p0_pt>30 && gen_l0p0_dr>0.7'
 
 # Event weights
 X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
@@ -390,9 +394,9 @@ if args.task == 'eft_region' or args.task == 'fid_region':
     do_cats['e'].extend(['fid_e'])
     do_cats['m'].extend(['fid_m'])
 
-    X['p_gen_ooa'] = 'gen_l0_q==+1 && !$gen_acc'
-    X['n_gen_ooa'] = 'gen_l0_q==-1 && !$gen_acc'
-    X['x_gen_ooa'] = '!$gen_acc'
+    X['p_gen_ooa'] = 'gen_l0_q==+1 && $gen_ooa'
+    X['n_gen_ooa'] = 'gen_l0_q==-1 && $gen_ooa'
+    X['x_gen_ooa'] = '$gen_ooa'
 
     X['p_gen_acc'] = 'gen_l0_q==+1 && $gen_acc'
     X['n_gen_acc'] = 'gen_l0_q==-1 && $gen_acc'
@@ -435,9 +439,9 @@ if args.task == 'eft_region' or args.task == 'fid_region':
             X['x_gen_met1_%i_%i' % (i, j)] = '$gen_acc_met1 && gen_p0_pt>=%f && gen_p0_pt<%f && %s >= %f && %s < %f' % (pt_bins_min[i], pt_bins_max[i], phi_var, phi_bins_min[j], phi_var, phi_bins_max[j])
 
     drawvars = [
-        ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
+        # ('gen_p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
         ('p0_pt', BinningFromStr(eft_defaults['pt_bins'])),
-        (eft_defaults['phi_var'], BinningFromStr(eft_defaults['phi_bins'])),
+        # (eft_defaults['phi_var'], BinningFromStr(eft_defaults['phi_bins'])),
         (eft_defaults['phi_var_obs'], BinningFromStr(eft_defaults['phi_bins_obs']))
     ]
 
@@ -525,7 +529,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('n_veto_m', (3, -0.5, 2.5)),
         ('n_veto_e', (3, -0.5, 2.5)),
         ('l0met_mt', (30, 0., 200.)),
-        ('l0_pt', (40, 0., 150.)),
+        ('l0_pt', (30, 0., 150.)),
         ('l0_eta', (20, -3.0, 3.0)),
         ('l0_phi', (20, -3.15, 3.15)),
         # ('l0_iso', (40, 0, 2.0)),
@@ -534,13 +538,13 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l0l1_M', (60, 60, 120)),
         ('l0l1_pt', (80, 0, 200)),
         # ('l0l1_dr', (20, 0., 5.)),
-        ('met', (40, 0., 200.)),
+        ('met', (20, 0., 200.)),
         ('met_phi', (20, -3.15, 3.15)),
         # ('tk_met', (40, 0., 200.)),
         # ('tk_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
         ('puppi_met_phi', (20, -3.15, 3.15)),
-        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300]),
+        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500]),
         ('p0_eta', (20, -3.0, 3.0)),
         ('p0_phi', (30, -3.15, 3.15)),
         ('l0p0_dr', (20, 0., 5.)),
