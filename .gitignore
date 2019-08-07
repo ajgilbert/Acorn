@@ -3,5 +3,4 @@ __init__.py
 *.root
 *.pdf
 *.png
-*.json
 *.csv
