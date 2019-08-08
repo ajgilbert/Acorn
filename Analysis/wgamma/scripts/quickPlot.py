@@ -13,6 +13,11 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
 
+
+def HistSum(hdict, label_list):
+    return sum([hdict[X] for X in label_list[1:]], hdict[label_list[0]])
+
+
 default_cfg = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
     'outdir': '',               # output directory
@@ -38,7 +43,23 @@ default_cfg = {
     'top_title_right': '35.9 fb^{-1} (13 TeV)',
     'top_title_left': '',
     'hide_data': False,
-    'auto_top_title_right': True
+    'auto_top_title_right': True,
+    'overlays': [
+        {
+            "name": "systUp",
+            "entries": "total",
+            "hist_postfix": "_CMS_scale_met_jesUp",
+            "legend": "systUp",
+            "color": 2
+        },
+        {
+            "name": "systDown",
+            "entries": "total",
+            "hist_postfix": "_CMS_scale_met_jesDown",
+            "legend": "systDown",
+            "color": 4
+        }
+    ]
 }
 
 config_by_setting = {
@@ -199,8 +220,10 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     stack = ROOT.THStack()
     legend = ROOT.TLegend(*(cfg['legend_pos'] + ['', 'NBNDC']))
 
+    all_input_hists = []
     for info in layout:
-        hist = hists[info['entries'][0]]
+        all_input_hists.extend(info['entries'])
+        hist = hists[info['entries'][0]].Clone()
         col = info['color']
         if isinstance(col, list):
             col = ROOT.TColor.GetColor(*col)
@@ -219,6 +242,31 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     h_tot.SetFillColor(plot.CreateTransparentColor(12, 0.3))
     h_tot.SetMarkerSize(0)
 
+    # Build overlays
+    for info in cfg['overlays']:
+        hist = None
+        input_list = []
+        if isinstance(info['entries'], str):
+            input_list = list(all_input_hists)
+        else:
+            input_list = list(info['entries'])
+        updated_list = []
+        for xh in input_list:
+            if xh + info['hist_postfix'] in hists:
+                updated_list.append(xh + info['hist_postfix'])
+            else:
+                updated_list.append(xh)
+        print updated_list
+        hist = HistSum(hists, updated_list)
+        col = info['color']
+        if isinstance(col, list):
+            col = ROOT.TColor.GetColor(*col)
+        plot.Set(hist, LineColor=col, LineWidth=2, MarkerSize=0, Title=info['legend'])
+        for ib in xrange(1, hist.GetNbinsX() + 1):
+            hist.SetBinError(ib, 1E-7)
+        h_store[info['name']] = hist
+
+
     legend.AddEntry(h_data, 'Observed', 'PL')
     for ele in reversed(layout):
         legend.AddEntry(h_store[ele['name']], '', 'F')
@@ -227,8 +275,15 @@ def MakePlot(name, outdir, hists, cfg, layouts):
         bkg_uncert_label = 'Uncertainty'
     legend.AddEntry(h_tot, bkg_uncert_label, 'F')
 
+    for info in cfg['overlays']:
+        legend.AddEntry(h_store[info['name']], info['legend'], 'L')
+
     stack.Draw('HISTSAME')
     h_tot.Draw("E2SAME")
+
+    for info in cfg['overlays']:
+        h_store[info['name']].Draw('SAME')
+
     if not cfg['hide_data']:
         h_data.Draw('E0SAME')
 
@@ -240,6 +295,7 @@ def MakePlot(name, outdir, hists, cfg, layouts):
             plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
+    r_store = {}
     if cfg['ratio'] or cfg['fraction']:
         pads[1].cd()
         pads[1].SetGrid(0, 1)
@@ -251,6 +307,9 @@ def MakePlot(name, outdir, hists, cfg, layouts):
             r_tot.Draw('E2SAME')
             if not cfg['hide_data']:
                 r_data.Draw('SAME')
+            for info in cfg['overlays']:
+                r_store[info['name']] = plot.MakeRatioHist(h_store[info['name']], h_tot, False, False)
+                r_store[info['name']].Draw('SAME')
 
             plot.SetupTwoPadSplitAsRatio(
                 pads, plot.GetAxisHist(

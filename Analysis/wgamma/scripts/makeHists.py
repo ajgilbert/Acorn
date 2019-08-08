@@ -236,7 +236,7 @@ def ApplyPostFix(hlist, postfix):
     return res
 
 
-def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], doFakes=True):
+def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], doFakes=True, doSysts=True):
     # Standard treatment for most MC samples
     for grp in groups:
         for P in groups[grp]:
@@ -256,9 +256,10 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
             if doFakes:
                 hlist_fw = ApplyPostFix(hlist, 'fw')
             hlist_init = list(hlist)
-            hlist.extend(ApplySystWeightSplitting(hlist_init, wt_systs))
-            if grp == 'WG':
-                hlist.extend(ApplyScaleWeightSplitting(hlist_init))
+            if doSysts:
+                hlist.extend(ApplySystWeightSplitting(hlist_init, wt_systs))
+                if grp == 'WG':
+                    hlist.extend(ApplyScaleWeightSplitting(hlist_init))
             # pprint(hlist)
             # pprint(hlist_fw)
             for H in hlist:
@@ -449,35 +450,47 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         for sel in do_cats[chn]:
             for var, binning in drawvars:
                 xnode = hists[chn][sel][var]
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs[chn])
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs[chn], doSysts=(args.syst is None))
+                wg_scale_hlist = []
+                wg_syst_hlist = []
                 wg_hlist = []
                 for chg in ['p', 'n', 'x']:
-                    wg_hlist.extend([
+                    hlist = [
                         ('WG_ooa_%s' % chg, '$' + sel + ' && $%s_gen_ooa' % chg, '$baseline_wt'),
                         ('WG_main_%s' % chg, '$' + sel + ' && $%s_gen_acc' % chg, '$baseline_wt'),
                         ('WG_met1_%s' % chg, '$' + sel + ' && $%s_gen_acc_met1' % chg, '$baseline_wt'),
-                        ])
+                    ]
+                    wg_hlist.extend(hlist)
+                    wg_scale_hlist.extend(hlist)
+                    wg_syst_hlist.extend(hlist)
                     # xnode['WG_ooa_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_ooa' % chg), wt=X.get('$baseline_wt'))
                     # xnode['WG_main_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc' % chg), wt=X.get('$baseline_wt'))
                     # xnode['WG_met1_%s' % chg] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_acc_met1' % chg), wt=X.get('$baseline_wt'))
                 if sel[-1].isdigit():
                     chg = sel[0]
                     for i in range(len(pt_bins_min)):
-                        wg_hlist.extend([
+                        hlist = [
                             ('WG_main_%s_%i' % (chg, i), '$' + sel + ' && $%s_gen_%i' % (chg, i), '$baseline_wt'),
                             ('WG_met1_%s_%i' % (chg, i), '$' + sel + ' && $%s_gen_met1_%i' % (chg, i), '$baseline_wt'),
-                            ])
+                        ]
+                        wg_hlist.extend(hlist)
+                        wg_syst_hlist.extend(hlist)
+
                         # xnode['WG_main_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
                         # xnode['WG_met1_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
                     for i in [int(sel[-1])]:
                         for j in range(len(phi_bins_min)):
-                            wg_hlist.extend([
+                            hlist = [
                                 ('WG_main_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j), '$baseline_wt'),
                                 ('WG_met1_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j), '$baseline_wt'),
-                                ])
+                            ]
+                            wg_hlist.extend(hlist)
+                            wg_syst_hlist.extend(hlist)
                             # xnode['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
                             # xnode['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
-                wg_hlist.extend(ApplySystWeightSplitting(wg_hlist, main_wt_systs[chn]))
+                if args.syst is None:
+                    wg_hlist.extend(ApplySystWeightSplitting(wg_syst_hlist, main_wt_systs[chn]))
+                    wg_hlist.extend(ApplyScaleWeightSplitting(wg_scale_hlist))
                 for H in wg_hlist:
                     xnode[H[0]] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
 
@@ -582,7 +595,7 @@ if args.task in ['baseline', 'electron_fakes']:
                     actual_wt_systs = wt_systs[chn]
                 else:
                     actual_wt_systs = list()
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs)
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs, doSysts=(args.syst is None))
             for sample in samples:
                 hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
                 hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
@@ -629,7 +642,7 @@ if args.task == 'photon_fakes':
         for sel in do_cats[chn]:
             for var, binning in drawvars:
                 doFakes = ('iso_t_sig_t' in sel)
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=doFakes)
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=doFakes, doSysts=(args.syst is None))
 
 MultiDraw(hists, samples, tname, mt_cores=4, mt_thresh=1)
 
@@ -685,6 +698,7 @@ for path, node in hists.ListNodes(withObjects=True):
         suffixes = [g.replace(grplist[0] + '_', '') for g in node.d.keys() if g.startswith(grplist[0] + '_')]
         scale_variations = []
         for suf in suffixes:
+            # print grp, grplist, suf
             if len(grplist) > 1:
                 sum_list = [g + '_' + suf for g in grplist]
                 node[grp + '_' + suf] = HistSum(sum_list)

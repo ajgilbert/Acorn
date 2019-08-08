@@ -142,17 +142,17 @@ if 'makeHists' in steps:
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
-        # do_systs = [
-        #   ('MetJesLo_', '_CMS_scale_met_jesDown'),
-        #   ('MetJesHi_', '_CMS_scale_met_jesUp'),
-        #   # ('PScaleLo_', '_CMS_scale_pDown'),
-        #   # ('PScaleHi_', '_CMS_scale_pUp'),
-        # ]
-        # for syst_file, syst_name in do_systs:
-        #     call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
-        #           '--indir-data', indir,
-        #           '--indir', indir + syst_file, '--syst', syst_name,
-        #           '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label + syst_name])
+        do_systs = [
+          ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          # ('PScaleLo_', '_CMS_scale_pDown'),
+          # ('PScaleHi_', '_CMS_scale_pUp'),
+        ]
+        for syst_file, syst_name in do_systs:
+            call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
+                  '--indir-data', indir,
+                  '--indir', indir + syst_file, '--syst', syst_name,
+                  '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label + syst_name])
 
 
 if 'setupDatacards' in steps:
