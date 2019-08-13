@@ -166,6 +166,8 @@ class WGDataAnalysis : public ModuleBase {
   float wt_trg_l0_lo_;
   float wt_p0_hi_;
   float wt_p0_lo_;
+  float wt_p0_fake_err_;
+  int wt_p0_fake_bin_;
   float wt_p0_e_fake_hi_;
   float wt_p0_e_fake_lo_;
 

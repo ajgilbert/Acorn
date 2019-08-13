@@ -1,7 +1,11 @@
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
+
 import CombineHarvester.CombineTools.plotting as plot
-import json
+# import json
 # import sys
+import math
 from pprint import pprint
 from collections import defaultdict
 import argparse
@@ -9,57 +13,97 @@ from array import array
 from Acorn.Analysis.analysis import *
 
 ROOT.TH1.SetDefaultSumw2(True)
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
+parser.add_argument('-i', '--input', default='')
+parser.add_argument('-o', '--output', default='output_2016_photon_fakes_ratios_m.root')
+parser.add_argument('--year', default='2016')
+parser.add_argument('--postfix', default='')
 parser.add_argument('--channel', default='m', choices=['e', 'm'])
 
 args = parser.parse_args()
 
 
-fin = ROOT.TFile('output_%s_photon_fakes.root' % args.year)
+fin = ROOT.TFile(args.input)
 hists = TDirToNode(fin)
+post = args.postfix
 
 var = 'p0_pt'
 # var = 'p0_chiso'
+add_channel = 'e'
 
 def RebinHist(hist, bins):
     x = hist.Rebin(len(bins) - 1, "", array('d', bins))
     x.Copy(hist)
 
 
-fout = ROOT.TFile('output_%s_photon_fakes_ratios_%s.root' % (args.year, args.channel), 'RECREATE')
+fout = ROOT.TFile(args.output, 'RECREATE')
 
 res = {}
 
 for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
-    for sel in ['%s_iso_t_sig_l' % eb, '%s_iso_l_sig_l' % eb, '%s_iso_l_sig_t' % eb]:
+    for sel in ['%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post)]:
         node = hists[args.channel][sel][var]
-        if 'barrel' in eb:
-            newbins = [30, 35, 40, 50, 60, 80, 100, 300]
-        else:
-            newbins = [30, 40, 60, 300]
+        sel_alt = sel.replace(eb, eb.replace('_%s' % args.channel, '_%s' % add_channel))
+        print sel_alt
+        node_alt = hists[add_channel][sel_alt][var]
 
-        # newbins = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-        node.ForEach(lambda x: RebinHist(x, newbins))
+        # Rebin if we're doing pT
+        if var == 'p0_pt':
+            if 'barrel' in eb:
+                # newbins = [30, 40, 60, 100, 200]
+                newbins = [30, 40, 50, 60, 80, 100, 150, 200, 300]
+            else:
+                # newbins = [30, 40, 60, 100, 200]
+                newbins = [30, 40, 60, 100, 300]
+            node.ForEach(lambda x: RebinHist(x, newbins))
+            if add_channel is not None:
+                node_alt.ForEach(lambda x: RebinHist(x, newbins))
+
+        # Subtract off the background
         node['data_sub'] = node['data_obs'] - (node['Total_R'] + node['Total_E'])
-    h_fr = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['data_sub'].Clone()
-    h_fr.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['data_sub'])
+        if add_channel is not None:
+            node['data_sub'] += (node_alt['data_obs'] - (node_alt['Total_R'] + node_alt['Total_E']))
 
-    h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_F'].Clone()
-    h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_F'])
+    # Now take the ratio between regions
+    h_fr = hists[args.channel]['%s_iso_l_sig_t%s' % (eb, post)][var]['data_sub'].Clone()
+    h_fr.Divide(hists[args.channel]['%s_iso_l_sig_l%s' % (eb, post)][var]['data_sub'])
+    hint = None
+    if var == 'p0_chiso':
+        h_fr.Fit('pol1')
+        # func = ROOT.TF1('func', '[0]*TMath::Exp([1]*([2]-x))')
+        # h_fr.Fit('func')
+        hint = ROOT.TH1D("hint", "Fitted gaussian with .95 conf.band", 100, 0, 20)
+        ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(hint, 0.68)
+        hint.SetStats(False)
+        hint.SetMarkerSize(0)
+        hint.SetFillColorAlpha(2, 0.2)
+        hint.Print('range')
+        # h_fr.GetFunction('pol2').Draw('E3SAME')
+
+    # Print the results
+    for ib in xrange(1, h_fr.GetNbinsX() + 1):
+        frac_err = 0.
+        if h_fr.GetBinContent(ib) > 0.:
+            frac_err = (h_fr.GetBinError(ib) / h_fr.GetBinContent(ib))
+        print '[%f,%f] %f %f %f' % (
+            h_fr.GetXaxis().GetBinLowEdge(ib), h_fr.GetXaxis().GetBinUpEdge(ib), h_fr.GetBinContent(ib), h_fr.GetBinError(ib), frac_err
+            )
+    # h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_F'].Clone()
+    # h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_F'])
 
     plot.Set(h_fr, MarkerSize=0.5)
     canv = ROOT.TCanvas('photon_fakes_%s_%s' % (args.year, eb), 'photon_fakes_%s_%s' % (args.year, eb))
     pads = plot.OnePad()
     h_fr.Draw('E')
-    plot.Set(h_fr_mc, LineColor=2, MarkerColor=2)
-    h_fr_mc.Draw('SAMEE')
-    h_fr.SetMaximum(1.2)
+    if hint is not None:
+        hint.Draw("E3SAME")
+        h_fr.Draw('ESAME')
+    # plot.Set(h_fr_mc, LineColor=2, MarkerColor=2)
+    # h_fr_mc.Draw('SAMEE')
+    h_fr.SetMaximum(1.5)
     h_fr.SetMinimum(0.1)
     h_fr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
     h_fr.GetYaxis().SetTitle('Fake ratio')
@@ -76,7 +120,175 @@ for i in xrange(1, h2d.GetNbinsX() + 1):
     x = h2d.GetXaxis().GetBinCenter(i)
     h2d.SetBinContent(i, 1, res['barrel_%s' % args.channel].GetBinContent(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
     h2d.SetBinContent(i, 2, res['endcap_%s' % args.channel].GetBinContent(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
+    h2d.SetBinError(i, 1, res['barrel_%s' % args.channel].GetBinError(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
+    h2d.SetBinError(i, 2, res['endcap_%s' % args.channel].GetBinError(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
+
+
+"""
+These are the linear extrapolations in charged iso to 0.5 GeV:
+BARREL - 2016
+30-40:
+ fSumw[3]=1.2113, x=0.5, error=0.0705191
+40-60:
+ fSumw[3]=0.995309, x=0.5, error=0.0586166
+60-100:
+ fSumw[3]=0.697634, x=0.5, error=0.0840808
+100-200:
+ fSumw[3]=0.280704, x=0.5, error=0.0550755
+
+[30.000000,40.000000] 1.004965 0.018217 0.018127
+[40.000000,60.000000] 0.887880 0.017478 0.019685
+[60.000000,100.000000] 0.657777 0.015734 0.023920
+[100.000000,200.000000] 0.363980 0.015708 0.043155
+Rel uncerts (+ stat err):
+ - 1.205315608
+ - 1.120994954
+ - 1.060593484
+ - 0.771207209
+
+ENDCAP - 2016
+30-40:
+ fSumw[3]=0.771773, x=0.5, error=0.0696247
+40-60:
+ fSumw[3]=0.703544, x=0.5, error=0.0832643
+60-100:
+ fSumw[3]=0.898874, x=0.5, error=0.100833
+ 100-200:
+ fSumw[3]=0.703094, x=0.5, error=0.222491
+
+[30.000000,40.000000] 0.613333 0.015178 0.024747
+[40.000000,60.000000] 0.603833 0.016708 0.027670
+[60.000000,100.000000] 0.679418 0.024028 0.035366
+[100.000000,200.000000] 0.833903 0.056843 0.068165
+
+Rel uncerts (+ stat err):
+ - 1.258326227
+ - 1.165130094
+ - 1.323005867
+ - 0.843136432
+
+
+BARREL - 2017
+30-40:
+ fSumw[3]=1.15364, x=0.5, error=0.055392
+40-60:
+ fSumw[3]=0.875979, x=0.5, error=0.0489659
+60-100:
+ fSumw[3]=0.677147, x=0.5, error=0.0544896
+100-200:
+ fSumw[3]=0.45907, x=0.5, error=0.0802994
+
+[30.000000,40.000000] 0.942330 0.013639 0.014473
+[40.000000,60.000000] 0.827754 0.013030 0.015742
+[60.000000,100.000000] 0.644211 0.012020 0.018658
+[100.000000,200.000000] 0.477286 0.015821 0.033149
+Rel uncerts (+ stat err):
+ - 1.220379273
+ - 1.058260063
+ - 1.051126106
+ - 0.961834204
+
+ENDCAP - 2017
+30-40:
+ fSumw[3]=0.805178, x=0.5, error=0.0485607
+40-60:
+ fSumw[3]=0.886195, x=0.5, error=0.0707819
+60-100:
+ fSumw[3]=1.01639, x=0.5, error=0.115265
+ 100-200:
+ fSumw[5]=1.07788, x=0.9, error=0.301499
+
+[30.000000,40.000000] 0.591468 0.014958 0.025290
+[40.000000,60.000000] 0.690967 0.019344 0.027996
+[60.000000,100.000000] 0.864095 0.030710 0.035540
+[100.000000,200.000000] 1.260906 0.088633 0.070293
+
+Rel uncerts (+ stat err):
+ - 1.361321323
+ - 1.282543161
+ - 1.176247982
+ - 0.854845643
+
+
+BARREL - 2018
+30-40:
+ fSumw[3]=1.21661, x=0.5, error=0.0256668
+40-60:
+ fSumw[3]=0.96831, x=0.5, error=0.0325356
+60-100:
+ fSumw[3]=0.63544, x=0.5, error=0.0410728
+100-200:
+ fSumw[3]=0.502062, x=0.5, error=0.0572004
+
+[30.000000,40.000000] 1.012072 0.014289 0.014119
+[40.000000,60.000000] 0.875597 0.012068 0.013782
+[60.000000,100.000000] 0.663844 0.010914 0.016440
+[100.000000,200.000000] 0.474364 0.013239 0.027910
+Rel uncerts (+ stat err):
+ - 1.20209827
+ - 1.10588547
+ - 0.957212839
+ - 1.05838976
+
+ENDCAP - 2018
+30-40:
+ fSumw[3]=0.828486, x=0.5, error=0.0500235
+40-60:
+ fSumw[3]=0.846882, x=0.5, error=0.0597682
+60-100:
+ fSumw[3]=0.807961, x=0.5, error=0.0829876
+100-200:
+ fSumw[3]=1.01117, x=0.5, error=0.201686
+
+[30.000000,40.000000] 0.555193 0.011527 0.020761
+[40.000000,60.000000] 0.585242 0.013790 0.023563
+[60.000000,100.000000] 0.788115 0.023815 0.030217
+[100.000000,200.000000] 1.201661 0.070848 0.058959
+
+Rel uncerts (+ stat err):
+ - 1.492248641
+ - 1.447062924
+ - 1.025181604
+ - 0.841476922
+
+
+Overall:
+Barrel:
+ - 30-40:  1.20
+ - 40-60:  1.10
+ - 60-100: 1.05
+ - 100+:   1.20
+ Endcap:
+  - 30-40:  1.50
+  - 40-60:  1.45
+  - 60-100: 1.30
+  - 100+:   1.15
+"""
+syst_vals_barrel = [0.20, 0.10, 0.05, 0.20]
+syst_vals_endcap = [0.50, 0.45, 0.30, 0.15]
+h_syst_barrel = ROOT.TH1F('h_syst_barrel', '', 4, array('d', [30, 40, 60, 100, 300]))
+h_syst_endcap = ROOT.TH1F('h_syst_endcap', '', 4, array('d', [30, 40, 60, 100, 300]))
+
+for ib in xrange(1, h_syst_barrel.GetNbinsX() + 1):
+    h_syst_barrel.SetBinContent(ib, syst_vals_barrel[ib - 1])
+    h_syst_endcap.SetBinContent(ib, syst_vals_endcap[ib - 1])
+
+h2d_syst_extrap = h2d.Clone()
+h2d_stat_syst = h2d.Clone()
+
+for i in xrange(1, h2d_syst_extrap.GetNbinsX() + 1):
+    x = h2d_syst_extrap.GetXaxis().GetBinCenter(i)
+    h2d_syst_extrap.SetBinError(i, 1, h2d_syst_extrap.GetBinContent(i, 1) * h_syst_barrel.GetBinContent(h_syst_barrel.GetXaxis().FindFixBin(x)))
+    h2d_syst_extrap.SetBinError(i, 2, h2d_syst_extrap.GetBinContent(i, 2) * h_syst_endcap.GetBinContent(h_syst_endcap.GetXaxis().FindFixBin(x)))
+    h2d_stat_syst.SetBinError(i, 1, math.sqrt(math.pow(h2d.GetBinError(i, 1), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 1), 2)))
+    h2d_stat_syst.SetBinError(i, 2, math.sqrt(math.pow(h2d.GetBinError(i, 2), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 2), 2)))
+
+h2d.Print('range')
+h2d_syst_extrap.Print('range')
+h2d_stat_syst.Print('range')
 
 ROOT.gDirectory.WriteTObject(h2d, 'photon_fakes')
+ROOT.gDirectory.WriteTObject(h2d_syst_extrap, 'photon_fakes_syst')
+ROOT.gDirectory.WriteTObject(h2d_stat_syst, 'photon_fakes_stat_syst')
 
 fout.Close()

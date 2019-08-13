@@ -348,18 +348,20 @@ for task in histsToWrap:
 ###############################################################################
 loc = 'wgamma/inputs/photons/%s' % era
 
-
+# e and m fake weights have been merged now
 histsToWrap = [
-    (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes' % era, 'p_fake_ratio_m_chn'),
-    (loc + '/output_%s_photon_fakes_ratios_e.root:photon_fakes' % era, 'p_fake_ratio_e_chn'),
+    (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio'),
+    (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio_err', +1.0),
 ]
 
 for task in histsToWrap:
-    SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'],
-                          GetFromTFile(task[0]), name=task[1])
+    if len(task) > 2:
+        SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'], HistErr(GetFromTFile(task[0]), task[2]), name=task[1])
+    else:
+        SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'], GetFromTFile(task[0]), name=task[1])
 
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v7.root' % era)
+w.writeToFile('wgamma_corrections_%s_v8.root' % era)
 w.Delete()
 

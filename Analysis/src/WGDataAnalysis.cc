@@ -161,6 +161,8 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_p0_lo", &wt_p0_lo_);
       tree_->Branch("wt_p0_e_fake_hi", &wt_p0_e_fake_hi_);
       tree_->Branch("wt_p0_e_fake_lo", &wt_p0_e_fake_lo_);
+      tree_->Branch("wt_p0_fake_err", &wt_p0_fake_err_);
+      tree_->Branch("wt_p0_fake_bin", &wt_p0_fake_bin_);
 
       if (do_wg_gen_vars_) {
         tree_->Branch("is_wg_gen", &is_wg_gen_);
@@ -287,10 +289,10 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("e_p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["e_p_fake_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
-  fns_["p_fake_ratio_m_chn"] = std::shared_ptr<RooFunctor>(
-    ws_->function("p_fake_ratio_m_chn")->functor(ws_->argSet("p_pt,p_eta")));
-  fns_["p_fake_ratio_e_chn"] = std::shared_ptr<RooFunctor>(
-    ws_->function("p_fake_ratio_e_chn")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_err"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
 
   if (rc_file_ != "") {
     rc_.init(rc_file_);
@@ -692,12 +694,39 @@ int WGDataAnalysis::PreAnalysis() {
       reco_puppi_phi_ = reco_puppi_sys.Phi(l0->charge());
       reco_puppi_phi_f_ = reco_puppi_sys.SymPhi(l0->charge());
 
-      if (m0) {
-        wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_m_chn"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_err_ = RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_bin_ = 0;
+      if (std::abs(p0->scEta()) < 1.4442) {
+        if (p0_pt_ >= 30 && p0_pt_ < 40) {
+          wt_p0_fake_bin_ = 1;
+        } else if (p0_pt_ >= 40 && p0_pt_ < 50) {
+          wt_p0_fake_bin_ = 2;
+        } else if (p0_pt_ >= 50 && p0_pt_ < 60) {
+          wt_p0_fake_bin_ = 3;
+        } else if (p0_pt_ >= 60 && p0_pt_ < 80) {
+          wt_p0_fake_bin_ = 4;
+        } else if (p0_pt_ >= 80 && p0_pt_ < 100) {
+          wt_p0_fake_bin_ = 5;
+        } else if (p0_pt_ >= 100 && p0_pt_ < 150) {
+          wt_p0_fake_bin_ = 6;
+        } else if (p0_pt_ >= 150 && p0_pt_ < 200) {
+          wt_p0_fake_bin_ = 7;
+        } else if (p0_pt_ >= 200) {
+          wt_p0_fake_bin_ = 8;
+        }
+      } else {
+        if (p0_pt_ >= 30 && p0_pt_ < 40) {
+          wt_p0_fake_bin_ = 9;
+        } else if (p0_pt_ >= 40 && p0_pt_ < 60) {
+          wt_p0_fake_bin_ = 10;
+        } else if (p0_pt_ >= 60 && p0_pt_ < 100) {
+          wt_p0_fake_bin_ = 11;
+        } else if (p0_pt_ >= 100) {
+          wt_p0_fake_bin_ = 12;
+        }
       }
-      if (e0) {
-        wt_p0_fake_ = RooFunc(fns_["p_fake_ratio_e_chn"], {p0_pt_, p0->scEta()});
-      }
+      // wt_p0_fake_lo_ = 1.0 - RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
     }
 
     if (!is_data_) {
@@ -924,6 +953,8 @@ int WGDataAnalysis::PreAnalysis() {
     wt_p0_lo_ = 1.;
     wt_p0_e_fake_hi_ = 1.;
     wt_p0_e_fake_lo_ = 1.;
+    wt_p0_fake_err_ = 1.;
+    wt_p0_fake_bin_ = 0;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
     gen_nparts_ = 0;

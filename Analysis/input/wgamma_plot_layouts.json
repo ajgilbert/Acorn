@@ -302,7 +302,7 @@
     },
     {
       "name": "WG",
-      "entries": ["WG_NLO"],
+      "entries": ["WG_R"],
       "legend": "W(#rightarrowl#nu)#gamma",
       "color": [108,190,237]
     }

@@ -45,20 +45,20 @@ default_cfg = {
     'hide_data': False,
     'auto_top_title_right': True,
     'overlays': [
-        {
-            "name": "systUp",
-            "entries": "total",
-            "hist_postfix": "_CMS_scale_met_jesUp",
-            "legend": "systUp",
-            "color": 2
-        },
-        {
-            "name": "systDown",
-            "entries": "total",
-            "hist_postfix": "_CMS_scale_met_jesDown",
-            "legend": "systDown",
-            "color": 4
-        }
+        # {
+        #     "name": "systUp",
+        #     "entries": "total",
+        #     "hist_postfix": "_CMS_scale_met_jesUp",
+        #     "legend": "systUp",
+        #     "color": 2
+        # },
+        # {
+        #     "name": "systDown",
+        #     "entries": "total",
+        #     "hist_postfix": "_CMS_scale_met_jesDown",
+        #     "legend": "systDown",
+        #     "color": 4
+        # }
     ]
 }
 
