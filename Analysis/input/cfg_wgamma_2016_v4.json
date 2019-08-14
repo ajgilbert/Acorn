@@ -220,7 +220,7 @@
       }
     },
     "WJetsToLNu-madgraphMLM": {
-      "attributes": ["default", "mc"],
+      "attributes": ["wjets_binned", "default", "mc"],
       "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext2"],
       "xsec": 61526.7,
       "GenXSecAnalyzer": "After filter: final cross section = 5.032e+04 +- 5.532e+01 pb",
@@ -330,7 +330,7 @@
           "target": false,
           "min": [3.0, null],
           "max": [4.0, null],
-          "events": 36891317,
+          "events": 39501912,
           "xsec": 948.1
         },
         "W4JetsToLNu-madgraphMLM": {
@@ -386,7 +386,7 @@
           "target": false,
           "min": [null, 1200.0],
           "max": [null, 2500.0],
-          "events": 6668873,
+          "events": 6872441,
           "xsec": 1.329
         }
       }
