@@ -293,7 +293,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.329e+00 +- 2.584e-03 pb"
     },
     "WJetsToLNu-stitched": {
-      "attributes": ["wjets_binned", "mc"],
+      "attributes": ["default", "wjets_binned", "mc"],
       "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext2",
                  "W1JetsToLNu-madgraphMLM", "W2JetsToLNu-madgraphMLM", "W3JetsToLNu-madgraphMLM",
                  "W4JetsToLNu-madgraphMLM", "W4JetsToLNu-madgraphMLM-ext2", "WJetsToLNu_HT-70To100",
@@ -497,7 +497,7 @@
       "xsec": 0.05124
     },
     "WGToMuNuG-EFT-madgraphMLM-stitched": {
-      "attributes": ["wg_gen_v3", "doit"],
+      "attributes": ["wg_gen_v3"],
       "inputs": ["WGToMuNuG-EFT-madgraphMLM", "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM", "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM"],
       "xsec": 232.9,
       "stitching": {

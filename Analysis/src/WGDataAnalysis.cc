@@ -87,6 +87,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("p0_haspix", &p0_haspix_);
       tree_->Branch("p0_eveto", &p0_eveto_);
       tree_->Branch("p0_medium_noch", &p0_medium_noch_);
+      tree_->Branch("p0_loose", &p0_loose_);
       tree_->Branch("p0_medium", &p0_medium_);
       tree_->Branch("p0_truth", &p0_truth_);
 
@@ -114,6 +115,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_l1", &wt_l1_);
       tree_->Branch("wt_p0", &wt_p0_);
       tree_->Branch("wt_p0_fake", &wt_p0_fake_);
+      tree_->Branch("wt_p0_highpt_fake", &wt_p0_highpt_fake_);
       tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
 
       if (do_wg_gen_vars_) {
@@ -293,6 +295,8 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_highpt_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_highpt_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
 
   if (rc_file_ != "") {
     rc_.init(rc_file_);
@@ -410,6 +414,13 @@ int WGDataAnalysis::PreAnalysis() {
              (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) && PhotonIDIso(p, year_, 1, false, false);
     });
 
+    bool super_loose = true;
+    double super_loose_threshold = 100.;
+    auto super_loose_photons = ac::copy_keep_if(photons, [&](ac::Photon const* p) {
+      return p->pt() > 100. && fabs(p->scEta()) < 2.5 &&
+             (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) && super_loose && p->pt() > super_loose_threshold && p->hadTowOverEm() < 0.15;
+    });
+
     // TODO: update with proper loose ID
     auto veto_muons = ac::copy_keep_if(muons, [](ac::Muon const* m) {
       return m->pt() > 10. && fabs(m->eta()) < 2.4 && fabs(m->dxy()) < 0.05 &&
@@ -425,6 +436,7 @@ int WGDataAnalysis::PreAnalysis() {
     boost::range::sort(pre_muons, DescendingPt);
     boost::range::sort(pre_electrons, DescendingPt);
     boost::range::sort(pre_photons, DescendingPt);
+    boost::range::sort(super_loose_photons, DescendingPt);
 
     // Resolve the case where we have at n_m >= 1 and n_e >= 1
     ac::Muon* m0 = pre_muons.size() ? pre_muons[0] : nullptr;
@@ -455,6 +467,13 @@ int WGDataAnalysis::PreAnalysis() {
       ac::keep_if(pre_photons, [&](ac::Photon const* p) {
         return DeltaR(p, l0) > 0.7;
       });
+      ac::keep_if(super_loose_photons, [&](ac::Photon const* p) {
+        return DeltaR(p, l0) > 0.7;
+      });
+    }
+
+    if (pre_photons.size() == 0) {
+      pre_photons = super_loose_photons;
     }
 
     ac::Photon* p0 = pre_photons.size() ? pre_photons[0] : nullptr;
@@ -666,6 +685,7 @@ int WGDataAnalysis::PreAnalysis() {
       p0_haspix_ = p0->hasPixelSeed();
       p0_eveto_ = p0->passElectronVeto();
       p0_medium_noch_ = ac::PhotonIDIso(p0, year_, 1, false, false);
+      p0_loose_ = p0->isLooseIdPhoton();
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
 
@@ -695,6 +715,11 @@ int WGDataAnalysis::PreAnalysis() {
       reco_puppi_phi_f_ = reco_puppi_sys.SymPhi(l0->charge());
 
       wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, p0->scEta()});
+      if (super_loose && p0_pt_ > super_loose_threshold) {
+        wt_p0_highpt_fake_ = RooFunc(fns_["p_highpt_fake_ratio"], {p0_pt_, p0->scEta()});
+      } else {
+        wt_p0_highpt_fake_ = 0.;
+      }
       wt_p0_fake_err_ = RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
       wt_p0_fake_bin_ = 0;
       if (std::abs(p0->scEta()) < 1.4442) {
@@ -905,6 +930,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_eveto_ = false;
     p0_medium_noch_ = false;
     p0_medium_ = false;
+    p0_loose_ = false;
     p0_fsr_ = false;
     p0_tight_ = false;
     p0_truth_ = 0;

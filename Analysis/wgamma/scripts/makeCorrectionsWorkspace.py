@@ -352,6 +352,8 @@ loc = 'wgamma/inputs/photons/%s' % era
 histsToWrap = [
     (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio'),
     (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio_err', +1.0),
+    (loc + '/high_pt_photon_fakes_MC.root:photon_fakes', 'p_highpt_fake_ratio'),
+    (loc + '/high_pt_photon_fakes_MC.root:photon_fakes', 'p_highpt_fake_ratio_err', +1.0),
 ]
 
 for task in histsToWrap:

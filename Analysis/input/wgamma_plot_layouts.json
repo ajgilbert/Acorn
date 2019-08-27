@@ -301,6 +301,12 @@
       "color": [187,10,33]
     },
     {
+      "name": "GG",
+      "entries": ["GG_R"],
+      "legend": "#gamma#gamma",
+      "color": 1
+    },
+    {
       "name": "WG",
       "entries": ["WG_R"],
       "legend": "W(#rightarrowl#nu)#gamma",

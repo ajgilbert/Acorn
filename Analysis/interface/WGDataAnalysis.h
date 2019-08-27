@@ -104,6 +104,7 @@ class WGDataAnalysis : public ModuleBase {
   float p0_sigma_;
   bool p0_haspix_;
   bool p0_eveto_;
+  bool p0_loose_;
   bool p0_medium_noch_;
   bool p0_medium_; // also passes medium ID
   bool p0_tight_; // also passes tight ID
@@ -146,6 +147,7 @@ class WGDataAnalysis : public ModuleBase {
   float wt_l1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
+  float wt_p0_highpt_fake_; // Photon fake factor for high pT photons
   float wt_p0_e_fake_; // Electron -> photon fake factor
 
   // event weights for systematics (relative to nominal)
