@@ -13,7 +13,7 @@ ROOT.TH1.SetDefaultSumw2()
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'electron_fakes', 'fid_region'])
+parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'photon_fakes2', 'electron_fakes', 'fid_region'])
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
@@ -38,7 +38,7 @@ remaps = {
         'TT': 'TT-powheg',
         # 'WG': 'WGToLNuG-madgraphMLM-stitched',
         'WG': 'WGToLNuG-amcatnloFXFX-stitched',
-        'W': 'WJetsToLNu-madgraphMLM',
+        'W': 'WJetsToLNu-stitched',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
         'WZTo1L1Nu2Q': 'WZTo1L1Nu2Q-amcatnloFXFX',
@@ -271,9 +271,11 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
     if doFakes:
         fake_sel = X.get(sel, override={"sig_t": "$sig_l"})
         node['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake')
-        # for ifake in xrange(1, 13):
-        #     node['data_fakes_WeightStatSystBin%iUp' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. + wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
-        #     node['data_fakes_WeightStatSystBin%iDown' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. - wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
+        loose_fake_sel = X.get(sel, override={"photon_sel": "!p0_loose"})
+        node['data_fakes_highpt'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=loose_fake_sel, wt='wt_p0_highpt_fake')
+        for ifake in xrange(1, 13):
+            node['data_fakes_WeightStatSystBin%iUp' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. + wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
+            node['data_fakes_WeightStatSystBin%iDown' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. - wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
 
 def HistSum(label_list):
     return sum([node[X] for X in label_list[1:]], node[label_list[0]])
@@ -322,7 +324,7 @@ X['iso_l'] = 'p0_chiso > 4 && p0_chiso < 10'
 X['sig_t'] = '($p0_eb && p0_sigma < 0.01015) || ($p0_ee && p0_sigma < 0.0272)'
 # X['sig_l'] = '($p0_eb && p0_sigma > 0.01015) || ($p0_ee && p0_sigma > 0.0272)'
 X['sig_l'] = '($p0_eb && p0_sigma > 0.01100) || ($p0_ee && p0_sigma > 0.0300)'
-
+X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t'
 # Selections for vetoing e->photon fakes
 X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
 X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
@@ -342,8 +344,8 @@ if args.year == '2018':
     X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
-X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && p0_medium_noch && $iso_t && $sig_t && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
 X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
@@ -564,7 +566,7 @@ if args.task in ['baseline', 'electron_fakes']:
         # ('tk_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
         ('puppi_met_phi', (20, -3.15, 3.15)),
-        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500]),
+        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
         ('p0_eta', (20, -3.0, 3.0)),
         ('p0_phi', (30, -3.15, 3.15)),
         ('l0p0_dr', (20, 0., 5.)),
@@ -608,7 +610,28 @@ if args.task in ['baseline', 'electron_fakes']:
                 hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
 
 
-if args.task == 'photon_fakes':
+if args.task in ['photon_fakes', 'photon_fakes2']:
+    if args.task == 'photon_fakes2':
+        X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+        X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+        X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met<40'
+        X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met<40'
+        extra_regions = [
+            ('_pt_100_150', 'p0_pt>100 && p0_pt<=150'),
+            ('_pt_150_200', 'p0_pt>150 && p0_pt<=200'),
+            ('_pt_200_300', 'p0_pt>200 && p0_pt<=300'),
+            ('_pt_300_400', 'p0_pt>300 && p0_pt<=400'),
+            ('_pt_400_600', 'p0_pt>400 && p0_pt<=600'),
+        ]
+    if args.task == 'photon_fakes':
+        extra_regions = [
+            ('_pt_30_40', 'p0_pt>30 && p0_pt<=40'),
+            ('_pt_40_60', 'p0_pt>40 && p0_pt<=60'),
+            ('_pt_60_100', 'p0_pt>60 && p0_pt<=100'),
+            ('_pt_100_200', 'p0_pt>100 && p0_pt<=200'),
+        ]
+
+
     X['baseline_m_mZ_veto'] = X.get('$baseline_m_mZ_veto', override={"sig_t": "1", "iso_t": "1"})
     X['baseline_e_mZ_veto'] = X.get('$baseline_e_mZ_veto', override={"sig_t": "1", "iso_t": "1"})
     X['barrel_m'] = '$baseline_m_mZ_veto && $p0_eb'
@@ -620,13 +643,11 @@ if args.task == 'photon_fakes':
         for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
             for POST, EXTRA in [
               ('', '1'),
-              ('_pt_30_40', 'p0_pt>30 && p0_pt<=40'),
-              ('_pt_40_60', 'p0_pt>40 && p0_pt<=60'),
-              ('_pt_60_100', 'p0_pt>60 && p0_pt<=100'),
-              ('_pt_100_200', 'p0_pt>100 && p0_pt<=200'),
-            ]:
+            ] + extra_regions:
                 X['%s_iso_l%s' % (S, POST)] = '$%s && $iso_l && (%s)' % (S, EXTRA)
                 X['%s_sig_l%s' % (S, POST)] = '$%s && $sig_l && (%s)' % (S, EXTRA)
+                X['%s_iso_t%s' % (S, POST)] = '$%s && $iso_t && (%s)' % (S, EXTRA)
+                X['%s_sig_t%s' % (S, POST)] = '$%s && $sig_t && (%s)' % (S, EXTRA)
                 X['%s_iso_l_sig_t%s' % (S, POST)] = '$%s && $iso_l && $sig_t && (%s)' % (S, EXTRA)
                 X['%s_iso_l_sig_l%s' % (S, POST)] = '$%s && $iso_l && $sig_l && (%s)' % (S, EXTRA)
                 X['%s_iso_t_sig_l%s' % (S, POST)] = '$%s && $iso_t && $sig_l && (%s)' % (S, EXTRA)
@@ -634,6 +655,8 @@ if args.task == 'photon_fakes':
                 do_cats[chn].extend(
                     ['%s_iso_l%s' % (S, POST),
                      '%s_sig_l%s' % (S, POST),
+                     '%s_iso_t%s' % (S, POST),
+                     '%s_sig_t%s' % (S, POST),
                      '%s_iso_l_sig_t%s' % (S, POST),
                      '%s_iso_l_sig_l%s' % (S, POST),
                      '%s_iso_t_sig_l%s' % (S, POST),
@@ -645,7 +668,7 @@ if args.task == 'photon_fakes':
         ('l0_eta', (20, -3.0, 3.0)),
         # ('l0l1_M', (40, 60, 120)),
         ('met', (20, 0., 200.)),
-        ('p0_pt', (100, 0, 500.)),
+        ('p0_pt', (120, 0, 600.)),
         ('p0_eta', (20, -3.0, 3.0)),
         # ('l0p0_dr', (20, 0., 5.)),
         # ('l0p0_M', (20, 60, 120)),

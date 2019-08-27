@@ -16,7 +16,7 @@ plot.ModTDRStyle()
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--task', default='baseline', choices=['eft_region', 'baseline', 'photon_fakes'])
-parser.add_argument('--indir', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190630-full/wgamma_2016_v4/WGamma_')
+parser.add_argument('--indir', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190729-full/wgamma_2016_v4/WGamma_')
 
 args = parser.parse_args()
 
@@ -41,7 +41,7 @@ do_cats = []
 
 # X = SelectionManager()
 
-pt_binning = [0, 15, 30, 45, 60, 90, 130, 200, 300, 400, 500, 1000]
+pt_binning = [30, 40, 50, 60, 80, 100, 150, 200, 300, 400, 600, 800, 1000]
 
 drawvars = [
     ('lhe_p0_pt', pt_binning),
@@ -57,7 +57,7 @@ drawvars = [
 # This is the selection used by the MATRIX authors:
 # baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.5 && gen_l0_pt > 25 && abs(gen_l0_eta) < 2.5 && gen_met > 35 && gen_m0p0_dr > 0.7'
 # baseline_sel = 'gen_p0_pt > 15 && abs(gen_p0_eta) < 2.6 && gen_l0_pt > 15 && abs(gen_l0_eta) < 999.0'
-baseline_sel = 'gen_l0_q==+1 && gen_l0_pt>35 && abs(gen_l0_eta)<2.4 && gen_met>30 && gen_p0_pt>30 && (gen_p0_eta)<2.5 && gen_l0p0_dr>0.7 && lhe_frixione'
+baseline_sel = 'gen_l0_pt>30 && abs(gen_l0_eta)<2.5 && gen_met>0 && gen_p0_pt>30 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>0.7 && lhe_frixione && gen_met>40'
 for var, binning in drawvars:
     for sample in samples:
         hists['inclusive'][var][sample] = Hist('TH1D', sample=sample, var=[var], binning=binning, sel='%s && gen_pdgid == 11' % baseline_sel, wt='wt_def')
@@ -84,35 +84,48 @@ for path, hname, obj in hists.ListObjects():
     # obj.Scale(3.)
     obj.Scale(1., 'width')
 
-matrix_p = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppexnea03_MATRIX/result/run_test_NNLO_iso_met/gnuplot/histograms/pT_gamma__NNLO_QCD.hist"
-h_matrix_NLO_p = ReadTxtHist(matrix_p)
-h_matrix_NLO_m = ReadTxtHist(matrix_p)
+matrix_p = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppexnea03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/pT_gamma__NNLO_QCD.hist"
+matrix_m = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppenexa03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/pT_gamma__NNLO_QCD.hist"
+h_matrix_p = ReadTxtHist(matrix_p)
+h_matrix_m = ReadTxtHist(matrix_m)
 h_matrix_p_sc_lo = ReadTxtHist(matrix_p, column=3)
 h_matrix_p_sc_hi = ReadTxtHist(matrix_p, column=5)
-h_matrix_NLO = h_matrix_NLO_p.Clone()
-# h_matrix_NLO.Add(h_matrix_NLO_m)
+h_matrix_m_sc_lo = ReadTxtHist(matrix_m, column=3)
+h_matrix_m_sc_hi = ReadTxtHist(matrix_m, column=5)
+h_matrix = h_matrix_p.Clone()
+h_matrix_sc_lo = h_matrix_p_sc_lo.Clone()
+h_matrix_sc_hi = h_matrix_p_sc_hi.Clone()
+h_matrix.Add(h_matrix_m)
+h_matrix_sc_lo.Add(h_matrix_m_sc_lo)
+h_matrix_sc_hi.Add(h_matrix_m_sc_hi)
 
-h_matrix_NLO.Scale(1E-3)
-h_matrix_NLO = VariableRebin(h_matrix_NLO, pt_binning)
-h_matrix_p_sc_lo.Scale(1E-3)
-h_matrix_p_sc_lo = VariableRebin(h_matrix_p_sc_lo, pt_binning)
-h_matrix_p_sc_hi.Scale(1E-3)
-h_matrix_p_sc_hi = VariableRebin(h_matrix_p_sc_hi, pt_binning)
-for ib in xrange(1, h_matrix_NLO.GetNbinsX() + 1):
-    h_matrix_NLO.SetBinError(ib, max(abs(h_matrix_NLO.GetBinContent(ib) - h_matrix_p_sc_lo.GetBinContent(ib)), abs(h_matrix_NLO.GetBinContent(ib) - h_matrix_p_sc_hi.GetBinContent(ib))))
-h_matrix_NLO.Scale(1., 'width')
+h_matrix.Scale(1E-3)
+h_matrix = VariableRebin(h_matrix, pt_binning)
+h_matrix_sc_lo.Scale(1E-3)
+h_matrix_sc_lo = VariableRebin(h_matrix_sc_lo, pt_binning)
+h_matrix_sc_hi.Scale(1E-3)
+h_matrix_sc_hi = VariableRebin(h_matrix_sc_hi, pt_binning)
+
+print h_matrix.Integral(), h_matrix_sc_lo.Integral(), h_matrix_sc_hi.Integral()
+
+# h_matrix.Print("range")
+for ib in xrange(1, h_matrix.GetNbinsX() + 1):
+    h_matrix.SetBinError(ib, max(abs(h_matrix.GetBinContent(ib) - h_matrix_sc_lo.GetBinContent(ib)), abs(h_matrix.GetBinContent(ib) - h_matrix_sc_hi.GetBinContent(ib))))
+# h_matrix.Print("range")
+
+h_matrix.Scale(1., 'width')
 
 h_MC = hists['inclusive']['gen_p0_pt']['WG-NLO']
 h_MC.Print("range")
 print h_MC.Integral('width')
-h_matrix_NLO.Print("range")
-print h_matrix_NLO.Integral('width')
+h_matrix.Print("range")
+print h_matrix.Integral('width')
 
 #h_matrix_NLO.Divide(h_MC)
 #h_matrix_NLO.Print("range")
 
 canv = ROOT.TCanvas('test', 'test')
-pads = plot.TwoPadSplit(0.27, 0.01, 0.01)
+pads = plot.TwoPadSplit(0.35, 0.01, 0.01)
 
 # # Get the data and create axis hist
 # var = 'gen_p0_pt'
@@ -145,6 +158,8 @@ for h in h_axes:
 h_axes[0].GetYaxis().SetTitle('a.u.')
 h_axes[0].Draw()
 pads[0].SetLogy()
+pads[0].SetLogx()
+pads[1].SetLogx()
 h_axes[0].SetMinimum(1E-7)
 
 # # A dict to keep track of the hists
@@ -153,21 +168,26 @@ legend = ROOT.TLegend(0.67, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
 legend.AddEntry(h_MC, 'MG NLO inclusive', 'L')
 # # legend.AddEntry(h_sm, 'SM', 'L')
 # # legend.AddEntry(h_th, 'Reference', 'L')
-legend.AddEntry(h_matrix_NLO, 'MATRIX NNLO', 'L')
+legend.AddEntry(h_matrix, 'MATRIX NNLO', 'L')
 # # legend.AddEntry(h_LO_130, 'LO 130', 'L')
 # # legend.AddEntry(h_LO_inc_cut_130, 'LO inc., 130 cut', 'L')
 # # legend.AddEntry(h_LO_500, 'LO 500', 'L')
-
+h_MC_fill = h_MC.Clone()
 plot.Set(h_MC, LineColor=2, LineWidth=2, MarkerColor=2)
-plot.Set(h_matrix_NLO, LineColor=4, LineWidth=2, MarkerColor=4)
+plot.Set(h_MC_fill, LineColor=2, LineWidth=2, MarkerColor=2, MarkerSize=0, FillColorAlpha=(2, 0.3))
+
+h_matrix_fill = h_matrix.Clone()
+plot.Set(h_matrix, LineColor=4, LineWidth=2, MarkerColor=4)
+plot.Set(h_matrix_fill, LineColor=4, LineWidth=2, MarkerColor=4, MarkerSize=0, FillColorAlpha=(4, 0.3))
 # plot.Set(h_LO_inc, LineColor=1, LineWidth=2, MarkerColor=1, MarkerSize=0.5)
 # plot.Set(h_NLO_inc, LineColor=ROOT.kGreen-3, LineWidth=1, MarkerColor=ROOT.kGreen-3, MarkerSize=0.5)
 # # plot.Set(h_LO_130, LineColor=9, LineWidth=1)
 # # plot.Set(h_LO_inc_cut_130, LineColor=2, LineWidth=2)
 # # plot.Set(h_LO_500, LineColor=28, LineWidth=1)
-
-h_MC.Draw('HISTSAMEE')
-h_matrix_NLO.Draw('HISTSAMEE2')
+h_MC_fill.Draw('E2SAME')
+h_matrix_fill.Draw('E2SAME')
+h_MC.Draw('HISTSAME')
+h_matrix.Draw('HISTSAME')
 # # h_th.Draw('HISTSAMEE')
 # h_NLO_inc.Draw('HISTSAMEE')
 # # h_LO_130.Draw('HISTSAME')
@@ -183,20 +203,24 @@ pads[1].cd()
 pads[1].SetGrid(0, 1)
 h_axes[1].Draw()
 
-r_MC = plot.MakeRatioHist(h_MC, h_matrix_NLO, True, True)
+r_MC = plot.MakeRatioHist(h_MC, h_matrix, True, False)
+r_matrix_fill = plot.MakeRatioHist(h_matrix_fill, h_matrix_fill, True, False)
+r_MC_fill = plot.MakeRatioHist(h_MC_fill, h_matrix_fill, True, False)
 # # r_nominal = plot.MakeRatioHist(h_nominal, h_nominal, True, False)
 # r_NLO_inc = plot.MakeRatioHist(h_NLO_inc, h_LO_inc, True, True)
 # # r_LO_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
 # # r_LO_inc_cut_130 = plot.MakeRatioHist(h_LO_130, h_LO_inc, True, True)
 # # r_LO_500 = plot.MakeRatioHist(h_LO_inc_cut_130, h_LO_inc, True, True)
-r_MC.Draw('SAMEE')
+r_MC_fill.Draw('E2SAME')
+r_matrix_fill.Draw('E2SAME')
+r_MC.Draw('HISTSAME')
 # # r_LO_130.Draw('SAMEE')
 # # r_LO_inc_cut_130.Draw('SAMEE')
 # # r_LO_500.Draw('SAMEE')
 # # r_data.Draw('SAME')
 plot.SetupTwoPadSplitAsRatio(
     pads, plot.GetAxisHist(
-        pads[0]), plot.GetAxisHist(pads[1]), 'MC / NNLO', True, 0.8, 1.2)
+        pads[0]), plot.GetAxisHist(pads[1]), 'MC / NNLO', True, 0.65, 1.35)
 
 
 # # Go back and tidy up the axes and frame

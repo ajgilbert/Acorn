@@ -1,6 +1,7 @@
 import ROOT
 import argparse
 import json
+import sys
 import itertools
 from copy import deepcopy
 from pprint import pprint
@@ -46,8 +47,8 @@ indirs = {
 samples = {
     '2016': {
         'data_obs': 'SingleMuon',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG-inc': 'WGToLNuG-madgraphMLM',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        # 'WG-inc': 'WGToLNuG-madgraphMLM',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'
     },
     '2017': {
@@ -89,9 +90,9 @@ hists = Node()
 
 if not args.load:
     list_of_vars = [
-        ('lhe_p0_pt_wide', 'lhe_p0_pt', [0, 10, 20, 30, 40, 50, 100, 150, 210, 300, 420, 600, 850, 1200]),
+        ('lhe_p0_pt_wide', 'lhe_p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
         ('lhe_p0_pt', 'lhe_p0_pt', (50, 0, 1000)),
-        ('p0_pt', 'gen_p0_pt', [0, 10, 20, 30, 40, 50, 100, 150, 210, 300, 420, 600, 850, 1200]),
+        ('p0_pt', 'gen_p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
         ('p0_eta', 'gen_p0_eta', (20, -3, 3)),
         ('l0_pt', 'gen_l0_pt', [0, 10, 20, 30, 40, 50, 100, 150, 200, 300, 400, 500]),
         ('l0_eta', 'gen_l0_eta', (20, -3, 3)),
@@ -99,52 +100,49 @@ if not args.load:
 
     for label, var, binning in list_of_vars:
         X = SelectionManager()
-        X['baseline_m'] = 'gen_pdgid==13 && is_wg_gen && gen_l0_pt > 30 && abs(gen_l0_eta) < 2.4 && gen_p0_pt > 30 && abs(gen_p0_eta) < 2.5 && (abs(gen_p0_eta) < 1.4442 || abs(gen_p0_eta) > 1.566) && gen_l0p0_dr > 0.7'
-        X['baseline_e'] = 'gen_pdgid==11 && is_wg_gen && gen_l0_pt > 35 && abs(gen_l0_eta) < 2.5 && (abs(gen_l0_eta) < 1.4442 || abs(gen_l0_eta) > 1.566) && gen_p0_pt > 30 && abs(gen_p0_eta) < 2.5 && (abs(gen_p0_eta) < 1.4442 || abs(gen_p0_eta) > 1.566) && gen_l0p0_dr > 0.7'
-        X['muon_id'] = '$baseline_m && n_pre_m==1 && l0_pdgid == 13'
-        X['elec_id'] = '$baseline_e && n_pre_e==1 && l0_pdgid == 11'
-        X['elec_match'] = '$elec_id && gen_l0_match'
-        X['muon_iso'] = '$muon_id && l0_iso < 0.15'
-        X['elec_iso'] = '$elec_id'
-        X['muon_trg'] = '$muon_iso && l0_trg'
+        X['gen_core'] = 'gen_l0_pt>30 && abs(gen_l0_eta)<2.5 && gen_met>40 && gen_p0_pt>30 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>0.7 && lhe_frixione'
+        X['baseline_m'] = 'gen_pdgid==13 && is_wg_gen && $gen_core'
+        X['baseline_e'] = 'gen_pdgid==11 && is_wg_gen && $gen_core'
+        X['muon_id'] = '$baseline_m && n_pre_m==1 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4'
+        X['elec_id'] = '$baseline_e && n_pre_e==1 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5'
+        X['muon_trg'] = '$muon_id && l0_trg'
         # X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
-        X['elec_trg'] = '$elec_iso && l0_trg'
-        X['muon_trg_2'] = '$muon_iso && l0_trg'
-        X['elec_trg_2'] = '$elec_iso && l0_trg'
-        X['photon_id_m'] = '$muon_trg_2 && n_pre_p==1 && p0_medium'
-        X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 1'
-        X['photon_id_e'] = '$elec_trg_2 && n_pre_p>=1 && p0_medium'
+        X['elec_trg'] = '$elec_id && l0_trg'
+        X['photon_id_m'] = '$muon_trg && n_pre_p==1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
+        X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
+        X['photon_id_e'] = '$elec_trg && n_pre_p>=1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
         X['photon_match_e'] = '$photon_id_e && gen_p0_match'
-        X['photon_pix_e'] = '$photon_match_e && !p0_haspix && p0_eveto && n_veto_e == 1'
+        X['photon_pix_e'] = '$photon_match_e && !p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
         X['mZ_veto_m'] = '$photon_pix_m && (l0p0_M < 70 || l0p0_M > 100)'
         X['mZ_veto_e'] = '$photon_pix_e && (l0p0_M < 70 || l0p0_M > 110)'
-        X['eft_m'] = '$photon_pix_m && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
-        X['eft_e'] = '$photon_pix_e && l0_pt>80 && gen_met>80 && p0_pt>150 && l0p0_dr>3.0'
+        X['met_m'] = '$mZ_veto_m && puppi_met>40'
+        X['met_e'] = '$mZ_veto_e && puppi_met>40'
+        X['eft_m'] = '$photon_pix_m && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
+        X['eft_e'] = '$photon_pix_e && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
 
-# 'm0_pt>80 && met>80 && p0_pt>150 && m0p0_dr>3.0'
         for year in years:
             for sel in X.storage.keys():
-                for sa in ['WG', 'WG-inc', 'WG-NLO']:
+                for sa in ['WG-NLO']:
                     hists[year][label][sa][sel] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + sel), wt='wt_pu*wt_def')
-            final_sel = 'mZ_veto_m'
-            for sa in ['WG', 'WG-inc', 'WG-NLO']:
+            final_sel = 'met_m'
+            for sa in ['WG-NLO']:
                 hists[year][label][sa]['m_with_wt_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0')
                 hists[year][label][sa]['m_with_wt_trg_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0')
                 hists[year][label][sa]['m_with_wt_p0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0')
                 hists[year][label][sa]['m_with_wt_pf'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
                 hists[year][label][sa]['m_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_m && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
-            final_sel = 'mZ_veto_e'
-            for sa in ['WG', 'WG-inc', 'WG-NLO']:
+            final_sel = 'met_e'
+            for sa in ['WG-NLO']:
                 hists[year][label][sa]['e_with_wt_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0')
                 hists[year][label][sa]['e_with_wt_trg_l0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0')
                 hists[year][label][sa]['e_with_wt_p0'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0')
                 hists[year][label][sa]['e_with_wt_pf'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
                 hists[year][label][sa]['e_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_e && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
 
-            for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
+            for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
                 for sa in ['WG-NLO']:
                     hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    # hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
@@ -163,10 +161,10 @@ if not args.load:
                 scale = tgt_lumi * xsec / events
                 obj.Scale(scale)
 
-        for sel in ['photon_pix_m', 'photon_pix_e', 'eft_m', 'eft_e']:
+        for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
             for sa in ['WG-NLO']:
                 NormTH2InColumns(hists[year]['phi_f_response'][sa][sel])
-                NormTH2InColumns(hists[year]['phi_f_tk_response'][sa][sel])
+                # NormTH2InColumns(hists[year]['phi_f_tk_response'][sa][sel])
                 NormTH2InColumns(hists[year]['phi_f_puppi_response'][sa][sel])
 
 
@@ -212,22 +210,20 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           }),
                       layout=[
                           {'name': 'baseline_m', 'legend': 'Baseline'},
-                          {'name': 'muon_id', 'legend': ' + Muon ID'},
-                          {'name': 'muon_iso', 'legend': ' + Muon Iso'},
-                          {'name': 'muon_trg', 'legend': ' + Muon Trg(24/27) OR (50)'},
-                          {'name': 'muon_trg_2', 'legend': ' + Muon Trg(24/27)'},
+                          {'name': 'muon_id', 'legend': ' + Muon ID+Iso'},
+                          {'name': 'muon_trg', 'legend': ' + Muon Trg'},
                           {'name': 'photon_id_m', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_m', 'legend': ' + Photon pix veto'},
                           {'name': 'mZ_veto_m', 'legend': ' + m_{Z} veto'},
+                          {'name': 'met_m', 'legend': ' + p_{T}^{miss} cut'},
                       ],
                       ratios=[
                           {'num': 'muon_id', 'den': 'baseline_m', 'type': 'binomial'},
-                          {'num': 'muon_iso', 'den': 'muon_id', 'type': 'binomial'},
-                          {'num': 'muon_trg', 'den': 'muon_iso', 'type': 'binomial'},
-                          {'num': 'muon_trg_2', 'den': 'muon_trg', 'type': 'binomial'},
-                          {'num': 'photon_id_m', 'den': 'muon_trg_2', 'type': 'binomial'},
+                          {'num': 'muon_trg', 'den': 'muon_id', 'type': 'binomial'},
+                          {'num': 'photon_id_m', 'den': 'muon_trg', 'type': 'binomial'},
                           {'num': 'photon_pix_m', 'den': 'photon_id_m', 'type': 'binomial'},
                           {'num': 'mZ_veto_m', 'den': 'photon_pix_m', 'type': 'binomial'},
+                          {'num': 'met_m', 'den': 'mZ_veto_m', 'type': 'binomial'},
                       ]
     )
     MakeMultiHistPlot('weights_m_%s_%s' % (year, var),
@@ -240,14 +236,14 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'ratio_y_range': [0.9, 1.05],
                           }),
                       layout=[
-                          {'name': 'photon_pix_m', 'legend': 'Full selection'},
+                          {'name': 'met_m', 'legend': 'Full selection'},
                           {'name': 'm_with_wt_l0', 'legend': ' + Muon Trk/ID/Iso SF'},
                           {'name': 'm_with_wt_trg_l0', 'legend': ' + Muon trigger SF'},
                           {'name': 'm_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
                           {'name': 'm_with_wt_pf', 'legend': ' + L1 prefiring SF'},
                       ],
                       ratios=[
-                          {'num': 'm_with_wt_l0', 'den': 'photon_pix_m', 'type': 'binomial'},
+                          {'num': 'm_with_wt_l0', 'den': 'met_m', 'type': 'binomial'},
                           {'num': 'm_with_wt_trg_l0', 'den': 'm_with_wt_l0', 'type': 'binomial'},
                           {'num': 'm_with_wt_p0', 'den': 'm_with_wt_trg_l0', 'type': 'binomial'},
                           {'num': 'm_with_wt_pf', 'den': 'm_with_wt_p0', 'type': 'binomial'},
@@ -273,6 +269,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'name': 'photon_match_e', 'legend': ' + Photon matched'},
                           {'name': 'photon_pix_e', 'legend': ' + Photon pix veto'},
                           {'name': 'mZ_veto_e', 'legend': ' + m_{Z} veto'},
+                          {'name': 'met_e', 'legend': ' + p_{T}^{miss} cut'},
                       ],
                       ratios=[
                           {'num': 'elec_id', 'den': 'baseline_e', 'type': 'binomial'},
@@ -284,6 +281,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'num': 'photon_match_e', 'den': 'photon_id_e', 'type': 'binomial'},
                           {'num': 'photon_pix_e', 'den': 'photon_id_e', 'type': 'binomial'},
                           {'num': 'mZ_veto_e', 'den': 'photon_pix_e', 'type': 'binomial'},
+                          {'num': 'met_e', 'den': 'mZ_veto_e', 'type': 'binomial'},
                       ]
     )
     MakeMultiHistPlot('weights_e_%s_%s' % (year, var),
@@ -296,14 +294,14 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'ratio_y_range': [0.9, 1.05],
                           }),
                       layout=[
-                          {'name': 'mZ_veto_e', 'legend': 'Full selection'},
+                          {'name': 'met_e', 'legend': 'Full selection'},
                           {'name': 'e_with_wt_l0', 'legend': ' + Electron Trk/ID/Iso SF'},
                           {'name': 'e_with_wt_trg_l0', 'legend': ' + Electron trigger SF'},
                           {'name': 'e_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
                           {'name': 'e_with_wt_pf', 'legend': ' + L1 prefiring SF'},
                       ],
                       ratios=[
-                          {'num': 'e_with_wt_l0', 'den': 'mZ_veto_e', 'type': 'binomial'},
+                          {'num': 'e_with_wt_l0', 'den': 'met_e', 'type': 'binomial'},
                           {'num': 'e_with_wt_p0', 'den': 'e_with_wt_trg_l0', 'type': 'binomial'},
                           {'num': 'e_with_wt_pf', 'den': 'e_with_wt_p0', 'type': 'binomial'},
                       ]
@@ -317,24 +315,24 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'x_title': x_titles[var],
                           'ratio_y_title': '#varepsilon(N/baseline)',
                           'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
-                          'ratio_y_range': [0.35, 1.05],
+                          'ratio_y_range': [0.05, 1.05],
                       }),
                       layout=[
                           {'name': 'baseline_m', 'legend': 'Baseline'},
                           {'name': 'muon_id', 'legend': ' + Muon ID'},
-                          {'name': 'muon_iso', 'legend': ' + Muon Iso'},
-                          {'name': 'muon_trg', 'legend': ' + Muon Trg(24/27) OR (50)'},
-                          {'name': 'muon_trg_2', 'legend': ' + Muon Trg(24/27)'},
+                          {'name': 'muon_trg', 'legend': ' + Muon Trg'},
                           {'name': 'photon_id_m', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_m', 'legend': ' + Photon pix veto'},
+                          {'name': 'mZ_veto_m', 'legend': ' + m_{Z} veto'},
+                          {'name': 'met_m', 'legend': ' + p_{T}^{miss} cut'},
                       ],
                       ratios=[
                           {'num': 'muon_id', 'den': 'baseline_m', 'type': 'binomial'},
-                          {'num': 'muon_iso', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'muon_trg', 'den': 'baseline_m', 'type': 'binomial'},
-                          {'num': 'muon_trg_2', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'photon_id_m', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'photon_pix_m', 'den': 'baseline_m', 'type': 'binomial'},
+                          {'num': 'mZ_veto_m', 'den': 'baseline_m', 'type': 'binomial'},
+                          {'num': 'met_m', 'den': 'baseline_m', 'type': 'binomial'},
                       ]
     )
     MakeMultiHistPlot('efficiencies_e_cumulative_%s_%s' % (year, var),
@@ -344,7 +342,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'x_title': x_titles[var],
                           'ratio_y_title': '#varepsilon(N/baseline)',
                           'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
-                          'ratio_y_range': [0.35, 1.05],
+                          'ratio_y_range': [0.05, 1.05],
                       }),
                       layout=[
                           {'name': 'baseline_e', 'legend': 'Baseline'},
@@ -354,6 +352,8 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'name': 'elec_trg_2', 'legend': ' + Electron Trg'},
                           {'name': 'photon_id_e', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_e', 'legend': ' + Photon pix veto'},
+                          {'name': 'mZ_veto_e', 'legend': ' + m_{Z} veto'},
+                          {'name': 'met_e', 'legend': ' + p_{T}^{miss} cut'},
                       ],
                       ratios=[
                           {'num': 'elec_id', 'den': 'baseline_e', 'type': 'binomial'},
@@ -362,10 +362,13 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'num': 'elec_trg_2', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'photon_id_e', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'photon_pix_e', 'den': 'baseline_e', 'type': 'binomial'},
+                          {'num': 'mZ_veto_e', 'den': 'baseline_e', 'type': 'binomial'},
+                          {'num': 'met_e', 'den': 'baseline_e', 'type': 'binomial'},
                       ]
     )
 
 
+sys.exit(0)
 # Draw LO vs stitched vs NLO per year
 # The LO cross sections should have been adjusted to give the same normalisation as
 # the NLO under the baseline selection above

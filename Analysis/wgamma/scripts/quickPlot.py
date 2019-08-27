@@ -40,7 +40,7 @@ default_cfg = {
     'data_name': 'data_obs',     # Name of the TH1 to take for data
     'main_logo': 'CMS',
     'sub_logo': 'Internal',
-    'top_title_right': '35.9 fb^{-1} (13 TeV)',
+    'top_title_right': '137.0 fb^{-1} (13 TeV)',
     'top_title_left': '',
     'hide_data': False,
     'auto_top_title_right': True,
@@ -353,12 +353,17 @@ parser.add_argument('--x-title', default='', help='x-axis variable, without GeV'
 parser.add_argument('--logy', action='store_true')
 parser.add_argument('--y-min', type=float, default=1)
 parser.add_argument('--title', default='')
+parser.add_argument('--lumi', default=None)
 parser.add_argument('--layout-file', '-l', default='layouts.json')
 parser.add_argument('--layout', default='data_fakes')
 
 args = parser.parse_args()
 
 default_cfg['layout'] = args.layout
+
+if args.lumi is not None:
+    default_cfg['top_title_right'] = args.lumi
+    default_cfg['auto_top_title_right'] = False
 
 with open(args.layout_file) as jsonfile:
     layouts = json.load(jsonfile)
