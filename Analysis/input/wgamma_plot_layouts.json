@@ -108,15 +108,9 @@
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R", "ZG_IZG_R"],
-      "legend": "Z#rightarrowll (prompt #gamma)",
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "DY_E"],
+      "legend": "Z(ll)#gamma",
       "color": [250,169,22]
-    },
-    {
-      "name": "DY_E",
-      "entries": ["DY_E"],
-      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
-      "color": [255,202,58]
     },
     {
       "name": "TT",
@@ -127,7 +121,7 @@
     {
       "name": "data_fakes",
       "entries": ["data_fakes_sub"],
-      "legend": "Non-prompt/fake #gamma",
+      "legend": "Non-prompt/mis-id. #gamma",
       "color": [78,89,140]
     },
     {
@@ -139,7 +133,7 @@
     {
       "name": "WG",
       "entries": ["WG_R"],
-      "legend": "W(#rightarrowl#nu)#gamma",
+      "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }
   ],
@@ -153,13 +147,13 @@
     {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R"],
-      "legend": "Z#rightarrowll (prompt #gamma)",
+      "legend": "Z(ll)#gamma",
       "color": [250,169,22]
     },
     {
       "name": "DY_E",
       "entries": ["DY_E"],
-      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "legend": "Z(ll) (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
@@ -171,7 +165,7 @@
     {
       "name": "data_fakes",
       "entries": ["data_fakes_sub"],
-      "legend": "Non-prompt/fake #gamma",
+      "legend": "Non-prompt/mis-id. #gamma",
       "color": [78,89,140]
     },
     {
@@ -183,7 +177,7 @@
     {
       "name": "WG",
       "entries": ["WG_R"],
-      "legend": "W(#rightarrowl#nu)#gamma",
+      "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }
   ],
@@ -214,13 +208,13 @@
     },
     {
       "name": "data_fakes",
-      "entries": ["data_fakes_sub"],
+      "entries": ["data_fakes_highpt"],
       "legend": "Non-prompt/fake #gamma",
       "color": [78,89,140]
     },
     {
       "name": "GG",
-      "entries": ["GG_R"],
+      "entries": ["GG_R", "GG_E"],
       "legend": "#gamma#gamma",
       "color": [1]
     },
