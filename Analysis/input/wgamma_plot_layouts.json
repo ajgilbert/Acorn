@@ -165,7 +165,7 @@
     {
       "name": "data_fakes",
       "entries": ["data_fakes_sub"],
-      "legend": "Non-prompt/mis-id. #gamma",
+      "legend": "Non-prompt/misid. #gamma",
       "color": [78,89,140]
     },
     {
@@ -191,25 +191,25 @@
     {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R"],
-      "legend": "Z#rightarrowll (prompt #gamma)",
+      "legend": "Z(ll)#gamma",
       "color": [250,169,22]
     },
     {
       "name": "DY_E",
       "entries": ["DY_E"],
-      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "legend": "Z(ll) (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
       "name": "TT",
       "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
-      "legend": "t#bar{t}",
+      "legend": "t#bar{t}#gamma",
       "color": [187,10,33]
     },
     {
       "name": "data_fakes",
       "entries": ["data_fakes_highpt"],
-      "legend": "Non-prompt/fake #gamma",
+      "legend": "Non-prompt/misid. #gamma",
       "color": [78,89,140]
     },
     {
@@ -221,19 +221,63 @@
     {
       "name": "WG_OOA",
       "entries": ["WG_ooa_p", "WG_ooa_n"],
-      "legend": "W(#rightarrowl#nu)#gamma (out)",
+      "legend": "W(l#nu)#gamma (out)",
       "color": 12
     },
     {
       "name": "WG_MET1",
       "entries": ["WG_met1_p", "WG_met1_n"],
-      "legend": "W(#rightarrowl#nu)#gamma (met sdb.)",
+      "legend": "W(l#nu)#gamma (met sdb.)",
       "color": 11
     },
     {
       "name": "WG",
       "entries": ["WG_main_p", "WG_main_n"],
-      "legend": "W(#rightarrowl#nu)#gamma (in)",
+      "legend": "W(l#nu)#gamma (in)",
+      "color": [108,190,237]
+    }
+  ],
+  "data_fakes_EFT_simple": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z(ll)#gamma",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z(ll) (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
+      "legend": "t#bar{t}#gamma",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_highpt"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG_R", "GG_E"],
+      "legend": "#gamma#gamma",
+      "color": [1]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_main_p", "WG_main_n", "WG_met1_p", "WG_met1_n", "WG_ooa_p", "WG_ooa_n"],
+      "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }
   ],

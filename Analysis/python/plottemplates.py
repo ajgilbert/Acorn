@@ -19,6 +19,9 @@ AUTO_COLOURS = [
     [237, 37, 78]
 ]
 
+def HistSum(hdict, label_list):
+    return sum([hdict[X] for X in label_list[1:]], hdict[label_list[0]])
+
 
 def VariableRebin(hist, binning):
     newhist = hist.Rebin(len(binning) - 1, "", array('d', binning))
@@ -34,6 +37,7 @@ def UpdateDict(current, update):
 DEFAULT_CFG = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
     'type': 'datamc',           # or multihist
+    'pads': None,               # externally sourced TPads
     'outdir': '',               # output directory
     'prefix': '',               # filename prefix
     'postfix': '',              # filename postfix
@@ -59,14 +63,30 @@ DEFAULT_CFG = {
     'sub_logo': 'Internal',
     'top_title_right': '35.9 fb^{-1} (13 TeV)',
     'top_title_left': '',
-    'hide_data': True,
+    'hide_data': False,
     'global_hist_opts': {
         'draw_opts': 'E0',
         'legend_opts': 'L',
         'marker_size': 0.6,
         'line_width': 3
     },
-    'norm_to': 0
+    'norm_to': 0,
+    'overlays': [
+        # {
+        #     "name": "systUp",
+        #     "entries": "total",
+        #     "hist_postfix": "_CMS_scale_met_jesUp",
+        #     "legend": "systUp",
+        #     "color": 2
+        # },
+        # {
+        #     "name": "systDown",
+        #     "entries": "total",
+        #     "hist_postfix": "_CMS_scale_met_jesDown",
+        #     "legend": "systDown",
+        #     "color": 4
+        # }
+    ]
 }
 
 
@@ -85,10 +105,13 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     hists = copyhists
 
     # Canvas and pads
-    canv = ROOT.TCanvas(name, name)
-    if cfg['ratio']:
+    if cfg['pads'] is not None:
+        pads = cfg['pads']
+    elif cfg['ratio']:
+        canv = ROOT.TCanvas(name, name)
         pads = plot.TwoPadSplit(cfg['ratio_pad_frac'], 0.01, 0.01)
     else:
+        canv = ROOT.TCanvas(name, name)
         pads = plot.OnePad()
 
     # Allow the user to skip specifying a list of entries for a given plot element.
@@ -158,15 +181,19 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     curr_auto_colour = 0
     for info in layout:
         hist = hists[info['entries'][0]]
-        col = AUTO_COLOURS[curr_auto_colour]
-        if curr_auto_colour == (len(AUTO_COLOURS) - 1):
-            curr_auto_colour = 0
+        if 'color' in info:
+            col = info['color']
         else:
-            curr_auto_colour += 1
+            col = AUTO_COLOURS[curr_auto_colour]
+            if curr_auto_colour == (len(AUTO_COLOURS) - 1):
+                curr_auto_colour = 0
+            else:
+                curr_auto_colour += 1
         # col = info['color']
         if isinstance(col, list):
             col = ROOT.TColor.GetColor(*col)
-        plot.Set(hist, FillColor=col, LineColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+        print info['line_width']
+        plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
                 hist.Add(hists[other])
@@ -186,6 +213,30 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         h_tot.SetMarkerSize(0)
         legend.AddEntry(h_data, 'Observed', 'PL')
 
+    # Build overlays
+    for info in cfg['overlays']:
+        hist = None
+        input_list = []
+        if isinstance(info['entries'], str):
+            input_list = list(all_input_hists)
+        else:
+            input_list = list(info['entries'])
+        updated_list = []
+        for xh in input_list:
+            if xh + info['hist_postfix'] in hists:
+                updated_list.append(xh + info['hist_postfix'])
+            else:
+                updated_list.append(xh)
+        print updated_list
+        hist = HistSum(hists, updated_list)
+        col = info['color']
+        if isinstance(col, list):
+            col = ROOT.TColor.GetColor(*col)
+        plot.Set(hist, LineColor=col, LineWidth=1, MarkerSize=0, Title=info['legend'])
+        for ib in xrange(1, hist.GetNbinsX() + 1):
+            hist.SetBinError(ib, 1E-7)
+        h_store[info['name']] = hist
+
     if cfg['type'] == 'datamc':
         for ele in reversed(layout):
             legend.AddEntry(h_store[ele['name']], ele['legend'], ele['legend_opts'])
@@ -204,13 +255,21 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
         stack.Draw('HISTSAME')
         h_tot.Draw("E2SAME")
+
+        for info in cfg['overlays']:
+            h_store[info['name']].Draw('HISTSAME')
+
         if not cfg['hide_data']:
             h_data.Draw('E0SAME')
 
+    for info in cfg['overlays']:
+        legend.AddEntry(h_store[info['name']], info['legend'], 'L')
+
+
     plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.35)
     legend.Draw()
-    if cfg['legend_padding'] > 0.:
-        plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
+    # if cfg['legend_padding'] > 0.:
+    #     plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
     r_store = {}
@@ -223,8 +282,12 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
             r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
             r_tot.Draw('E2SAME')
+            for info in cfg['overlays']:
+                r_store[info['name']] = plot.MakeRatioHist(h_store[info['name']], h_tot, False, False)
+                r_store[info['name']].Draw('SAME')
             if not cfg['hide_data']:
                 r_data.Draw('SAME')
+
 
         if ratios is not None:
             for info in ratios:
@@ -256,9 +319,20 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     # plot.DrawTitle(pads[0], args.title, 1)
 
     # ... and we're done
-    canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.png')
-    canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.pdf')
+    if cfg['pads'] is None:
+        canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.png')
+        canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.pdf')
 
+    outobjs = {}
+    outobjs['axes'] = h_axes
+    outobjs['hists'] = hists
+    outobjs['stack'] = stack
+    outobjs['h_tot'] = h_tot
+    outobjs['legend'] = legend
+    outobjs['r_store'] = r_store
+    outobjs['r_data'] = r_data
+    outobjs['r_tot'] = r_tot
+    return outobjs
 def MakeDataMCPlot(name, outdir, hists, cfg, layouts):
     copyhists = {}
     for hname, h in hists.iteritems():

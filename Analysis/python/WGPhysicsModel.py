@@ -30,13 +30,13 @@ class WGModel(PhysicsModel):
             # 2016, 2017, 2018
             # electron channel, muon channel
             # W+, W-
-            self.doConstVar("c3w", "[0,0,10]")
+            self.doConstVar("c3w", "[0,-10,10]")
             for yr in self.years:
-                self.doConstVar("c3w_%s" % yr, "[0,0,10]")
+                self.doConstVar("c3w_%s" % yr, "[0,-10,10]")
             for chn in self.channels:
-                self.doConstVar("c3w_%s" % chn, "[0,0,10]")
+                self.doConstVar("c3w_%s" % chn, "[0,-10,10]")
             for sgn in self.signs:
-                self.doConstVar("c3w_%s" % sgn, "[0,0,10]")
+                self.doConstVar("c3w_%s" % sgn, "[0,-10,10]")
             pois = ['c3w']
             for filename, label, sgn in self.files:
                 print filename, label, sgn
