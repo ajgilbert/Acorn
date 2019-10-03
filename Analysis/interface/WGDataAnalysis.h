@@ -33,6 +33,8 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
   CLASS_MEMBER(WGDataAnalysis, int, shift_met)
   CLASS_MEMBER(WGDataAnalysis, int, scale_weights)
+  CLASS_MEMBER(WGDataAnalysis, int, pdf_begin)
+  CLASS_MEMBER(WGDataAnalysis, int, pdf_end)
   CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
 
   LookupFilter filters_IsoMu24_;
@@ -157,6 +159,8 @@ class WGDataAnalysis : public ModuleBase {
   float wt_sc_3_;
   float wt_sc_4_;
   float wt_sc_5_;
+
+  std::vector<float> wt_pdf_;
 
   float wt_pu_hi_;
   float wt_pu_lo_;

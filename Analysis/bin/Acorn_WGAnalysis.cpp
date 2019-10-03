@@ -158,6 +158,16 @@ int main(int argc, char* argv[]) {
       }));
     }
 
+    int pdf_weights = ac::ReadAttrValue<int>(jsc["attributes"], "pdf_weights");
+    int pdf_begin = -1;
+    int pdf_end = -1;
+    if (pdf_weights > 0) {
+      if (pdf_weights == 1) {
+        // NNPDF31_nnl0_as_0118 - replicas
+        pdf_begin = 1114; // Nominal + 100 replicas
+        pdf_end = 1214;
+      }
+    }
     auto counters = ac::EventCounters("EventCounters").set_fs(wgamma_fs);
     if (scale_weights > 0) {
       counters.AddWeightSet("scale_weights", 6, true);
@@ -211,6 +221,8 @@ int main(int argc, char* argv[]) {
                              .set_shift_met(shift_met)
                              .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt")
                              .set_scale_weights(scale_weights)
+                             .set_pdf_begin(pdf_begin)
+                             .set_pdf_end(pdf_end)
                              .set_var_set(var_set));
     wgamma_seq.InsertSequence(wgamma_label, analysis);
   }

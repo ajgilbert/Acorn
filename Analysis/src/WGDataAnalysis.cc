@@ -35,7 +35,9 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       correct_p_energy_(-1),
       correct_m_energy_(-1),
       shift_met_(-1),
-      scale_weights_(0) {}
+      scale_weights_(0),
+      pdf_begin_(-1),
+      pdf_end_(-1) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
 
@@ -131,6 +133,8 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_l0_eta", &gen_l0_eta_);
         tree_->Branch("gen_met", &gen_met_);
         tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
+
+        tree_->Branch("lhe_frixione", &lhe_frixione_);
       }
     }
 
@@ -150,6 +154,14 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_sc_3", &wt_sc_3_);
       tree_->Branch("wt_sc_4", &wt_sc_4_);
       tree_->Branch("wt_sc_5", &wt_sc_5_);
+
+      if (pdf_begin_ >= 0 && pdf_end_ >= 0 && pdf_end_ >= pdf_begin_) {
+        int npdf = pdf_end_ - pdf_begin_ + 1;
+        wt_pdf_.resize(npdf);
+        for (int ipdf = 0; ipdf < npdf; ++ipdf) {
+          tree_->Branch(TString::Format("wt_pdf_%i", ipdf), &(wt_pdf_[ipdf]));
+        }
+      }
 
       tree_->Branch("wt_pu_hi", &wt_pu_hi_);
       tree_->Branch("wt_pu_lo", &wt_pu_lo_);
@@ -182,7 +194,6 @@ int WGDataAnalysis::PreAnalysis() {
         // tree_->Branch("lhe_l0p0_dr", &lhe_l0p0_dr_);
         // tree_->Branch("lhe_p0j_dr", &lhe_p0j_dr_);
         // tree_->Branch("lhe_j_pt", &lhe_j_pt_);
-        tree_->Branch("lhe_frixione", &lhe_frixione_);
       }
     }
 
@@ -880,6 +891,20 @@ int WGDataAnalysis::PreAnalysis() {
         wt_sc_4_ = scale_weights.at(4);
         wt_sc_5_ = scale_weights.at(5);
       }
+
+      if (pdf_begin_ >= 0 && pdf_end_ >= 0 && pdf_end_ >= pdf_begin_) {
+        int npdf = pdf_end_ - pdf_begin_ + 1;
+        for (int ipdf = 0; ipdf < npdf; ++ipdf) {
+          if (info->lheWeights().count(pdf_begin_ + ipdf)) {
+            wt_pdf_[ipdf] = 1. + 2. * info->lheWeights().at(pdf_begin_ + ipdf);
+          } else {
+            wt_pdf_[ipdf] = 0.;
+          }
+          // std::cout << " - pdf " << ipdf << "/" << pdf_begin_ + ipdf << "\t" << wt_pdf_[ipdf] << "\n";
+        }
+
+      }
+
     }
     CompressVars();
     //if (nproc == 10000) {

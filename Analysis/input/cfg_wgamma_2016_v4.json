@@ -156,7 +156,7 @@
       }
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["mc", "do_wg_gen_vars", "no_presel"],
+      "attributes": ["doit", "default", "mc", "do_wg_gen_vars", "no_presel", "scale_weights:2", "pdf_weights:1"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 178.9,
       "GenXSecAnalyzer": "After filter: final cross section = 1.789e+02 +- 4.426e-01 pb",

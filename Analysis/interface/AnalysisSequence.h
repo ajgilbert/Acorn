@@ -26,6 +26,9 @@ class Sequence {
   }
 
   void InsertSequence(std::string name, ac::AnalysisBase & ana);
+
+  ModuleSequence const& Get() { return seq; }
+
 };
 
 }
