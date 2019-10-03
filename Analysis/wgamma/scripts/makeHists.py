@@ -487,7 +487,13 @@ if args.task == 'eft_region' or args.task == 'fid_region':
 
                         # xnode['WG_main_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i' % (chg, i)), wt=X.get('$baseline_wt'))
                         # xnode['WG_met1_%s_%i' % (chg, i)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i' % (chg, i)), wt=X.get('$baseline_wt'))
-                    for i in [int(sel[-1])]:
+                    this_pt_bin = int(sel[-1])
+                    do_pt_bins_in_phi = [this_pt_bin]
+                    if this_pt_bin > 0:
+                        do_pt_bins_in_phi.append(this_pt_bin - 1)
+                    if this_pt_bin < len(pt_bins_min) - 1:
+                        do_pt_bins_in_phi.append(this_pt_bin + 1)
+                    for i in do_pt_bins_in_phi:
                         for j in range(len(phi_bins_min)):
                             hlist = [
                                 ('WG_main_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j), '$baseline_wt'),
@@ -514,6 +520,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         hists[chn]['XS']['2D']['XS_WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
         hists[chn]['XS']['2D']['XS_WG_x_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
+        # Also make a copy that does get normalised to the lumi, for doing
+        hists[chn]['XS']['2D']['WG_p_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['WG_n_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def'))
+        hists[chn]['XS']['2D']['WG_x_%s_acc' % chn] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $x_gen_acc' % pdgid), wt=X.get('wt_def'))
         for i_sc in range(6):
             hists[chn]['XS']['2D']['XS_WG_p_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $p_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
             hists[chn]['XS']['2D']['XS_WG_n_%s_acc__sc_%i' % (chn, i_sc)] = Hist('TH2F', sample=wg_sample, var=['gen_p0_pt', phi_var], binning=(BinningFromStr(eft_defaults['pt_bins']) + BinningFromStr(eft_defaults['phi_bins'])), sel=X.get('gen_pdgid==%s && $n_gen_acc' % pdgid), wt=X.get('wt_def * wt_sc_%i' % i_sc))
@@ -765,7 +775,11 @@ for path, node in hists.ListNodes(withObjects=True):
         node['Total_E_fw'] = HistSum(['W_E_fw', 'TT_E_fw', 'DY_E_fw', 'VV_E_fw'])
         node['data_fakes_sub'] = node['data_fakes'] - (node['Total_R_fw'] + node['Total_E_fw'])
         CapNegativeBins(node['data_fakes_sub'])
-
+        for ifake in xrange(1, 13):
+            node['data_fakes_sub_WeightStatSystBin%iUp' % ifake] = node['data_fakes_WeightStatSystBin%iUp' % ifake] - (node['Total_R_fw'] + node['Total_E_fw'])
+            node['data_fakes_sub_WeightStatSystBin%iDown' % ifake] = node['data_fakes_WeightStatSystBin%iDown' % ifake] - (node['Total_R_fw'] + node['Total_E_fw'])
+            CapNegativeBins(node['data_fakes_sub_WeightStatSystBin%iUp' % ifake])
+            CapNegativeBins(node['data_fakes_sub_WeightStatSystBin%iDown' % ifake])
 
 fout = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label), 'RECREATE')
 NodeToTDir(fout, hists, args.syst)

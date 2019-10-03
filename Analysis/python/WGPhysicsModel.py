@@ -50,6 +50,7 @@ class WGModel(PhysicsModel):
                         pois.append(varname)
                         self.modelBuilder.doVar("%s[1,0,10]" % varname)
         elif self.type in ['pt_phi_diff']:
+            self.signs = ['p', 'n']
             pois = []
             for sgn in self.signs:
                 for ptbin in range(self.ptBins):

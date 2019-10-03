@@ -47,46 +47,6 @@ def DivideGraphByHist(gr, hist):
     return res
 
 
-def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
-    pads = []
-    ratio_pads = []
-    l_margin = ROOT.gStyle.GetPadLeftMargin()
-    r_margin = ROOT.gStyle.GetPadRightMargin()
-    t_margin = ROOT.gStyle.GetPadTopMargin()
-    b_margin = ROOT.gStyle.GetPadBottomMargin()
-    usable_width = 1. - l_margin - r_margin
-    usable_height = 1. - t_margin - b_margin
-    for i in xrange(len(split_points)+1):
-        pad = ROOT.TPad('pad%i'%i, '', 0., 0., 1., 1.)
-        if i > 0:
-            pad_l_margin = l_margin + sum(split_points[0:i]) * usable_width + gaps_left[i-1]
-            pad.SetLeftMargin(pad_l_margin)
-        if i < len(split_points):
-            pad_r_margin = (1. - sum(split_points[0:i+1])) * usable_width + r_margin + gaps_right[i]
-            pad.SetRightMargin(pad_r_margin)
-        print pad.GetLeftMargin(), pad.GetRightMargin()
-        if ratio is not None:
-            pad.SetBottomMargin(b_margin + usable_height * ratio)
-        pad.SetFillStyle(4000)
-        pad.Draw()
-        pads.append(pad)
-        if ratio is not None:
-            padr = ROOT.TPad('r_pad%i'%i, '', 0., 0., 1., 1.)
-            if i > 0:
-                padr.SetLeftMargin(pad_l_margin)
-            if i < len(split_points):
-                padr.SetRightMargin(pad_r_margin)
-            padr.SetTopMargin(1 - (b_margin + usable_height * ratio))
-            padr.SetFillStyle(4000)
-            padr.Draw()
-            ratio_pads.append(padr)
-
-
-    pads[0].cd()
-    # pads.reverse()
-    return pads, ratio_pads
-
-
 def RebinHists(h_names, h_fits, pt_bins, phi_bins, chg, chn, year, fit):
     h_dicts = []
     n_bins_phi = len(phi_bins) - 1
@@ -233,7 +193,7 @@ for i in xrange(n_bins_phi):
     hr.GetXaxis().SetNdivisions(510)
     hr.GetXaxis().ChangeLabel(-1, -1., -1., -1, -1, -1, ' ')
     h.GetYaxis().SetTickLength(h.GetYaxis().GetTickLength() * 0.5)
-    hr.GetYaxis().SetTickLength(h.GetYaxis().GetTickLength() * 0.5)
+    hr.GetYaxis().SetTickLength(hr.GetYaxis().GetTickLength() * 0.5)
     if i == 0:
         h.GetYaxis().SetTitle('Events / GeV')
     if i > 0:

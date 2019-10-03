@@ -139,13 +139,14 @@ if 'makeHists' in steps:
     print json.dumps(testplot_args)
     for yr in years:
         indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190814-full/wgamma_%s_v4/WGamma_' % yr
-        # indir = '/home/files/190814-full/wgamma_%s_v4/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
           # ('MetJesLo_', '_CMS_scale_met_jesDown'),
           # ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          # ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
+          # ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
           # ('PScaleLo_', '_CMS_scale_pDown'),
           # ('PScaleHi_', '_CMS_scale_pUp'),
         ]
@@ -172,36 +173,47 @@ if 'T2W' in steps:
         for sgn in ['p', 'n']:
             infiles.append('%s_LO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
 
-    call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-         ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-          '--PO', 'ptBins=%i' % n_pt_bins,
-          '--PO', 'phiBins=%i' % n_phi_bins,
-          '--PO', 'type=eft', '--PO',
-          'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
 
-    # if label == 'fid_pt_binned':
-    #     call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-    #          ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-    #           '--PO', 'ptBins=%i' % n_pt_bins,
-    #           '--PO', 'phiBins=%i' % n_phi_bins,
-    #           '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
-    # else:
-    #     call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-    #          ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
-    #           '--PO', 'ptBins=%i' % n_pt_bins,
-    #           '--PO', 'phiBins=%i' % n_phi_bins,
-    #           '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
+    if label == 'fid_pt_binned':
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+              '--PO', 'ptBins=%i' % n_pt_bins,
+              '--PO', 'phiBins=%i' % n_phi_bins,
+              '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
+    else:
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+              '--PO', 'ptBins=%i' % n_pt_bins,
+              '--PO', 'phiBins=%i' % n_phi_bins,
+              '--PO', 'type=eft', '--PO',
+              'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
+
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+              '--PO', 'ptBins=%i' % n_pt_bins,
+              '--PO', 'phiBins=%i' % n_phi_bins,
+              '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
 
 if 'limitsVsPtMax' in steps:
-    for bsm_label, bsm_setting in [('withBSM', 1), ('noBSM', 0)]:
+    for bsm_label, bsm_setting, fit_range in [
+        ('withBSM', 1, 1.5),
+        ('noBSM', 0, 4.0)
+    ]:
         for i in range(n_pt_bins):
             setpars = ['c3w=0', 'lumiscale=1', 'withBSM=%i' % bsm_setting]
             setpars = ','.join(setpars + ['mask_%i=1' % X for X in range(i + 1, n_pt_bins)])
-            call(['combine', '-M', 'AsymptoticLimits', '-t', '-1', '-n', '.%s.%s' % (label, bsm_label),
-                  '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
-                  '--setParameterRanges', 'c3w=0,0.1'])
-        call(['combineTool.py', '-M', 'CollectLimits', '-o', 'limits_%s_%s.json' % (label, bsm_label)] +
-              glob.glob('higgsCombine.%s.%s.*.root' % (label, bsm_label)))
+            par_range = fit_range * (1. - float(i) / float(n_pt_bins))
+            # call(['combine', '-M', 'AsymptoticLimits', '-t', '-1', '-n', '.%s.%s' % (label, bsm_label),
+            #       '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
+            #       '--setParameterRanges', 'c3w=0,0.1'])
+            call(['combine', '-M', 'MultiDimFit', '-t', '-1', '-n', '.%s.%s' % (label, bsm_label),
+                  '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
+                  '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
+                  '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
+            call(['combine', '-M', 'MultiDimFit', '-t', '1', '-s', '1', '-n', '.%s.%s.toy' % (label, bsm_label),
+                  '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
+                  '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
+                  '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
 
 
 allPOIs = []
@@ -222,11 +234,16 @@ if 'xsec2D' in steps:
         rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
     else:
         wsp = 'pt_phi_diff'
-        rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
+        rangePOIs = ':'.join([('%s=0,10' % X) for X in allPOIs])
 
     call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
           '--algo', 'grid', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
-          '--generate', genStr, '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4'])
+          '--generate', genStr, '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4',
+          '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
+    # call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
+    #       '--algo', 'none', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
+    #       '-n', '.%s.corr' % label, '--parallel', '4', '--saveFitResult', '--robustHesse', '0', '-v', '3',
+    #       '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
 
 if 'xsec2DPlot' in steps:
 
@@ -239,6 +256,17 @@ if 'xsec2DPlot' in steps:
               '--json', '%s.json' % label, '--chop', '20'])
 
 
+if 'C3WPlot' in steps:
+    for bsm_label in ['withBSM', 'noBSM']:
+        for i in range(n_pt_bins):
+            call(['python', 'wgamma/scripts/plot1DScan.py',
+                '--main', 'higgsCombine.%s.%s.MultiDimFit.mH%i.root' % (label, bsm_label, i), '--POI', 'c3w',
+                '--model', 'c3w_bin_%i' % i, '--output', 'scan_%s_%s_%i' % (label, bsm_label, i),
+                '--json', '%s_%s.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])
+            call(['python', 'wgamma/scripts/plot1DScan.py',
+                '--main', 'higgsCombine.%s.%s.toy.MultiDimFit.mH%i.1.root' % (label, bsm_label, i), '--POI', 'c3w',
+                '--model', 'c3w_bin_%i' % i, '--output', 'scan_toy_%s_%s_%i' % (label, bsm_label, i),
+                '--json', '%s_%s_toy.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])
 """
 python wgamma/scripts/theoryLimitPlot.py limits_phi_binned_noBSM.json limits_pt_binned_noBSM.json:exp0:'MarkerSize=0,LineWidth=2,LineColor=4,Title="No #phi binning"' --show exp --limit-on "C_{3W} (TeV^{-2})" --x-title "Maximum p_{T}^{#gamma} (GeV)"
 """

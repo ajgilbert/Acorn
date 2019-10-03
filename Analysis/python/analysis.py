@@ -513,3 +513,41 @@ def BinEdgesFromStr(binning_str):
             binedges.append(float(binning[1]) + float(i) * width)
         binedges.append(binning[2])
         return binedges
+
+
+def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
+    pads = []
+    ratio_pads = []
+    l_margin = ROOT.gStyle.GetPadLeftMargin()
+    r_margin = ROOT.gStyle.GetPadRightMargin()
+    t_margin = ROOT.gStyle.GetPadTopMargin()
+    b_margin = ROOT.gStyle.GetPadBottomMargin()
+    usable_width = 1. - l_margin - r_margin
+    usable_height = 1. - t_margin - b_margin
+    for i in xrange(len(split_points)+1):
+        pad = ROOT.TPad('pad%i'%i, '', 0., 0., 1., 1.)
+        if i > 0:
+            pad_l_margin = l_margin + sum(split_points[0:i]) * usable_width + gaps_left[i-1]
+            pad.SetLeftMargin(pad_l_margin)
+        if i < len(split_points):
+            pad_r_margin = (1. - sum(split_points[0:i+1])) * usable_width + r_margin + gaps_right[i]
+            pad.SetRightMargin(pad_r_margin)
+        print pad.GetLeftMargin(), pad.GetRightMargin()
+        if ratio is not None:
+            pad.SetBottomMargin(b_margin + usable_height * ratio)
+        pad.SetFillStyle(4000)
+        pad.Draw()
+        pads.append(pad)
+        if ratio is not None:
+            padr = ROOT.TPad('r_pad%i'%i, '', 0., 0., 1., 1.)
+            if i > 0:
+                padr.SetLeftMargin(pad_l_margin)
+            if i < len(split_points):
+                padr.SetRightMargin(pad_r_margin)
+            padr.SetTopMargin(1 - (b_margin + usable_height * ratio))
+            padr.SetFillStyle(4000)
+            padr.Draw()
+            ratio_pads.append(padr)
+    pads[0].cd()
+    # pads.reverse()
+    return pads, ratio_pads
