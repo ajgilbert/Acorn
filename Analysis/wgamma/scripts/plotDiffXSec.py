@@ -13,6 +13,7 @@ ROOT.TH1.AddDirectory(False)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--selection', default='eft_region')
+parser.add_argument('--output', default='diff_xsec')
 parser.add_argument('--scheme', default='phi_f_binned')
 parser.add_argument('--years', default='2016,2017,2018')
 parser.add_argument('--ratio', action='store_true')
@@ -25,14 +26,20 @@ settings = {
         'y_axis_title': '#Delta^{2}#sigma/#Deltap_{T}^{#gamma}#Delta|#phi_{f}| (fb/GeV)',
         'show_matrix': False,
         'y_axis_min': 5E-5,
-        'y_axis_max': 8E-1
+        'y_axis_max': 8E-1,
+        'ratio_min': -1,
+        'ratio_max': +4,
+        'legend': [0.74, 0.72, 0.97, 0.88]
     },
     'fid_region': {
         'canvas_width': 600,
         'y_axis_title': '#Delta#sigma/#Deltap_{T}^{#gamma} (fb/GeV)',
         'show_matrix': True,
         'y_axis_min': 1E-1,
-        'y_axis_max': 1E+4
+        'y_axis_max': 1E+4,
+        'ratio_min': -0.28,
+        'ratio_max': +0.28,
+        'legend': [0.5, 0.72, 0.94, 0.88]
     }
 }
 
@@ -120,7 +127,7 @@ n_bins_pt = ref_hists[years[0]].GetNbinsX()
 n_bins_phi = ref_hists[years[0]].GetNbinsY()
 width = 1. / n_bins_phi
 
-canv = ROOT.TCanvas('diff_xsec', 'diff_xsec')
+canv = ROOT.TCanvas(args.output, args.output)
 
 ratio = None
 if args.ratio:
@@ -163,7 +170,7 @@ for i in range(n_bins_phi):
 h_axes = [h.Clone() for h in ref_hists_1D]
 r_h_axes = [h.Clone() for h in ref_hists_1D]
 
-legend = ROOT.TLegend(0.68, 0.72, 0.94, 0.88, '', 'NBNDC')
+legend = ROOT.TLegend(*(settings[args.selection]['legend'] + ['', 'NBNDC']))
 
 h_obs = ROOT.TH1F('h_obs', '', 1, 0, 1)
 plot.Set(h_obs, LineWidth=2)
@@ -193,7 +200,7 @@ for i, h in enumerate(h_axes):
 
     pads[i].cd()
     plot.SetupTwoPadSplitAsRatio(
-        [pads[i], ratio_pads[i]], h, hr, '(Obs-Exp)/Exp', True, -0.28, +0.28)
+        [pads[i], ratio_pads[i]], h, hr, '(Obs-Exp)/Exp', True, settings[args.selection]['ratio_min'], settings[args.selection]['ratio_max'])
 
     h.SetMinimum(settings[args.selection]['y_axis_min'])
     h.SetMaximum(settings[args.selection]['y_axis_max'])
@@ -222,7 +229,7 @@ for i, h in enumerate(h_axes):
 
     if i == 0:
         legend.AddEntry(h_obs, 'Observed', 'PE')
-        legend.AddEntry(ref_hists_1D[i], 'aMC@NLO', 'LF')
+        legend.AddEntry(ref_hists_1D[i], 'MG5_aMC + PY8 (#leq1j NLO + PS)', 'LF')
 
 
     ##### THIS PART ONLY FOR THE diff XSEC

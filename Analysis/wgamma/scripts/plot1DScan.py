@@ -341,7 +341,7 @@ if args.translate is not None:
     if args.POI in name_translate:
         fixed_name = name_translate[args.POI]
 
-yvals = [1., 4.]
+yvals = [ROOT.Math.chisquared_quantile(0.68, 1), ROOT.Math.chisquared_quantile(0.95, 1)]
 if args.decorate_signif is not None:
     yvals = [float(i)*float(i) for i in args.decorate_signif.split(',')]
     NPX = 1000
@@ -868,8 +868,8 @@ if args.POI_line is not None:
     if args.legend_pos in [6, 10]:
         POI_line = args.POI_line
 
-if not args.no_input_label:
-    plot.DrawTitle(pads[0], '#bf{Input:} %s' % collab, 3)
+# if not args.no_input_label:
+#     plot.DrawTitle(pads[0], '#bf{Input:} %s' % collab, 3)
 # legend_l = 0.70 if len(args) >= 4 else 0.73
 
 plot.DrawTitle(pads[0], args.title_right, 3)

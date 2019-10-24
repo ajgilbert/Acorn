@@ -183,7 +183,7 @@ else:
             y_vals_err = [hists[h].GetBinError(ib, jb) for h in y_labels]
             bin_str = '%.4g #leq %s < %.4g' % (hists[h].GetXaxis().GetBinLowEdge(ib), label_x, hists[h].GetXaxis().GetBinUpEdge(ib))
             bin_str +=', %.4g #leq %s < %.4g' % (hists[h].GetYaxis().GetBinLowEdge(jb), label_y, hists[h].GetYaxis().GetBinUpEdge(jb))
-            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i_%i' % (args.label, pm_label, ib - 1, jb - 1), wsp=wsp, binStr=bin_str))
+            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i_%i' % (args.label, pm_label, ib - 1, jb - 1), makePlots=True, wsp=wsp, binStr=bin_str))
             scale = bin_scalings[ib - 1][jb - 1]
             for label, val in compute:
                 scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])

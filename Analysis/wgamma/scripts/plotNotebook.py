@@ -53,14 +53,14 @@ samples = {
     },
     '2017': {
         'data_obs': 'SingleMuon',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG-inc': 'WGToLNuG-madgraphMLM',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        # 'WG-inc': 'WGToLNuG-madgraphMLM',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'  # No NLO sample yet
     },
     '2018': {
         'data_obs': 'SingleMuon',
-        'WG': 'WGToLNuG-madgraphMLM-stitched',
-        'WG-inc': 'WGToLNuG-madgraphMLM',
+        # 'WG': 'WGToLNuG-madgraphMLM-stitched',
+        # 'WG-inc': 'WGToLNuG-madgraphMLM',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'
     }
 }
@@ -144,6 +144,9 @@ if not args.load:
                     hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     # hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['a_gen_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(gen_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['a_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                    hists[year]['a_phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_puppi_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                     hists[year]['true_reco_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'reco_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
@@ -164,6 +167,9 @@ if not args.load:
         for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
             for sa in ['WG-NLO']:
                 NormTH2InColumns(hists[year]['phi_f_response'][sa][sel])
+                NormTH2InColumns(hists[year]['a_gen_phi_f_response'][sa][sel])
+                NormTH2InColumns(hists[year]['a_phi_f_response'][sa][sel])
+                NormTH2InColumns(hists[year]['a_phi_f_puppi_response'][sa][sel])
                 # NormTH2InColumns(hists[year]['phi_f_tk_response'][sa][sel])
                 NormTH2InColumns(hists[year]['phi_f_puppi_response'][sa][sel])
 

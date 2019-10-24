@@ -115,7 +115,7 @@
     {
       "name": "TT",
       "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
-      "legend": "t#bar{t}",
+      "legend": "t#bar{t}#gamma",
       "color": [187,10,33]
     },
     {
@@ -159,7 +159,7 @@
     {
       "name": "TT",
       "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
-      "legend": "t#bar{t}",
+      "legend": "t#bar{t}#gamma",
       "color": [187,10,33]
     },
     {
@@ -277,6 +277,50 @@
     {
       "name": "WG",
       "entries": ["WG_main_p", "WG_main_n", "WG_met1_p", "WG_met1_n", "WG_ooa_p", "WG_ooa_n"],
+      "legend": "W(l#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "data_fakes_diff_simple": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z(ll)#gamma",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z(ll) (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
+      "legend": "t#bar{t}#gamma",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_sub"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [78,89,140]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG_R", "GG_E"],
+      "legend": "#gamma#gamma",
+      "color": [1]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_main_x", "WG_met1_x", "WG_ooa_x"],
       "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }

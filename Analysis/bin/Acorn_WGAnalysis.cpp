@@ -15,6 +15,7 @@
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
 #include "Acorn/Analysis/interface/WGDataAnalysis.h"
+#include "Acorn/Analysis/interface/JESStudy.h"
 #include "Acorn/Analysis/interface/WGAnalysisTools.h"
 #include "Acorn/Analysis/interface/WGTagAndProbe.h"
 #include "Acorn/Analysis/interface/DiMuonAnalysis.h"
@@ -161,7 +162,7 @@ int main(int argc, char* argv[]) {
     int pdf_weights = ac::ReadAttrValue<int>(jsc["attributes"], "pdf_weights");
     int pdf_begin = -1;
     int pdf_end = -1;
-    if (pdf_weights > 0) {
+    if (pdf_weights > 0 && subseq == "") { // only if the main sequence
       if (pdf_weights == 1) {
         // NNPDF31_nnl0_as_0118 - replicas
         pdf_begin = 1114; // Nominal + 100 replicas
@@ -262,6 +263,13 @@ int main(int argc, char* argv[]) {
     }
     wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("wg_gen").get()));
     wg_gen_seq.InsertSequence("wg_gen", analysis);
+  }
+
+  ac::Sequence jes_seq;
+  if (sequences.count("JES")) {
+    auto jes_fs = fs.at("JES").get();
+    jes_seq.BuildModule(ac::JESStudy("JESStudy").set_fs(jes_fs));
+    jes_seq.InsertSequence("JES", analysis);
   }
 
   analysis.RunAnalysis();

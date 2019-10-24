@@ -11,12 +11,7 @@ from array import array
 ROOT.TH1.SetDefaultSumw2(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
-plot.ModTDRStyle()
-
-
-def HistSum(hdict, label_list):
-    return sum([hdict[X] for X in label_list[1:]], hdict[label_list[0]])
-
+plot.ModTDRStyle(height=300)
 
 default_cfg = {
     # full filename will be [outdir]/[prefix]name[postfix].[ext]:
@@ -40,26 +35,10 @@ default_cfg = {
     'data_name': 'data_obs',     # Name of the TH1 to take for data
     'main_logo': 'CMS',
     'sub_logo': 'Internal',
-    'top_title_right': '137.0 fb^{-1} (13 TeV)',
+    'top_title_right': '35.9 fb^{-1} (13 TeV)',
     'top_title_left': '',
     'hide_data': False,
-    'auto_top_title_right': True,
-    'overlays': [
-        # {
-        #     "name": "systUp",
-        #     "entries": "total",
-        #     "hist_postfix": "_CMS_ele_fake_pUp",
-        #     "legend": "systUp",
-        #     "color": 2
-        # },
-        # {
-        #     "name": "systDown",
-        #     "entries": "total",
-        #     "hist_postfix": "_CMS_ele_fake_pDown",
-        #     "legend": "systDown",
-        #     "color": 4
-        # }
-    ]
+    'auto_top_title_right': True
 }
 
 config_by_setting = {
@@ -112,10 +91,6 @@ config_by_setting = {
         '*/abs(reco_phi)': ('Reconstructed #phi', ''),
         '*/abs(gen_phi)': ('Gen. #phi', ''),
         '*/abs(true_phi)': ('True #phi', ''),
-        '*/abs(reco_phi_f)': ('Reconstructed #phi_{f}', ''),
-        '*/abs(reco_puppi_phi_f)': ('Reconstructed #phi_{f}', ''),
-        '*/abs(gen_phi_f)': ('Gen. #phi_{f}', ''),
-        '*/abs(true_phi_f)': ('True #phi_{f}', ''),
         '*/wt_def': ('Default weight', ''),
         '*/wt_pu': ('Pileup weight', ''),
         '*/wt_l0': ('Lepton weight', ''),
@@ -125,10 +100,6 @@ config_by_setting = {
         '*/wt_p0_e_fake': ('e#rightarrow#gamma weight', ''),
         '*/1': ('1', ''),
         '*/0.5': ('0.5', '')
-    },
-    "layout": {
-        'm/cr_Zmm/*': 'pure_mc_zll',
-        'e/cr_Zee/*': 'pure_mc_zll',
     }
 }
 
@@ -147,10 +118,6 @@ variants_by_path = [
     ("*/p0_pt", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),
-    ("*/p0_pt", {
-            "prefix": "zoom_logy_",
-            "x_range": (0, 200),
-            "logy": True}),
     # ("*/p0_pt", {
     #         "prefix": "fr_barrel_",
     #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],
@@ -224,10 +191,8 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     stack = ROOT.THStack()
     legend = ROOT.TLegend(*(cfg['legend_pos'] + ['', 'NBNDC']))
 
-    all_input_hists = []
     for info in layout:
-        all_input_hists.extend(info['entries'])
-        hist = hists[info['entries'][0]].Clone()
+        hist = hists[info['entries'][0]]
         col = info['color']
         if isinstance(col, list):
             col = ROOT.TColor.GetColor(*col)
@@ -246,31 +211,6 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     h_tot.SetFillColor(plot.CreateTransparentColor(12, 0.3))
     h_tot.SetMarkerSize(0)
 
-    # Build overlays
-    for info in cfg['overlays']:
-        hist = None
-        input_list = []
-        if isinstance(info['entries'], str):
-            input_list = list(all_input_hists)
-        else:
-            input_list = list(info['entries'])
-        updated_list = []
-        for xh in input_list:
-            if xh + info['hist_postfix'] in hists:
-                updated_list.append(xh + info['hist_postfix'])
-            else:
-                updated_list.append(xh)
-        print updated_list
-        hist = HistSum(hists, updated_list)
-        col = info['color']
-        if isinstance(col, list):
-            col = ROOT.TColor.GetColor(*col)
-        plot.Set(hist, LineColor=col, LineWidth=2, MarkerSize=0, Title=info['legend'])
-        for ib in xrange(1, hist.GetNbinsX() + 1):
-            hist.SetBinError(ib, 1E-7)
-        h_store[info['name']] = hist
-
-
     legend.AddEntry(h_data, 'Observed', 'PL')
     for ele in reversed(layout):
         legend.AddEntry(h_store[ele['name']], '', 'F')
@@ -279,15 +219,8 @@ def MakePlot(name, outdir, hists, cfg, layouts):
         bkg_uncert_label = 'Uncertainty'
     legend.AddEntry(h_tot, bkg_uncert_label, 'F')
 
-    for info in cfg['overlays']:
-        legend.AddEntry(h_store[info['name']], info['legend'], 'L')
-
     stack.Draw('HISTSAME')
     h_tot.Draw("E2SAME")
-
-    for info in cfg['overlays']:
-        h_store[info['name']].Draw('SAME')
-
     if not cfg['hide_data']:
         h_data.Draw('E0SAME')
 
@@ -299,7 +232,6 @@ def MakePlot(name, outdir, hists, cfg, layouts):
             plot.FixBoxPadding(pads[0], legend, cfg['legend_padding'])
 
     # Do the ratio plot
-    r_store = {}
     if cfg['ratio'] or cfg['fraction']:
         pads[1].cd()
         pads[1].SetGrid(0, 1)
@@ -311,13 +243,10 @@ def MakePlot(name, outdir, hists, cfg, layouts):
             r_tot.Draw('E2SAME')
             if not cfg['hide_data']:
                 r_data.Draw('SAME')
-            for info in cfg['overlays']:
-                r_store[info['name']] = plot.MakeRatioHist(h_store[info['name']], h_tot, False, False)
-                r_store[info['name']].Draw('SAME')
 
             plot.SetupTwoPadSplitAsRatio(
                 pads, plot.GetAxisHist(
-                    pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, cfg['ratio_y_range'][0], cfg['ratio_y_range'][1])
+                    pads[0]), plot.GetAxisHist(pads[1]), 'Obs/Exp', True, 0.61, 1.69)
         if cfg['fraction']:
             r_frac = plot.MakeRatioHist(h_tot, h_data, True, True)
             r_frac.Draw('SAME')
@@ -351,58 +280,81 @@ def MakePlot(name, outdir, hists, cfg, layouts):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', '-i', help='Output of PostFitShapes or PostFitShapesFromWorkspace, specified as FILE:BIN')
-parser.add_argument('--output', '-o', default='.', help='top level output directory')
-parser.add_argument('--channel', '-c', default='mt', choices=['mt', 'et', 'em', 'tt', 'mm', 'generic', 'wgamma'], help='Channel')
-parser.add_argument('--x-title', default='', help='x-axis variable, without GeV')
-parser.add_argument('--logy', action='store_true')
-parser.add_argument('--y-min', type=float, default=1)
-parser.add_argument('--title', default='')
-parser.add_argument('--lumi', default=None)
-parser.add_argument('--layout-file', '-l', default='layouts.json')
-parser.add_argument('--layout', default='data_fakes')
+parser.add_argument('--path', '-p', help='Output of PostFitShapes or PostFitShapesFromWorkspace, specified as FILE:BIN')
+parser.add_argument('--procs', default='WG_R')
+parser.add_argument('--systs', '-s', default='CMS_eff_m')
+# parser.add_argument('--output', '-o', default='.', help='top level output directory')
+# parser.add_argument('--channel', '-c', default='mt', choices=['mt', 'et', 'em', 'tt', 'mm', 'generic', 'wgamma'], help='Channel')
+# parser.add_argument('--x-title', default='', help='x-axis variable, without GeV')
+# parser.add_argument('--logy', action='store_true')
+# parser.add_argument('--y-min', type=float, default=1)
+# parser.add_argument('--title', default='')
+# parser.add_argument('--layout-file', '-l', default='layouts.json')
+# parser.add_argument('--layout', default='data_fakes')
 
 args = parser.parse_args()
 
-default_cfg['layout'] = args.layout
+# default_cfg['layout'] = args.layout
 
-if args.lumi is not None:
-    default_cfg['top_title_right'] = args.lumi
-    default_cfg['auto_top_title_right'] = False
+# with open(args.layout_file) as jsonfile:
+#     layouts = json.load(jsonfile)
 
-with open(args.layout_file) as jsonfile:
-    layouts = json.load(jsonfile)
+# filename, dirfilter = args.input.split(':')
+# print filename
+file = ROOT.TFile(args.input)
+node = TDirToNode(file, startdir=args.path)
 
-filename, dirfilter = args.input.split(':')
-print filename
-file = ROOT.TFile(filename)
+print node.d.keys()
 
-node = TDirToNode(file)
 
-made_dirs = set()
+canv = ROOT.TCanvas('test', 'test')
+pads = plot.OnePad()
 
-for path, subnode in node.ListNodes(withObjects=True):
-    print path
-    if not fnmatch.fnmatch(path, dirfilter):
-        continue
-    # for now work on the assumption that the last component of the path will be the actual filename
-    split_path = path.split('/')[:-1]
-    name = path.split('/')[-1]
-    target_dir = os.path.join(args.output, *split_path)
-    if target_dir not in made_dirs:
-        os.system('mkdir -p %s' % target_dir)
-        made_dirs.add(target_dir)
-    hists = {}
-    for opath, objname, obj in subnode.ListObjects(depth=0):
-        hists[objname] = obj
+h_nom = node[args.procs]
+h_hi = node[args.procs + '_' + args.systs + 'Up']
+h_lo = node[args.procs + '_' + args.systs + 'Down']
 
-    plotcfg = dict(default_cfg)
-    for setting, vardict in config_by_setting.iteritems():
-        for pathkey, val in vardict.iteritems():
-            if fnmatch.fnmatch(path, pathkey):
-                plotcfg[setting] = val
-                print 'Path %s, setting %s, to value %s' % (path, setting, val)
-    for pathkey, varcfg in variants_by_path:
-        if fnmatch.fnmatch(path, pathkey):
-            varplotcfg = dict(plotcfg)
-            varplotcfg.update(varcfg)
-            MakePlot(name, target_dir, hists, varplotcfg, layouts)
+r_nom = plot.MakeRatioHist(h_nom, h_nom, True, False)
+r_hi = plot.MakeRatioHist(h_hi, h_nom, False, False)
+r_lo = plot.MakeRatioHist(h_lo, h_nom, False, False)
+
+plot.Set(r_nom, LineColor=1, LineWidth=2)
+plot.Set(r_hi, LineColor=2, LineWidth=2)
+plot.Set(r_lo, LineColor=4, LineWidth=2)
+
+r_nom.Draw('HISTE')
+r_hi.Draw('HISTSAME')
+r_lo.Draw('HISTSAME')
+
+r_nom.SetMinimum(0.9)
+r_nom.SetMaximum(1.1)
+
+canv.Print('test.pdf')
+# made_dirs = set()
+
+# for path, subnode in node.ListNodes(withObjects=True):
+#     print path
+#     if not fnmatch.fnmatch(path, dirfilter):
+#         continue
+#     # for now work on the assumption that the last component of the path will be the actual filename
+#     split_path = path.split('/')[:-1]
+#     name = path.split('/')[-1]
+#     target_dir = os.path.join(args.output, *split_path)
+#     if target_dir not in made_dirs:
+#         os.system('mkdir -p %s' % target_dir)
+#         made_dirs.add(target_dir)
+#     hists = {}
+#     for opath, objname, obj in subnode.ListObjects(depth=0):
+#         hists[objname] = obj
+
+#     plotcfg = dict(default_cfg)
+#     for setting, vardict in config_by_setting.iteritems():
+#         for pathkey, val in vardict.iteritems():
+#             if fnmatch.fnmatch(path, pathkey):
+#                 plotcfg[setting] = val
+#                 print 'Path %s, setting %s, to value %s' % (path, setting, val)
+#     for pathkey, varcfg in variants_by_path:
+#         if fnmatch.fnmatch(path, pathkey):
+#             varplotcfg = dict(plotcfg)
+#             varplotcfg.update(varcfg)
+#             MakePlot(name, target_dir, hists, varplotcfg, layouts)

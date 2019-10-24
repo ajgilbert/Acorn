@@ -16,6 +16,7 @@ parser.add_argument('--phi-bins', type=int, default=5)
 args = parser.parse_args()
 
 cb = ch.CombineHarvester()
+cb.SetFlag('filters-use-regex', True)
 
 chn = args.channel
 n_pt_bins = args.pt_bins
@@ -160,6 +161,21 @@ cb.cp().ExtractShapes(
     file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 
 cb.ForEachObj(lambda x: x.set_bin(x.bin() + '_' + args.year))
+
+decorrelate_years = [
+    'CMS_eff_e',
+    'CMS_eff_m',
+    'CMS_trigger_e',
+    'CMS_trigger_m',
+    'CMS_eff_p',
+    'CMS_ele_fake_p',
+    'WeightStatSystBin.*',
+    'CMS_scale_p',
+    'CMS_scale_met_jes',
+    'CMS_scale_met_unclustered'
+]
+
+cb.cp().syst_name(decorrelate_years).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.era()))
 
 
 def DropBogusShapes(x):

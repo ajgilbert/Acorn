@@ -41,7 +41,7 @@ def DrawAxisHists(pads, axis_hists, def_pad=None, pt_bins=None):
     if def_pad is not None:
         def_pad.cd()
 
-pt_bins = [150, 210, 300, 420, 600, 850, 1200]
+pt_bins = [150,200,300,500,800,1200]
 
 bin_centres = []
 bin_e_lo = []
@@ -138,7 +138,7 @@ for src in args.input:
         if '2sig' in args.show:
             graph_set['2sig_p'].Draw('PLSAME')
             graph_set['2sig_m'].Draw('PLSAME')
-            legend.AddEntry(graph_set['2sig_p'], '#pm 2#sigma %s' % splitsrc[2], 'L')
+            legend.AddEntry(graph_set['2sig_p'], '95%% CL %s' % splitsrc[2], 'L')
     else:
         graph_set['2sig'].Draw('PZSAME')
         graph_set['1sig'].Draw('PZSAME')

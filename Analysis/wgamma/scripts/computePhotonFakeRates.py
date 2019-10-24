@@ -13,7 +13,7 @@ from array import array
 from Acorn.Analysis.analysis import *
 
 ROOT.TH1.SetDefaultSumw2(True)
-plot.ModTDRStyle()
+plot.ModTDRStyle(height=300)
 
 parser = argparse.ArgumentParser()
 
@@ -106,6 +106,8 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
     h_fr.SetMaximum(1.5)
     h_fr.SetMinimum(0.1)
     h_fr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
+    if var == 'p0_chiso':
+        h_fr.GetXaxis().SetTitle('Photon I_{ch} (GeV)')
     h_fr.GetYaxis().SetTitle('Fake ratio')
     canv.Print('.pdf')
     canv.Print('.png')

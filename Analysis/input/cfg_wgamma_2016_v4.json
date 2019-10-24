@@ -19,7 +19,7 @@
       "lumi": 35917.353795
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["mc", "tp", "check_is_zg"],
+      "attributes": ["mc", "tp", "check_is_zg", "jes"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM-ext1", "DYJetsToLL_M-50-madgraphMLM-ext2"],
       "xsec": 6225.42,
       "GenXSecAnalyzer": "After matching: total cross section = 4.954e+03 +- 4.704e+00 pb",

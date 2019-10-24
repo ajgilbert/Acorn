@@ -14,15 +14,21 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.TH1.AddDirectory(False)
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('--selection', default='eft_region')
+parser.add_argument('--selection', default='eft_region')
+parser.add_argument('--channel', default='l')
+parser.add_argument('--charge', default='x')
+parser.add_argument('--output', '-o', default='postfit_plot')
 # parser.add_argument('--scheme', default='phi_f_binned')
 # parser.add_argument('--years', default='2016,2017,2018')
 # parser.add_argument('--ratio', action='store_true')
 # parser.add_argument('--charge', default='p')
 args = parser.parse_args()
 
+if args.selection == 'eft_region':
+    plot.ModTDRStyle(width=1000)
+if args.selection == 'fid_region':
+    plot.ModTDRStyle(width=600)
 
-plot.ModTDRStyle(width=1000)
 ROOT.gStyle.SetEndErrorSize(0)
 
 def DoScaleEnvelope(node, nominal):
@@ -72,22 +78,43 @@ def RebinHists(h_names, h_fits, pt_bins, phi_bins, chg, chn, year, fit):
     return h_dicts
 
 
-f_fits = ROOT.TFile('shapes_combined_puppi_phi_f_binned.root')
-h_fits = Node()
-TDirToNode(f_fits, '/', h_fits)
+chg = args.charge
+chn = args.channel
 
-f_fits_c3w_p1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_p1.root')
-h_fits_c3w_p1 = Node()
-TDirToNode(f_fits_c3w_p1, '/', h_fits_c3w_p1)
+if args.selection == 'eft_region':
+    f_fits = ROOT.TFile('shapes_combined_puppi_phi_f_binned.root')
+    h_fits = Node()
+    TDirToNode(f_fits, '/', h_fits)
 
-f_fits_c3w_m1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_m1.root')
-h_fits_c3w_m1 = Node()
-TDirToNode(f_fits_c3w_m1, '/', h_fits_c3w_m1)
+    f_fits_c3w_p1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_p1.root')
+    h_fits_c3w_p1 = Node()
+    TDirToNode(f_fits_c3w_p1, '/', h_fits_c3w_p1)
 
-chg = 'n'
-chn = 'l'
-year = 'total'
-fit = 'prefit'
+    f_fits_c3w_m1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_m1.root')
+    h_fits_c3w_m1 = Node()
+    TDirToNode(f_fits_c3w_m1, '/', h_fits_c3w_m1)
+
+    year = 'total'
+    fit = 'prefit'
+
+    pt_bins = BinEdgesFromStr('[150,200,300,500,800,1200]')
+    phi_bins = BinEdgesFromStr('(3,0.,math.pi/2.)')
+
+    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_highpt" , "GG_R", "GG_E" , "WG_ooa_p", "WG_ooa_n" , "WG_met1_p", "WG_met1_n" , "WG_main_p", "WG_main_n"]
+
+if args.selection == 'fid_region':
+    f_fits = ROOT.TFile('shapes_combined_pt_diff_fid_pt_binned.root')
+    h_fits = Node()
+    TDirToNode(f_fits, '/', h_fits)
+    year = 'total'
+    fit = 'prefit'
+
+    pt_bins = BinEdgesFromStr('[30,50,70,100,150,200,300,500,800]')
+    phi_bins = BinEdgesFromStr('(1,0.,1.)')
+
+    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_sub" , "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x" , "WG_main_x"]
+
+
 
 chg_latex = {
     'n': '-',
@@ -99,25 +126,24 @@ chn_latex = {
     'e': 'e',
     'l': 'l'
 }
-pt_bins = BinEdgesFromStr('[150, 210, 300, 420, 600, 850, 1200]')
-phi_bins = BinEdgesFromStr('(3,0.,math.pi/2.)')
 n_bins_pt = len(pt_bins) - 1
 n_bins_phi = len(phi_bins) - 1
 print pt_bins, phi_bins
 # h_names = h_fits['%s_%s_0_%s_%s' % (chg, chn, year, fit)].d.keys()
 
-h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_highpt" , "GG_R", "GG_E" , "WG_ooa_p", "WG_ooa_n" , "WG_met1_p", "WG_met1_n" , "WG_main_p", "WG_main_n"]
 h_dicts = RebinHists(h_names, h_fits, pt_bins, phi_bins, chg, chn, year, fit)
-h_dicts_c3w_p1 = RebinHists(h_names, h_fits_c3w_p1, pt_bins, phi_bins, chg, chn, year, fit)
-h_dicts_c3w_m1 = RebinHists(h_names, h_fits_c3w_m1, pt_bins, phi_bins, chg, chn, year, fit)
 
-for i in xrange(len(h_dicts)):
-    h_dicts[i]['TotalProcs_c3w_p1'] = h_dicts_c3w_p1[i]['TotalProcs']
-    h_dicts[i]['TotalProcs_c3w_m1'] = h_dicts_c3w_m1[i]['TotalProcs']
+if args.selection == 'eft_region':
+    h_dicts_c3w_p1 = RebinHists(h_names, h_fits_c3w_p1, pt_bins, phi_bins, chg, chn, year, fit)
+    h_dicts_c3w_m1 = RebinHists(h_names, h_fits_c3w_m1, pt_bins, phi_bins, chg, chn, year, fit)
+
+    for i in xrange(len(h_dicts)):
+        h_dicts[i]['TotalProcs_c3w_p1'] = h_dicts_c3w_p1[i]['TotalProcs']
+        h_dicts[i]['TotalProcs_c3w_m1'] = h_dicts_c3w_m1[i]['TotalProcs']
 
 width = 1. / n_bins_phi
 
-canv = ROOT.TCanvas('postfit_plot', 'postfit_plot')
+canv = ROOT.TCanvas(args.output, args.output)
 
 ratio = None
 # if args.ratio:
@@ -138,12 +164,15 @@ plotcfg.update({
         'marker_size': 0.6,
         'line_width': 1
     },
-    'legend_pos': [0.80, 0.57, 0.95, 0.88],
+    'legend_pos': [0.80, 0.60, 0.95, 0.88],
     'main_logo': '',
     'sub_logo': '',
     'top_title_right': '',
-    'ratio_y_range': [0.31, 2.19]
+    'ratio_y_range': [0.31, 1.79]
 })
+if args.selection == 'fid_region':
+    plotcfg['legend_pos'] = [0.65, 0.62, 0.95, 0.93]
+    plotcfg['ratio_y_range'] = [0.61, 1.39]
 
 print plotcfg
 
@@ -156,24 +185,33 @@ latex.SetTextAlign(22)
 
 for i in xrange(n_bins_phi):
     pads[i].cd()
-    thiscfg = UpdateDict(plotcfg, {
-                          'pads': [pads[i], ratio_pads[i]],
-                          'overlays': [
-                            {"name": "c3wUp", "entries": ["TotalProcs_c3w_p1"], 'hist_postfix': '', 'legend': 'C_{3W} = 0.2 TeV^{-2}', 'color': 4},
-                            {"name": "c3wDown", "entries": ["TotalProcs_c3w_m1"], 'hist_postfix': '', 'legend': 'C_{3W} = -0.2  TeV^{-2}', 'color': 2}
-                          ]
-                          })
+
+    if args.selection == 'eft_region':
+        thiscfg = UpdateDict(plotcfg, {
+                              'pads': [pads[i], ratio_pads[i]],
+                              'overlays': [
+                                {"name": "c3wUp", "entries": ["TotalProcs_c3w_p1"], 'hist_postfix': '', 'legend': 'C_{3W} = 0.2 TeV^{-2}', 'color': 4},
+                                {"name": "c3wDown", "entries": ["TotalProcs_c3w_m1"], 'hist_postfix': '', 'legend': 'C_{3W} = -0.2  TeV^{-2}', 'color': 2}
+                              ]
+                              })
+        layout_name = 'data_fakes_EFT_simple'
+    else:
+        thiscfg = UpdateDict(plotcfg, {
+                              'pads': [pads[i], ratio_pads[i]],
+                              })
+        layout_name = 'data_fakes_diff_simple'
+
     if i == 0:
         thiscfg['main_logo'] = 'CMS'
         thiscfg['sub_logo'] = 'Internal'
-        thiscfg['top_title_left'] = '%s^{%s} channel' % (chn_latex[chn], chg_latex[chg])
+        thiscfg['top_title_left'] = 'W^{%s}(%s^{%s}#nu)#gamma' % (chg_latex[chg], chn_latex[chn], chg_latex[chg])
     if i == n_bins_phi - 1:
-        thiscfg['top_title_right'] = '35.9 fb^{-1} (13 TeV, 2016)'
+        thiscfg['top_title_right'] = '136.9 fb^{-1} (13 TeV)'
     res = MakeMultiHistPlot('test',
                       outdir='.',
                       hists=h_dicts[i],
                       cfg=thiscfg,
-                      layout=layouts['data_fakes_EFT_simple'],
+                      layout=layouts[layout_name],
     )
 
     out_objects.append(res)
@@ -186,8 +224,13 @@ for i in xrange(n_bins_phi):
 
     h = plot.GetAxisHist(pads[i])
     hr = plot.GetAxisHist(ratio_pads[i])
-    h.SetMinimum(1E-4)
-    h.SetMaximum(1E+1)
+    if args.selection == 'eft_region':
+        h.SetMinimum(1E-4)
+        h.SetMaximum(1E+2)
+    if args.selection == 'fid_region':
+        h.SetMinimum(1E-1)
+        h.SetMaximum(1E+5)
+
     # h.Draw()
     h.GetXaxis().SetNdivisions(510)
     hr.GetXaxis().SetNdivisions(510)
@@ -206,7 +249,8 @@ for i in xrange(n_bins_phi):
 
 
     pad_width = 1. - pads[i].GetLeftMargin() - pads[i].GetRightMargin()
-    latex.DrawLatexNDC(pads[i].GetLeftMargin() + pad_width * 0.75, 0.91, '%.2f #leq |#phi_{f}| < %.2f' % (phi_bins[i], phi_bins[i + 1]))
+    if args.selection == 'eft_region':
+        latex.DrawLatexNDC(pads[i].GetLeftMargin() + pad_width * 0.75, 0.91, '%.2f #leq |#phi_{f}| < %.2f' % (phi_bins[i], phi_bins[i + 1]))
 
 
 canv.Print('.png')

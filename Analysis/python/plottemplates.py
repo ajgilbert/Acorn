@@ -192,7 +192,8 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         # col = info['color']
         if isinstance(col, list):
             col = ROOT.TColor.GetColor(*col)
-        print info['line_width']
+        # print info['line_width']
+        # plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
         plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
@@ -273,6 +274,8 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
     # Do the ratio plot
     r_store = {}
+    r_data = None
+    r_tot = None
     if cfg['ratio']:
         pads[1].cd()
         pads[1].SetGrid(0, 1)

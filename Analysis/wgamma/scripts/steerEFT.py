@@ -17,7 +17,17 @@ def call(args):
 
 configs = {
     "fid_pt_binned": {
-        'pt_bins': '[30,40,50,60,80,100,200,500]',
+        'pt_bins': '[30,50,70,100,150,200,300,500,800]',
+        # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
+    "inclusive_xs": {
+        'pt_bins': '[30,10000]',
         # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
         'phi_var': '0.5',
         'phi_var_label': '1',
@@ -45,7 +55,8 @@ configs = {
         'task_name': 'eft_region'
     },
     "puppi_phi_f_binned": {
-        'pt_bins': '[150,210,300,420,600,850,1200]',
+        # 'pt_bins': '[150,210,300,420,600,850,1200]',
+        'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
         'phi_var_obs': 'abs(reco_puppi_phi_f)',
@@ -138,17 +149,17 @@ if 'makeHists' in steps:
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/190814-full/wgamma_%s_v4/WGamma_' % yr
+        indir = 'root://eoscms.cern.ch//store/cmst3/user/agilbert/191003-full/wgamma_%s_v4/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
-          # ('MetJesLo_', '_CMS_scale_met_jesDown'),
-          # ('MetJesHi_', '_CMS_scale_met_jesUp'),
-          # ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
-          # ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
-          # ('PScaleLo_', '_CMS_scale_pDown'),
-          # ('PScaleHi_', '_CMS_scale_pUp'),
+          ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
+          ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
+          ('PScaleLo_', '_CMS_scale_pDown'),
+          ('PScaleHi_', '_CMS_scale_pUp'),
         ]
         for syst_file, syst_name in do_systs:
             call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
@@ -171,10 +182,10 @@ if 'T2W' in steps:
     infiles = []
     for region in ['main', 'met1']:
         for sgn in ['p', 'n']:
-            infiles.append('%s_LO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
+            infiles.append('%s_NLO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
 
 
-    if label == 'fid_pt_binned':
+    if label == 'fid_pt_binned' or label == 'inclusive_xs':
         call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
              ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
@@ -218,7 +229,7 @@ if 'limitsVsPtMax' in steps:
 
 allPOIs = []
 for i in range(n_pt_bins):
-    if label == 'fid_pt_binned':
+    if label == 'fid_pt_binned' or label == 'inclusive_xs':
         allPOIs.append('r_x_%i' % i)
     else:
         for j in range(n_phi_bins):
@@ -229,7 +240,7 @@ if 'xsec2D' in steps:
     initPOIs = ','.join([('%s=1' % X) for X in allPOIs])
     genStr = 'P;n;;' + ';'.join(['%s,%s' % (X, X) for X in allPOIs])
 
-    if label == 'fid_pt_binned':
+    if label == 'fid_pt_binned' or label == 'inclusive_xs':
         wsp = 'pt_diff'
         rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
     else:

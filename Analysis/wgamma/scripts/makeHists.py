@@ -348,6 +348,10 @@ X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && n_pre_m==1 
 X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
+X['baseline_m_met'] ='$baseline_m && puppi_met>40'
+X['baseline_e_met'] ='$baseline_e && puppi_met>40'
+X['baseline_m_nomet'] ='$baseline_m && $mZ_veto_m'
+X['baseline_e_nomet'] ='$baseline_e && $mZ_veto_e'
 X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
 X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met>40'
 
@@ -500,6 +504,7 @@ if args.task == 'eft_region' or args.task == 'fid_region':
                                 ('WG_met1_%s_%i_%i' % (chg, i, j), '$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j), '$baseline_wt'),
                             ]
                             wg_hlist.extend(hlist)
+                            wg_scale_hlist.extend(hlist)
                             wg_syst_hlist.extend(hlist)
                             # xnode['WG_main_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
                             # xnode['WG_met1_%s_%i_%i' % (chg, i, j)] = Hist('TH1F', sample=wg_sample, var=[var], binning=binning, sel=X.get('$' + sel + ' && $%s_gen_met1_%i_%i' % (chg, i, j)), wt=X.get('$baseline_wt'))
@@ -548,8 +553,8 @@ if args.task in ['baseline', 'electron_fakes']:
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
 
-    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'cr_Zee'])
-    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'cr_Zmm'])
+    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
+    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
 
     cat_to_wt = {
         'cr_Zee': '$cr_zll_wt',
@@ -560,22 +565,18 @@ if args.task in ['baseline', 'electron_fakes']:
         ('n_vtx', (30, 0., 60.)),
         ('n_veto_m', (3, -0.5, 2.5)),
         ('n_veto_e', (3, -0.5, 2.5)),
-        ('l0met_mt', (30, 0., 200.)),
         ('l0_pt', (30, 0., 150.)),
         ('l0_eta', (20, -3.0, 3.0)),
         ('l0_phi', (20, -3.15, 3.15)),
         # ('l0_iso', (40, 0, 2.0)),
         ('l1_pt', (40, 0., 150.)),
-        ('l1_eta', (20, -3.0, 3.0)),
         ('l0l1_M', (60, 60, 120)),
         ('l0l1_pt', (80, 0, 200)),
         # ('l0l1_dr', (20, 0., 5.)),
         ('met', (20, 0., 200.)),
-        ('met_phi', (20, -3.15, 3.15)),
         # ('tk_met', (40, 0., 200.)),
         # ('tk_met_phi', (20, -3.15, 3.15)),
         ('puppi_met', (20, 0., 200.)),
-        ('puppi_met_phi', (20, -3.15, 3.15)),
         ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
         ('p0_eta', (20, -3.0, 3.0)),
         ('p0_phi', (30, -3.15, 3.15)),
@@ -597,6 +598,16 @@ if args.task in ['baseline', 'electron_fakes']:
         ('wt_p0', (100, 0.8, 1.2)),
         ('wt_p0_e_fake', (100, 0, 4))
     ]
+
+    if args.syst == None:
+        drawvars.extend([
+            ('l0met_mt', (30, 0., 200.)),
+            ('l1_eta', (20, -3.0, 3.0)),
+            ('met_phi', (20, -3.15, 3.15)),
+            ('puppi_met_phi', (20, -3.15, 3.15))
+        ])
+
+
     if args.task == 'electron_fakes':
         drawvars = [
             ('l0p0_M', (40, 60, 120)),
