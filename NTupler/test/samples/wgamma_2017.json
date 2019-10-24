@@ -328,6 +328,12 @@
       "attributes": ["submit"],
       "events": 0,
       "config": "mc_no_lhe"
+    },
+    "DiPhotonJets_MGG-80toInf": {
+      "dataset": "/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
+      "attributes": ["submitx"],
+      "events": 0,
+      "config": "mc"
     }
   },
   "configs": {
