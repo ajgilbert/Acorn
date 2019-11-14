@@ -232,6 +232,25 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'met_m', 'den': 'mZ_veto_m', 'type': 'binomial'},
                       ]
     )
+
+    this_layout = [
+                          {'name': 'met_m', 'legend': 'Full selection'},
+                          {'name': 'm_with_wt_l0', 'legend': ' + Muon Trk/ID/Iso SF'},
+                          {'name': 'm_with_wt_trg_l0', 'legend': ' + Muon trigger SF'},
+                          {'name': 'm_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
+                ]
+    this_ratio = [
+                          {'num': 'm_with_wt_l0', 'den': 'met_m', 'type': 'binomial'},
+                          {'num': 'm_with_wt_trg_l0', 'den': 'm_with_wt_l0', 'type': 'binomial'},
+                          {'num': 'm_with_wt_p0', 'den': 'm_with_wt_trg_l0', 'type': 'binomial'},
+                ]
+    if year != '2018':
+        this_layout += [
+                          {'name': 'm_with_wt_pf', 'legend': ' + L1 prefiring SF'},
+        ]
+        this_ratio += [
+                          {'num': 'm_with_wt_pf', 'den': 'm_with_wt_p0', 'type': 'binomial'},
+        ]
     MakeMultiHistPlot('weights_m_%s_%s' % (year, var),
                       outdir=outdir,
                       hists=hist_dict,
@@ -241,19 +260,8 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
                           'ratio_y_range': [0.9, 1.05],
                           }),
-                      layout=[
-                          {'name': 'met_m', 'legend': 'Full selection'},
-                          {'name': 'm_with_wt_l0', 'legend': ' + Muon Trk/ID/Iso SF'},
-                          {'name': 'm_with_wt_trg_l0', 'legend': ' + Muon trigger SF'},
-                          {'name': 'm_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
-                          {'name': 'm_with_wt_pf', 'legend': ' + L1 prefiring SF'},
-                      ],
-                      ratios=[
-                          {'num': 'm_with_wt_l0', 'den': 'met_m', 'type': 'binomial'},
-                          {'num': 'm_with_wt_trg_l0', 'den': 'm_with_wt_l0', 'type': 'binomial'},
-                          {'num': 'm_with_wt_p0', 'den': 'm_with_wt_trg_l0', 'type': 'binomial'},
-                          {'num': 'm_with_wt_pf', 'den': 'm_with_wt_p0', 'type': 'binomial'},
-                      ]
+                      layout=this_layout,
+                      ratios=this_ratio
     )
     MakeMultiHistPlot('efficiencies_e_%s_%s' % (year, var),
                       outdir=outdir,
@@ -290,6 +298,24 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'met_e', 'den': 'mZ_veto_e', 'type': 'binomial'},
                       ]
     )
+    this_layout = [
+                    {'name': 'met_e', 'legend': 'Full selection'},
+                    {'name': 'e_with_wt_l0', 'legend': ' + Electron Trk/ID/Iso SF'},
+                    {'name': 'e_with_wt_trg_l0', 'legend': ' + Electron trigger SF'},
+                    {'name': 'e_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
+                ]
+    this_ratio = [
+                    {'num': 'e_with_wt_l0', 'den': 'met_e', 'type': 'binomial'},
+                    {'num': 'e_with_wt_p0', 'den': 'e_with_wt_trg_l0', 'type': 'binomial'},
+                    {'num': 'e_with_wt_trg_l0', 'den': 'e_with_wt_l0', 'type': 'binomial'},
+                ]
+    if year != '2018':
+        this_layout += [
+            {'name': 'e_with_wt_pf', 'legend': ' + L1 prefiring SF'},
+        ]
+        this_ratio += [
+            {'num': 'e_with_wt_pf', 'den': 'e_with_wt_p0', 'type': 'binomial'},
+        ]
     MakeMultiHistPlot('weights_e_%s_%s' % (year, var),
                       outdir=outdir,
                       hists=hist_dict,
@@ -299,18 +325,8 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
                           'ratio_y_range': [0.9, 1.05],
                           }),
-                      layout=[
-                          {'name': 'met_e', 'legend': 'Full selection'},
-                          {'name': 'e_with_wt_l0', 'legend': ' + Electron Trk/ID/Iso SF'},
-                          {'name': 'e_with_wt_trg_l0', 'legend': ' + Electron trigger SF'},
-                          {'name': 'e_with_wt_p0', 'legend': ' + Photon ID/Iso SF'},
-                          {'name': 'e_with_wt_pf', 'legend': ' + L1 prefiring SF'},
-                      ],
-                      ratios=[
-                          {'num': 'e_with_wt_l0', 'den': 'met_e', 'type': 'binomial'},
-                          {'num': 'e_with_wt_p0', 'den': 'e_with_wt_trg_l0', 'type': 'binomial'},
-                          {'num': 'e_with_wt_pf', 'den': 'e_with_wt_p0', 'type': 'binomial'},
-                      ]
+                      layout=this_layout,
+                      ratios=this_ratio
     )
 
     # Draw N/baseline efficiencies

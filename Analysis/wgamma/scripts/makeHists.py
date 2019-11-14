@@ -58,7 +58,8 @@ remaps = {
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
         'GG': 'DiPhotonJetsBox_MGG-80toInf',
         'GG_NLO': 'DiPhotonJets_MGG-80toInf',
-        'GG_L': 'DiPhotonJetsBox_MGG-40to80'
+        'GG_L': 'DiPhotonJetsBox_MGG-40to80',
+        'WWG': 'WWG-amcatnlo'
     },
     "2017": {
         'DY': 'DYJetsToLL_M-50-amcatnloFXFX',
@@ -119,7 +120,8 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
-        'GG': 'DiPhotonJetsBox_MGG-80toInf'
+        'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'WWG': 'WWG-amcatnlo'
     }
 }
 
@@ -136,7 +138,8 @@ groups = {
     'TT': ['TT_SL', 'TT_Had', 'TT_DL'],
     'TTG': ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar'],
     'VV': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top'],
-    'GG': ['GG_LO', 'GG_L']
+    'GG': ['GG_LO', 'GG_L'],
+    'WWG': ['WWG']
 }
 
 if year == '2016':
@@ -344,8 +347,8 @@ if args.year == '2018':
     X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
-X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && n_pre_m>=1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && n_pre_e>=1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
 X['baseline_m_met'] ='$baseline_m && puppi_met>40'
@@ -550,8 +553,10 @@ if args.task in ['baseline', 'electron_fakes']:
                 label = label.replace('.', 'p')
                 X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                X['tot_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
+                do_cats['e'].append('tot_%s' % label)
 
     do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
     do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
@@ -749,7 +754,28 @@ for chn in ['e', 'm']:
 
 # fin = ROOT.TFile('output_%s_%s_%s.root' % (year, args.task, args.label))
 # TDirToNode(fin, node=hists)
-doCleanup = True
+doCleanup = False
+
+allProcs = []
+for sa in groups['WG']:
+    allProcs.append('%s_R' % sa)
+for sa in groups['DY']:
+    allProcs.append('%s_XZG_R' % sa)
+    allProcs.append('%s_E' % sa)
+for sa in groups['ZG']:
+    allProcs.append('%s_IZG_R' % sa)
+for sa in groups['TT']:
+    allProcs.append('%s_XTTG_R' % sa)
+    allProcs.append('%s_E' % sa)
+for sa in groups['TTG']:
+    allProcs.append('%s_ITTG_R' % sa)
+for sa in groups['VV']:
+    allProcs.append('%s_R' % sa)
+    allProcs.append('%s_E' % sa)
+for sa in groups['GG']:
+    allProcs.append('%s_R' % sa)
+    allProcs.append('%s_E' % sa)
+allProcs.append('data_fakes_highpt')
 
 for path, node in hists.ListNodes(withObjects=True):
     print path
@@ -757,6 +783,8 @@ for path, node in hists.ListNodes(withObjects=True):
         continue
     if 'XS' in path.split('/'):
         continue
+
+    # CheckBinErrors(node, allProcs)
 
     for grp, grplist in groups.iteritems():
         suffixes = [g.replace(grplist[0] + '_', '') for g in node.d.keys() if g.startswith(grplist[0] + '_')]

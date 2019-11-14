@@ -26,6 +26,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, std::string, gen_classify)
   CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_zg)
+  CLASS_MEMBER(WGDataAnalysis, bool, check_is_wwg)
   CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
   CLASS_MEMBER(WGDataAnalysis, int, var_set)
   CLASS_MEMBER(WGDataAnalysis, int, correct_e_energy)

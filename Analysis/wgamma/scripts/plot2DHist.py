@@ -19,6 +19,9 @@ parser.add_argument('--label-size', type=float, default=0.04)
 parser.add_argument('--marker-size', type=float, default=1.5)
 parser.add_argument('--print-twiki', action='store_true')
 parser.add_argument('--titles', default='x,y,z')
+parser.add_argument('--draw-opt', default='COLZTEXT')
+parser.add_argument('--palette', default='default', choices=['default', 'i103'])
+
 parser.add_argument(
     '--subline', default='Internal', help='text to add next to cms logo')
 
@@ -26,6 +29,10 @@ args = parser.parse_args()
 plot.ModTDRStyle(width=750, height=600, l = 0.17, b = 0.15, r = 0.23, t=0.08)
 
 # plot.SetCorrMatrixPalette()
+if args.palette == 'i103':
+	ROOT.gStyle.SetPalette(103)
+	ROOT.TColor.InvertPalette()
+
 ROOT.gStyle.SetNdivisions(510, "XYZ")
 ROOT.gStyle.SetMarkerSize(1.0)
 ROOT.gStyle.SetPaintTextFormat('.2f')
@@ -55,8 +62,9 @@ pads = plot.OnePad()
 
 ROOT.gStyle.SetTextFont(42)
 hist.SetMarkerSize(args.marker_size)
-hist.Draw('COLZTEXT')
+hist.Draw(args.draw_opt)
 
+plot.FixOverlay()
 
 plot.DrawCMSLogo(pads[0], 'CMS', args.subline, 0, 0.17, 0.035, 1.2)
 

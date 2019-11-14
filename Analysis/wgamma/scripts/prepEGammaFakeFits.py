@@ -16,7 +16,7 @@ parser.add_argument('--label', default='nominal')
 # parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
 args = parser.parse_args()
 
-sub_bkgs = ['DY_R', 'WG']
+sub_bkgs = ['DY_XZG_R', 'ZG_IZG_R', 'WG_R']
 
 if args.bkg_sub:
     print '>> Subtracting backgrounds %s from data_obs' % str(sub_bkgs)

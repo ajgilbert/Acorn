@@ -224,6 +224,10 @@ for i, h in enumerate(h_axes):
     h_store['ref_hists_1D_%i_line' % i] = ZeroErrors(ref_hists_1D[i].Clone())
     plot.Set(obs_graphs[i], LineWidth=2, MarkerSize=0.6)
     ref_hists_1D[i].Draw('E2SAME')
+    print '>>> REF graph %i' % i
+    for ig in xrange(1, ref_hists_1D[i].GetNbinsX() + 1):
+        print '%10g %10g %10.3g %10.3g' % (ref_hists_1D[i].GetXaxis().GetBinLowEdge(ig), ref_hists_1D[i].GetXaxis().GetBinUpEdge(ig), ref_hists_1D[i].GetBinContent(ig), ref_hists_1D[i].GetBinError(ig))
+
     h_store['ref_hists_1D_%i_line' % i].Draw('LSAME')
 
 
@@ -268,12 +272,17 @@ for i, h in enumerate(h_axes):
         plot.Set(h_matrix, LineColor=4, LineWidth=1, MarkerSize=0, FillColorAlpha=(4, 0.3))
         h_store['matrix_%i_line' % i] = ZeroErrors(h_matrix.Clone())
         h_matrix.Draw('E2SAME')
+        print '>>> MATRIX graph %i' % i
+        for ig in xrange(1, h_matrix.GetNbinsX() + 1):
+            print '%10g %10g %10.3g %10.3g' % (h_matrix.GetXaxis().GetBinLowEdge(ig), h_matrix.GetXaxis().GetBinUpEdge(ig), h_matrix.GetBinContent(ig), h_matrix.GetBinError(ig))
         h_store['matrix_%i_line' % i].Draw('LSAME')
         legend.AddEntry(h_matrix, 'MATRIX (NNLO QCD)', 'LF')
 
 
     obs_graphs[i].Draw('SAMEP')
-
+    print '>>> Observed graph %i' % i
+    for ig in xrange(obs_graphs[i].GetN()):
+        print '%10.3g %10.3g %10.3g %10.3g' % (obs_graphs[i].GetX()[ig], obs_graphs[i].GetY()[ig], obs_graphs[i].GetEYlow()[ig], obs_graphs[i].GetEYhigh()[ig])
 
     pad_width = 1. - pads[i].GetLeftMargin() - pads[i].GetRightMargin()
     if args.selection != 'fid_region':

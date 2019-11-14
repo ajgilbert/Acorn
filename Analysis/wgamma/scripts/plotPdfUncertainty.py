@@ -140,6 +140,7 @@ pads[0].SetLogy()
 # pads[0].SetLogx()
 # pads[1].SetLogx()
 h_axes[0].SetMinimum(1E-9)
+h_axes[0].GetXaxis().SetTitle('Photon p_{T} [GeV]')
 
 # # # A dict to keep track of the hists
 legend = ROOT.TLegend(0.67, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
@@ -161,6 +162,8 @@ h_pdf_env_fill.Draw('E2SAME')
 h_pdf_env.Draw('HISTSAME')
 h_pdf_nlo.Draw('HISTSAME')
 # h_matrix.Draw('HISTSAME')
+h_axes[0].SetMinimum(1E-6)
+h_axes[0].SetMaximum(1E0)
 
 # plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.3)
 legend.Draw()
@@ -179,7 +182,7 @@ r_pdf_env_fill.Draw('E2SAME')
 r_pdf_nlo.Draw('HISTSAME')
 plot.SetupTwoPadSplitAsRatio(
     pads, plot.GetAxisHist(
-        pads[0]), plot.GetAxisHist(pads[1]), 'ratio to NNLO', True, 0.92, 1.08)
+        pads[0]), plot.GetAxisHist(pads[1]), 'ratio to NNLO', True, 0.92, 1.04)
 
 
 # # # Go back and tidy up the axes and frame

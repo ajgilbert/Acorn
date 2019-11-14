@@ -113,6 +113,30 @@
       "events": 0,
       "config": "mc"
     },
+    "DY1JetsToLL_M-50-madgraphMLM": {
+      "dataset": "/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
+      "attributes": [],
+      "events": 0,
+      "config": "mc"
+    },
+    "DY2JetsToLL_M-50-madgraphMLM": {
+      "dataset": "/DY2JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
+      "attributes": [],
+      "events": 0,
+      "config": "mc"
+    },
+    "DY3JetsToLL_M-50-madgraphMLM": {
+      "dataset": "/DY3JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
+      "attributes": [],
+      "events": 0,
+      "config": "mc"
+    },
+    "DY4JetsToLL_M-50-madgraphMLM": {
+      "dataset": "/DY4JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": [],
+      "events": 0,
+      "config": "mc"
+    },
     "DYJetsToLL_M-50-amcatnloFXFX": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext2-v1/MINIAODSIM",
       "attributes": ["submit"],

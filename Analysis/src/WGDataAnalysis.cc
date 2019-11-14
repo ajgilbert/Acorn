@@ -29,6 +29,7 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       is_data_(true),
       do_wg_gen_vars_(false),
       check_is_zg_(false),
+      check_is_wwg_(false),
       do_presel_(true),
       var_set_(1),
       correct_e_energy_(-1),
@@ -57,6 +58,9 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("metfilters", &metfilters_);
       if (check_is_zg_) {
         tree_->Branch("gen_is_zg", &gen_is_zg_);
+      }
+      if (check_is_wwg_) {
+        tree_->Branch("gen_proc", &gen_proc_);
       }
       tree_->Branch("n_vtx", &n_vtx_);
 
@@ -318,6 +322,19 @@ int WGDataAnalysis::PreAnalysis() {
   int WGDataAnalysis::Execute(TreeEvent* event) {
 
     SetDefaults();
+
+    if (check_is_wwg_) {
+      unsigned n_neutrinos = 0;
+      auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
+      for (auto const& p : gen_parts) {
+        if (p->statusFlags().isPrompt() && p->status() == 1 && IsNeutrino(*p)) {
+          ++n_neutrinos;
+        }
+      }
+      if (n_neutrinos == 2) {
+        return 1;
+      }
+    }
 
     auto const* info = event->GetPtr<EventInfo>("eventInfo");
 
@@ -844,6 +861,18 @@ int WGDataAnalysis::PreAnalysis() {
           p0_truth_ = 6;
         } else if (prompt_gen_photons.size() > 0) {
           p0_truth_ = 1;
+
+          if (check_is_wwg_) {
+            int p0_idx = prompt_gen_photons[0]->index();
+            for (auto const& p : genparts) {
+              if (ac::contains(p->daughters(), p0_idx)) {
+                // These flags should only select photons that come from V->qq(q->qgamma)
+                if (p->status() == 23 && std::abs(p->pdgId()) >= 1 && std::abs(p->pdgId()) <= 6 && p->statusFlags().isLastCopyBeforeFSR()) {
+                  gen_proc_ = 1;
+                }
+              }
+            }
+          }
         }
         for (auto const& p_pho : prompt_gen_photons) {
           for (auto const& p : genparts) {

@@ -194,7 +194,7 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             col = ROOT.TColor.GetColor(*col)
         # print info['line_width']
         # plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
-        plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+        plot.Set(hist, LineColor=col, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
                 hist.Add(hists[other])
@@ -297,6 +297,8 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
                 if 'type' in info and info['type'] == 'binomial':
                     rhist = h_store[info['num']].Clone()
                     rhist.Divide(h_store[info['num']], h_store[info['den']], 1., 1., "B")
+                elif 'type' in info and info['type'] == 'noerror':
+                    rhist = plot.MakeRatioHist(h_store[info['num']], h_store[info['den']], True, False)
                 else:
                     rhist = plot.MakeRatioHist(h_store[info['num']], h_store[info['den']], True, True)
                 r_store['%s_%s' % (info['num'], info['den'])] = rhist

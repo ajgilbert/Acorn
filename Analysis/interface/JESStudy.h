@@ -20,19 +20,29 @@
 
 namespace ac {
 
+struct JESHists {
+  TFileDirectory dir;
+  TH2D * j_nominal_;
+  std::vector<TH2D *> jhists_;
+  std::vector<double> pt_edges_;
+  std::vector<double> eta_edges_;
+
+  void MakeHists(std::vector<std::string> & srcs);
+};
+
 class JESStudy : public ModuleBase {
  private:
   CLASS_MEMBER(JESStudy, fwlite::TFileService*, fs)
   CLASS_MEMBER(JESStudy, unsigned, year)
   CLASS_MEMBER(JESStudy, bool, is_data)
 
+ private:
   std::vector<JetCorrectorParameters *> jpars_;
   std::vector<JetCorrectionUncertainty *> juncs_;
   std::vector<std::string> jsrcs_;
-  std::vector<TH2D *> jhists_;
-
- private:
-  TH2D *j_nominal;
+  // std::vector<TH2D *> jhists_;
+  std::map<std::string, JESHists> jhists_;
+  // TH2D *j_nominal;
 
  public:
   JESStudy(std::string const& name);

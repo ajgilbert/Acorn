@@ -24,6 +24,13 @@
 
 namespace ac {
 
+void JESHists::MakeHists(std::vector<std::string> & srcs) {
+  for (auto src : srcs) {
+    jhists_.push_back(dir.make<TH2D>(src.c_str(), "", pt_edges_.size() - 1, pt_edges_.data(), eta_edges_.size() - 1, eta_edges_.data()));
+  }
+    j_nominal_ = dir.make<TH2D>("nominal", "", pt_edges_.size() - 1, pt_edges_.data(), eta_edges_.size() - 1, eta_edges_.data());
+}
+
 JESStudy::JESStudy(std::string const& name)
     : ModuleBase(name), fs_(nullptr), year_(2016), is_data_(true) {}
 
@@ -63,19 +70,52 @@ int JESStudy::PreAnalysis() {
 
   std::string jfile_ = "wgamma/inputs/Autumn18_V8_MC_UncertaintySources_AK4PFchs.txt";
 
-  std::vector<double> pt_edges = {40, 60, 80, 100, 150, 200};
-  std::vector<double> eta_edges = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+
   for (auto src : jsrcs_) {
     auto pars = new JetCorrectorParameters(jfile_, src);
     jpars_.push_back(pars);
     juncs_.push_back(new JetCorrectionUncertainty(*pars));
-    jhists_.push_back(fs_->make<TH2D>(src.c_str(), "", pt_edges.size() - 1, pt_edges.data(), eta_edges.size() - 1, eta_edges.data()));
   }
 
-  if (fs_) {
-    // tree_ = fs_->make<TTree>("JESStudy", "JESStudy");
-    j_nominal = fs_->make<TH2D>("nominal", "", pt_edges.size() - 1, pt_edges.data(), eta_edges.size() - 1, eta_edges.data());
+  auto & main = jhists_["main"];
+  main.dir = fs_->mkdir("main");
+  main.pt_edges_ = {40, 60, 80, 100, 150, 200};
+  main.eta_edges_ = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+  main.MakeHists(jsrcs_);
+
+  auto & fine = jhists_["fine"];
+  fine.dir = fs_->mkdir("fine");
+  fine.pt_edges_ = {35, 40, 45, 50, 60, 70, 80, 100, 150, 200, 300};
+  fine.eta_edges_ = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+  fine.MakeHists(jsrcs_);
+
+  auto & fineneg = jhists_["fineneg"];
+  fineneg.dir = fs_->mkdir("fineneg");
+  fineneg.pt_edges_ = {35, 40, 45, 50, 60, 70, 80, 100, 150, 200, 300};
+  fineneg.eta_edges_ = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+  fineneg.MakeHists(jsrcs_);
+
+  auto & direct = jhists_["direct"];
+  direct.dir = fs_->mkdir("direct");
+  // direct.pt_edges_ = {30, 35, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300};
+  // direct.eta_edges_ = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+  direct.pt_edges_ = {40, 60, 80, 100, 150, 200};
+  direct.eta_edges_ = {-5.0, -3.0, -2.5, -1.3, 0.0, +1.3, +2.5, +3.0, +5.0};
+  // direct.eta_edges_ = {-5.0, -2.5, 0.0, +2.5, +5.0};
+  direct.MakeHists(jsrcs_);
+
+  for (int ix = 1; ix <= direct.j_nominal_->GetNbinsX(); ++ix) {
+    for (int iy = 1; iy <= direct.j_nominal_->GetNbinsY(); ++iy) {
+      direct.j_nominal_->SetBinContent(ix, iy, 1.0);
+      for (unsigned ic = 0; ic < jsrcs_.size(); ++ic) {
+        juncs_[ic]->setJetPt(direct.j_nominal_->GetXaxis()->GetBinCenter(ix));
+        juncs_[ic]->setJetEta(direct.j_nominal_->GetYaxis()->GetBinCenter(iy));
+        direct.jhists_[ic]->SetBinContent(ix, iy, 1. + juncs_[ic]->getUncertainty(true));
+      }
+    }
   }
+
+
   return 0;
 }
 
@@ -111,12 +151,21 @@ int JESStudy::Execute(TreeEvent* event) {
     return DeltaR(j, l0) > 0.5 && DeltaR(j, l1) > 0.5 && j->passesJetID();
   });
 
+  auto & main = jhists_["main"];
+  auto & fine = jhists_["fine"];
+  auto & fineneg = jhists_["fineneg"];
   for (auto const& j : jets) {
-    j_nominal->Fill(j->pt(), j->eta());
+    main.j_nominal_->Fill(j->pt(), j->eta());
+    fine.j_nominal_->Fill(j->pt(), j->eta());
+    fineneg.j_nominal_->Fill(j->pt(), j->eta());
     for (unsigned ic = 0; ic < jsrcs_.size(); ++ic) {
       juncs_[ic]->setJetPt(j->pt());
       juncs_[ic]->setJetEta(j->eta());
-      jhists_[ic]->Fill(j->pt() * (1. + juncs_[ic]->getUncertainty(true)), j->eta());
+      double uncHi = juncs_[ic]->getUncertainty(true);
+
+      main.jhists_[ic]->Fill(j->pt() * (1. + uncHi), j->eta());
+      fine.jhists_[ic]->Fill(j->pt() * (1. + uncHi), j->eta());
+      fineneg.jhists_[ic]->Fill(j->pt() * (1. - uncHi), j->eta());
     }
   }
 

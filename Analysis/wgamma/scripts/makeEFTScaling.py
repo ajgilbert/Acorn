@@ -86,6 +86,7 @@ parser.add_argument('--draw-y', default=None, nargs=3)
 parser.add_argument('--unit-norm', action='store_true')
 parser.add_argument('--charge', default='+1')
 parser.add_argument('--logy', action='store_true')
+parser.add_argument('--int-only', action='store_true')
 parser.add_argument('--g_pt', default='300.')
 parser.add_argument('--g_pt_max', default='9999999999.')
 parser.add_argument('--g_eta', default='3.')
@@ -172,7 +173,10 @@ if not is2D:
         bin_scalings.append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i' % (args.label, pm_label, ib - 1), wsp=wsp, binStr=bin_str))
         scale = bin_scalings[ib - 1]
         for label, val in compute:
-            scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
+            if args.int_only:
+                scale_factor = (scale[0] + val * scale[1])
+            else:
+                scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
             hists[label].SetBinContent(ib, hists[label].GetBinContent(ib) * scale_factor)
 
 else:
@@ -231,7 +235,7 @@ if not is2D:
     # A dict to keep track of the hists
     legend = ROOT.TLegend(0.67, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
 
-    legend.AddEntry(h_nominal, 'C_{3W} = 0.0 (EWDim6)', 'L')
+    legend.AddEntry(h_nominal, 'C_{3W} = 0.0', 'L')
     # legend.AddEntry(h_sm, 'SM', 'L')
     # legend.AddEntry(h_th, 'Reference', 'L')
     legend.AddEntry(h_0p1, 'C_{3W} = 0.1', 'L')
@@ -293,7 +297,7 @@ if not is2D:
     plot.Set(latex, NDC=None, TextFont=42, TextSize=0.03)
     # latex.DrawLatex(0.20, 0.75, args.title)
     plot.DrawTitle(pads[0], '#sqrt{s} = 13 TeV', 3)
-    plot.DrawTitle(pads[0], 'W^{%s}#gamma^{} LO - MG5_aMC@NLO 2.4.2' %
+    plot.DrawTitle(pads[0], 'W^{%s}#gamma^{}' %
                    ('+' if args.charge == '+1' else '-' if args.charge == '-1' else '#pm'), 1)
 
     pt_l = ROOT.TPaveText(0.23, 0.65, 0.55, 0.9, 'NDCNB')
