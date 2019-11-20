@@ -7,7 +7,7 @@ MASTER_JOB = """#!/bin/sh
 set -e
 #set -x
 
-SEED=$1
+SEED=$(( $1 + %(SEED_OFFSET)s ))
 
 %(CONTENT)s
 
@@ -94,6 +94,8 @@ parser.add_argument('--crab-cfg', default=None,
                     help='Template crab config')
 parser.add_argument('--label', default='test',
                     help='Prepare for running with crab')
+parser.add_argument('--seed-offset', default=0, type=int,
+                    help='Initial offset for RNG seed')
 
 args = parser.parse_args()
 
@@ -183,7 +185,8 @@ for i, seq in enumerate(sequence):
     master_commands.append('bash %s ${SEED}' % script_name)
 
 master_script = MASTER_JOB % ({
-    'CONTENT': '\n'.join(master_commands)
+    'CONTENT': '\n'.join(master_commands),
+    'SEED_OFFSET': args.seed_offset
   })
 
 master_script_name = 'run_chain_%s.sh' % args.label
