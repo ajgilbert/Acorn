@@ -171,6 +171,13 @@
       "config": "mc",
       "inputDBS": "phys03"
     },
+    "WGToLNuG-amcatnloFXFX-PtG-500-ext1": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/agilbert-RunIISummer16MiniAODv3-ext1-bd3e7bcff6c9bcad356ea4ed7e4f08b4/USER",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
     "WGToMuNuG-EFT-madgraphMLM": {
       "dataset": "/WGToMuNuG-EFT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-genonly-miniaod-81a2c693d430d7f96872242e8057cc92/USER",
       "attributes": ["submitgenonly"],

@@ -95,6 +95,20 @@
       "config": "mc",
       "inputDBS": "phys03"
     },
+    "WGToLNuG-amcatnloFXFX-PtG-500-ext1": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-ext1-0b190b81003e6f0362c4e5f88abe28d7/USER",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
+    "WGToLNuG-amcatnloFXFX-PtG-500-ext2": {
+      "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-ext2-0b190b81003e6f0362c4e5f88abe28d7/USER",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc",
+      "inputDBS": "phys03"
+    },
     "ZGToLLG-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
       "attributes": ["submit"],
