@@ -140,7 +140,7 @@ for src in args.input:
             graph_set['2sig_m'].Draw('PLSAME')
             legend.AddEntry(graph_set['2sig_p'], '95%% CL %s' % splitsrc[2], 'L')
         for ip in xrange(graph_set['nominal'].GetN()):
-            print '%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f' % (graph_set['nominal'].GetX()[ip], graph_set['nominal'].GetY()[ip], graph_set['1sig_m'].GetY()[ip], graph_set['1sig_p'].GetY()[ip], graph_set['2sig_m'].GetY()[ip], graph_set['1sig_p'].GetY()[ip])
+            print '%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f' % (graph_set['nominal'].GetX()[ip], graph_set['nominal'].GetY()[ip], graph_set['1sig_m'].GetY()[ip], graph_set['1sig_p'].GetY()[ip], graph_set['2sig_m'].GetY()[ip], graph_set['2sig_p'].GetY()[ip])
     else:
         graph_set['2sig'].Draw('PZSAME')
         graph_set['1sig'].Draw('PZSAME')

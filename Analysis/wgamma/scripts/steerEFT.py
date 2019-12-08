@@ -64,6 +64,17 @@ configs = {
         'phi_bins_obs': '(3,0.,math.pi/2.)',
         'task_name': 'eft_region'
     },
+    "puppi_phi_f_binned_nobin": {
+        # 'pt_bins': '[150,210,300,420,600,850,1200]',
+        'pt_bins': '[150,200,300,500,800,1200]',
+        'phi_var': 'abs(true_phi_f)',
+        'phi_var_label': '|#phi_{f}|',
+        'phi_var_obs': 'p0_pt',
+        'phi_bins': '(3,0.,math.pi/2.)',
+        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'task_name': 'eft_region',
+        'using_label': 'puppi_phi_f_binned'
+    },
     "pt_binned": {
         'pt_bins': '[150,210,300,420,600,850,1200]',
         'phi_var': 'abs(true_phi)',
@@ -208,7 +219,7 @@ if 'T2W' in steps:
 if 'limitsVsPtMax' in steps:
     for bsm_label, bsm_setting, fit_range in [
         ('withBSM', 1, 1.5),
-        ('noBSM', 0, 4.0)
+        ('noBSM', 0, 6.0)
     ]:
         for i in range(n_pt_bins):
             setpars = ['c3w=0', 'lumiscale=1', 'withBSM=%i' % bsm_setting]
@@ -221,10 +232,10 @@ if 'limitsVsPtMax' in steps:
                   '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
                   '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
                   '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
-            call(['combine', '-M', 'MultiDimFit', '-t', '1', '-s', '1', '-n', '.%s.%s.toy' % (label, bsm_label),
-                  '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
-                  '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
-                  '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
+            # call(['combine', '-M', 'MultiDimFit', '-t', '1', '-s', '1', '-n', '.%s.%s.toy' % (label, bsm_label),
+            #       '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
+            #       '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
+            #       '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
 
 
 allPOIs = []
@@ -274,10 +285,10 @@ if 'C3WPlot' in steps:
                 '--main', 'higgsCombine.%s.%s.MultiDimFit.mH%i.root' % (label, bsm_label, i), '--POI', 'c3w',
                 '--model', 'c3w_bin_%i' % i, '--output', 'scan_%s_%s_%i' % (label, bsm_label, i),
                 '--json', '%s_%s.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])
-            call(['python', 'wgamma/scripts/plot1DScan.py',
-                '--main', 'higgsCombine.%s.%s.toy.MultiDimFit.mH%i.1.root' % (label, bsm_label, i), '--POI', 'c3w',
-                '--model', 'c3w_bin_%i' % i, '--output', 'scan_toy_%s_%s_%i' % (label, bsm_label, i),
-                '--json', '%s_%s_toy.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])
+            # call(['python', 'wgamma/scripts/plot1DScan.py',
+            #     '--main', 'higgsCombine.%s.%s.toy.MultiDimFit.mH%i.1.root' % (label, bsm_label, i), '--POI', 'c3w',
+            #     '--model', 'c3w_bin_%i' % i, '--output', 'scan_toy_%s_%s_%i' % (label, bsm_label, i),
+            #     '--json', '%s_%s_toy.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])
 """
 python wgamma/scripts/theoryLimitPlot.py limits_phi_binned_noBSM.json limits_pt_binned_noBSM.json:exp0:'MarkerSize=0,LineWidth=2,LineColor=4,Title="No #phi binning"' --show exp --limit-on "C_{3W} (TeV^{-2})" --x-title "Maximum p_{T}^{#gamma} (GeV)"
 """

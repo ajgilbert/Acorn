@@ -17,12 +17,20 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--selection', default='eft_region')
 parser.add_argument('--channel', default='l')
 parser.add_argument('--charge', default='x')
+parser.add_argument('--year', default='total')
 parser.add_argument('--output', '-o', default='postfit_plot')
 # parser.add_argument('--scheme', default='phi_f_binned')
 # parser.add_argument('--years', default='2016,2017,2018')
 # parser.add_argument('--ratio', action='store_true')
 # parser.add_argument('--charge', default='p')
 args = parser.parse_args()
+
+lumi_year = {
+    '2016': '35.9',
+    '2017': '41.5',
+    '2018': '59.3',
+    'total': '136.9'
+}
 
 if args.selection == 'eft_region':
     plot.ModTDRStyle(width=1000)
@@ -94,7 +102,7 @@ if args.selection == 'eft_region':
     h_fits_c3w_m1 = Node()
     TDirToNode(f_fits_c3w_m1, '/', h_fits_c3w_m1)
 
-    year = 'total'
+    year = args.year
     fit = 'prefit'
 
     pt_bins = BinEdgesFromStr('[150,200,300,500,800,1200]')
@@ -106,7 +114,7 @@ if args.selection == 'fid_region':
     f_fits = ROOT.TFile('shapes_combined_pt_diff_fid_pt_binned.root')
     h_fits = Node()
     TDirToNode(f_fits, '/', h_fits)
-    year = 'total'
+    year = args.year
     fit = 'prefit'
 
     pt_bins = BinEdgesFromStr('[30,50,70,100,150,200,300,500,800]')
@@ -206,7 +214,8 @@ for i in xrange(n_bins_phi):
         thiscfg['sub_logo'] = 'Internal'
         thiscfg['top_title_left'] = 'W^{%s}(%s^{%s}#nu)#gamma' % (chg_latex[chg], chn_latex[chn], chg_latex[chg])
     if i == n_bins_phi - 1:
-        thiscfg['top_title_right'] = '136.9 fb^{-1} (13 TeV)'
+        thiscfg['top_title_right'] = '%s fb^{-1} (13 TeV)' % lumi_year[year]
+    h_dicts[i]['TotalProcs'].Print("range")
     res = MakeMultiHistPlot('test',
                       outdir='.',
                       hists=h_dicts[i],

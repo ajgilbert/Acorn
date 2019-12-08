@@ -18,7 +18,8 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=F
         print '>> Skipping bin %s due to zero content' % label
         return
     y_vals_rel = [y / y_vals[0] for y in y_vals]
-    y_vals_errs_rel = [y / y_vals[0] for y in y_val_errs]
+    # y_vals_errs_rel = [y / y_vals[0] for y in y_val_errs]
+    y_vals_errs_rel = [0] * len(y_val_errs)
     npoints = len(x_vals)
     gr = ROOT.TGraphErrors(npoints, array('d', x_vals), array('d', y_vals_rel), array('d', [0] * npoints), array('d', y_vals_errs_rel))
     fn_full = None
@@ -45,7 +46,7 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=F
         canv = ROOT.TCanvas('%s' % (label), '%s' % (label))
         plot.Set(gr, MarkerColor=2, LineColor=2, LineWidth=2)
         pads = plot.OnePad()
-        gr.Draw('APC')
+        gr.Draw('AP')
         gr.Print()
         if fn_full is not None:
             plot.Set(fn_full, MarkerColor=2, LineColor=2, LineWidth=2)
@@ -56,6 +57,7 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=F
             fn_BSM.Draw('SAME')
             axis = plot.GetAxisHist(pads[0])
             axis.SetMinimum(min(axis.GetMinimum(), fn_lin.Eval(1)))
+            axis.SetMaximum(max(axis.GetMaximum(), fn_BSM.Eval(1)))
             # axis.SetMaximum(2)
             plot.Set(axis.GetXaxis(), Title='C_{3W} (TeV^{-2})')
             plot.Set(axis.GetYaxis(), Title='#sigma(C_{3W})/#sigma_{SM}')
@@ -193,6 +195,9 @@ else:
                 scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
                 hists[label].SetBinContent(ib, jb, hists[label].GetBinContent(ib, jb) * scale_factor)
 
+for ib in xrange(0, hists['nominal'].GetNbinsX()):
+    for jb in xrange(0, hists['nominal'].GetNbinsY()):
+        print '%-10i %-10i %-20.2f %-20.2f %-20.2f' % (ib, jb, bin_scalings[ib][jb][0], bin_scalings[ib][jb][1], bin_scalings[ib][jb][2])
 
 if not is2D:
     if args.unit_norm:

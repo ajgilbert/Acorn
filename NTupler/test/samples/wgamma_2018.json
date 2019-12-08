@@ -97,7 +97,7 @@
     },
     "WGToLNuG-amcatnloFXFX-PtG-500-ext1": {
       "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-ext1-0b190b81003e6f0362c4e5f88abe28d7/USER",
-      "attributes": ["submit"],
+      "attributes": ["submitnew"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
@@ -117,7 +117,7 @@
     },
     "ZGToLLG-lowMLL-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_lowMLL_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -214,7 +214,7 @@
     },
     "WZTo1L1Nu2Q-amcatnloFXFX": {
       "dataset": "/WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -323,7 +323,7 @@
     },
     "TGJets_leptonDecays-amcatnlo": {
       "dataset": "/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -335,7 +335,7 @@
     },
     "DiPhotonJetsBox_MGG-40to80": {
       "dataset": "/DiPhotonJetsBox_M40_80-Sherpa/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc_no_lhe"
     }

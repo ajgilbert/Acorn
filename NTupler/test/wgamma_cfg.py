@@ -532,6 +532,7 @@ elif genOnly == 2:
     # Take the full collection for now
     process.acEventInfoProducer.saveMetFilters = cms.vstring()
     process.acEventInfoProducer.includeNumVertices=cms.bool(False)
+    process.acEventInfoProducer.userDoubles = cms.VInputTag()
     process.p = cms.Path(
         process.acLHEParticleProducer +
         process.acEventInfoProducer +

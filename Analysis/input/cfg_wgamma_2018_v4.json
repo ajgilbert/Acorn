@@ -103,9 +103,9 @@
       "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
-      "xsec": 229.92,
+      "xsec": 191.6,
       "GenXSecAnalyzer": "After filter: final cross section = 1.914e+02 +- 4.441e-01 pb",
       "XSecSource": "(1): 191.6 (NLO) * 1.2 (kNNLO) = 229.92"
     },

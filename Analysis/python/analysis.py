@@ -557,10 +557,13 @@ def CheckBinErrors(node, hists):
     N = node[hists[0]].GetNbinsX()
     for i in xrange(N):
         toterr = 0.0
+        totval = 0.0
         errs = []
         for h in hists:
             err = node[h].GetBinError(i + 1)
-            errs.append((h, err))
+            val = node[h].GetBinContent(i + 1)
+            errs.append((h, err, val))
+            totval += val
             toterr += (err * err)
-        print '>> Bin %i has total error %f' % (i, math.sqrt(toterr))
+        print '>> Bin %i has total error %f / %f' % (i, math.sqrt(toterr), totval)
         print sorted(errs, key=lambda x: x[1], reverse=True)[:5]

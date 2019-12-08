@@ -27,7 +27,7 @@ default_cfg = {
     'logy': False,              # Draw y-axis in log-scale
     'ratio': True,             # Draw the ratio plot?
     'fraction': False,             # Draw the ratio plot?
-    'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
+    'ratio_y_range': [0.61, 2.39],  # Range of the ratio y-axis
     'x_range': [],                  # Restrict the x-axis range shown
     'rebin': 0,                     # Rebin by this factor
     'rebinvar': [],                 # Rebin to this list of bin edges
@@ -48,8 +48,8 @@ default_cfg = {
         # {
         #     "name": "systUp",
         #     "entries": "total",
-        #     "hist_postfix": "_CMS_ele_fake_pUp",
-        #     "legend": "systUp",
+        #     "hist_postfix": "_no_p0_wt",
+        #     "legend": "No Photon ID SF",
         #     "color": 2
         # },
         # {
@@ -87,6 +87,8 @@ config_by_setting = {
         'e/*/l0l1_M': ('m_{e^{+}e^{-}}', 'GeV'),
         'e/*/l0l1_pt': ('p_{T}^{e^{+}e^{-}}', 'GeV'),
         'e/*/l0l1_dr': ('#DeltaR(e^{+},e^{-})', ''),
+        '*/*/l0j0_dphi': ('#Delta#phi(#ell,jet)', ''),
+        '*/*/j0_pt': ('Leading jet p_{T}', 'GeV'),
         '*/met': ('p_{T}^{miss}', 'GeV'),
         '*/met_phi': ('p_{T}^{miss} #phi', ''),
         '*/tk_met': ('Track p_{T}^{miss}', 'GeV'),
@@ -129,6 +131,8 @@ config_by_setting = {
     "layout": {
         'm/cr_Zmm/*': 'pure_mc_zll',
         'e/cr_Zee/*': 'pure_mc_zll',
+        'm/lepton_fakes_m/*': 'pure_mc',
+        'e/lepton_fakes_e/*': 'pure_mc',
     }
 }
 
@@ -151,6 +155,9 @@ variants_by_path = [
             "prefix": "zoom_logy_",
             "x_range": (0, 200),
             "logy": True}),
+    ("*/p0_eta", {
+            "prefix": "wide_",
+            "rebinvar": [-3.0, -2.7, -1.5, -0.9, 0, 0.9, 1.5, 2.7, 3.0]}),
     # ("*/p0_pt", {
     #         "prefix": "fr_barrel_",
     #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],

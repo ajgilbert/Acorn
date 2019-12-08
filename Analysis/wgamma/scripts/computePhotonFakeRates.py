@@ -23,6 +23,7 @@ parser.add_argument('--year', default='2016')
 parser.add_argument('--postfix', default='')
 parser.add_argument('--var', default='p0_pt', choices=['p0_pt', 'p0_chiso'])
 parser.add_argument('--channel', default='m', choices=['e', 'm'])
+parser.add_argument('--mc', action='store_true')
 
 args = parser.parse_args()
 
@@ -92,9 +93,17 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         print '[%f,%f] %.3f %.3f %.3f' % (
             h_fr.GetXaxis().GetBinLowEdge(ib), h_fr.GetXaxis().GetBinUpEdge(ib), h_fr.GetBinContent(ib), h_fr.GetBinError(ib), frac_err
             )
-    # h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_F'].Clone()
-    # h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_F'])
-
+    if args.mc:
+        h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_J'].Clone()
+        h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_J'])
+        print '>> MC'
+        for ib in xrange(1, h_fr_mc.GetNbinsX() + 1):
+            frac_err = 0.
+            if h_fr_mc.GetBinContent(ib) > 0.:
+                frac_err = (h_fr_mc.GetBinError(ib) / h_fr_mc.GetBinContent(ib))
+            print '[%f,%f] %.3f %.3f %.3f' % (
+                h_fr_mc.GetXaxis().GetBinLowEdge(ib), h_fr_mc.GetXaxis().GetBinUpEdge(ib), h_fr_mc.GetBinContent(ib), h_fr_mc.GetBinError(ib), frac_err
+                )
     plot.Set(h_fr, MarkerSize=0.5)
     canv = ROOT.TCanvas('photon_fakes_%s_%s%s' % (args.year, eb, post), 'photon_fakes_%s_%s%s' % (args.year, eb, post))
     pads = plot.OnePad()
@@ -102,14 +111,20 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
     if hint is not None:
         hint.Draw("E3SAME")
         h_fr.Draw('ESAME')
-    # plot.Set(h_fr_mc, LineColor=2, MarkerColor=2)
-    # h_fr_mc.Draw('SAMEE')
+    if args.mc:
+        plot.Set(h_fr_mc, LineColor=2, MarkerColor=2, MarkerSize=0.5)
+    h_fr_mc.Draw('SAMEE')
     h_fr.SetMaximum(1.5)
     h_fr.SetMinimum(0.1)
     h_fr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
     if var == 'p0_chiso':
         h_fr.GetXaxis().SetTitle('Photon I_{ch} (GeV)')
     h_fr.GetYaxis().SetTitle('Fake ratio')
+    if args.mc:
+        legend = ROOT.TLegend(0.6, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
+        legend.AddEntry(h_fr, 'Data', 'L')
+        legend.AddEntry(h_fr_mc, 'W+jets simulation', 'L')
+        legend.Draw()
     canv.Print('.pdf')
     canv.Print('.png')
     fout.cd()

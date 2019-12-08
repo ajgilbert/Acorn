@@ -48,19 +48,19 @@ samples = {
     '2016': {
         'data_obs': 'SingleMuon',
         # 'WG': 'WGToLNuG-madgraphMLM-stitched',
-        # 'WG-inc': 'WGToLNuG-madgraphMLM',
+        #'WG-inc': 'WGToLNuG-amcatnloFXFX',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'
     },
     '2017': {
         'data_obs': 'SingleMuon',
         # 'WG': 'WGToLNuG-madgraphMLM-stitched',
-        # 'WG-inc': 'WGToLNuG-madgraphMLM',
+        #'WG-inc': 'WGToLNuG-amcatnloFXFX',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'  # No NLO sample yet
     },
     '2018': {
         'data_obs': 'SingleMuon',
         # 'WG': 'WGToLNuG-madgraphMLM-stitched',
-        # 'WG-inc': 'WGToLNuG-madgraphMLM',
+        #'WG-inc': 'WGToLNuG-amcatnloFXFX',
         'WG-NLO': 'WGToLNuG-amcatnloFXFX-stitched'
     }
 }
@@ -396,53 +396,55 @@ sys.exit(0)
 # the NLO under the baseline selection above
 for year, var in itertools.product(years, ['lhe_p0_pt', 'lhe_p0_pt_wide', 'p0_pt', 'l0_pt']):
     hist_dict = {}
-    for hname in ['WG', 'WG-inc', 'WG-NLO']:
+    for hname in ['WG-inc', 'WG-NLO']:
         hist_dict[hname] = hists[year][var][hname]['baseline_m']
 
     cfg = deepcopy(plotcfg)
     cfg.update({
         'x_title': x_titles[var],
         'ratio_y_range': [0.65, 1.35],
-        'ratio_y_title': 'Ratio to LO'
+        'ratio_y_title': 'Ratio to inc.',
+        'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
         })
+
+    print hist_dict
 
     MakeMultiHistPlot('lhe_%s_%s' % (year, var),
                       outdir=outdir,
                       hists=hist_dict,
-                      cfg=UpdateDict(plotcfg, {
+                      cfg=UpdateDict(cfg, {
                           'x_title': x_titles[var],
                           'ratio_y_range': [0.65, 1.35],
-                          'ratio_y_title': 'Ratio to LO',
-                          'legend_show_yields': True
+                          'ratio_y_title': 'Ratio to inc.',
+                          'legend_show_yields': True,
+                          'logy': True
                       }),
                       layout=[
-                          {'name': 'WG', 'legend': 'LO stitched sample'},
-                          {'name': 'WG-inc', 'legend': 'LO inclusive sample'},
-                          {'name': 'WG-NLO', 'legend': 'NLO inclusive sample'}
+                          {'name': 'WG-inc', 'legend': 'NLO inclusive sample'},
+                          {'name': 'WG-NLO', 'legend': 'NLO combined sample'}
                       ],
                       ratios=[
-                          {'num': 'WG-inc', 'den': 'WG'},
-                          {'num': 'WG-NLO', 'den': 'WG'}
+                          {'num': 'WG-NLO', 'den': 'WG-inc'}
                       ])
 
-    MakeMultiHistPlot('lhe_normed_%s_%s' % (year, var),
-                      outdir=outdir,
-                      hists=hist_dict,
-                      cfg=UpdateDict(plotcfg, {
-                          'x_title': x_titles[var],
-                          'ratio_y_range': [0.65, 1.35],
-                          'ratio_y_title': 'Ratio to LO',
-                          'legend_show_yields': True,
-                          'norm_to': 1.0,
-                          'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year)
-                      }),
-                      layout=[
-                          {'name': 'WG', 'legend': 'LO stitched sample'},
-                          {'name': 'WG-NLO', 'legend': 'NLO inclusive sample'}
-                      ],
-                      ratios=[
-                          {'num': 'WG-NLO', 'den': 'WG'}
-                      ])
+    # MakeMultiHistPlot('lhe_normed_%s_%s' % (year, var),
+    #                   outdir=outdir,
+    #                   hists=hist_dict,
+    #                   cfg=UpdateDict(plotcfg, {
+    #                       'x_title': x_titles[var],
+    #                       'ratio_y_range': [0.65, 1.35],
+    #                       'ratio_y_title': 'Ratio to LO',
+    #                       'legend_show_yields': True,
+    #                       'norm_to': 1.0,
+    #                       'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year)
+    #                   }),
+    #                   layout=[
+    #                       {'name': 'WG', 'legend': 'LO stitched sample'},
+    #                       {'name': 'WG-NLO', 'legend': 'NLO inclusive sample'}
+    #                   ],
+    #                   ratios=[
+    #                       {'num': 'WG-NLO', 'den': 'WG'}
+    #                   ])
 
 # Draw l0_pt in the high p0_pt region
 for year, var in itertools.product(years, ['l0_pt']):
