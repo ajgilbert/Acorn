@@ -152,7 +152,7 @@
     },
     "ZGToLLG-lowMLL-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_lowMLL_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -332,7 +332,7 @@
     },
     "TGJets_leptonDecays-amcatnlo": {
       "dataset": "/TGJets_leptonDecays_TuneCP5_PSweights_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     },
@@ -350,7 +350,7 @@
     },
     "DiPhotonJets_MGG-80toInf": {
       "dataset": "/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
-      "attributes": ["submitx"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc"
     }
