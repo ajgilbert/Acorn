@@ -97,7 +97,7 @@
     },
     "WGToLNuG-amcatnloFXFX-PtG-500-ext1": {
       "dataset": "/WGToLNuG_01J_5f_PtG-500_TuneCP5_13TeV-amcatnloFXFX-pythia8/agilbert-RunIIAutumn18MiniAOD-ext1-0b190b81003e6f0362c4e5f88abe28d7/USER",
-      "attributes": ["submitnew"],
+      "attributes": ["submit"],
       "events": 0,
       "config": "mc",
       "inputDBS": "phys03"
@@ -338,6 +338,36 @@
       "attributes": ["submit"],
       "events": 0,
       "config": "mc_no_lhe"
+    },
+    "GJets_DR-0p4_HT-40To100": {
+      "dataset": "/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submitnew"],
+      "events": 0,
+      "config": "mc"
+    },
+    "GJets_DR-0p4_HT-100To200": {
+      "dataset": "/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submitnew"],
+      "events": 0,
+      "config": "mc"
+    },
+    "GJets_DR-0p4_HT-200To400": {
+      "dataset": "/GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submitnew"],
+      "events": 0,
+      "config": "mc"
+    },
+    "GJets_DR-0p4_HT-400To600": {
+      "dataset": "/GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submitnew"],
+      "events": 0,
+      "config": "mc"
+    },
+    "GJets_DR-0p4_HT-600ToInf": {
+      "dataset": "/GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
+      "attributes": ["submitnew"],
+      "events": 0,
+      "config": "mc"
     }
   },
   "configs": {

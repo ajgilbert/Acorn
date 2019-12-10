@@ -45,7 +45,7 @@ fout = ROOT.TFile(args.output, 'RECREATE')
 
 res = {}
 
-for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
+for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s' % args.channel, 'endcap_%s' % args.channel, 'endcap1_%s' % args.channel, 'endcap2_%s' % args.channel]:
     for sel in ['%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post)]:
         node = hists[args.channel][sel][var]
         sel_alt = sel.replace(eb, eb.replace('_%s' % args.channel, '_%s' % add_channel))
@@ -113,7 +113,7 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         h_fr.Draw('ESAME')
     if args.mc:
         plot.Set(h_fr_mc, LineColor=2, MarkerColor=2, MarkerSize=0.5)
-    h_fr_mc.Draw('SAMEE')
+        h_fr_mc.Draw('SAMEE')
     h_fr.SetMaximum(1.5)
     h_fr.SetMinimum(0.1)
     h_fr.GetXaxis().SetTitle('Photon p_{T} (GeV)')

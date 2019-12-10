@@ -156,7 +156,7 @@
       }
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["doit", "default", "mc", "do_wg_gen_vars", "no_presel", "scale_weights:2", "pdf_weights:1"],
+      "attributes": ["default", "mc", "do_wg_gen_vars", "no_presel", "scale_weights:2", "pdf_weights:1"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 178.9,
       "GenXSecAnalyzer": "After filter: final cross section = 1.789e+02 +- 4.426e-01 pb",
@@ -470,6 +470,36 @@
       "inputs": ["DiPhotonJets_MGG-80toInf"],
       "xsec": 134.4,
       "GenXSecAnalyzer": "After filter: final cross section = 1.344e+02 +- 4.135e-01 pb"
+    },
+    "GJets_DR-0p4_HT-40To100": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-40To100"],
+      "xsec": 17420.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-100To200": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-100To200"],
+      "xsec": 5391.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-200To400": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-200To400"],
+      "xsec": 1168.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-400To600": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-400To600"],
+      "xsec": 132.5,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-600ToInf": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-600ToInf"],
+      "xsec": 44.05,
+      "GenXSecAnalyzer": ""
     },
     "Theorists": {
       "attributes": ["wg_gen"],

@@ -27,7 +27,7 @@ default_cfg = {
     'logy': False,              # Draw y-axis in log-scale
     'ratio': True,             # Draw the ratio plot?
     'fraction': False,             # Draw the ratio plot?
-    'ratio_y_range': [0.61, 2.39],  # Range of the ratio y-axis
+    'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
     'x_range': [],                  # Restrict the x-axis range shown
     'rebin': 0,                     # Rebin by this factor
     'rebinvar': [],                 # Rebin to this list of bin edges
@@ -87,7 +87,8 @@ config_by_setting = {
         'e/*/l0l1_M': ('m_{e^{+}e^{-}}', 'GeV'),
         'e/*/l0l1_pt': ('p_{T}^{e^{+}e^{-}}', 'GeV'),
         'e/*/l0l1_dr': ('#DeltaR(e^{+},e^{-})', ''),
-        '*/*/l0j0_dphi': ('#Delta#phi(#ell,jet)', ''),
+        '*/*/l0j0_dphi': ('#Delta#phi(l,jet)', ''),
+        '*/*/l0met_dphi': ('#Delta#phi(l,MET)', ''),
         '*/*/j0_pt': ('Leading jet p_{T}', 'GeV'),
         '*/met': ('p_{T}^{miss}', 'GeV'),
         '*/met_phi': ('p_{T}^{miss} #phi', ''),

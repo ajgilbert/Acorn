@@ -311,6 +311,36 @@
       "xsec": 454.8,
       "GenXSecAnalyzer": "After filter: final cross section = 3.094e+02 +- 4.967e-01 pb",
       "XSecSource": "Applied kNLO of 1.47"
+    },
+    "GJets_DR-0p4_HT-40To100": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-40To100"],
+      "xsec": 20790.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-100To200": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-100To200"],
+      "xsec": 5391.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-200To400": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-200To400"],
+      "xsec": 1168.0,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-400To600": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-400To600"],
+      "xsec": 132.5,
+      "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4_HT-600ToInf": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-600ToInf"],
+      "xsec": 44.05,
+      "GenXSecAnalyzer": ""
     }
   },
   "config": {

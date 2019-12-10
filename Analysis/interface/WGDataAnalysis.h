@@ -68,13 +68,16 @@ class WGDataAnalysis : public ModuleBase {
   unsigned n_pre_e_; // number of medium/tight electrons
   unsigned n_veto_m_; // number of veto muons
   unsigned n_veto_e_; // number of veto electrons
+  unsigned n_qcd_j_; // number of "QCD" jets
 
   // l0: Main muon/electron variables
   float l0_pt_;
   float l0_eta_;
   float l0_phi_;
   float l0_iso_;
+  bool l0_nominal_;
   float l0_tkiso_;
+  bool l0_medium_;
   bool l0_tight_;
   bool l0_trg_; // trigger fired and object matched
   bool l0_trg_2_; // 2nd trigger option
@@ -113,6 +116,10 @@ class WGDataAnalysis : public ModuleBase {
   bool p0_tight_; // also passes tight ID
   unsigned p0_truth_; // 0 = default (assume jet), 1 = prompt photon, 2 = prompt electron
   bool p0_fsr_; // true if mother is a charged lepton, false otherwise
+
+  float j0_pt_;
+  float j0_eta_;
+  float l0j0_dphi_;
 
   // met
   float met_;

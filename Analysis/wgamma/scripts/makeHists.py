@@ -13,16 +13,19 @@ ROOT.TH1.SetDefaultSumw2()
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'photon_fakes2', 'electron_fakes', 'fid_region'])
+parser.add_argument('--task', default='eft_region', choices=['eft_region', 'baseline', 'photon_fakes', 'photon_fakes2', 'electron_fakes', 'fid_region', 'lepton_fakes'])
 parser.add_argument('--label', default='default')
 parser.add_argument('--year', default='2016', choices=['2016', '2017', '2018'])
 parser.add_argument('--indir', default='output/130818/wgamma_2016_v2/WGamma/')
 parser.add_argument('--indir-data', default=None)
 parser.add_argument('--syst', default=None)
 parser.add_argument('--extra-cfg', default=None)
+parser.add_argument('--no-wt-systs', action='store_true')
 
 args = parser.parse_args()
 
+DO_WWG_SPLIT = False
+SWITCH_OFF_P0_WT = False
 
 tname = 'WGDataAnalysis'
 prefix = args.indir
@@ -90,7 +93,8 @@ remaps = {
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
         'GG_LO': 'DiPhotonJetsBox_MGG-80toInf',
-        'GG_L': 'DiPhotonJetsBox_MGG-40to80'
+        'GG_L': 'DiPhotonJetsBox_MGG-40to80',
+        'WWG': 'WWG-amcatnlo'
     },
     "2018": {
         'DY': 'DYJetsToLL_M-50-amcatnloFXFX',
@@ -127,6 +131,15 @@ remaps = {
 
 remap = remaps[year]
 
+if args.task in ['lepton_fakes']:
+    remap.update({
+        'GJets-40To100': 'GJets_DR-0p4_HT-40To100',
+        'GJets-100To200': 'GJets_DR-0p4_HT-100To200',
+        'GJets-200To400': 'GJets_DR-0p4_HT-200To400',
+        'GJets-400To600': 'GJets_DR-0p4_HT-400To600',
+        'GJets-600ToInf': 'GJets_DR-0p4_HT-600ToInf',
+    })
+
 wg_sample = 'WG'
 
 # Combine samples together at the end
@@ -138,9 +151,11 @@ groups = {
     'TT': ['TT_SL', 'TT_Had', 'TT_DL'],
     'TTG': ['TTG_DL', 'TTG_Had', 'TTG_SL_T', 'TTG_SL_Tbar'],
     'VV': ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top'],
-    'GG': ['GG_LO', 'GG_L'],
-    'WWG': ['WWG']
+    'GG': ['GG_LO', 'GG_L']
 }
+
+if args.task in ['lepton_fakes']:
+    groups['GJets'] = ['GJets-40To100', 'GJets-100To200', 'GJets-200To400', 'GJets-400To600', 'GJets-600ToInf']
 
 if year == '2016':
     groups['TT'] = ['TT']
@@ -149,6 +164,9 @@ if year == '2016':
 if year == '2018':
     groups['VV'] = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top']
     groups['GG'] = ['GG']
+
+if DO_WWG_SPLIT:
+    groups['VV'].append('WWG')
 
 samples = {}
 for sa in remap:
@@ -175,7 +193,7 @@ main_wt_systs = {
 }
 
 
-if args.syst is not None:
+if args.syst is not None or args.no_wt_systs:
     # No weight-based systematics in this case
     main_wt_systs = {'e': [], 'm': []}
 
@@ -199,6 +217,16 @@ def ApplyTTSplitting(hlist, components=['XTTG', 'ITTG']):
             res.append(('%s_XTTG' % label, '(%s) && !(p0_truth==1)' % sel, wt))
         if 'ITTG' in components:
             res.append(('%s_ITTG' % label, '(%s) && (p0_truth==1)' % sel, wt))
+    return res
+
+
+def ApplyWWGSplitting(hlist, components=['XWWG', 'IWWG']):
+    res = []
+    for label, sel, wt in hlist:
+        if 'XWWG' in components:
+            res.append((label, '(%s) && (gen_proc==1)' % sel, wt))
+        if 'IWWG' in components:
+            res.append(('%s_IWWG' % label, '(%s) && (gen_proc==0)' % sel, wt))
     return res
 
 
@@ -240,6 +268,9 @@ def ApplyPostFix(hlist, postfix):
 
 
 def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], doFakes=True, doSysts=True):
+    lep_expr = {
+        'm': '(abs(l0_eta) < 1.5) * ((l0_pt>30 && l0_pt<=40) * 1.063 + (l0_pt>40 && l0_pt<=50) * 1.216 + (l0_pt>50 && l0_pt<=60) * 1.313 + (l0_pt>60 && l0_pt<=80) * 1.429 + (l0_pt>80 && l0_pt<=100) * 1.228 + (l0_pt>100 && l0_pt<=200) * 1.104) + (abs(l0_eta)>=1.5) * ((l0_pt>30 && l0_pt<=40) * 1.822 + (l0_pt>40 && l0_pt<=50) * 1.974 + (l0_pt>50 && l0_pt<=60) * 2.047 + (l0_pt>60 && l0_pt<=80) * 2.190 + (l0_pt>80 && l0_pt<=100) * 2.050 + (l0_pt>100 && l0_pt<=200) * 1.880)',
+        'e': '(abs(l0_eta) < 1.4442) * ((l0_pt>30 && l0_pt<=40) * 0.75 + (l0_pt>40 && l0_pt<=50) * 0.74 + (l0_pt>50 && l0_pt<=60) * 1.49 + (l0_pt>60 && l0_pt<=80) * 1.63 + (l0_pt>80 && l0_pt<=100) * 1.28 + (l0_pt>100 && l0_pt<=200) * 0.43) + (abs(l0_eta) >= 1.4442) * ((l0_pt>30 && l0_pt<=40) * 1.74 + (l0_pt>40 && l0_pt<=50) * 1.00 + (l0_pt>50 && l0_pt<=60) * 1.25 + (l0_pt>60 && l0_pt<=80) * 1.42 + (l0_pt>80 && l0_pt<=100) * 1.20 + (l0_pt>100 && l0_pt<=200) * 1.11)'    }
     # Standard treatment for most MC samples
     for grp in groups:
         for P in groups[grp]:
@@ -253,11 +284,16 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
                 hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E']))
             elif grp == 'TTG':
                 hlist = ApplyPhotonSplitting(ApplyTTSplitting([(P, sel, wt)], components=['ITTG']), components=['R'])
+            elif DO_WWG_SPLIT and grp == 'VV' and P == 'WWTo1L1Nu2Q':
+                hlist = ApplyPhotonSplitting(ApplyWWGSplitting([(P, sel, wt)], components=['XWWG', 'IWWG']), components=['R'])
+                hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E']))
             else:
                 hlist = ApplyPhotonSplitting([(P, sel, wt)])
             hlist_fw = []
+            hlist_fwl = []
             if doFakes:
                 hlist_fw = ApplyPostFix(hlist, 'fw')
+                hlist_fwl = ApplyPostFix(hlist, 'fwl')
             hlist_init = list(hlist)
             if doSysts:
                 hlist.extend(ApplySystWeightSplitting(hlist_init, wt_systs))
@@ -269,11 +305,15 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
                 node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
             for H in hlist_fw:
                 node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"sig_t": "$sig_l"}), wt=X.get('(%s) * wt_p0_fake' % H[2]))
+            for H in hlist_fwl:
+                node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"lepton_sel": "$lepton_sdb_%s" % chn}), wt=X.get('(%s) * (%s)' % (H[2], lep_expr[chn])))
 
     node['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel), wt='1')
     if doFakes:
         fake_sel = X.get(sel, override={"sig_t": "$sig_l"})
         node['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake')
+        node['data_fakes_lep'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"lepton_sel": "$lepton_sdb_%s" % chn}), wt='(%s)' % lep_expr[chn])
+        node['data_fakes_double'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"lepton_sel": "$lepton_sdb_%s" % chn, "sig_t": "$sig_l"}), wt='(%s)*wt_p0_fake' % lep_expr[chn])
         loose_fake_sel = X.get(sel, override={"photon_sel": "!p0_loose"})
         node['data_fakes_highpt'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=loose_fake_sel, wt='wt_p0_highpt_fake')
         for ifake in xrange(1, 13):
@@ -329,8 +369,11 @@ X['sig_t'] = '($p0_eb && p0_sigma < 0.01015) || ($p0_ee && p0_sigma < 0.0272)'
 X['sig_l'] = '($p0_eb && p0_sigma > 0.01100) || ($p0_ee && p0_sigma > 0.0300)'
 X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t'
 # Selections for vetoing e->photon fakes
-X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
-X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
+X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 0 && n_veto_m == 0'
+X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 0 && n_veto_e == 0'
+X['lepton_sel'] = 'l0_nominal'
+X['lepton_sdb_m'] = '!l0_nominal && l0_iso > 0.2'
+X['lepton_sdb_e'] = '!l0_nominal && l0_iso > 0.1 && l0_iso < 0.95'
 
 # Selection to veto (or select) mZ region
 X['mZ_veto_m'] = '(l0p0_M < 70 || l0p0_M > 100)'
@@ -347,8 +390,8 @@ if args.year == '2018':
     X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && n_pre_m>=1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
-X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && n_pre_e>=1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && $lepton_sel && n_pre_m>=1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && $lepton_sel && n_pre_e>=1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
 X['baseline_m_met'] ='$baseline_m && puppi_met>40'
@@ -357,10 +400,12 @@ X['baseline_m_nomet'] ='$baseline_m && $mZ_veto_m'
 X['baseline_e_nomet'] ='$baseline_e && $mZ_veto_e'
 X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
 X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met>40'
+X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
+X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
 
 # Control regions
-X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
-X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
+X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && $lepton_sel && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
+X['cr_Zee'] ='l0_pdgid == 11 && l0_trg && n_pre_e==2 && $lepton_sel && l0_pt>30 && l1_pt>30 && met>0 && l0l1_os && l0l1_dr > 0.3'
 
 # Common fiducial region:
 if args.task == 'eft_region':
@@ -383,8 +428,11 @@ if args.task == 'fid_region':
 
 # Event weights
 X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
+X['lepton_fakes_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_pf'
 X['cr_zll_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_l1*wt_pf'
 
+if SWITCH_OFF_P0_WT:
+    X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0_e_fake*wt_pf'
 
 if args.task == 'eft_region' or args.task == 'fid_region':
     eft_defaults = {
@@ -573,7 +621,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l0_pt', (30, 0., 150.)),
         ('l0_eta', (20, -3.0, 3.0)),
         ('l0_phi', (20, -3.15, 3.15)),
-        # ('l0_iso', (40, 0, 2.0)),
+        ('l0_iso', (40, 0, 0.5)),
         ('l1_pt', (40, 0., 150.)),
         ('l0l1_M', (60, 60, 120)),
         ('l0l1_pt', (80, 0, 200)),
@@ -638,8 +686,8 @@ if args.task in ['baseline', 'electron_fakes']:
 
 if args.task in ['photon_fakes', 'photon_fakes2']:
     if args.task == 'photon_fakes2':
-        X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
-        X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+        X['baseline_m_nopix'] ='l0_pdgid == 13 && l0_trg && n_pre_m==1 && $lepton_sel && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7'
+        X['baseline_e_nopix'] ='l0_pdgid == 11 && l0_trg && n_pre_e==1 && $lepton_sel && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>100 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
         X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met<40'
         X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met<40'
         extra_regions = [
@@ -661,12 +709,20 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
     X['baseline_m_mZ_veto'] = X.get('$baseline_m_mZ_veto', override={"sig_t": "1", "iso_t": "1"})
     X['baseline_e_mZ_veto'] = X.get('$baseline_e_mZ_veto', override={"sig_t": "1", "iso_t": "1"})
     X['barrel_m'] = '$baseline_m_mZ_veto && $p0_eb'
+    X['barrel1_m'] = '$baseline_m_mZ_veto && $p0_eb && abs(p0_eta) < 1.0'
+    X['barrel2_m'] = '$baseline_m_mZ_veto && $p0_eb && abs(p0_eta) >= 1.0'
     X['endcap_m'] = '$baseline_m_mZ_veto && $p0_ee'
+    X['endcap1_m'] = '$baseline_m_mZ_veto && $p0_ee && abs(p0_eta) < 2.1'
+    X['endcap2_m'] = '$baseline_m_mZ_veto && $p0_ee && abs(p0_eta) >= 2.1'
     X['barrel_e'] = '$baseline_e_mZ_veto && $p0_eb'
+    X['barrel1_e'] = '$baseline_e_mZ_veto && $p0_eb && abs(p0_eta) < 1.0'
+    X['barrel2_e'] = '$baseline_e_mZ_veto && $p0_eb && abs(p0_eta) >= 1.0'
     X['endcap_e'] = '$baseline_e_mZ_veto && $p0_ee'
+    X['endcap1_e'] = '$baseline_e_mZ_veto && $p0_ee && abs(p0_eta) < 2.1'
+    X['endcap2_e'] = '$baseline_e_mZ_veto && $p0_ee && abs(p0_eta) > 2.1'
 
     for chn in ['e', 'm']:
-        for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
+        for S in ['barrel_%s' % chn, 'barrel1_%s' % chn, 'barrel2_%s' % chn, 'endcap_%s' % chn, 'endcap1_%s' % chn, 'endcap2_%s' % chn]:
             for POST, EXTRA in [
               ('', '1'),
             ] + extra_regions:
@@ -689,22 +745,22 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
                      '%s_iso_t_sig_t%s' % (S, POST)])
 
     drawvars = [
-        ('l0met_mt', (30, 0., 200.)),
-        ('l0_pt', (40, 0., 150.)),
-        ('l0_eta', (20, -3.0, 3.0)),
+        # ('l0met_mt', (30, 0., 200.)),
+        # ('l0_pt', (40, 0., 150.)),
+        # ('l0_eta', (20, -3.0, 3.0)),
         # ('l0l1_M', (40, 60, 120)),
-        ('met', (20, 0., 200.)),
+        # ('met', (20, 0., 200.)),
         ('p0_pt', (120, 0, 600.)),
-        ('p0_eta', (20, -3.0, 3.0)),
+        # ('p0_eta', (20, -3.0, 3.0)),
         # ('l0p0_dr', (20, 0., 5.)),
         # ('l0p0_M', (20, 60, 120)),
         ('p0_chiso', (40, 0, 20.0)),
         # ('p0_neiso', (40, 0, 20.0)),
         # ('p0_phiso', (40, 0, 20.0)),
         # ('p0_hovere', (20, 0., 0.5)),
-        ('p0_sigma', (60, 0., 0.06)),
-        ('p0_haspix', (2, -0.5, 1.5)),
-        ('p0_truth', (7, -0.5, 6.5)),
+        # ('p0_sigma', (60, 0., 0.06)),
+        # ('p0_haspix', (2, -0.5, 1.5)),
+        # ('p0_truth', (7, -0.5, 6.5)),
     ]
 
     for chn in ['e', 'm']:
@@ -712,6 +768,52 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
             for var, binning in drawvars:
                 doFakes = ('iso_t_sig_t' in sel)
                 StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=doFakes, doSysts=False)
+
+
+if args.task in ['lepton_fakes']:
+    extra_regions = [
+        ('_pt_30_40', 'l0_pt>30 && l0_pt<=40'),
+        ('_pt_40_50', 'l0_pt>40 && l0_pt<=50'),
+        ('_pt_50_60', 'l0_pt>50 && l0_pt<=60'),
+        ('_pt_60_80', 'l0_pt>60 && l0_pt<=80'),
+        ('_pt_80_100', 'l0_pt>80 && l0_pt<=100'),
+        ('_pt_100_200', 'l0_pt>100 && l0_pt<=200'),
+    ]
+
+    X['lepton_fakes_m'] = X.get('$lepton_fakes_m', override={"lepton_sel": "1"})
+    X['lepton_fakes_e'] = X.get('$lepton_fakes_e', override={"lepton_sel": "1"})
+    X['barrel_m'] = '$lepton_fakes_m && abs(l0_eta) < 1.5'
+    X['endcap_m'] = '$lepton_fakes_m && abs(l0_eta) >= 1.5'
+    X['barrel_e'] = '$lepton_fakes_e && abs(l0_eta) < 1.4442'
+    X['endcap_e'] = '$lepton_fakes_e && abs(l0_eta) >= 1.4442'
+
+    for chn in ['e', 'm']:
+        for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
+            for POST, EXTRA in [
+              ('', '1'),
+            ] + extra_regions:
+                X['%s_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
+                X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && l0met_mt<30 && (%s)' % (S, EXTRA)
+                X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && l0met_mt>80 && (%s)' % (S, EXTRA)
+                do_cats[chn].extend(
+                    ['%s_iso_l%s' % (S, POST),
+                     '%s_iso_t%s' % (S, POST),
+                     '%s_w_ctl%s' % (S, POST),
+                     ])
+    drawvars = [
+        ('l0met_mt', (20, 0., 200.)),
+        ('l0_pt', (40, 0., 200.)),
+        # ('l0_eta', (20, -3.0, 3.0)),
+        ('puppi_met', (20, 0., 200.)),
+        ('l0_iso', (40, 0, 2.0)),
+        ('l0j0_dphi', (30, -3.15, 3.15)),
+        ('j0_pt', (30, 0., 150.)),
+    ]
+
+    for chn in ['e', 'm']:
+        for sel in do_cats[chn]:
+            for var, binning in drawvars:
+                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$lepton_fakes_wt', chn=chn, manager=X, wt_systs=[], doFakes=False, doSysts=False)
 
 MultiDraw(hists, samples, tname, mt_cores=4, mt_thresh=1)
 
@@ -803,17 +905,24 @@ for path, node in hists.ListNodes(withObjects=True):
                 node[grp + '_' + suf.replace('_scale_0', '_QCDScaleDown')] = scale_lo
                 # scale_variations.append(suf.replace('_scale_0', ''))
 
-
-
-    node['Total_R'] = HistSum(['WG_R', 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R'])
-    node['Total_E'] = HistSum(['W_E', 'TT_E', 'DY_E', 'VV_E'])
-    node['Total_J'] = HistSum(['W_J', 'TT_J', 'DY_J', 'VV_J'])
+    procs_r = ['WG_R', 'TT_XTTG_R', 'TTG_ITTG_R', 'DY_XZG_R', 'ZG_IZG_R', 'VV_R', 'GG_R']
+    procs_e = ['W_E', 'TT_E', 'DY_E', 'VV_E', 'GG_E']
+    procs_j = ['W_J', 'TT_J', 'DY_J', 'VV_J', 'GG_J']
+    node['Total_R'] = HistSum(procs_r)
+    node['Total_E'] = HistSum(procs_e)
+    node['Total_J'] = HistSum(procs_j)
 
     if 'data_fakes' in node.d:
-        node['Total_R_fw'] = HistSum(['WG_R_fw', 'TT_XTTG_R_fw', 'TTG_ITTG_R_fw', 'DY_XZG_R_fw', 'ZG_IZG_R_fw', 'VV_R_fw'])
-        node['Total_E_fw'] = HistSum(['W_E_fw', 'TT_E_fw', 'DY_E_fw', 'VV_E_fw'])
+        node['Total_R_fw'] = HistSum(['%s_fw' % proc for proc in procs_r])
+        node['Total_E_fw'] = HistSum(['%s_fw' % proc for proc in procs_e])
+        node['Total_J_fw'] = HistSum(['%s_fw' % proc for proc in procs_j])
+        node['Total_R_fwl'] = HistSum(['%s_fwl' % proc for proc in procs_r])
+        node['Total_E_fwl'] = HistSum(['%s_fwl' % proc for proc in procs_e])
+        node['Total_J_fwl'] = HistSum(['%s_fwl' % proc for proc in procs_j])
         node['data_fakes_sub'] = node['data_fakes'] - (node['Total_R_fw'] + node['Total_E_fw'])
+        node['data_fakes_lep_sub'] = node['data_fakes_lep'] - (node['Total_R_fwl'] + node['Total_E_fwl'] + node['data_fakes_double'])
         CapNegativeBins(node['data_fakes_sub'])
+        CapNegativeBins(node['data_fakes_lep_sub'])
         for ifake in xrange(1, 13):
             node['data_fakes_sub_WeightStatSystBin%iUp' % ifake] = node['data_fakes_WeightStatSystBin%iUp' % ifake] - (node['Total_R_fw'] + node['Total_E_fw'])
             node['data_fakes_sub_WeightStatSystBin%iDown' % ifake] = node['data_fakes_WeightStatSystBin%iDown' % ifake] - (node['Total_R_fw'] + node['Total_E_fw'])
