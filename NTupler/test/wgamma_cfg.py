@@ -22,6 +22,8 @@ opts.register('updateJECs', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Update JECs for jets and MET")
 opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
+opts.register('keepLHEWeights', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE weights")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -34,6 +36,7 @@ isMC = not isData
 genOnly = int(opts.genOnly)
 year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
+keepLHEWeights = bool(opts.keepLHEWeights)
 updateJECs = bool(opts.updateJECs)
 
 ################################################################
@@ -435,7 +438,7 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
-    includeLHEWeights=cms.bool(isMC and hasLHE),
+    includeLHEWeights=cms.bool(isMC and hasLHE and keepLHEWeights),
     includeGenWeights=cms.bool(isMC),
     metFilterResults=cms.InputTag("TriggerResults", "", metfilter_proc[year]),
     saveMetFilters=cms.vstring(
