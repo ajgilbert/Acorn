@@ -13,7 +13,7 @@
       "lumi": 41525.685252
     },
     "SinglePhoton": {
-      "attributes": ["default", "data"],
+      "attributes": ["data"],
       "sequences": ["WGamma"],
       "inputs": ["SinglePhoton-2017B", "SinglePhoton-2017C", "SinglePhoton-2017D", "SinglePhoton-2017E", "SinglePhoton-2017F"],
       "lumi": 41526.052520
@@ -60,6 +60,12 @@
       "inputs": ["ST_tW_top_5f-powheg"],
       "xsec": 34.91,
       "GenXSecAnalyzer": "After filter: final cross section = 3.491e+01 +- 1.260e-02 pb"
+    },
+    "TGJets_leptonDecays-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TGJets_leptonDecays-amcatnlo"],
+      "xsec": 1.018,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.018e+00 +- 4.188e-03 pb"
     },
     "TTToSemiLeptonic-powheg": {
       "attributes": ["default", "mc"],
@@ -138,7 +144,7 @@
       "XSecSource": "LO * kNNLO (1.32)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel"],
+      "attributes": ["do_wg_gen_vars", "mc", "no_presel"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 846.43,
       "stitching": {
@@ -285,6 +291,34 @@
       "inputs": ["ZGToLLG-amcatnloFXFX"],
       "xsec": 55.56,
       "GenXSecAnalyzer": "After filter: final cross section = 5.556e+01 +- 1.303e-01 pb"
+    },
+    "ZGToLLG-lowMLL-amcatnloFXFX": {
+      "attributes": ["default", "mc", "check_is_zg"],
+      "inputs": ["ZGToLLG-lowMLL-amcatnloFXFX"],
+      "xsec": 106.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.060e+02 +- 3.377e-01 pb"
+    },
+    "ZGToLLG-amcatnloFXFX-stitched": {
+      "attributes": ["doit", "default", "mc", "check_is_zg"],
+      "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
+      "xsec": 106.0,
+      "stitching": {
+        "binned": ["mll_sf", "ptl"],
+        "ZGToLLG-lowMLL-amcatnloFXFX": {
+          "target": true,
+          "min": [0.0, 0.0],
+          "max": [null, null],
+          "events": 9690262,
+          "xsec": 106.0
+        },
+        "ZGToLLG-amcatnloFXFX": {
+          "target": false,
+          "min": [30.0, 15.0],
+          "max": [null, null],
+          "events": 19282022,
+          "xsec": 55.56
+        }
+      }
     },
     "ZZTo2L2Q-amcatnloFXFX": {
       "attributes": ["default", "mc"],

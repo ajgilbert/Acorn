@@ -152,6 +152,10 @@ variants_by_path = [
     ("*/p0_pt", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),
+    ("*/l0l1_M", {
+            "prefix": "rebinned_",
+            "rebin": 2,
+            "logy": True}),
     ("*/p0_pt", {
             "prefix": "zoom_logy_",
             "x_range": (0, 200),
@@ -171,6 +175,9 @@ def MakePlot(name, outdir, hists, cfg, layouts):
     for hname, h in hists.iteritems():
         if len(cfg['rebinvar']):
             copyhists[hname] = VariableRebin(h, cfg['rebinvar'])
+        elif cfg['rebin'] > 0:
+            copyhists[hname] = h.Clone()
+            copyhists[hname].Rebin(cfg['rebin'])
         else:
             copyhists[hname] = h.Clone()
         if cfg['divwidth']:

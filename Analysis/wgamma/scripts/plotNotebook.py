@@ -98,28 +98,28 @@ if not args.load:
         ('l0_eta', 'gen_l0_eta', (20, -3, 3)),
     ]
 
+    X = SelectionManager()
+    X['gen_core'] = 'gen_l0_pt>30 && abs(gen_l0_eta)<2.5 && gen_met>40 && gen_p0_pt>30 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>0.7 && lhe_frixione'
+    X['eft_core'] = 'gen_l0_pt>80 && abs(gen_l0_eta)<2.5 && gen_met>80 && gen_p0_pt>150 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>3.0 && lhe_frixione'
+    X['baseline_m'] = 'gen_pdgid==13 && is_wg_gen && $gen_core'
+    X['baseline_e'] = 'gen_pdgid==11 && is_wg_gen && $gen_core'
+    X['muon_id'] = '$baseline_m && n_pre_m==1 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4'
+    X['elec_id'] = '$baseline_e && n_pre_e==1 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5'
+    X['muon_trg'] = '$muon_id && l0_trg'
+    # X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
+    X['elec_trg'] = '$elec_id && l0_trg'
+    X['photon_id_m'] = '$muon_trg && n_pre_p==1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
+    X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
+    X['photon_id_e'] = '$elec_trg && n_pre_p>=1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
+    X['photon_match_e'] = '$photon_id_e && gen_p0_match'
+    X['photon_pix_e'] = '$photon_match_e && !p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
+    X['mZ_veto_m'] = '$photon_pix_m && (l0p0_M < 70 || l0p0_M > 100)'
+    X['mZ_veto_e'] = '$photon_pix_e && (l0p0_M < 70 || l0p0_M > 110)'
+    X['met_m'] = '$mZ_veto_m && puppi_met>40'
+    X['met_e'] = '$mZ_veto_e && puppi_met>40'
+    X['eft_m'] = '$photon_pix_m && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
+    X['eft_e'] = '$photon_pix_e && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
     for label, var, binning in list_of_vars:
-        X = SelectionManager()
-        X['gen_core'] = 'gen_l0_pt>30 && abs(gen_l0_eta)<2.5 && gen_met>40 && gen_p0_pt>30 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>0.7 && lhe_frixione'
-        X['baseline_m'] = 'gen_pdgid==13 && is_wg_gen && $gen_core'
-        X['baseline_e'] = 'gen_pdgid==11 && is_wg_gen && $gen_core'
-        X['muon_id'] = '$baseline_m && n_pre_m==1 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4'
-        X['elec_id'] = '$baseline_e && n_pre_e==1 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5'
-        X['muon_trg'] = '$muon_id && l0_trg'
-        # X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
-        X['elec_trg'] = '$elec_id && l0_trg'
-        X['photon_id_m'] = '$muon_trg && n_pre_p==1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
-        X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
-        X['photon_id_e'] = '$elec_trg && n_pre_p>=1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
-        X['photon_match_e'] = '$photon_id_e && gen_p0_match'
-        X['photon_pix_e'] = '$photon_match_e && !p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
-        X['mZ_veto_m'] = '$photon_pix_m && (l0p0_M < 70 || l0p0_M > 100)'
-        X['mZ_veto_e'] = '$photon_pix_e && (l0p0_M < 70 || l0p0_M > 110)'
-        X['met_m'] = '$mZ_veto_m && puppi_met>40'
-        X['met_e'] = '$mZ_veto_e && puppi_met>40'
-        X['eft_m'] = '$photon_pix_m && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
-        X['eft_e'] = '$photon_pix_e && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
-
         for year in years:
             for sel in X.storage.keys():
                 for sa in ['WG-NLO']:
@@ -139,18 +139,26 @@ if not args.load:
                 hists[year][label][sa]['e_with_wt_pf'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$' + final_sel), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
                 hists[year][label][sa]['e_high_p0_pt'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_e && p0_pt>850 && p0_pt<1200'), wt='wt_pu*wt_def*wt_l0*wt_trg_l0*wt_p0*wt_pf')
 
-            for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
-                for sa in ['WG-NLO']:
-                    hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    # hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['a_gen_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(gen_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['a_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['a_phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_puppi_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    hists[year]['true_reco_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'reco_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                    # hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(6, -1.571, 1.571, 6, -1.571, 1.571), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+    for year in years:
+        for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
+            for sa in ['WG-NLO']:
+                # hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['a_gen_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(gen_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['a_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['a_phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_puppi_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['true_reco_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'reco_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(6, -1.571, 1.571, 6, -1.571, 1.571), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+        for sel in ['eft_core']:
+            sa = 'WG-NLO'
+            var = 'gen_wg_M'
+            binning = (40, 0, 4000)
+            hists[year]['wg_M_scan'][sa]['nocut'] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_core'), wt='wt_def')
+            for cut in ['1200', '800', '500', '300', '200']:
+                hists[year]['wg_M_scan'][sa]['cut_%s' % cut] = Hist('TH1D', sample=sa, var=[var], binning=binning, sel=X.get('$eft_core && gen_p0_pt < %s' % cut), wt='wt_def')
     # X.get('$photon_pix', printlevel=1)
     for year in years:
         MultiDraw(hists[year], sample_files[year], 'WGDataAnalysis', mt_cores=4, mt_thresh=1E5)
@@ -166,9 +174,9 @@ if not args.load:
 
         for sel in ['met_m', 'met_e', 'eft_m', 'eft_e']:
             for sa in ['WG-NLO']:
-                NormTH2InColumns(hists[year]['phi_f_response'][sa][sel])
+                # NormTH2InColumns(hists[year]['phi_f_response'][sa][sel])
                 NormTH2InColumns(hists[year]['a_gen_phi_f_response'][sa][sel])
-                NormTH2InColumns(hists[year]['a_phi_f_response'][sa][sel])
+                # NormTH2InColumns(hists[year]['a_phi_f_response'][sa][sel])
                 NormTH2InColumns(hists[year]['a_phi_f_puppi_response'][sa][sel])
                 # NormTH2InColumns(hists[year]['phi_f_tk_response'][sa][sel])
                 NormTH2InColumns(hists[year]['phi_f_puppi_response'][sa][sel])
@@ -197,6 +205,64 @@ plotcfg.update({
     'logy_min': 1E-4
     })
 
+
+for year in years:
+    hist_dict = {}
+    for opath, objname, obj in hists[year]['wg_M_scan']['WG-NLO'].ListObjects(depth=0):
+        hist_dict[objname] = obj
+    MakeMultiHistPlot('wg_M_cutoff_%s' % year,
+                      outdir=outdir,
+                      hists=hist_dict,
+                      cfg=UpdateDict(plotcfg, {
+                          'x_title': ["M_{W#gamma}", "GeV"],
+                          'ratio': False,
+                          'rebinvar': [0, 100, 200, 300, 400, 500, 600, 700, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2400, 2800, 3200, 3600, 4000],
+                          'top_title_right': '%.1f fb^{-1} (13 TeV, %s)' % (lumi_fb[year], year),
+                          }),
+                      layout=[
+                          {'name': 'nocut', 'legend': 'No cut-off'},
+                          {'name': 'cut_1200', 'legend': 'p_{T}^{#gamma} < 1200 GeV'},
+                          {'name': 'cut_800', 'legend': 'p_{T}^{#gamma} < 800 GeV'},
+                          {'name': 'cut_500', 'legend': 'p_{T}^{#gamma} < 500 GeV'},
+                          {'name': 'cut_300', 'legend': 'p_{T}^{#gamma} < 300 GeV'},
+                          {'name': 'cut_200', 'legend': 'p_{T}^{#gamma} < 200 GeV'},
+                      ]
+    )
+
+    arr_x = array('d', [200, 300, 500, 800, 1200])
+    y0 = []
+    y1 = []
+    y2 = []
+    q = array('d', [0.68, 0.95, 0.997])
+    res = array('d', [0, 0, 0])
+    for ib, cutoff in enumerate(arr_x):
+        hists[year]['wg_M_scan']['WG-NLO']['cut_%i' % cutoff].GetQuantiles(3, res, q)
+        y0.append(res[0])
+        y1.append(res[1])
+        y2.append(res[2])
+    gr0 = ROOT.TGraph(len(arr_x), arr_x, array('d', y0))
+    gr1 = ROOT.TGraph(len(arr_x), arr_x, array('d', y1))
+    gr2 = ROOT.TGraph(len(arr_x), arr_x, array('d', y2))
+    canv = ROOT.TCanvas('wg_M_cutoff_quantiles_%s' % year, 'wg_M_cutoff_quantiles_%s' % year)
+    pads = plot.OnePad()
+    plot.Set(gr0, LineWidth=2, LineColor=1, MarkerColor=1)
+    plot.Set(gr1, LineWidth=2, LineColor=2, MarkerColor=2)
+    plot.Set(gr2, LineWidth=2, LineColor=4, MarkerColor=4)
+    gr0.Print()
+    gr0.Draw('ALP')
+    gr1.Draw('LPSAME')
+    gr2.Draw('LPSAME')
+    axis = plot.GetAxisHist(pads[0])
+    axis.SetMaximum(4000)
+    axis.GetXaxis().SetTitle('p_{T}^{#gamma} cut-off [GeV]')
+    axis.GetYaxis().SetTitle('M_{W#gamma} [GeV]')
+    legend = plot.PositionedLegend(0.30, 0.20, 3, 0.015)
+    legend.AddEntry(gr0, '68% quantile')
+    legend.AddEntry(gr1, '95% quantile')
+    legend.AddEntry(gr2, '99.7% quantile')
+    legend.Draw()
+    canv.Print('.png')
+    canv.Print('.pdf')
 
 # Draw efficiencies for the stitched sample
 for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):

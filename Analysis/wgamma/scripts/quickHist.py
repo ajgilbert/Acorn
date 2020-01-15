@@ -16,7 +16,7 @@ parser.add_argument('-s', default='', help='Selection/weights')
 parser.add_argument('-o', default='', help='output.root:hist')
 parser.add_argument('-x', default='', help='x-axis title')
 args = parser.parse_args()
-
+# file:tree:var:binning:sel
 fin = ROOT.TFile(args.i.split(':')[0])
 tree = fin.Get(args.i.split(':')[1])
 

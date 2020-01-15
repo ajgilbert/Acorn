@@ -28,14 +28,15 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_zg)
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_wwg)
   CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
+  CLASS_MEMBER(WGDataAnalysis, bool, only_wg)
   CLASS_MEMBER(WGDataAnalysis, int, var_set)
   CLASS_MEMBER(WGDataAnalysis, int, correct_e_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_p_energy)
   CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
   CLASS_MEMBER(WGDataAnalysis, int, shift_met)
   CLASS_MEMBER(WGDataAnalysis, int, scale_weights)
-  CLASS_MEMBER(WGDataAnalysis, int, pdf_begin)
-  CLASS_MEMBER(WGDataAnalysis, int, pdf_end)
+  CLASS_MEMBER(WGDataAnalysis, std::vector<int>, pdf_begin)
+  CLASS_MEMBER(WGDataAnalysis, std::vector<int>, pdf_end)
   CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
 
   LookupFilter filters_IsoMu24_;
@@ -159,6 +160,7 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_fake_; // Photon fake factor
   float wt_p0_highpt_fake_; // Photon fake factor for high pT photons
   float wt_p0_e_fake_; // Electron -> photon fake factor
+  float wt_l0_fake_; // Lepton fake factor
 
   // event weights for systematics (relative to nominal)
   float wt_sc_0_;
@@ -206,6 +208,7 @@ class WGDataAnalysis : public ModuleBase {
   float gen_p0_eta_;
   float gen_phi_;
   float gen_phi_f_;
+  float gen_wg_M_;
   float true_phi_;
   float true_phi_f_;
   int gen_l0_q_;

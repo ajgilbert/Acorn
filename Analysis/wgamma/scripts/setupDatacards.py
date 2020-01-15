@@ -35,19 +35,21 @@ for c in charges:
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
         cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', fakes_name], [cat], False)
+        if args.type in ['fid_region']:
+            cb.AddProcesses(['*'], ['wg'], [era], [chn], ['data_fakes_lep_sub'], [cat], False)
         if args.type in ['eft_region', 'pt_phi_diff']:
             for phibin in range(n_phi_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
         if args.type in ['pt_diff', 'fid_region']:
-            for pt_truthbin in range(n_pt_bins):
+            for pt_truthbin in [ptbin]:
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i' % (c, pt_truthbin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i' % (c, pt_truthbin)], [cat], True)
 
 print '>> Adding systematic uncertainties...'
 
 
-cb_no_fakes = cb.cp().process([fakes_name], False)
+cb_no_fakes = cb.cp().process([fakes_name, 'data_fakes_lep_sub'], False)
 
 ##### Lumi
 # https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#SummaryTable
@@ -98,6 +100,8 @@ cb_no_fakes.cp().AddSyst(
     (['2017'], 1.001))
 
 ##### TODO: Pileup uncertainty
+cb_no_fakes.cp().AddSyst(
+    cb, 'CMS_pileup', 'shape', ch.SystMap()(1.0))
 
 ##### Electron & muon ID & iso efficiencies
 cb_no_fakes.cp().AddSyst(
@@ -121,11 +125,29 @@ cb_no_fakes.cp().AddSyst(
 
 ##### Photon fake estimation (low pT method only)
 if fakes_name == 'data_fakes_sub':
-    for ix in xrange(1, 13):
+    for ix in xrange(1, 19):
         cb.cp().process(['data_fakes_sub']).AddSyst(
             cb, 'WeightStatSystBin%i' % ix, 'shape', ch.SystMap()(1.0))
 
-##### TODO: QCD scale uncertainty
+##### Lepton fake estimation
+cb.cp().process(['data_fakes_lep_sub']).AddSyst(
+    cb, 'CMS_fake_$CHANNEL_$ERA_norm', 'lnN', ch.SystMap('channel', 'era')
+    (['e'], ['2016'], 1.44)
+    (['e'], ['2017'], 1.25)
+    (['e'], ['2018'], 1.31)
+    (['m'], ['2016'], 1.29)
+    (['m'], ['2017'], 1.23)
+    (['m'], ['2018'], 1.18)
+    )
+
+##### QCD scale uncertainty
+if args.type in ['fid_region']:
+    cb.cp().process(['WG_main_.*']).AddSyst(
+        cb, 'QCDScaleAccept', 'shape', ch.SystMap()(1.0))
+    cb.cp().process(['WG_met1_.*']).AddSyst(
+        cb, 'QCDScaleRatio', 'shape', ch.SystMap()(1.0))
+    cb.cp().process(['WG_ooa_.*']).AddSyst(
+        cb, 'QCDScale', 'shape', ch.SystMap()(1.0))
 """
     - In principle for all backgrounds (limited in practice)
     - For signal depends on measurement:
@@ -133,6 +155,38 @@ if fakes_name == 'data_fakes_sub':
         * For C3W - on everything
     - Should be de-correlated between procs
 """
+
+cb.cp().process(['DY_XZG_R', 'DY_E']).AddSyst(
+    cb, 'QCDScale_Z_NNLO', 'lnN', ch.SystMap()(1.02))
+
+cb.cp().process(['ZG_IZG_R']).AddSyst(
+    cb, 'QCDScale_ZG_NLO', 'lnN', ch.SystMap()(1.035))
+
+cb.cp().process(['VV_R', 'VV_E']).AddSyst(
+    cb, 'QCDScale_VV_NLO', 'lnN', ch.SystMap()(1.034))
+
+cb.cp().process(['TT_XTTG_R', 'TT_E']).AddSyst(
+    cb, 'QCDScale_ttbar_NNLO', 'lnN', ch.SystMap()(1.034))
+
+cb.cp().process(['GG_R', 'GG_E']).AddSyst(
+    cb, 'QCDScale_GG_NLO', 'lnN', ch.SystMap()(1.16))
+
+cb.cp().process(['VV_R', 'VV_E']).AddSyst(
+    cb, 'pdf_VV', 'lnN', ch.SystMap()(1.048))
+
+cb.cp().process(['TT_XTTG_R', 'TT_E']).AddSyst(
+    cb, 'pdf_ttbar', 'lnN', ch.SystMap()(1.042))
+
+# WW: 3% scale, 4.6% pdf
+# WZ: 3.4% scale, 4.7% pdf
+# ZZ: 3% scale, 4.8% pdf
+# ST t-channel: 3% scale, 3% pdf
+# ST tW-channel: 2.5% scale, 4.3% pdf
+# ST s-channel: 3% scale, 3% pdf
+# WWG?
+# TGJets?
+
+# ZG: 3.5% from scale variations
 
 if alt_shapes:
     ##### Photon energy scale
@@ -175,7 +229,14 @@ decorrelate_years = [
     'CMS_scale_met_unclustered'
 ]
 
+decorrelate_proc = [
+    'QCDScaleAccept',
+    'QCDScaleRatio',
+    'QCDScale'
+]
+
 cb.cp().syst_name(decorrelate_years).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.era()))
+cb.cp().syst_name(decorrelate_proc).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.process()))
 
 
 def DropBogusShapes(x):
@@ -187,6 +248,7 @@ def DropBogusShapes(x):
 
 
 cb.FilterSysts(lambda x: DropBogusShapes(x))
+cb.cp().syst_type(['shape']).ForEachSyst(lambda x: x.set_type('lnN'))
 
 
 def CorrectionNegativeYield(proc):

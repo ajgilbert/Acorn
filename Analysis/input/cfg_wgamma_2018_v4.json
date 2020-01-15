@@ -56,6 +56,12 @@
       "xsec": 34.91,
       "GenXSecAnalyzer": "After filter: final cross section = 3.491e+01 +- 2.762e-02 pb"
     },
+    "TGJets_leptonDecays-amcatnlo": {
+      "attributes": ["default", "mc"],
+      "inputs": ["TGJets_leptonDecays-amcatnlo"],
+      "xsec": 1.018,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.018e+00 +- 4.188e-03 pb"
+    },
     "TTToSemiLeptonic-powheg": {
       "attributes": ["default", "mc"],
       "inputs": ["TTToSemiLeptonic-powheg"],
@@ -241,6 +247,34 @@
       "inputs": ["ZGToLLG-amcatnloFXFX"],
       "xsec": 55.56,
       "GenXSecAnalyzer": "After filter: final cross section = 5.556e+01 +- 1.303e-01 pb"
+    },
+    "ZGToLLG-lowMLL-amcatnloFXFX": {
+      "attributes": ["default", "mc", "check_is_zg"],
+      "inputs": ["ZGToLLG-lowMLL-amcatnloFXFX"],
+      "xsec": 106.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.060e+02 +- 3.377e-01 pb"
+    },
+    "ZGToLLG-amcatnloFXFX-stitched": {
+      "attributes": ["doit", "default", "mc", "check_is_zg"],
+      "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
+      "xsec": 106.0,
+      "stitching": {
+        "binned": ["mll_sf", "ptl"],
+        "ZGToLLG-lowMLL-amcatnloFXFX": {
+          "target": true,
+          "min": [0.0, 0.0],
+          "max": [null, null],
+          "events": 9896482,
+          "xsec": 106.0
+        },
+        "ZGToLLG-amcatnloFXFX": {
+          "target": false,
+          "min": [30.0, 15.0],
+          "max": [null, null],
+          "events": 8816038,
+          "xsec": 55.56
+        }
+      }
     },
     "VVTo2L2Nu-amcatnloFXFX": {
       "attributes": ["default", "mc"],

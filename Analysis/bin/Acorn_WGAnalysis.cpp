@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
     }));
 
     if (jsc.count("stitching")) {
-      wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+      wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]).set_fs(wgamma_fs));
     }
 
 
@@ -160,13 +160,14 @@ int main(int argc, char* argv[]) {
     }
 
     int pdf_weights = ac::ReadAttrValue<int>(jsc["attributes"], "pdf_weights");
-    int pdf_begin = -1;
-    int pdf_end = -1;
+    std::vector<int> pdf_begin;
+    std::vector<int> pdf_end;
     if (pdf_weights > 0 && subseq == "") { // only if the main sequence
       if (pdf_weights == 1) {
-        // NNPDF31_nnl0_as_0118 - replicas
-        pdf_begin = 1114; // Nominal + 100 replicas
-        pdf_end = 1214;
+        // NNPDF31_nnl0_as_0118 + 100 replicas
+        // NNPDF30_nlo_nf_5_pdfas + 100 replicas
+        pdf_begin = {1114, 1002};
+        pdf_end = {1214, 1102};
       }
     }
     auto counters = ac::EventCounters("EventCounters").set_fs(wgamma_fs);
@@ -183,7 +184,11 @@ int main(int argc, char* argv[]) {
     // Keep baseline set of vars
     int var_set = 1;
     // Unless this is some systematic variation - in which case keep only the core ones
-    if (subseq != "") var_set = 0;
+    bool only_wg = false;
+    if (subseq != "") {
+      var_set = 0;
+      only_wg = true;
+    }
 
     int correct_p_energy = 0;
     int correct_e_energy = 0;
@@ -210,13 +215,14 @@ int main(int argc, char* argv[]) {
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v9.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v10.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(ac::contains(jsc["attributes"], "do_wg_gen_vars"))
                              .set_check_is_zg(ac::contains(jsc["attributes"], "check_is_zg"))
                              .set_check_is_wwg(ac::contains(jsc["attributes"], "check_is_wwg"))
                              .set_do_presel(!ac::contains(jsc["attributes"], "no_presel"))
+                             .set_only_wg(only_wg)
                              .set_correct_e_energy(correct_e_energy)
                              .set_correct_p_energy(correct_p_energy)
                              .set_correct_m_energy(correct_m_energy)
@@ -249,7 +255,7 @@ int main(int argc, char* argv[]) {
     tp_seq.BuildModule(ac::WGTagAndProbe("WGTagAndProbe")
                              .set_fs(tp_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v9.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v10.root")
                              .set_is_data(is_data));
 
     tp_seq.InsertSequence(tp_label, analysis);

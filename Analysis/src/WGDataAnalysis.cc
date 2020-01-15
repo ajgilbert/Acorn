@@ -32,14 +32,13 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       check_is_zg_(false),
       check_is_wwg_(false),
       do_presel_(true),
+      only_wg_(false),
       var_set_(1),
       correct_e_energy_(-1),
       correct_p_energy_(-1),
       correct_m_energy_(-1),
       shift_met_(-1),
-      scale_weights_(0),
-      pdf_begin_(-1),
-      pdf_end_(-1) {}
+      scale_weights_(0) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
 
@@ -49,7 +48,7 @@ int WGDataAnalysis::PreAnalysis() {
     // The default AutoFlush (30MB) seems to cause large
     // memory usage at times (probably due to some branches
     // being basically empty). Reduce it by a factor of 10 here:
-    tree_->SetAutoFlush(-3000000);
+    tree_->SetAutoFlush(-6000000);
     // var sets:
     // 0 = essential
     // 1 = nominal
@@ -106,7 +105,7 @@ int WGDataAnalysis::PreAnalysis() {
       // tree_->Branch("j0_eta", &j0_eta_);
       tree_->Branch("l0j0_dphi", &l0j0_dphi_);
 
-      // tree_->Branch("met", &met_);
+      tree_->Branch("met", &met_);
       // tree_->Branch("tk_met", &tk_met_);
       // tree_->Branch("tk_met_phi", &tk_met_phi_);
       tree_->Branch("puppi_met", &puppi_met_);
@@ -134,6 +133,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_p0_fake", &wt_p0_fake_);
       tree_->Branch("wt_p0_highpt_fake", &wt_p0_highpt_fake_);
       tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
+      tree_->Branch("wt_l0_fake", &wt_l0_fake_);
 
       if (do_wg_gen_vars_) {
         tree_->Branch("gen_p0_pt", &gen_p0_pt_);
@@ -148,6 +148,7 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_l0_eta", &gen_l0_eta_);
         tree_->Branch("gen_met", &gen_met_);
         tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
+        tree_->Branch("gen_wg_M", &gen_wg_M_);
 
         tree_->Branch("lhe_frixione", &lhe_frixione_);
       }
@@ -168,11 +169,18 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_sc_4", &wt_sc_4_);
       tree_->Branch("wt_sc_5", &wt_sc_5_);
 
-      if (pdf_begin_ >= 0 && pdf_end_ >= 0 && pdf_end_ >= pdf_begin_) {
-        int npdf = pdf_end_ - pdf_begin_ + 1;
-        wt_pdf_.resize(npdf);
-        for (int ipdf = 0; ipdf < npdf; ++ipdf) {
+      int npdf_tot = 0;
+      for (unsigned ipdfset = 0; ipdfset < pdf_begin_.size(); ++ipdfset) {
+        npdf_tot += (pdf_end_.at(ipdfset) - pdf_begin_.at(ipdfset) + 1);
+      }
+      wt_pdf_.resize(npdf_tot);
+
+      int ipdf = 0;
+      for (unsigned ipdfset = 0; ipdfset < pdf_begin_.size(); ++ipdfset) {
+        int npdf = pdf_end_.at(ipdfset) - pdf_begin_.at(ipdfset) + 1;
+        for (int ip = 0; ip < npdf; ++ip) {
           tree_->Branch(TString::Format("wt_pdf_%i", ipdf), &(wt_pdf_[ipdf]));
+          ++ipdf;
         }
       }
 
@@ -300,14 +308,22 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("m_trg_ratio")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_trg_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_trg_ratio_err")->functor(ws_->argSet("m_pt,m_eta")));
+  fns_["m_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("m_fake_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+
   fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["e_gsfidiso_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio_err")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["e_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_trg_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+  fns_["e_fake_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("e_fake_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_psv_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_psv_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_id_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["e_p_fake_ratio"] = std::shared_ptr<RooFunctor>(
@@ -316,6 +332,8 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("e_p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_index"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_index")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_fake_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_highpt_fake_ratio"] = std::shared_ptr<RooFunctor>(
@@ -585,7 +603,7 @@ int WGDataAnalysis::PreAnalysis() {
     bool lj_presel = (l0 != nullptr) && (j0 != nullptr);
     bool mm_presel = (pre_muons.size() >= 2 && l0_nominal_);
     bool ee_presel = (pre_electrons.size() >= 2 && l0_nominal_);
-    bool reco_event = (wg_presel || mm_presel || ee_presel || lj_presel);
+    bool reco_event = only_wg_ ? wg_presel : (wg_presel || mm_presel || ee_presel || lj_presel);
     if (do_presel_ && !reco_event) {
       return 1;
     }
@@ -653,6 +671,7 @@ int WGDataAnalysis::PreAnalysis() {
         gen_l0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
         true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
         true_phi_f_ = gen_true_sys.SymPhi(parts.gen_lep->charge() > 0);
+        gen_wg_M_ = (parts.gen_lep->vector() + parts.gen_neu->vector() + parts.gen_pho->vector()).M();
 
         // Now try and match to the reco objects, if they exist
         if (l0 && ac::DeltaR(l0, parts.gen_lep) < 0.3) {
@@ -814,37 +833,14 @@ int WGDataAnalysis::PreAnalysis() {
         wt_p0_highpt_fake_ = 0.;
       }
       wt_p0_fake_err_ = RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
-      wt_p0_fake_bin_ = 0;
-      if (std::abs(p0->scEta()) < 1.4442) {
-        if (p0_pt_ >= 30 && p0_pt_ < 40) {
-          wt_p0_fake_bin_ = 1;
-        } else if (p0_pt_ >= 40 && p0_pt_ < 50) {
-          wt_p0_fake_bin_ = 2;
-        } else if (p0_pt_ >= 50 && p0_pt_ < 60) {
-          wt_p0_fake_bin_ = 3;
-        } else if (p0_pt_ >= 60 && p0_pt_ < 80) {
-          wt_p0_fake_bin_ = 4;
-        } else if (p0_pt_ >= 80 && p0_pt_ < 100) {
-          wt_p0_fake_bin_ = 5;
-        } else if (p0_pt_ >= 100 && p0_pt_ < 150) {
-          wt_p0_fake_bin_ = 6;
-        } else if (p0_pt_ >= 150 && p0_pt_ < 200) {
-          wt_p0_fake_bin_ = 7;
-        } else if (p0_pt_ >= 200) {
-          wt_p0_fake_bin_ = 8;
-        }
-      } else {
-        if (p0_pt_ >= 30 && p0_pt_ < 40) {
-          wt_p0_fake_bin_ = 9;
-        } else if (p0_pt_ >= 40 && p0_pt_ < 60) {
-          wt_p0_fake_bin_ = 10;
-        } else if (p0_pt_ >= 60 && p0_pt_ < 100) {
-          wt_p0_fake_bin_ = 11;
-        } else if (p0_pt_ >= 100) {
-          wt_p0_fake_bin_ = 12;
-        }
-      }
+      wt_p0_fake_bin_ = RooFunc(fns_["p_fake_index"], {p0_pt_, p0->scEta()});
       // wt_p0_fake_lo_ = 1.0 - RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
+      if (e0) {
+        wt_l0_fake_ = RooFunc(fns_["e_fake_ratio"], {l0_pt_, l0_eta_});
+      }
+      if (m0) {
+        wt_l0_fake_ = RooFunc(fns_["m_fake_ratio"], {l0_pt_, l0_eta_});
+      }
     }
 
     if (!is_data_) {
@@ -939,19 +935,22 @@ int WGDataAnalysis::PreAnalysis() {
             }
           }
         }
-        for (auto const& p_pho : prompt_gen_photons) {
-          for (auto const& p : genparts) {
-            if (ac::IsChargedLepton(*p) && ac::contains(p->daughters(), p_pho->index())) {
-              p0_fsr_ = true;
-              break;
-            }
-          }
-          if (p0_fsr_) break;
-        }
+        // for (auto const& p_pho : prompt_gen_photons) {
+        //   for (auto const& p : genparts) {
+        //     if (ac::IsChargedLepton(*p) && ac::contains(p->daughters(), p_pho->index())) {
+        //       p0_fsr_ = true;
+        //       break;
+        //     }
+        //   }
+        //   if (p0_fsr_) break;
+        // }
         if (ac::contains({1, 2, 4, 5}, p0_truth_)) {
           wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
           wt_p0_hi_ = 1.0 + RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
           wt_p0_lo_ = 1.0 - RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
+        }
+        if (ac::contains({1, 4, 5}, p0_truth_) && !p0->hasPixelSeed() && p0->passElectronVeto()) {
+          wt_p0_ *= RooFunc(fns_["p_psv_ratio"], {p0_pt_, p0->scEta()});
         }
         if (ac::contains({2}, p0_truth_) && !p0->hasPixelSeed() && p0->passElectronVeto()) {
           wt_p0_e_fake_ = RooFunc(fns_["e_p_fake_ratio"], {p0_pt_, p0->eta()});
@@ -986,19 +985,22 @@ int WGDataAnalysis::PreAnalysis() {
         wt_sc_5_ = scale_weights.at(5);
       }
 
-      if (pdf_begin_ >= 0 && pdf_end_ >= 0 && pdf_end_ >= pdf_begin_) {
-        int npdf = pdf_end_ - pdf_begin_ + 1;
-        for (int ipdf = 0; ipdf < npdf; ++ipdf) {
-          if (info->lheWeights().count(pdf_begin_ + ipdf)) {
-            wt_pdf_[ipdf] = 1. + 2. * info->lheWeights().at(pdf_begin_ + ipdf);
+      int ipdf = 0;
+      for (unsigned ipdfset = 0; ipdfset < pdf_begin_.size(); ++ipdfset) {
+        int pdf_begin = pdf_begin_.at(ipdfset);
+        int pdf_end = pdf_end_.at(ipdfset);
+        int npdf = pdf_end - pdf_begin + 1;
+        for (int ip = 0; ip < npdf; ++ip) {
+          if (info->lheWeights().count(pdf_begin + ip)) {
+            wt_pdf_[ipdf] = 1. + 2. * info->lheWeights().at(pdf_begin + ip);
           } else {
             wt_pdf_[ipdf] = 0.;
           }
+          ++ipdf;
           // std::cout << " - pdf " << ipdf << "/" << pdf_begin_ + ipdf << "\t" << wt_pdf_[ipdf] << "\n";
         }
 
       }
-
     }
     CompressVars();
     //if (nproc == 10000) {
@@ -1085,6 +1087,7 @@ int WGDataAnalysis::PreAnalysis() {
     wt_l1_ = 1.;
     wt_p0_ = 1.;
     wt_p0_fake_ = 1.;
+    wt_l0_fake_ = 1.;
     wt_p0_e_fake_ = 1.;
     wt_sc_0_ = 1.;
     wt_sc_1_ = 1.;
@@ -1125,6 +1128,7 @@ int WGDataAnalysis::PreAnalysis() {
     gen_phi_f_ = 0.;
     gen_l0_q_ = 0;
     gen_l0_pt_ = 0.;
+    gen_wg_M_ = 0.;
     gen_l0_eta_ = 0.;
     gen_met_ = 0.;
     gen_l0p0_dr_ = 0.;
@@ -1138,7 +1142,7 @@ int WGDataAnalysis::PreAnalysis() {
     for (float* var :
          {&l0_pt_,     &l0_iso_,    &l0met_mt_,  &l1_pt_,     &l1_iso_,      &met_,
           &puppi_met_, &tk_met_,    &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
-          &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
+          &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_wg_M_,  &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
           &j0_pt_,
           &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_,
           &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_}) {

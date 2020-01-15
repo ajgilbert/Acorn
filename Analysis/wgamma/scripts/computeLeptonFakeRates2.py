@@ -24,6 +24,7 @@ parser.add_argument('--postfix', default='')
 parser.add_argument('--var', default='l0_pt', choices=['l0_pt', 'p0_chiso'])
 parser.add_argument('--channel', default='m', choices=['e', 'm'])
 parser.add_argument('--mc', action='store_true')
+parser.add_argument('--syst', type=int, default=0)
 
 args = parser.parse_args()
 
@@ -49,12 +50,14 @@ def ComputeSFs(node, strategy=0, var='l0j0_dphi', node_m=None):
 
     # Strategy 0 - solve simultaneous
     if var == 'l0j0_dphi':
-        obs_central = node['data_sub'].Integral(3, 28)
-        obs_edge = node['data_sub'].Integral(1, 2) + node['data_sub'].Integral(29, 30)
-        w_central = node['W_J'].Integral(3, 28)
-        w_edge = node['W_J'].Integral(1, 2) + node['W_J'].Integral(29, 30)
-        gjets_central = node['GJets_J'].Integral(3, 28)
-        gjets_edge = node['GJets_J'].Integral(1, 2) + node['GJets_J'].Integral(29, 30)
+        l_max = 3
+        h_max = 27
+        obs_central = node['data_sub'].Integral(l_max + 1, h_max - 1)
+        obs_edge = node['data_sub'].Integral(1, l_max) + node['data_sub'].Integral(h_max, 30)
+        w_central = node['W_J'].Integral(l_max + 1, h_max - 1)
+        w_edge = node['W_J'].Integral(1, l_max) + node['W_J'].Integral(h_max, 30)
+        gjets_central = node['GJets_J'].Integral(l_max + 1, h_max - 1)
+        gjets_edge = node['GJets_J'].Integral(1, l_max) + node['GJets_J'].Integral(h_max, 30)
     if var == 'puppi_met':
         obs_central = node['data_sub'].Integral(1, 7)
         obs_edge = node['data_sub'].Integral(8, 20)
@@ -80,7 +83,12 @@ fout = ROOT.TFile(args.output, 'RECREATE')
 
 res = {}
 
-bins = [30, 40, 50, 60, 80, 100, 200]
+bins = [30, 50, 100]
+
+if args.channel == 'e':
+    h2d = ROOT.TH2F('lepton_fakes', '', 14, 30, 100, 2, array('d', [0., 1.4442, 2.5]))
+else:
+    h2d = ROOT.TH2F('lepton_fakes', '', 14, 30, 100, 2, array('d', [0., 1.5, 2.5]))
 
 for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
     print '\n'
@@ -101,120 +109,65 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         node_w_ctl_dphi = hists[args.channel][region_w_ctl][var_w_ctl]
         node_w_ctl_muons = hists['m'][region_w_ctl.replace('_e_', '_m_')][var_w_ctl]
 
-        # Subtract all MC from the data - careful with GJets - assuming this is never
-        # part of Total_J
-        # node_w_ctl_dphi['data_sub'] = node_w_ctl_dphi['data_obs'] - (node_w_ctl_dphi['Total_R'] + node_w_ctl_dphi['Total_E'] + node_w_ctl_dphi['Total_J'] + node_w_ctl_dphi['GJets_J'])
-        # w_ctl_dphi_central = node_w_ctl_dphi['data_sub'].Integral(3, 28)
-        # w_ctl_dphi_edge = node_w_ctl_dphi['data_sub'].Integral(1, 2) + node_w_ctl_dphi['data_sub'].Integral(29, 30)
-        # w_ctl_dphi_w_central = node_w_ctl_dphi['W_J'].Integral(3, 28)
-        # w_ctl_dphi_w_edge = node_w_ctl_dphi['W_J'].Integral(1, 2) + node_w_ctl_dphi['W_J'].Integral(29, 30)
-        # w_ctl_dphi_gjets_central = node_w_ctl_dphi['GJets_J'].Integral(3, 28)
-        # w_ctl_dphi_gjets_edge = node_w_ctl_dphi['GJets_J'].Integral(1, 2) + node_w_ctl_dphi['GJets_J'].Integral(29, 30)
-
-        # w_ctl_dphi_w_sf = ((w_ctl_dphi_w_central + w_ctl_dphi_central) / w_ctl_dphi_w_central)
-        # w_ctl_dphi_edge = w_ctl_dphi_edge - (w_ctl_dphi_w_edge * (w_ctl_dphi_w_sf - 1.0))
-        # w_ctl_dphi_gjets_sf = ((w_ctl_dphi_gjets_edge + w_ctl_dphi_edge) / w_ctl_dphi_gjets_edge)
         w_sf, gjets_sf = ComputeSFs(node_w_ctl_dphi, strategy=2, var=var_w_ctl, node_m=node_w_ctl_muons)
-        print '>> dphi SFs: %f, %f' % (w_sf, gjets_sf)
+        if args.channel == 'm':
+            gjets_sf = 1.0
+
+        if args.syst == 1:
+            w_sf = ((w_sf - 1.0) / 2.) + 1.0
+            gjets_sf = ((gjets_sf - 1.0) / 2.) + 1.0
+        if args.syst == 2:
+            w_sf = ((w_sf - 1.0) / 2.) + w_sf
+            gjets_sf = ((gjets_sf - 1.0) / 2.) + gjets_sf
+
+
+        # gjets_sf_ref_2016 = [
+        #     2.654239,
+        #     1.132372,
+        #     1.512585,
+        #     3.521884,
+        #     2.615963,
+        #     2.764810
+        # ]
+        # if 'barrel' in eb:
+        #     gjets_sf = gjets_sf_ref_2016[ib]
+        # else:
+        #     gjets_sf = gjets_sf_ref_2016[3 + ib]
+
+        print '>> dphi SFs: %.2f, %.2f' % (w_sf, gjets_sf)
 
         w_norm_w_ctl = node_w_ctl['W_J'].Integral()
         gjet_norm_w_ctl = node_w_ctl['GJets_J'].Integral()
 
         node_w_ctl['data_sub'] = node_w_ctl['data_obs'] - (node_w_ctl['Total_R'] + node_w_ctl['Total_E'] + node_w_ctl['Total_J'] + node_w_ctl['GJets_J'])
         data_sub_norm_w_ctl = node_w_ctl['data_sub'].Integral()
-        # w_sf = ((w_norm_w_ctl + data_sub_norm_w_ctl) / w_norm_w_ctl)
-        # gjet_sf = ((gjet_norm_w_ctl + data_sub_norm_w_ctl) / gjet_norm_w_ctl)
-        # print w_sf, gjet_sf
-
         node_iso_t['Total_J'].Add(node_iso_t['W_J'], -1.0)
         node_iso_t['W_J'].Scale(w_sf)
         node_iso_t['GJets_J'].Scale(gjets_sf)
         node_iso_t['data_sub'] = node_iso_t['data_obs'] - (node_iso_t['Total_R'] + node_iso_t['Total_E'] + node_iso_t['Total_J'] + node_iso_t['W_J'] + node_iso_t['GJets_J'])
         node_iso_l['data_sub'] = node_iso_l['data_obs'] - (node_iso_l['Total_R'] + node_iso_l['Total_E'] + node_iso_l['Total_J'])
-        data_sub_norm_iso_t = node_iso_t['data_sub'].Integral()
-        data_sub_norm_iso_l = node_iso_l['data_sub'].Integral()
 
-        print '>> Fake factor: %f' % (data_sub_norm_iso_t / data_sub_norm_iso_l)
+        h_data_sub_norm_iso_t = VariableRebin(node_iso_t['data_sub'], [node_iso_t['data_sub'].GetXaxis().GetXmin(), node_iso_t['data_sub'].GetXaxis().GetXmax()])
+        h_data_sub_norm_iso_l = VariableRebin(node_iso_l['data_sub'], [node_iso_l['data_sub'].GetXaxis().GetXmin(), node_iso_l['data_sub'].GetXaxis().GetXmax()])
+        h_data_sub_norm_iso_t.Divide(h_data_sub_norm_iso_l)
+        fake_factor = h_data_sub_norm_iso_t.GetBinContent(1)
+        fake_factor_err = h_data_sub_norm_iso_t.GetBinError(1)
 
-        node_iso_t['data_sub'].Divide(node_iso_l['data_sub'])
-        # node_iso_t['data_sub'].Print("range")
-        # # Rebin if we're doing pT
-        # if var == 'l0_pt':
-        #     if 'barrel' in eb:
-        #         # newbins = [30, 40, 60, 100, 200]
-        #         newbins = [30, 40, 50, 60, 80, 100, 200]
-        #     else:
-        #         # newbins = [30, 40, 60, 100, 200]
-        #         newbins = [30, 40, 50, 60, 80, 100, 200]
-        #     node.ForEach(lambda x: RebinHist(x, newbins))
+        # data_sub_norm_iso_t = node_iso_t['data_sub'].Integral()
+        # data_sub_norm_iso_l = node_iso_l['data_sub'].Integral()
+        # fake_factor = (data_sub_norm_iso_t / data_sub_norm_iso_l)
+        print '>> Fake factor: %.2f +/- %.2f' % (fake_factor, fake_factor_err)
 
-        # Subtract off the background
-        # node['data_obs'].Print('range')
-        # node['Total_R'].Print('range')
-        # node['Total_E'].Print('range')
-        # node['Total_J'].Print('range')
-        # node['data_sub'] = node['data_obs'] - (node['Total_R'] + node['Total_E'] + node['Total_J'])
+        iy = 1 if 'barrel' in eb else 2
+        for ix in xrange(1, h2d.GetNbinsX() + 1):
+            xcenter = h2d.GetXaxis().GetBinCenter(ix)
+            if xcenter > bins[ib] and xcenter < bins[ib + 1]:
+                h2d.SetBinContent(ix, iy, fake_factor)
+        # node_iso_t['data_sub'].Divide(node_iso_l['data_sub'])
 
-#     # Now take the ratio between regions
-#     h_fr = hists[args.channel]['%s_iso_t%s' % (eb, post)][var]['data_sub'].Clone()
-#     h_fr.Divide(hists[args.channel]['%s_iso_l%s' % (eb, post)][var]['data_sub'])
-#     hint = None
-#     if var == 'p0_chiso':
-#         h_fr.Fit('pol1')
-#         # func = ROOT.TF1('func', '[0]*TMath::Exp([1]*([2]-x))')
-#         # h_fr.Fit('func')
-#         hint = ROOT.TH1D("hint", "Fitted gaussian with .95 conf.band", 100, 0, 20)
-#         ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(hint, 0.68)
-#         hint.SetStats(False)
-#         hint.SetMarkerSize(0)
-#         hint.SetFillColorAlpha(2, 0.2)
-#         hint.Print('range')
-#         # h_fr.GetFunction('pol2').Draw('E3SAME')
+# h2d.Print('range')
 
-#     # Print the results
-#     for ib in xrange(1, h_fr.GetNbinsX() + 1):
-#         frac_err = 0.
-#         if h_fr.GetBinContent(ib) > 0.:
-#             frac_err = (h_fr.GetBinError(ib) / h_fr.GetBinContent(ib))
-#         print '[%f,%f] %.3f %.3f %.3f' % (
-#             h_fr.GetXaxis().GetBinLowEdge(ib), h_fr.GetXaxis().GetBinUpEdge(ib), h_fr.GetBinContent(ib), h_fr.GetBinError(ib), frac_err
-#             )
-#     if args.mc:
-#         h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_J'].Clone()
-#         h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_J'])
-#         print '>> MC'
-#         for ib in xrange(1, h_fr_mc.GetNbinsX() + 1):
-#             frac_err = 0.
-#             if h_fr_mc.GetBinContent(ib) > 0.:
-#                 frac_err = (h_fr_mc.GetBinError(ib) / h_fr_mc.GetBinContent(ib))
-#             print '[%f,%f] %.3f %.3f %.3f' % (
-#                 h_fr_mc.GetXaxis().GetBinLowEdge(ib), h_fr_mc.GetXaxis().GetBinUpEdge(ib), h_fr_mc.GetBinContent(ib), h_fr_mc.GetBinError(ib), frac_err
-#                 )
-#     plot.Set(h_fr, MarkerSize=0.5)
-#     canv = ROOT.TCanvas('lepton_fakes_%s_%s%s' % (args.year, eb, post), 'lepton_fakes_%s_%s%s' % (args.year, eb, post))
-#     pads = plot.OnePad()
-#     h_fr.Draw('E')
-#     if hint is not None:
-#         hint.Draw("E3SAME")
-#         h_fr.Draw('ESAME')
-#     if args.mc:
-#         plot.Set(h_fr_mc, LineColor=2, MarkerColor=2, MarkerSize=0.5)
-#         h_fr_mc.Draw('SAMEE')
-#     h_fr.SetMaximum(10)
-#     h_fr.SetMinimum(0)
-#     h_fr.GetXaxis().SetTitle('Lepton p_{T} (GeV)')
-#     if var == 'p0_chiso':
-#         h_fr.GetXaxis().SetTitle('Photon I_{ch} (GeV)')
-#     h_fr.GetYaxis().SetTitle('Fake ratio')
-#     if args.mc:
-#         legend = ROOT.TLegend(0.6, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
-#         legend.AddEntry(h_fr, 'Data', 'L')
-#         legend.AddEntry(h_fr_mc, 'W+jets simulation', 'L')
-#         legend.Draw()
-#     canv.Print('.pdf')
-#     canv.Print('.png')
-#     fout.cd()
-#     res[eb] = h_fr
+
 #     ROOT.gDirectory.WriteTObject(h_fr, eb)
 
 
@@ -230,7 +183,7 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
 # h2d_syst_extrap = h2d.Clone()
 # h2d_stat_syst = h2d.Clone()
 
-# ROOT.gDirectory.WriteTObject(h2d, 'lepton_fakes')
+ROOT.gDirectory.WriteTObject(h2d, 'lepton_fakes')
 
 
 fout.Close()

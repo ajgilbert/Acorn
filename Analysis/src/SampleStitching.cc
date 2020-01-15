@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include "Acorn/Analysis/interface/AnalysisTools.h"
+#include "Acorn/Analysis/interface/WGAnalysisTools.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
 #include "Acorn/NTupler/interface/json.hpp"
@@ -17,7 +18,7 @@
 namespace ac {
 
 SampleStitching::SampleStitching(std::string const& name, nlohmann::json const& cfg)
-    : ModuleBase(name), fs_(nullptr) {
+    : ModuleBase(name), fs_(nullptr), weight_(1.0) {
   using json = nlohmann::json;
   binned_ = cfg["binned"].get<std::vector<std::string>>();
   unsigned N = binned_.size();
@@ -66,13 +67,16 @@ SampleStitching::~SampleStitching() { ; }
 int SampleStitching::PreAnalysis() {
   if (fs_) {
     tree_ = fs_->make<TTree>("SampleStitching", "SampleStitching");
-    // tree_->Branch("wt", &wt_);
-    // tree_->Branch("n_jets", &n_jets_);
+    tree_->Branch("wt", &weight_);
+    for (unsigned i =0; i < binned_.size(); ++i) {
+      tree_->Branch(binned_[i].c_str(), &(vars_[i]));
+    }
   }
   return 0;
 }
 
 int SampleStitching::Execute(TreeEvent* event) {
+  weight_ = 1.0;
   auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
   auto info = event->GetPtr<ac::EventInfo>("eventInfo");
 
@@ -108,6 +112,24 @@ int SampleStitching::Execute(TreeEvent* event) {
           vars_[i] += p->pt();
         }
       }
+    } else if (binned_[i] == "mll_sf") {
+      vars_[i] = 0.0;
+      std::vector<ac::GenParticle*> charged_leptons;
+      for (auto const& p : lhe_parts) {
+        if (ac::IsChargedLepton(*p)) charged_leptons.push_back(p);
+      }
+      if (charged_leptons.size() == 2) {
+        vars_[i] = (charged_leptons[0]->vector() + charged_leptons[1]->vector()).M();
+      }
+    } else if (binned_[i] == "ptl") {
+      vars_[i] = -1.0;
+      std::vector<ac::GenParticle*> charged_leptons;
+      for (auto const& p : lhe_parts) {
+        if (ac::IsChargedLepton(*p)) {
+          double pt = p->pt();
+          if (vars_[i] < 0.0 || (pt < vars_[i])) vars_[i] = pt;
+        }
+      }
     } else {
       throw std::runtime_error(
           "SampleStitching: No implementation exists for binning variable \"" + binned_[i] + "\"");
@@ -141,9 +163,12 @@ int SampleStitching::Execute(TreeEvent* event) {
     }
   }
   // std::cout << " => " << target_lumi << "/" << eff_lumi << "\n";
-  double weight =  target_lumi / eff_lumi;
+  weight_ =  target_lumi / eff_lumi;
+  info->setWeight("stitching", weight_);
 
-  info->setWeight("stitching", weight);
+  if (tree_) {
+    tree_->Fill();
+  }
   return 0;
 }
 int SampleStitching::PostAnalysis() { return 0; }

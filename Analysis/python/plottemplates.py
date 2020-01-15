@@ -193,8 +193,10 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         if isinstance(col, list):
             col = ROOT.TColor.GetColor(*col)
         # print info['line_width']
-        # plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
-        plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+        if cfg['type'] == 'multihist':
+            plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+        else:
+            plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
                 hist.Add(hists[other])

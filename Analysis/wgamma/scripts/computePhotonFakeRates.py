@@ -54,12 +54,16 @@ for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s'
 
         # Rebin if we're doing pT
         if var == 'p0_pt':
-            if 'barrel' in eb:
+            if 'barrel_' in eb or 'barrel1_' in eb:
                 # newbins = [30, 40, 60, 100, 200]
-                newbins = [30, 40, 50, 60, 80, 100, 150, 200, 300]
-            else:
+                newbins = [30, 40, 50, 60, 100, 150, 300]
+            elif 'barrel2_' in eb:
+                newbins = [30, 40, 50, 60, 100, 300]
+            elif 'endcap_' in eb or 'endcap1_' in eb:
                 # newbins = [30, 40, 60, 100, 200]
                 newbins = [30, 40, 60, 100, 300]
+            elif 'endcap2_' in eb:
+                newbins = [30, 40, 60, 300]
             node.ForEach(lambda x: RebinHist(x, newbins))
             if add_channel is not None:
                 node_alt.ForEach(lambda x: RebinHist(x, newbins))
@@ -131,15 +135,51 @@ for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s'
     res[eb] = h_fr
     ROOT.gDirectory.WriteTObject(h_fr, eb)
 
+use4bins = True
 
-h2d = ROOT.TH2F('photon_fakes', '', 54, 30, 300, 2, array('d', [0., 1.4442, 2.5]))
+if use4bins:
+    h2d = ROOT.TH2F('photon_fakes', '', 54, 30, 300, 4, array('d', [0., 1.0, 1.4442, 2.1, 2.5]))
+else:
+    h2d = ROOT.TH2F('photon_fakes', '', 54, 30, 300, 2, array('d', [0., 1.4442, 2.5]))
+
+h2d_index = h2d.Clone()
+curr_index = 0
+for j in xrange(1, h2d.GetNbinsY() + 1):
+    curr_index += 1
+    if j == 1:
+        curr_hist = res['barrel1_%s' % args.channel]
+    if j == 2:
+        curr_hist = res['barrel2_%s' % args.channel]
+    if j == 3:
+        curr_hist = res['endcap1_%s' % args.channel]
+    if j == 4:
+        curr_hist = res['endcap2_%s' % args.channel]
+    curr_x_bin = 1
+    for i in xrange(1, h2d.GetNbinsX() + 1):
+        x = h2d.GetXaxis().GetBinCenter(i)
+        xbin = curr_hist.GetXaxis().FindFixBin(x)
+        if xbin > curr_x_bin:
+            curr_x_bin = xbin
+            curr_index += 1
+        h2d_index.SetBinContent(i, j, float(curr_index))
+
 
 for i in xrange(1, h2d.GetNbinsX() + 1):
     x = h2d.GetXaxis().GetBinCenter(i)
-    h2d.SetBinContent(i, 1, res['barrel_%s' % args.channel].GetBinContent(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
-    h2d.SetBinContent(i, 2, res['endcap_%s' % args.channel].GetBinContent(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
-    h2d.SetBinError(i, 1, res['barrel_%s' % args.channel].GetBinError(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
-    h2d.SetBinError(i, 2, res['endcap_%s' % args.channel].GetBinError(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
+    if use4bins:
+        h2d.SetBinContent(i, 1, res['barrel1_%s' % args.channel].GetBinContent(res['barrel1_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinContent(i, 2, res['barrel2_%s' % args.channel].GetBinContent(res['barrel2_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinContent(i, 3, res['endcap1_%s' % args.channel].GetBinContent(res['endcap1_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinContent(i, 4, res['endcap2_%s' % args.channel].GetBinContent(res['endcap2_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 1, res['barrel1_%s' % args.channel].GetBinError(res['barrel1_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 2, res['barrel2_%s' % args.channel].GetBinError(res['barrel2_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 3, res['endcap1_%s' % args.channel].GetBinError(res['endcap1_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 4, res['endcap2_%s' % args.channel].GetBinError(res['endcap2_%s' % args.channel].GetXaxis().FindFixBin(x)))
+    else:
+        h2d.SetBinContent(i, 1, res['barrel_%s' % args.channel].GetBinContent(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinContent(i, 2, res['endcap_%s' % args.channel].GetBinContent(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 1, res['barrel_%s' % args.channel].GetBinError(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
+        h2d.SetBinError(i, 2, res['endcap_%s' % args.channel].GetBinError(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
 
 
 """
@@ -296,16 +336,27 @@ h2d_stat_syst = h2d.Clone()
 
 for i in xrange(1, h2d_syst_extrap.GetNbinsX() + 1):
     x = h2d_syst_extrap.GetXaxis().GetBinCenter(i)
-    h2d_syst_extrap.SetBinError(i, 1, h2d_syst_extrap.GetBinContent(i, 1) * h_syst_barrel.GetBinContent(h_syst_barrel.GetXaxis().FindFixBin(x)))
-    h2d_syst_extrap.SetBinError(i, 2, h2d_syst_extrap.GetBinContent(i, 2) * h_syst_endcap.GetBinContent(h_syst_endcap.GetXaxis().FindFixBin(x)))
-    h2d_stat_syst.SetBinError(i, 1, math.sqrt(math.pow(h2d.GetBinError(i, 1), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 1), 2)))
-    h2d_stat_syst.SetBinError(i, 2, math.sqrt(math.pow(h2d.GetBinError(i, 2), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 2), 2)))
+    if use4bins:
+        h2d_syst_extrap.SetBinError(i, 1, h2d_syst_extrap.GetBinContent(i, 1) * h_syst_barrel.GetBinContent(h_syst_barrel.GetXaxis().FindFixBin(x)))
+        h2d_syst_extrap.SetBinError(i, 2, h2d_syst_extrap.GetBinContent(i, 2) * h_syst_barrel.GetBinContent(h_syst_barrel.GetXaxis().FindFixBin(x)))
+        h2d_syst_extrap.SetBinError(i, 3, h2d_syst_extrap.GetBinContent(i, 3) * h_syst_endcap.GetBinContent(h_syst_endcap.GetXaxis().FindFixBin(x)))
+        h2d_syst_extrap.SetBinError(i, 4, h2d_syst_extrap.GetBinContent(i, 4) * h_syst_endcap.GetBinContent(h_syst_endcap.GetXaxis().FindFixBin(x)))
+        h2d_stat_syst.SetBinError(i, 1, math.sqrt(math.pow(h2d.GetBinError(i, 1), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 1), 2)))
+        h2d_stat_syst.SetBinError(i, 2, math.sqrt(math.pow(h2d.GetBinError(i, 2), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 2), 2)))
+        h2d_stat_syst.SetBinError(i, 3, math.sqrt(math.pow(h2d.GetBinError(i, 3), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 3), 2)))
+        h2d_stat_syst.SetBinError(i, 4, math.sqrt(math.pow(h2d.GetBinError(i, 4), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 4), 2)))
+    else:
+        h2d_syst_extrap.SetBinError(i, 1, h2d_syst_extrap.GetBinContent(i, 1) * h_syst_barrel.GetBinContent(h_syst_barrel.GetXaxis().FindFixBin(x)))
+        h2d_syst_extrap.SetBinError(i, 2, h2d_syst_extrap.GetBinContent(i, 2) * h_syst_endcap.GetBinContent(h_syst_endcap.GetXaxis().FindFixBin(x)))
+        h2d_stat_syst.SetBinError(i, 1, math.sqrt(math.pow(h2d.GetBinError(i, 1), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 1), 2)))
+        h2d_stat_syst.SetBinError(i, 2, math.sqrt(math.pow(h2d.GetBinError(i, 2), 2) + math.pow(h2d_syst_extrap.GetBinError(i, 2), 2)))
 
 h2d.Print('range')
 h2d_syst_extrap.Print('range')
 h2d_stat_syst.Print('range')
 
 ROOT.gDirectory.WriteTObject(h2d, 'photon_fakes')
+ROOT.gDirectory.WriteTObject(h2d_index, 'photon_fakes_index')
 ROOT.gDirectory.WriteTObject(h2d_syst_extrap, 'photon_fakes_syst')
 ROOT.gDirectory.WriteTObject(h2d_stat_syst, 'photon_fakes_stat_syst')
 

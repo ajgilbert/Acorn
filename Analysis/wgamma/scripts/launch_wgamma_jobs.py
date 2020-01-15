@@ -47,6 +47,8 @@ for sample in SAMPLES:
     filtered_seqs = list(sequences)
     if 'sequences' in SAMPLES[sample]:
         filtered_seqs = [X for X in filtered_seqs if X in SAMPLES[sample]['sequences']]
+    if len(filtered_seqs) == 0:
+        continue
     cfg = {
         'sequences': filtered_seqs,
         'filelists': ['filelists/%s_%s.txt' % (args.production, x) for x in SAMPLES[sample]['inputs']],
@@ -61,10 +63,13 @@ for sample in SAMPLES:
     if 'stitching' in SAMPLES[sample]:
         cfg['stitching'] = SAMPLES[sample]['stitching']
 
+    files_per_job = args.files_per_job
+    if 'data' in SAMPLES[sample]['attributes']:
+        files_per_job *= 2
     job_mgr.add_filelist_split_jobs(
         prog='Acorn_WGAnalysis',
         cfg=cfg,
-        files_per_job=args.files_per_job,
+        files_per_job=files_per_job,
         output_cfgs=output_cfgs,
         tempdir=args.tmp)
 

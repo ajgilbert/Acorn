@@ -32,6 +32,7 @@ class SampleStitching : public ModuleBase {
   CLASS_MEMBER(SampleStitching, fwlite::TFileService*, fs)
 
   TTree* tree_;
+  double weight_;
   std::vector<double> vars_;
   std::vector<std::string> binned_;
   std::vector<SampleInfo> samples_;
