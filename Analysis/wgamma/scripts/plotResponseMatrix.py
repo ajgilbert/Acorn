@@ -87,7 +87,7 @@ if args.selection == 'fid_region':
     h_resp.GetYaxis().SetLabelOffset(h_resp.GetYaxis().GetLabelOffset() * 0.5)
     h_resp.GetXaxis().SetLabelSize(0.04)
     h_resp.GetYaxis().SetLabelSize(0.04)
-    bin_labels = ['[30, 50]', '[50,70]', '[70,100]', '[100,150]', '[150,200]', '[200,300]', '[300,500]', '[500,800]']
+    bin_labels = ['[30, 50]', '[50,70]', '[70,100]', '[100,150]', '[150,200]', '[200,300]', '[300,500]', '[500,800]', '[800,1200]']
     for ib, label in enumerate(bin_labels):
         h_resp.GetXaxis().SetBinLabel(ib + 1, label)
         h_resp.GetYaxis().SetBinLabel(ib + 1, label)
@@ -105,35 +105,37 @@ h_resp.Draw('COLZ')
 
 
 latex = ROOT.TLatex()
-x_offset = -2.5
-plot.Set(latex, TextSize=0.02, TextAlign=22)
-latex.DrawLatex(1, x_offset, '[150, 200]')
-latex.DrawLatex(4, x_offset, '[200, 300]')
-latex.DrawLatex(7, x_offset, '[300, 500]')
-latex.DrawLatex(10, x_offset, '[500, 800]')
-latex.DrawLatex(13, x_offset, '[800, 1200]')
-# latex.DrawLatex(16, x_offset, '[850, 1200]')
 
-plot.Set(latex, TextAngle=90)
+if args.selection == 'eft_region':
+    x_offset = -2.5
+    plot.Set(latex, TextSize=0.02, TextAlign=22)
+    latex.DrawLatex(1, x_offset, '[150, 200]')
+    latex.DrawLatex(4, x_offset, '[200, 300]')
+    latex.DrawLatex(7, x_offset, '[300, 500]')
+    latex.DrawLatex(10, x_offset, '[500, 800]')
+    latex.DrawLatex(13, x_offset, '[800, 1200]')
+    # latex.DrawLatex(16, x_offset, '[850, 1200]')
 
-y_offset = -2.4
-latex.DrawLatex(y_offset, 1, '[150, 200]')
-latex.DrawLatex(y_offset, 4, '[200, 300]')
-latex.DrawLatex(y_offset, 7, '[300, 500]')
-latex.DrawLatex(y_offset, 10, '[500, 800]')
-latex.DrawLatex(y_offset, 13, '[800, 1200]')
-# latex.DrawLatex(y_offset, 16, '[850, 1200]')
+    plot.Set(latex, TextAngle=90)
+
+    y_offset = -2.4
+    latex.DrawLatex(y_offset, 1, '[150, 200]')
+    latex.DrawLatex(y_offset, 4, '[200, 300]')
+    latex.DrawLatex(y_offset, 7, '[300, 500]')
+    latex.DrawLatex(y_offset, 10, '[500, 800]')
+    latex.DrawLatex(y_offset, 13, '[800, 1200]')
+    # latex.DrawLatex(y_offset, 16, '[850, 1200]')
 
 plot.Set(latex, TextAngle=0, TextSize=0.03, TextAlign=21)
 if args.selection == 'eft_region':
     latex.DrawLatex(12, -3.7, 'Gen. p_{T}^{#gamma} [GeV] x |#phi_{f}| bin')
 if args.selection == 'fid_region':
-    latex.DrawLatex(6.5, -2.0, 'Gen. p_{T}^{#gamma} [GeV] bin')
+    latex.DrawLatex(7.0, -2.4, 'Gen. p_{T}^{#gamma} [GeV] bin')
 plot.Set(latex, TextAngle=90, TextSize=0.03, TextAlign=21)
 if args.selection == 'eft_region':
     latex.DrawLatex(-3.2, 12, 'Reco. p_{T}^{#gamma} [GeV] x |#phi_{f}| bin')
 if args.selection == 'fid_region':
-    latex.DrawLatex(-1.7, 6.5, 'Reco. p_{T}^{#gamma} [GeV] bin')
+    latex.DrawLatex(-2.0, 7.0, 'Reco. p_{T}^{#gamma} [GeV] bin')
 
 plot.FixOverlay()
 

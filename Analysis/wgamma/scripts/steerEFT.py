@@ -161,9 +161,9 @@ if 'makeHists' in steps:
     print json.dumps(testplot_args)
     for yr in years:
         indir = 'root://eoscms.cern.ch//store/user/agilbert/191216-full/wgamma_%s_v4/WGamma_' % yr
-        # call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
-        #       '--indir', indir,
-        #       '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
+        call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
+              '--indir', indir,
+              '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
           ('MetJesLo_', '_CMS_scale_met_jesDown'),
           ('MetJesHi_', '_CMS_scale_met_jesUp'),
@@ -250,17 +250,20 @@ for i in range(n_pt_bins):
 if 'xsec2D' in steps:
     initPOIs = ','.join([('%s=1' % X) for X in allPOIs])
     genStr = 'P;n;;' + ';'.join(['%s,%s' % (X, X) for X in allPOIs])
-
     if label == 'fid_pt_binned' or label == 'inclusive_xs':
         wsp = 'pt_diff'
         rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
+        grpStr = 'freezeNuisanceGroups;n;;!,,nominal;th,fr.th;th,expt,,fr.expt;all,fr.all;all,autoMCStats,,fr.mcstats'
     else:
         wsp = 'pt_phi_diff'
         rangePOIs = ':'.join([('%s=0,10' % X) for X in allPOIs])
+        # Only do a more basic breakdown for the 2D
+        grpStr = 'freezeNuisanceGroups;n;;sig_inc,,nominal;all,autoMCStats,,fr.mcstats'
 
     call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
           '--algo', 'grid', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
-          '--generate', genStr, '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4',
+          '--generate', genStr, grpStr,
+          '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4',
           '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
     # call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
     #       '--algo', 'none', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
@@ -270,18 +273,33 @@ if 'xsec2D' in steps:
 if 'xsec2DPlot' in steps:
 
     call(['rm', '%s.json' % label])
+    call(['rm', '%s_breakdown.json' % label])
 
     for POI in allPOIs:
         call(['python', 'wgamma/scripts/plot1DScan.py',
-              '--main', 'higgsCombine.%s.%s.MultiDimFit.mH120.root' % (label, POI), '--POI', POI,
-              '--model', 'xsec2D', '--output', 'scan_%s_%s' % (label, POI),
-              '--json', '%s.json' % label, '--chop', '20'])
+            '--main', 'higgsCombine.%s.%s.nominal.MultiDimFit.mH120.root' % (label, POI), '--POI', POI,
+            '--model', 'xsec2D', '--output', 'scan_%s_%s' % (label, POI),
+            '--json', '%s.json' % label, '--chop', '20', '--translate', 'wgamma/scripts/pois.json',
+            '--others',
+            "higgsCombine.%s.%s.fr.mcstats.MultiDimFit.mH120.root:Freeze all:2" % (label, POI),
+            '--breakdown', 'Syst,Stat'])
 
+        if label == 'fid_pt_binned' or label == 'inclusive_xs':
+            call(['python', 'wgamma/scripts/plot1DScan.py',
+                  '--main', 'higgsCombine.%s.%s.nominal.MultiDimFit.mH120.root' % (label, POI), '--POI', POI,
+                  '--model', 'xsec2D', '--output', 'scan_%s_%s_breakdown' % (label, POI),
+                  '--json', '%s_breakdown.json' % label, '--chop', '20', '--translate', 'wgamma/scripts/pois.json',
+                  '--others',
+                  "higgsCombine.%s.%s.fr.th.MultiDimFit.mH120.root:Freeze Th.:2"  % (label, POI),
+                  "higgsCombine.%s.%s.fr.expt.MultiDimFit.mH120.root:Freeze Th. + Expt.:4"  % (label, POI),
+                  "higgsCombine.%s.%s.fr.all.MultiDimFit.mH120.root:Freeze all:8"  % (label, POI),
+                  "higgsCombine.%s.%s.fr.mcstats.MultiDimFit.mH120.root:Freeze all + MCStats:12" % (label, POI),
+                  '--breakdown', 'Th,Expt,Lumi,MCStats,Stat'])
 
 if 'C3WPlot' in steps:
     for bsm_label in ['withBSM', 'noBSM']:
         for i in range(n_pt_bins):
-            call(['python', 'wgamma/scripts/plot1DScan.py',
+            call(['python', 'wgamma/scripts/plot1DScan.py', '--limit-cls',
                 '--main', 'higgsCombine.%s.%s.MultiDimFit.mH%i.root' % (label, bsm_label, i), '--POI', 'c3w',
                 '--model', 'c3w_bin_%i' % i, '--output', 'scan_%s_%s_%i' % (label, bsm_label, i),
                 '--json', '%s_%s.json' % (label, bsm_label), '--chop', '30', '--remove-near-min', '0.8'])

@@ -117,10 +117,10 @@ if args.selection == 'fid_region':
     year = args.year
     fit = 'prefit'
 
-    pt_bins = BinEdgesFromStr('[30,50,70,100,150,200,300,500,800]')
+    pt_bins = BinEdgesFromStr('[30,50,70,100,150,200,300,500,800,1200]')
     phi_bins = BinEdgesFromStr('(1,0.,1.)')
 
-    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_sub" , "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x" , "WG_main_x"]
+    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_sub" , "data_fakes_lep_sub", "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x" , "WG_main_x"]
 
 
 
@@ -237,7 +237,7 @@ for i in xrange(n_bins_phi):
         h.SetMinimum(1E-4)
         h.SetMaximum(1E+2)
     if args.selection == 'fid_region':
-        h.SetMinimum(1E-1)
+        h.SetMinimum(1E-2)
         h.SetMaximum(1E+5)
 
     # h.Draw()

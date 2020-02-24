@@ -217,7 +217,7 @@ if args.special == 'eft_region':
 
 if args.special == 'fid_region':
     hist.GetXaxis().LabelsOption('v')
-    bin_labels = ['[30, 50]', '[50,70]', '[70,100]', '[100,150]', '[150,200]', '[200,300]', '[300,500]', '[500,800]']
+    bin_labels = ['[30, 50]', '[50,70]', '[70,100]', '[100,150]', '[150,200]', '[200,300]', '[300,500]', '[500,800]', '[800,1200]']
     for ib, label in enumerate(bin_labels):
         hist.GetXaxis().SetBinLabel(ib + 1, label)
         hist.GetYaxis().SetBinLabel(hist.GetNbinsY() - ib, label)

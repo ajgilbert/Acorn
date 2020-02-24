@@ -307,6 +307,7 @@ parser.add_argument('--box-frac', default=0.625, type=float, help='fraction of t
 parser.add_argument('--x-title', default=None)
 parser.add_argument('--x-range', default=None)
 parser.add_argument('--premade', action='store_true')
+parser.add_argument('--limit-cls', action='store_true')
 parser.add_argument('--outdir', default='')
 parser.add_argument('--no-sort', action='store_true')
 parser.add_argument('--vertical-line', type=float, default=None)
@@ -341,7 +342,11 @@ if args.translate is not None:
     if args.POI in name_translate:
         fixed_name = name_translate[args.POI]
 
-yvals = [ROOT.Math.chisquared_quantile(0.68, 1), ROOT.Math.chisquared_quantile(0.95, 1)]
+if args.limit_cls:
+    yvals = [ROOT.Math.chisquared_quantile(0.68, 1), ROOT.Math.chisquared_quantile(0.95, 1)]
+else:
+    yvals = [1., 4.]
+
 if args.decorate_signif is not None:
     yvals = [float(i)*float(i) for i in args.decorate_signif.split(',')]
     NPX = 1000

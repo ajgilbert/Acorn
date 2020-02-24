@@ -38,11 +38,18 @@ for c in charges:
         if args.type in ['fid_region']:
             cb.AddProcesses(['*'], ['wg'], [era], [chn], ['data_fakes_lep_sub'], [cat], False)
         if args.type in ['eft_region', 'pt_phi_diff']:
-            for phibin in range(n_phi_bins):
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
-                cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, ptbin, phibin)], [cat], True)
+            if ptbin == 0:
+                pt_truthbins = [ptbin, ptbin + 1]
+            elif ptbin == n_pt_bins - 1:
+                pt_truthbins = [ptbin - 1, ptbin]
+            else:
+                pt_truthbins = [ptbin - 1, ptbin, ptbin + 1]
+            for pt_truthbin in pt_truthbins:
+                for phibin in range(n_phi_bins):
+                    cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i_%i' % (c, pt_truthbin, phibin)], [cat], True)
+                    cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i_%i' % (c, pt_truthbin, phibin)], [cat], True)
         if args.type in ['pt_diff', 'fid_region']:
-            for pt_truthbin in [ptbin]:
+            for pt_truthbin in range(n_pt_bins):
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_main_%s_%i' % (c, pt_truthbin)], [cat], True)
                 cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_met1_%s_%i' % (c, pt_truthbin)], [cat], True)
 
@@ -148,6 +155,17 @@ if args.type in ['fid_region']:
         cb, 'QCDScaleRatio', 'shape', ch.SystMap()(1.0))
     cb.cp().process(['WG_ooa_.*']).AddSyst(
         cb, 'QCDScale', 'shape', ch.SystMap()(1.0))
+
+if args.type in ['eft_region']:
+    # Only adding scale uncerts on the diagonal for now...
+    for ptbin in range(n_pt_bins):
+        cb.cp().bin(['._._%i' % ptbin]).process(['WG_main_._%i_.*' % ptbin]).AddSyst(
+            cb, 'QCDScale', 'shape', ch.SystMap()(1.0))
+        cb.cp().bin(['._._%i' % ptbin]).process(['WG_met1_._%i_.*' % ptbin]).AddSyst(
+            cb, 'QCDScaleRatio', 'shape', ch.SystMap()(1.0))
+    cb.cp().process(['WG_ooa_.*']).AddSyst(
+        cb, 'QCDScale', 'shape', ch.SystMap()(1.0))
+
 """
     - In principle for all backgrounds (limited in practice)
     - For signal depends on measurement:
@@ -229,14 +247,48 @@ decorrelate_years = [
     'CMS_scale_met_unclustered'
 ]
 
-decorrelate_proc = [
-    'QCDScaleAccept',
-    'QCDScaleRatio',
-    'QCDScale'
-]
+if args.type in ['fid_region']:
+    decorrelate_proc = [
+        'QCDScale',
+        'QCDScaleAccept',
+        'QCDScaleRatio'
+    ]
+    decorrelate_pt_bin = []
+elif args.type in ['eft_region']:
+    decorrelate_proc = [
+        'QCDScale'
+    ]
 
-cb.cp().syst_name(decorrelate_years).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.era()))
-cb.cp().syst_name(decorrelate_proc).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.process()))
+    decorrelate_pt_bin = [
+        'QCDScale',
+        'QCDScaleAccept',
+        'QCDScaleRatio',
+    ]
+
+for syst_pattern in decorrelate_years:
+    for syst_name in cb.cp().syst_name([syst_pattern]).syst_name_set():
+        for era in cb.cp().syst_name([syst_name]).SetFromSysts(lambda x: x.era()):
+            cb.cp().era([era]).RenameSystematic(cb, syst_name, syst_name + '_' + era)
+            cb.RenameParameter(syst_name, syst_name + '_' + era)
+
+for syst_pattern in decorrelate_pt_bin:
+    for syst_name in cb.cp().signals().syst_name([syst_pattern]).syst_name_set():
+        for proc in cb.cp().signals().syst_name([syst_name]).SetFromSysts(lambda x: x.process()):
+            pt_bin = proc.split('_')[3]
+            newname = syst_name + '_WG_PtBin_%s' % pt_bin
+            cb.cp().process([proc]).RenameSystematic(cb, syst_name, newname)
+            cb.RenameParameter(syst_name, newname)
+
+### Fully decorrelates based on the process name, but perhaps overkill?
+for syst_pattern in decorrelate_proc:
+    for syst_name in cb.cp().syst_name([syst_pattern]).syst_name_set():
+        for proc in cb.cp().syst_name([syst_name]).SetFromSysts(lambda x: x.process()):
+            cb.cp().process([proc]).RenameSystematic(cb, syst_name, syst_name + '_' + proc)
+            cb.RenameParameter(syst_name, syst_name + '_' + proc)
+
+
+# cb.cp().syst_name(decorrelate_years).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.era()))
+# cb.cp().syst_name(decorrelate_proc).ForEachSyst(lambda x: x.set_name(x.name() + '_' + x.process()))
 
 
 def DropBogusShapes(x):
@@ -248,7 +300,10 @@ def DropBogusShapes(x):
 
 
 cb.FilterSysts(lambda x: DropBogusShapes(x))
-cb.cp().syst_type(['shape']).ForEachSyst(lambda x: x.set_type('lnN'))
+
+# Can safely do this if every channel is a 1-bin counting expt.
+if args.type in ['fid_region']:
+    cb.cp().syst_type(['shape']).ForEachSyst(lambda x: x.set_type('lnN'))
 
 
 def CorrectionNegativeYield(proc):
@@ -260,6 +315,42 @@ def CorrectionNegativeYield(proc):
 cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
 cb.SetAutoMCStats(cb, 0., True)
 # cb.PrintAll()
+
+# Groups:
+# - stat, lumi, theory, expt
+# - stat, lumi, theory, mcstats, lepton_eff, photon_eff, photon_scale, photon_fakes, met_scale
+cb.SetGroup('all', ['.*'])
+
+gr_lumi = ['CMS_lumi_.*']
+gr_lep_eff = ['CMS_eff_[em]_.*', 'CMS_trigger_[em]_.*']
+gr_pho_eff = ['CMS_eff_p_.*']
+gr_pho_fakes = ['CMS_ele_fake_p_.*', 'WeightStatSystBin.*']
+gr_lep_fakes = ['CMS_fake_[em]_.*']
+gr_other = ['CMS_pileup', 'CMS_prefiring']
+gr_met_scale = ['CMS_scale_met_.*']
+gr_pho_scale = ['CMS_scale_p_.*']
+gr_sig_th = ['QCDScale.*_WG_.*']
+gr_sig_inc = ['QCDScale_WG_PtBin_.*']
+gir_bkg_th = ['QCDScale_.*NLO', 'pdf_VV', 'pdf_ttbar']
+
+gr_th = gr_sig_th + gir_bkg_th
+gr_expt = gr_lep_eff + gr_pho_eff + gr_pho_fakes + gr_lep_fakes + gr_other + gr_met_scale + gr_pho_scale
+
+cb.SetGroup('lumi', gr_lumi)
+cb.SetGroup('lep_eff', gr_lep_eff)
+cb.SetGroup('pho_eff', gr_pho_eff)
+cb.SetGroup('pho_fakes', gr_pho_fakes)
+cb.SetGroup('lep_fakes', gr_lep_fakes)
+cb.SetGroup('other', gr_other)
+cb.SetGroup('met_scale', gr_met_scale)
+cb.SetGroup('pho_scale', gr_pho_scale)
+cb.SetGroup('sig_th', gr_sig_th)
+cb.SetGroup('sig_inc', gr_sig_inc)
+cb.SetGroup('bkg_th', gir_bkg_th)
+cb.SetGroup('th', gr_th)
+cb.SetGroup('expt', gr_expt)
+
+cb.PrintParams()
 
 writer = ch.CardWriter('$TAG/$BIN.txt',
                        '$TAG/common/$ANALYSIS.%s.%s.input.root' % (args.channel, args.year))

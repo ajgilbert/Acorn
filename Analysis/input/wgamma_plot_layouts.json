@@ -357,16 +357,22 @@
       "color": [187,10,33]
     },
     {
-      "name": "data_fakes",
-      "entries": ["data_fakes_sub"],
-      "legend": "Non-prompt/misid. #gamma",
-      "color": [119,127,160]
-    },
-    {
       "name": "GG",
       "entries": ["GG_R", "GG_E"],
       "legend": "#gamma#gamma",
       "color": [72, 74, 71]
+    },
+    {
+      "name": "data_fakes_lep",
+      "entries": ["data_fakes_lep_sub"],
+      "legend": "Non-prompt/misid. l",
+      "color": [186, 193, 184]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_sub"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [119,127,160]
     },
     {
       "name": "WG",
