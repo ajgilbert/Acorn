@@ -1,4 +1,24 @@
 {
+  "wjets_split": [
+    {
+      "name": "W_H",
+      "entries": ["W_H"],
+      "legend": "W#rightarrowl#nu (hadronic #gamma)",
+      "color": 30
+    },
+    {
+      "name": "W_M",
+      "entries": ["W_M"],
+      "legend": "W#rightarrowl#nu (misid. #gamma)",
+      "color": 40
+    },
+    {
+      "name": "W_P",
+      "entries": ["W_P"],
+      "legend": "W#rightarrowl#nu (PU #gamma)",
+      "color": 46
+    }
+  ],
   "pure_mc": [
     {
       "name": "VV_R",

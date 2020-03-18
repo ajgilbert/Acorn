@@ -427,7 +427,7 @@ def MultiDraw(node, sample_to_file_dict, tree_name, mt_cores=0, mt_thresh=1E7):
             func_dict[obj_hash] = fname
         else:
             fname = func_dict[obj_hash]
-            print '>> Recyling function %s in %.2g seconds' % (fname, (time.time() - start))
+            print '>> Recycling function %s in %.2g seconds' % (fname, (time.time() - start))
         end = time.time()
         codegen_time += (end - start)
         histarr = ROOT.TObjArray(len(flatobjlist))
@@ -515,9 +515,10 @@ def BinEdgesFromStr(binning_str):
         return binedges
 
 
-def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
+def SetupPads(split_points, gaps_left, gaps_right, ratio=None, purity=None):
     pads = []
     ratio_pads = []
+    purity_pads = []
     l_margin = ROOT.gStyle.GetPadLeftMargin()
     r_margin = ROOT.gStyle.GetPadRightMargin()
     t_margin = ROOT.gStyle.GetPadTopMargin()
@@ -534,7 +535,11 @@ def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
             pad.SetRightMargin(pad_r_margin)
         print pad.GetLeftMargin(), pad.GetRightMargin()
         if ratio is not None:
-            pad.SetBottomMargin(b_margin + usable_height * ratio)
+            if purity is None:
+                pad.SetBottomMargin(b_margin + usable_height * ratio)
+            else:
+                pad.SetBottomMargin(b_margin + usable_height * (ratio + purity))
+
         pad.SetFillStyle(4000)
         pad.Draw()
         pads.append(pad)
@@ -548,9 +553,20 @@ def SetupPads(split_points, gaps_left, gaps_right, ratio=None):
             padr.SetFillStyle(4000)
             padr.Draw()
             ratio_pads.append(padr)
+        if purity is not None:
+            padp = ROOT.TPad('p_pad%i'%i, '', 0., 0., 1., 1.)
+            if i > 0:
+                padp.SetLeftMargin(pad_l_margin)
+            if i < len(split_points):
+                padp.SetRightMargin(pad_r_margin)
+            padp.SetTopMargin(1 - (b_margin + usable_height * (ratio + purity)))
+            padp.SetBottomMargin(b_margin + usable_height * ratio)
+            padp.SetFillStyle(4000)
+            padp.Draw()
+            purity_pads.append(padp)
     pads[0].cd()
     # pads.reverse()
-    return pads, ratio_pads
+    return pads, ratio_pads, purity_pads
 
 
 def CheckBinErrors(node, hists):

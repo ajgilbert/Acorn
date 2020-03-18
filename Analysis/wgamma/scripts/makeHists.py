@@ -26,6 +26,7 @@ args = parser.parse_args()
 
 DO_WWG_SPLIT = True
 SWITCH_OFF_P0_WT = False
+DO_W_FAKE_STUDY = True
 N_FAKE_BINS = 18
 
 tname = 'WGDataAnalysis'
@@ -112,7 +113,7 @@ remaps = {
         'TT_DL': 'TTTo2L2Nu-powheg',
         # 'WG': 'WGToLNuG-madgraphMLM-stitched',
         'WG': 'WGToLNuG-amcatnloFXFX-stitched',
-        'W': 'WJetsToLNu-madgraphMLM',
+        'W': 'WJetsToLNu-stitched',
         'VVTo2L2Nu': 'VVTo2L2Nu-amcatnloFXFX',
         'WWTo1L1Nu2Q': 'WWTo1L1Nu2Q-amcatnloFXFX',
         # 'WZTo1L1Nu2Q': 'WZTo1L1Nu2Q-amcatnloFXFX',
@@ -247,6 +248,10 @@ def ApplyPhotonSplitting(hlist, components=['R', 'J', 'E']):
             res.append(('%s_R' % label, '(%s) && $p0_isprompt' % sel, wt))
         if 'J' in components:
             res.append(('%s_J' % label, '(%s) && $p0_isjet' % sel, wt))
+            if label == 'W' and DO_W_FAKE_STUDY:
+                res.append(('%s_H' % label, '(%s) && p0_truth==6' % sel, wt))  # hadron
+                res.append(('%s_M' % label, '(%s) && p0_truth==0' % sel, wt))  # misid
+                res.append(('%s_P' % label, '(%s) && p0_truth==7' % sel, wt))  # PU
         if 'E' in components:
             res.append(('%s_E' % label, '(%s) && $p0_iselec' % sel, wt))
     return res
@@ -378,9 +383,9 @@ do_cats['m'] = []
 X = SelectionManager()
 # Selections for photon truth
 X['p0_isprompt'] = 'p0_truth == 1 || p0_truth == 4 || p0_truth == 5'
-X['p0_isjet'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 3'
+X['p0_isjet'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 3 || p0_truth == 7'
 X['p0_iselec'] = 'p0_truth == 2'
-X['p0_isfake'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 2 || p0_truth == 3'
+X['p0_isfake'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 2 || p0_truth == 3 || p0_truth == 7'
 
 # Selecting barrel or endcap photons
 X['p0_eb'] = 'abs(p0_eta) < 1.4442'
@@ -639,6 +644,8 @@ if args.task in ['baseline', 'electron_fakes']:
 
     do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
     do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
+    # do_cats['e'].extend(['baseline_e_nopix', 'baseline_e_mZ_veto'])
+    # do_cats['m'].extend(['baseline_m_nopix', 'baseline_m_mZ_veto'])
 
     cat_to_wt = {
         'cr_Zee': '$cr_zll_wt',
@@ -673,7 +680,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('p0_sigma', (60, 0., 0.06)),
         ('p0_haspix', (2, -0.5, 1.5)),
         ('p0_eveto', (2, -0.5, 1.5)),
-        ('p0_truth', (7, -0.5, 6.5)),
+        ('p0_truth', (8, -0.5, 7.5)),
         ('wt_def', (100, 0.8, 1.2)),
         ('wt_pu', (100, 0.5, 1.5)),
         ('wt_l0', (100, 0.8, 1.2)),
@@ -754,6 +761,7 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
 
     for chn in ['e', 'm']:
         for S in ['barrel_%s' % chn, 'barrel1_%s' % chn, 'barrel2_%s' % chn, 'endcap_%s' % chn, 'endcap1_%s' % chn, 'endcap2_%s' % chn]:
+        # for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
             for POST, EXTRA in [
               ('', '1'),
             ] + extra_regions:
@@ -789,7 +797,7 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
         # ('p0_neiso', (40, 0, 20.0)),
         # ('p0_phiso', (40, 0, 20.0)),
         # ('p0_hovere', (20, 0., 0.5)),
-        # ('p0_sigma', (60, 0., 0.06)),
+        ('p0_sigma', (60, 0., 0.06)),
         # ('p0_haspix', (2, -0.5, 1.5)),
         # ('p0_truth', (7, -0.5, 6.5)),
     ]

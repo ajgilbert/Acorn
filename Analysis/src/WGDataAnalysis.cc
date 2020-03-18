@@ -934,7 +934,36 @@ int WGDataAnalysis::PreAnalysis() {
               }
             }
           }
+        } else {
+          // So not any of the above, is it at least matched to a genJet with pT > 15 GeV?
+          auto genjets = event->GetPtrVec<ac::Candidate>("genJets");
+          auto genjet_dr = ac::copy_keep_if(genjets, [&](ac::Candidate *p) {
+            return p->pt() > 15.0 && DeltaR(p, p0) < 0.5;
+          });
+          if (genjet_dr.size() == 0) {
+            p0_truth_ = 7; // Pileup photon
+          }
+
         }
+        // if (p0_truth_ == 0 && p0_medium_) {
+        //   std::cout << ">>>> Fake hadronic photon found: " << p0->vector() << "\n";
+        // }
+        // if (p0_truth_ == 0 && p0_medium_) {
+        //   auto gen_dr = ac::copy_keep_if(genparts, [&](ac::GenParticle *p) {
+        //     return DeltaR(p, p0) < 0.5;
+        //   });
+
+        //   std::cout << ">>>> Fake photon found: " << p0->vector() << "\n";
+        //   std::cout << ">>>> Nearby GenParticles:\n";
+        //   for (auto const& gpart : gen_dr) {
+        //     gpart->Print();
+        //   }
+        //   std::cout << ">>>> Nearby GenJets:\n";
+        //   for (auto const& gpart : genjet_dr) {
+        //     gpart->Print();
+        //   }
+
+        // }
         // for (auto const& p_pho : prompt_gen_photons) {
         //   for (auto const& p : genparts) {
         //     if (ac::IsChargedLepton(*p) && ac::contains(p->daughters(), p_pho->index())) {

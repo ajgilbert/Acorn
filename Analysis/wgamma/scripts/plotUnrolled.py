@@ -156,7 +156,7 @@ canv = ROOT.TCanvas(args.output, args.output)
 ratio = None
 # if args.ratio:
 #     ratio = 0.4
-pads, ratio_pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0], ratio=0.20)
+pads, ratio_pads, purity_pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0], ratio=0.20, purity=0.20)
 
 
 with open('input/wgamma_plot_layouts.json') as jsonfile:
@@ -166,6 +166,7 @@ plotcfg = DEFAULT_CFG
 plotcfg.update({
     'type': 'datamc',
     'ratio': True,
+    'purity': True,
     'global_hist_opts': {
         'draw_opts': 'HIST',
         'legend_opts': 'F',
@@ -196,7 +197,7 @@ for i in xrange(n_bins_phi):
 
     if args.selection == 'eft_region':
         thiscfg = UpdateDict(plotcfg, {
-                              'pads': [pads[i], ratio_pads[i]],
+                              'pads': [pads[i], purity_pads[i], ratio_pads[i]],
                               'overlays': [
                                 {"name": "c3wUp", "entries": ["TotalProcs_c3w_p1"], 'hist_postfix': '', 'legend': 'C_{3W} = 0.2 TeV^{-2}', 'color': 4},
                                 {"name": "c3wDown", "entries": ["TotalProcs_c3w_m1"], 'hist_postfix': '', 'legend': 'C_{3W} = -0.2  TeV^{-2}', 'color': 2}
@@ -205,7 +206,7 @@ for i in xrange(n_bins_phi):
         layout_name = 'data_fakes_EFT_simple'
     else:
         thiscfg = UpdateDict(plotcfg, {
-                              'pads': [pads[i], ratio_pads[i]],
+                              'pads': [pads[i], purity_pads[i], ratio_pads[i]],
                               })
         layout_name = 'data_fakes_diff_simple'
 

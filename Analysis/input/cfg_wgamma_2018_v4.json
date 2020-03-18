@@ -224,11 +224,185 @@
       }
     },
     "WJetsToLNu-madgraphMLM": {
-      "attributes": ["default", "mc"],
-      "inputs": ["WJetsToLNu-madgraphMLM"],
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext1"],
       "xsec": 61526.7,
       "GenXSecAnalyzer": "After filter: final cross section = 5.272e+04 +- 6.373e+01 pb",
       "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV"
+    },
+    "W1JetsToLNu-madgraphMLM": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["W1JetsToLNu-madgraphMLM"],
+      "xsec": 8090.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 8.090e+03 +- 1.834e+01 pb"
+    },
+    "W2JetsToLNu-madgraphMLM": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["W2JetsToLNu-madgraphMLM"],
+      "xsec": 2799.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 2.799e+03 +- 9.018e+00 pb"
+    },
+    "W3JetsToLNu-madgraphMLM": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["W3JetsToLNu-madgraphMLM"],
+      "xsec": 993.6,
+      "GenXSecAnalyzer": "After filter: final cross section = 9.936e+02 +- 2.074e+00 pb"
+    },
+    "W4JetsToLNu-madgraphMLM": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["W4JetsToLNu-madgraphMLM"],
+      "xsec": 543.2,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.432e+02 +- 1.213e+00 pb"
+    },
+    "WJetsToLNu_HT-70To100": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-70To100"],
+      "xsec": 1292.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.292e+03 +- 3.545e+00 pb"
+    },
+    "WJetsToLNu_HT-100To200": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-100To200"],
+      "xsec": 1392.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.392e+03 +- 3.084e+00 pb"
+    },
+    "WJetsToLNu_HT-200To400": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-200To400"],
+      "xsec": 408.3,
+      "GenXSecAnalyzer": "After filter: final cross section = 4.083e+02 +- 1.013e+00 pb"
+    },
+    "WJetsToLNu_HT-400To600": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-400To600"],
+      "xsec": 57.59,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.759e+01 +- 1.493e-01 pb"
+    },
+    "WJetsToLNu_HT-600To800": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-600To800"],
+      "xsec": 12.9,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.290e+01 +- 3.527e-02 pb"
+    },
+    "WJetsToLNu_HT-800To1200": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-800To1200"],
+      "xsec": 5.362,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.362e+00 +- 1.542e-02 pb"
+    },
+    "WJetsToLNu_HT-1200To2500": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-1200To2500"],
+      "xsec": 1.075,
+      "GenXSecAnalyzer": "After filter: final cross section = 1.075e+00 +- 3.032e-03 pb"
+    },
+    "WJetsToLNu_HT-2500ToInf": {
+      "attributes": ["wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu_HT-2500ToInf"],
+      "xsec": 0.008118,
+      "GenXSecAnalyzer": "After filter: final cross section = 8.118e-03 +- 2.824e-05 pb"
+    },
+    "WJetsToLNu-stitched": {
+      "attributes": ["default", "wjets_binned", "mc"],
+      "inputs": ["WJetsToLNu-madgraphMLM", "WJetsToLNu-madgraphMLM-ext1",
+                 "W1JetsToLNu-madgraphMLM", "W2JetsToLNu-madgraphMLM", "W3JetsToLNu-madgraphMLM", "W4JetsToLNu-madgraphMLM",
+                 "WJetsToLNu_HT-70To100", "WJetsToLNu_HT-100To200", "WJetsToLNu_HT-200To400", "WJetsToLNu_HT-400To600",
+                 "WJetsToLNu_HT-600To800", "WJetsToLNu_HT-800To1200", "WJetsToLNu_HT-1200To2500", "WJetsToLNu_HT-2500ToInf"],
+      "xsec": 61526.7,
+      "stitching": {
+        "binned": ["njet", "ht"],
+        "WJetsToLNu-madgraphMLM": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 115553890,
+          "xsec": 52720.0
+        },
+        "W1JetsToLNu-madgraphMLM": {
+          "target": false,
+          "min": [1.0, null],
+          "max": [2.0, null],
+          "events": 51047866,
+          "xsec": 8090.0
+        },
+        "W2JetsToLNu-madgraphMLM": {
+          "target": false,
+          "min": [2.0, null],
+          "max": [3.0, null],
+          "events": 23272818,
+          "xsec": 2799.0
+        },
+        "W3JetsToLNu-madgraphMLM": {
+          "target": false,
+          "min": [3.0, null],
+          "max": [4.0, null],
+          "events": 14450363,
+          "xsec": 993.6
+        },
+        "W4JetsToLNu-madgraphMLM": {
+          "target": false,
+          "min": [4.0, null],
+          "max": [5.0, null],
+          "events": 10062333,
+          "xsec": 543.2
+        },
+        "WJetsToLNu_HT-70To100": {
+          "target": false,
+          "min": [null, 70.0],
+          "max": [null, 100.0],
+          "events": 27910424,
+          "xsec": 1292.0
+        },
+        "WJetsToLNu_HT-100To200": {
+          "target": false,
+          "min": [null, 100.0],
+          "max": [null, 200.0],
+          "events": 29488310,
+          "xsec": 1392.0
+        },
+        "WJetsToLNu_HT-200To400": {
+          "target": false,
+          "min": [null, 200.0],
+          "max": [null, 400.0],
+          "events": 25423155,
+          "xsec": 408.3
+        },
+        "WJetsToLNu_HT-400To600": {
+          "target": false,
+          "min": [null, 400.0],
+          "max": [null, 600.0],
+          "events": 5915969,
+          "xsec": 57.59
+        },
+        "WJetsToLNu_HT-600To800": {
+          "target": false,
+          "min": [null, 600.0],
+          "max": [null, 800.0],
+          "events": 19699782,
+          "xsec": 12.9
+        },
+        "WJetsToLNu_HT-800To1200": {
+          "target": false,
+          "min": [null, 800.0],
+          "max": [null, 1200.0],
+          "events": 8362227,
+          "xsec": 5.362
+        },
+        "WJetsToLNu_HT-1200To2500": {
+          "target": false,
+          "min": [null, 1200.0],
+          "max": [null, 2500.0],
+          "events": 7274071,
+          "xsec": 1.075
+        },
+        "WJetsToLNu_HT-2500ToInf": {
+          "target": false,
+          "min": [null, 2500.0],
+          "max": [null, null],
+          "events": 3191612,
+          "xsec": 0.008118
+        }
+      }
     },
     "WWG-amcatnlo": {
       "attributes": ["default", "mc"],
@@ -255,7 +429,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.060e+02 +- 3.377e-01 pb"
     },
     "ZGToLLG-amcatnloFXFX-stitched": {
-      "attributes": ["doit", "default", "mc", "check_is_zg"],
+      "attributes": ["default", "mc", "check_is_zg"],
       "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 106.0,
       "stitching": {

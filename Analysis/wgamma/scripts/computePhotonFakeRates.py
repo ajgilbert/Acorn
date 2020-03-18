@@ -45,8 +45,26 @@ fout = ROOT.TFile(args.output, 'RECREATE')
 
 res = {}
 
-for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s' % args.channel, 'endcap_%s' % args.channel, 'endcap1_%s' % args.channel, 'endcap2_%s' % args.channel]:
-    for sel in ['%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post)]:
+
+def DoMCRatio(num, den):
+    num.Print('range')
+    den.Print('range')
+    h_fr_mc = num.Clone()
+    h_fr_mc.Divide(den)
+    # print '>> MC'
+    for ib in xrange(1, h_fr_mc.GetNbinsX() + 1):
+        frac_err = 0.
+        if h_fr_mc.GetBinContent(ib) > 0.:
+            frac_err = (h_fr_mc.GetBinError(ib) / h_fr_mc.GetBinContent(ib))
+            print '[%f,%f] %.3f %.3f %.3f' % (
+                h_fr_mc.GetXaxis().GetBinLowEdge(ib), h_fr_mc.GetXaxis().GetBinUpEdge(ib), h_fr_mc.GetBinContent(ib), h_fr_mc.GetBinError(ib), frac_err
+                )
+    return h_fr_mc
+
+
+# for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s' % args.channel, 'endcap_%s' % args.channel, 'endcap1_%s' % args.channel, 'endcap2_%s' % args.channel]:
+for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
+    for sel in ['%s_iso_t_sig_t%s' % (eb, post), '%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post)]:
         node = hists[args.channel][sel][var]
         sel_alt = sel.replace(eb, eb.replace('_%s' % args.channel, '_%s' % add_channel))
         print sel_alt
@@ -98,16 +116,19 @@ for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s'
             h_fr.GetXaxis().GetBinLowEdge(ib), h_fr.GetXaxis().GetBinUpEdge(ib), h_fr.GetBinContent(ib), h_fr.GetBinError(ib), frac_err
             )
     if args.mc:
-        h_fr_mc = hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_J'].Clone()
-        h_fr_mc.Divide(hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_J'])
         print '>> MC'
-        for ib in xrange(1, h_fr_mc.GetNbinsX() + 1):
-            frac_err = 0.
-            if h_fr_mc.GetBinContent(ib) > 0.:
-                frac_err = (h_fr_mc.GetBinError(ib) / h_fr_mc.GetBinContent(ib))
-            print '[%f,%f] %.3f %.3f %.3f' % (
-                h_fr_mc.GetXaxis().GetBinLowEdge(ib), h_fr_mc.GetXaxis().GetBinUpEdge(ib), h_fr_mc.GetBinContent(ib), h_fr_mc.GetBinError(ib), frac_err
-                )
+        h_fr_mc = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_J'])
+        h_fr_mc_all = DoMCRatio(hists[args.channel]['%s_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_sig_l' % eb][var]['W_J'])
+        print '>> MC (h)'
+        h_fr_mc_h = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_H'], hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_H'])
+        print '>> MC (truth)'
+        h_fr_mc_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_J'])
+        print '>> MC (h - truth)'
+        h_fr_mc_h_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_H'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_H'])
+        print '>> MC (p - truth)'
+        h_fr_mc_p_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_P'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_P'])
+        print '>> MC (m - truth)'
+        h_fr_mc_m_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_M'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_M'])
     plot.Set(h_fr, MarkerSize=0.5)
     canv = ROOT.TCanvas('photon_fakes_%s_%s%s' % (args.year, eb, post), 'photon_fakes_%s_%s%s' % (args.year, eb, post))
     pads = plot.OnePad()
@@ -117,8 +138,19 @@ for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s'
         h_fr.Draw('ESAME')
     if args.mc:
         plot.Set(h_fr_mc, LineColor=2, MarkerColor=2, MarkerSize=0.5)
+        plot.Set(h_fr_mc_all, LineColor=2, MarkerColor=2, MarkerSize=0.5)
+        plot.Set(h_fr_mc_truth, LineColor=4, MarkerColor=4, MarkerSize=0.5)
+        plot.Set(h_fr_mc_h, LineColor=30, MarkerColor=30, MarkerSize=0.5)
+        plot.Set(h_fr_mc_h_truth, LineColor=6, MarkerColor=6, MarkerSize=0.5)
+        plot.Set(h_fr_mc_p_truth, LineColor=8, MarkerColor=8, MarkerSize=0.5)
+        plot.Set(h_fr_mc_m_truth, LineColor=28, MarkerColor=28, MarkerSize=0.5)
         h_fr_mc.Draw('SAMEE')
-    h_fr.SetMaximum(1.5)
+        # h_fr_mc_truth.Draw('SAMEE')
+        # h_fr_mc_h.Draw('SAMEE')
+        # h_fr_mc_h_truth.Draw('SAMEE')
+        # h_fr_mc_p_truth.Draw('SAMEE')
+        # h_fr_mc_m_truth.Draw('SAMEE')
+    h_fr.SetMaximum(2.1)
     h_fr.SetMinimum(0.1)
     h_fr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
     if var == 'p0_chiso':
@@ -127,7 +159,12 @@ for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s'
     if args.mc:
         legend = ROOT.TLegend(0.6, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
         legend.AddEntry(h_fr, 'Data', 'L')
-        legend.AddEntry(h_fr_mc, 'W+jets simulation', 'L')
+        # legend.AddEntry(h_fr_mc, 'W+jets (anti-iso)', 'L')
+        # legend.AddEntry(h_fr_mc_truth, 'W+jets (iso)', 'L')
+        # legend.AddEntry(h_fr_mc_h, 'W+jets [H] (anti-iso)', 'L')
+        # legend.AddEntry(h_fr_mc_h_truth, 'W+jets [H] (iso)', 'L')
+        # legend.AddEntry(h_fr_mc_p_truth, 'W+jets [P] (iso)', 'L')
+        # legend.AddEntry(h_fr_mc_m_truth, 'W+jets [M] (iso)', 'L')
         legend.Draw()
     canv.Print('.pdf')
     canv.Print('.png')
