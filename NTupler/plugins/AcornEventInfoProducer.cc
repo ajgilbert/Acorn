@@ -35,6 +35,7 @@ AcornEventInfoProducer::AcornEventInfoProducer(const edm::ParameterSet& config)
       lheToken_(consumes<LHEEventProduct>(config.getParameter<edm::InputTag>("lheProducer"))),
       genToken_(consumes<GenEventInfoProduct>(config.getParameter<edm::InputTag>("generator"))),
       includeLHEWeights_(config.getParameter<bool>("includeLHEWeights")),
+      includeLHEInfo_(config.getParameter<bool>("includeLHEInfo")),
       includeGenWeights_(config.getParameter<bool>("includeGenWeights")),
       metfilterToken_(consumes<edm::TriggerResults>(config.getParameter<edm::InputTag>("metFilterResults"))),
       saveMetFilters_(config.getParameter<std::vector<std::string>>("saveMetFilters")),
@@ -166,26 +167,31 @@ void AcornEventInfoProducer::produce(edm::Event& event,
   info->setLuminosityBlock(event.luminosityBlock());
   info->setBunchCrossing(event.bunchCrossing());
 
-  if (includeLHEWeights_) {
+  if (includeLHEWeights_ || includeLHEInfo_) {
     edm::Handle<LHEEventProduct> lhe_handle;
     event.getByToken(lheToken_, lhe_handle);
 
-    info->setNpLO(setVar("npLO", lhe_handle->npLO()));
-    info->setNpNLO(setVar("npNLO", lhe_handle->npNLO()));
-
-    double nominalLHEWeight = 1.;
-    if (lhe_handle->weights().size()) {
-      // Very rarely, this weights() vector is empty (seen in a powheg sample)
-      nominalLHEWeight = lhe_handle->weights()[0].wgt;
+    if (includeLHEInfo_) {
+      info->setNpLO(setVar("npLO", lhe_handle->npLO()));
+      info->setNpNLO(setVar("npNLO", lhe_handle->npNLO()));
+      info->setLHEAlphaS(setVar("lheAlphaS", lhe_handle->hepeup().AQCDUP));
     }
-    info->setNominalLHEWeight(setVar("nominalLHEWeight", nominalLHEWeight));
-    for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
-      // Weight id is a string, assume it can always cast to an unsigned int
-      unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
-      auto it = savedLHEWeightIds.find(id);
-      if (it != savedLHEWeightIds.end()) {
-        double weight = (lhe_handle->weights()[i].wgt / nominalLHEWeight) - 1.0;
-        info->setLHEWeight(id, processVar(weight, it->second));
+
+    if (includeLHEWeights_) {
+      double nominalLHEWeight = 1.;
+      if (lhe_handle->weights().size()) {
+        // Very rarely, this weights() vector is empty (seen in a powheg sample)
+        nominalLHEWeight = lhe_handle->weights()[0].wgt;
+      }
+      info->setNominalLHEWeight(setVar("nominalLHEWeight", nominalLHEWeight));
+      for (unsigned i = 0; i < lhe_handle->weights().size(); ++i) {
+        // Weight id is a string, assume it can always cast to an unsigned int
+        unsigned id = boost::lexical_cast<unsigned>(lhe_handle->weights()[i].id);
+        auto it = savedLHEWeightIds.find(id);
+        if (it != savedLHEWeightIds.end()) {
+          double weight = (lhe_handle->weights()[i].wgt / nominalLHEWeight) - 1.0;
+          info->setLHEWeight(id, processVar(weight, it->second));
+        }
       }
     }
   }

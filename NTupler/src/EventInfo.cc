@@ -11,6 +11,7 @@ EventInfo::EventInfo()
       nominalGenWeight_(0.),
       npLO_(0),
       npNLO_(0),
+      lheAlphaS_(0.),
       nominalLHEWeight_(0.),
       metfilters_(0),
       numVertices_(0) {}
@@ -27,6 +28,7 @@ void EventInfo::Print(unsigned detail) const {
   std::cout << format("%-17s | %10i\n")   % "bunchCrossing"    % bunchCrossing();
   std::cout << format("%-17s | %10i\n")   % "npLO"             % npLO();
   std::cout << format("%-17s | %10i\n")   % "npNLO"            % npNLO();
+  std::cout << format("%-17s | %10i\n")   % "lheAlphaS"        % lheAlphaS();
   std::cout << format("%-17s | %10f\n")   % "nominalGenWeight" % nominalGenWeight();
   std::cout << format("%-17s | %10f\n")   % "nominalLHEWeight" % nominalLHEWeight();
   std::cout << format("%-17s | %10i\n")   % "genWeights[n]"    % genWeights().size();

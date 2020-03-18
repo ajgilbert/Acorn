@@ -30,6 +30,7 @@ class Photon : public Candidate {
   inline double chargedIso() const { return chargedIso_; }
   inline double neutralHadronIso() const { return neutralHadronIso_; }
   inline double photonIso() const { return photonIso_; }
+  inline double worstChargedIsolation() const { return worstChargedIso_; }
 
   inline std::vector<float> const& energyCorrections() const { return energyCorrections_; }
 
@@ -48,6 +49,7 @@ class Photon : public Candidate {
   inline void setChargedIso(double const& chargedIso) { chargedIso_ = chargedIso; }
   inline void setNeutralHadronIso(double const& neutralHadronIso) { neutralHadronIso_ = neutralHadronIso; }
   inline void setPhotonIso(double const& photonIso) { photonIso_ = photonIso; }
+  inline void setWorstChargedIso(double const& worstChargedIso) { worstChargedIso_ = worstChargedIso; }
 
   inline void setEnergyCorrections(std::vector<float> const& energyCorrections) { energyCorrections_ = energyCorrections; }
 
@@ -67,6 +69,7 @@ class Photon : public Candidate {
   double chargedIso_;
   double neutralHadronIso_;
   double photonIso_;
+  double worstChargedIso_;
 
   std::vector<float> energyCorrections_;
 };

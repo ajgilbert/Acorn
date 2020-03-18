@@ -17,7 +17,8 @@
 AcornLHEParticleProducer::AcornLHEParticleProducer(const edm::ParameterSet& config)
     : AcornBaseProducer<std::vector<ac::GenParticle>>(config),
       inputToken_(
-          consumes<LHEEventProduct>(config.getParameter<edm::InputTag>("input"))) {}
+          consumes<LHEEventProduct>(config.getParameter<edm::InputTag>("input"))),
+      incomingP4Fix_(config.getParameter<bool>("incomingP4Fix")) {}
 
 AcornLHEParticleProducer::~AcornLHEParticleProducer() { ; }
 
@@ -34,14 +35,23 @@ void AcornLHEParticleProducer::produce(edm::Event& event,
   for (unsigned i = 0; i < lhe_handle->hepeup().PUP.size(); ++i) {
     ac::GenParticle& dest = output()->at(i);
 
-    ROOT::Math::PxPyPzMVector p4c(lhe_particles[i][0], lhe_particles[i][1], lhe_particles[i][2],
-                                 lhe_particles[i][4]);
-    ROOT::Math::PtEtaPhiMVector p4(p4c);
+    int status = lhe_handle->hepeup().ISTUP[i];
+
+    ROOT::Math::PtEtaPhiMVector p4;
+
+    if (incomingP4Fix_ && status == -1) {
+      p4.SetPt(lhe_particles[i][2]);
+      p4.SetM(lhe_particles[i][3]);
+    } else {
+      ROOT::Math::PxPyPzMVector p4c(lhe_particles[i][0], lhe_particles[i][1], lhe_particles[i][2],
+                                   lhe_particles[i][4]);
+      p4 = ROOT::Math::PtEtaPhiMVector(p4c);
+    }
 
     dest.setVector(setVar("p4", p4));
     dest.setIndex(setVar("index", i));
     dest.setPdgId(setVar("pdgId", lhe_handle->hepeup().IDUP[i]));
-    dest.setStatus(setVar("status",lhe_handle->hepeup().ISTUP[i]));
+    dest.setStatus(setVar("status", status));
     dest.setSpin(setVar("spin",lhe_handle->hepeup().SPINUP[i]));
   }
 }

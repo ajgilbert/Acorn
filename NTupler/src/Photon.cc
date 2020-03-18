@@ -13,7 +13,8 @@ Photon::Photon()
       full5x5SigmaIetaIeta_(0.),
       chargedIso_(0.),
       neutralHadronIso_(0.),
-      photonIso_(0.) {}
+      photonIso_(0.),
+      worstChargedIso_(0.) {}
 
 Photon::~Photon() {}
 

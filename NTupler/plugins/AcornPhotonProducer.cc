@@ -29,6 +29,7 @@ AcornPhotonProducer::AcornPhotonProducer(const edm::ParameterSet& config)
       chargedIsolationLabel_(config.getParameter<std::string>("chargedIsolation")),
       neutralHadronIsolationLabel_(config.getParameter<std::string>("neutralHadronIsolation")),
       photonIsolationLabel_(config.getParameter<std::string>("photonIsolation")),
+      worstChargedIsolationLabel_(config.getParameter<std::string>("worstChargedIsolation")),
       takeIdsFromObjects_(config.getParameter<bool>("takeIdsFromObjects")),
       energyCorrectionLabels_(config.getParameter<std::vector<std::string>>("energyCorrections")) {
 
@@ -98,6 +99,7 @@ void AcornPhotonProducer::produce(edm::Event& event,
       dest.setChargedIso(setVar("chargedIso", pat_src->userFloat(chargedIsolationLabel_)));
       dest.setNeutralHadronIso(setVar("neutralHadronIso", pat_src->userFloat(neutralHadronIsolationLabel_)));
       dest.setPhotonIso(setVar("photonIso", pat_src->userFloat(photonIsolationLabel_)));
+      dest.setWorstChargedIso(setVar("worstChargedIso", pat_src->userFloat(worstChargedIsolationLabel_)));
     } else {
       // This is how to print the full cut flow later if desired.
       // See this message for details of what the cryptic cut names are:

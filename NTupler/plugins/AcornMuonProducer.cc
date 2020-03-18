@@ -51,6 +51,7 @@ void AcornMuonProducer::produce(edm::Event& event, const edm::EventSetup& setup)
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
 
+    dest.setIsLooseMuon(setVar("isLooseMuon", muon::isLooseMuon(src)));
     dest.setIsMediumMuon(setVar("isMediumMuon", muon::isMediumMuon(src)));
     dest.setIsTightMuon(setVar("isTightMuon", muon::isTightMuon(src, *firstVertex)));
 

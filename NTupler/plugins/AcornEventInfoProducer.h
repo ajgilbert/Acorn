@@ -35,6 +35,7 @@ class AcornEventInfoProducer : public AcornBaseProducer<ac::EventInfo> {
   edm::EDGetTokenT<LHEEventProduct> lheToken_;
   edm::EDGetTokenT<GenEventInfoProduct> genToken_;
   bool includeLHEWeights_;
+  bool includeLHEInfo_;
   bool includeGenWeights_;
   std::vector<std::string> lheWeightLabels_;
   std::vector<bool> lheWeightWasKept_;

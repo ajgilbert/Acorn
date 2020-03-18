@@ -91,12 +91,12 @@ process.selectedElectrons = cms.EDFilter("PATElectronRefSelector",
 
 process.selectedMuons = cms.EDFilter("PATMuonRefSelector",
     src=cms.InputTag("slimmedMuons"),
-    cut=cms.string("pt > 5 & abs(eta) < 2.6")
+    cut=cms.string("pt > 9 & abs(eta) < 2.6")
 )
 
 process.selectedPhotons = cms.EDFilter("PATPhotonRefSelector",
     src=cms.InputTag("slimmedPhotons"),
-    cut=cms.string("pt > 20 & abs(eta) < 3.5")
+    cut=cms.string("pt > 25 & abs(eta) < 2.6")
 )
 
 jetLabel = 'patJetsReapplyJECUpdatedJECs' if updateJECs else 'slimmedJets'
@@ -141,8 +141,8 @@ if updateJECs:
                                postfix="PuppiUpdatedJECs",
                                jetFlavor="AK4PFPuppi",
                                )
-    process.puppiNoLep.useExistingWeights = False
-    process.puppi.useExistingWeights = False
+    process.puppiNoLep.useExistingWeights = True
+    process.puppi.useExistingWeights = True
     # The sequence for PUPPI has to go first, then the normal MET, because of some overriding conflicts
     process.customInitialSeq += cms.Sequence(process.egmPhotonIDSequence + process.puppiMETSequence + process.fullPatMetSequencePuppiUpdatedJECs)
     process.customInitialSeq += cms.Sequence(process.fullPatMetSequenceUpdatedJECs)
@@ -190,7 +190,7 @@ process.acElectronProducer = cms.EDProducer('AcornElectronProducer',
     input=cms.InputTag("selectedElectrons"),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices'),
     branch=cms.string('electrons'),
-    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12 energyCorrections=12'),
+    select=cms.vstring('keep .* p4=12 dxy=12 dz=12 vertex=12 relativeEAIso=12 energyCorrections=12 scEta=12 scEnergy=12'),
     eleVetoIdMap=cms.InputTag(ele_veto_id),
     eleLooseIdMap=cms.InputTag(ele_loose_id),
     eleMediumIdMap=cms.InputTag(ele_medium_id),
@@ -219,6 +219,7 @@ process.acPhotonProducer = cms.EDProducer('AcornPhotonProducer',
     chargedIsolation=cms.string('phoChargedIsolation'),
     neutralHadronIsolation=cms.string('phoNeutralHadronIsolation'),
     photonIsolation=cms.string('phoPhotonIsolation'),
+    worstChargedIsolation=cms.string('phoWorstChargedIsolation'),
     takeIdsFromObjects=cms.bool(True),
     energyCorrections=cms.vstring('ecalEnergyPostCorr', 'energyScaleUp', 'energyScaleDown', 'energySigmaUp', 'energySigmaDown')
 )
@@ -243,20 +244,6 @@ process.acPFType1MetProducer = cms.EDProducer('AcornMetProducer',
     saveGenMetFromPat=cms.bool(False),
     saveCorrectionLevels=cms.vint32(1),
     saveUncertaintyShifts=cms.vint32(2, 3, 10, 11, 12, 13),
-    skipMainMet=cms.bool(True)
-)
-
-# Found that trackMet changed when updating JECs - probably due
-# to some difference in the track selection that's used. So for
-# now stick with the original (except 2016_old, because trackMet wasn't saved)
-trackMetLabel = 'slimmedMETsUpdatedJECs' if (year == '2016_old') else 'slimmedMETs'
-process.acTrackMetProducer = cms.EDProducer('AcornMetProducer',
-    input=cms.InputTag(trackMetLabel),
-    branch=cms.string('trackMet'),
-    select=cms.vstring('keep .* p4=12', 'drop sumEt'),
-    saveGenMetFromPat=cms.bool(False),
-    saveCorrectionLevels=cms.vint32(12),
-    saveUncertaintyShifts=cms.vint32(),
     skipMainMet=cms.bool(True)
 )
 
@@ -294,7 +281,8 @@ process.acGenParticleProducer = cms.EDProducer('AcornGenParticleProducer',
 process.acLHEParticleProducer = cms.EDProducer('AcornLHEParticleProducer',
     input=cms.InputTag("externalLHEProducer"),
     branch=cms.string('lheParticles'),
-    select=cms.vstring('keep .* p4=12')
+    select=cms.vstring('keep .* p4=12'),
+    incomingP4Fix=cms.bool(True)
 )
 
 process.acPileupInfoProducer = cms.EDProducer('AcornPileupInfoProducer',
@@ -438,6 +426,7 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
 process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
     lheProducer=cms.InputTag("externalLHEProducer"),
     generator=cms.InputTag("generator"),
+    includeLHEInfo=cms.bool(isMC and hasLHE),
     includeLHEWeights=cms.bool(isMC and hasLHE and keepLHEWeights),
     includeGenWeights=cms.bool(isMC),
     metFilterResults=cms.InputTag("TriggerResults", "", metfilter_proc[year]),
@@ -553,7 +542,6 @@ else:
         process.acPhotonProducer +
         process.acPFJetProducer +
         process.acPFType1MetProducer +
-        process.acTrackMetProducer +
         process.acPuppiMetProducer +
         process.acMCSequence +
         process.acTriggerObjectSequence +

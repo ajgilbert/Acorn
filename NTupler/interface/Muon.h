@@ -22,6 +22,7 @@ class Muon : public Candidate {
   virtual ~Muon();
   virtual void Print() const;
 
+  inline bool isLooseMuon() const { return isLooseMuon_; }
   inline bool isMediumMuon() const { return isMediumMuon_; }
   inline bool isTightMuon() const { return isTightMuon_; }
 
@@ -35,6 +36,7 @@ class Muon : public Candidate {
 
   inline ROOT::Math::XYZPoint vertex() const { return vertex_; }
 
+  inline void setIsLooseMuon(bool const& isLooseMuon) { isLooseMuon_ = isLooseMuon; }
   inline void setIsMediumMuon(bool const& isMediumMuon) { isMediumMuon_ = isMediumMuon; }
   inline void setIsTightMuon(bool const& isTightMuon) { isTightMuon_ = isTightMuon; }
 
@@ -57,6 +59,7 @@ class Muon : public Candidate {
   }
 
  private:
+  bool isLooseMuon_;
   bool isMediumMuon_;
   bool isTightMuon_;
 

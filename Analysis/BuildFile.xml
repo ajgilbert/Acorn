@@ -20,6 +20,8 @@
 <use name="roofit"/>
 <use name="clhep"/>
 <use name="rootrflx"/>
+<use name="python"/>
+<use name="boost_python"/>
 <export>
  <lib name="1"/>
 </export>

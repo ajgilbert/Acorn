@@ -40,6 +40,8 @@ class EventInfo {
 
   inline int npNLO() const { return npNLO_; }
 
+  inline double lheAlphaS() const { return lheAlphaS_; }
+
   inline double nominalLHEWeight() const { return nominalLHEWeight_; }
 
   inline std::map<unsigned, double> const& lheWeights() const { return lheWeights_; }
@@ -86,6 +88,8 @@ class EventInfo {
   inline void setNpLO(int const& npLO) { npLO_ = npLO; }
 
   inline void setNpNLO(int const& npNLO) { npNLO_ = npNLO; }
+
+  inline void setLHEAlphaS(double const& lheAlphaS) { lheAlphaS_ = lheAlphaS; }
 
   inline void setNominalLHEWeight(double const& nominalLHEWeight) {
     nominalLHEWeight_ = nominalLHEWeight;
@@ -150,6 +154,8 @@ class EventInfo {
   // belongs to in a jet-merged sample
   int npLO_;
   int npNLO_;
+
+  double lheAlphaS_;
 
   // LHE weights (present only for samples with external generators)
   double nominalLHEWeight_;

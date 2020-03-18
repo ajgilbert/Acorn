@@ -5,6 +5,7 @@ namespace ac {
 
 Muon::Muon()
     : Candidate::Candidate(),
+      isLooseMuon_(false),
       isMediumMuon_(false),
       isTightMuon_(false),
       dxy_(0.),

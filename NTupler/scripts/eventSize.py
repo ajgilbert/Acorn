@@ -46,5 +46,5 @@ print '%-20s : %.2f' % ('1MilFileSizeMB', (zipbytes / 1048576.0) * (1E6 / float(
 sorted_results = sorted(results, key=lambda x: x['ZipFrac'], reverse=True)
 
 for b in sorted_results:
-    print '%-50s : %.1f : %.2f' % (b['Name'], b['ZipFrac'] * 100., b['ZipKBperEvent'])
+    print '%-50s : %.1f : %.3f' % (b['Name'], b['ZipFrac'] * 100., b['ZipKBperEvent'])
 # print 'Entries: %i, TotalMB: %.2f, ZippedMB: %.2f, Compression factor: %.2f' % (entries, totbytes / 1048576.0, zipbytes / 1048576.0, zipbytes / totbytes)

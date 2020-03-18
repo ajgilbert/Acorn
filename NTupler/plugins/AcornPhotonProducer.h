@@ -39,6 +39,7 @@ class AcornPhotonProducer : public AcornBaseProducer<std::vector<ac::Photon>> {
   std::string chargedIsolationLabel_;
   std::string neutralHadronIsolationLabel_;
   std::string photonIsolationLabel_;
+  std::string worstChargedIsolationLabel_;
 
   // Take the id values stored within the pat::Photon objects
   // instead of reading from external ValueMaps

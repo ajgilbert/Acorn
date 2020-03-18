@@ -28,6 +28,9 @@ class AcornLHEParticleProducer : public AcornBaseProducer<std::vector<ac::GenPar
   virtual void produce(edm::Event &, const edm::EventSetup &);
 
   edm::EDGetTokenT<LHEEventProduct> inputToken_;
+
+  // Need to save incoming partons as Pz, 0, 0, E instead of Pt, Eta, Phi, M
+  bool incomingP4Fix_;
 };
 
 
