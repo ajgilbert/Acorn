@@ -130,6 +130,18 @@ int SampleStitching::Execute(TreeEvent* event) {
           if (vars_[i] < 0.0 || (pt < vars_[i])) vars_[i] = pt;
         }
       }
+    } else if (binned_[i] == "nlo_njet") {
+      vars_[i] = 0.5;
+      vars_[i] += info->npNLO();
+    } else if (binned_[i] == "ptv") {
+      vars_[i] = 0.0;
+      std::vector<ac::GenParticle*> charged_leptons;
+      for (auto const& p : lhe_parts) {
+        if (ac::IsChargedLepton(*p)) charged_leptons.push_back(p);
+      }
+      if (charged_leptons.size() == 2) {
+        vars_[i] = (charged_leptons[0]->vector() + charged_leptons[1]->vector()).pt();
+      }
     } else {
       throw std::runtime_error(
           "SampleStitching: No implementation exists for binning variable \"" + binned_[i] + "\"");

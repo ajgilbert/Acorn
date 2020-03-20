@@ -26,10 +26,67 @@
       "XSecSource": "NNLO from https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV"
     },
     "DYJetsToLL_M-50-amcatnloFXFX": {
-      "attributes": ["default", "mc", "check_is_zg", "tp", "scale_weights:3"],
+      "attributes": ["default", "mc", "check_is_zg", "tp", "scale_weights:3", "zjets_binned"],
       "inputs": ["DYJetsToLL_M-50-amcatnloFXFX"],
       "xsec": 6225.42,
       "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+    },
+    "DY0JetsToLL_M-50-amcatnloFXFX": {
+      "attributes": ["mc", "check_is_zg", "zjets_binned"],
+      "inputs": ["DY0JetsToLL_M-50-amcatnloFXFX"],
+      "xsec": 5330.0,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+    },
+    "DY1JetsToLL_M-50-amcatnloFXFX": {
+      "attributes": ["mc", "check_is_zg", "zjets_binned"],
+      "inputs": ["DY1JetsToLL_M-50-amcatnloFXFX"],
+      "xsec": 966.5,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+    },
+    "DY2JetsToLL_M-50-amcatnloFXFX": {
+      "attributes": ["mc", "check_is_zg", "zjets_binned"],
+      "inputs": ["DY2JetsToLL_M-50-amcatnloFXFX"],
+      "xsec": 359.3,
+      "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+    },
+    "DYJetsToLL_M-50-stitched": {
+      "attributes": ["default", "mc", "check_is_zg", "zjets_binned"],
+      "inputs": [
+        "DYJetsToLL_M-50-amcatnloFXFX",
+        "DY0JetsToLL_M-50-amcatnloFXFX", "DY1JetsToLL_M-50-amcatnloFXFX", "DY2JetsToLL_M-50-amcatnloFXFX"
+      ],
+      "xsec": 6225.42,
+      "stitching": {
+        "binned": ["nlo_njet", "ptv"],
+        "DYJetsToLL_M-50-amcatnloFXFX": {
+          "target": true,
+          "min": [],
+          "max": [],
+          "events": 80924255,
+          "xsec": 6498.0
+        },
+        "DY0JetsToLL_M-50-amcatnloFXFX": {
+          "target": false,
+          "min": [0.0, null],
+          "max": [1.0, null],
+          "events": 40486508,
+          "xsec": 5330.0
+        },
+        "DY1JetsToLL_M-50-amcatnloFXFX": {
+          "target": false,
+          "min": [1.0, null],
+          "max": [2.0, null],
+          "events": 22770078,
+          "xsec": 966.5
+        },
+        "DY2JetsToLL_M-50-amcatnloFXFX": {
+          "target": false,
+          "min": [2.0, null],
+          "max": [3.0, null],
+          "events": 13359287,
+          "xsec": 359.3
+        }
+      }
     },
     "ST_s-channel_4f-amcatnlo": {
       "attributes": ["default", "mc"],
@@ -440,14 +497,14 @@
       "GenXSecAnalyzer": "After filter: final cross section = 4.706e+00 +- 8.943e-03 pb"
     },
     "ZGToLLG-amcatnloFXFX": {
-      "attributes": ["default", "mc", "check_is_zg", "scale_weights:4"],
+      "attributes": ["mc", "check_is_zg", "scale_weights:4"],
       "inputs": ["ZGToLLG-amcatnloFXFX"],
       "xsec": 47.36,
       "GenXSecAnalyzer": "After filter: final cross section = 4.736e+01 +- 1.087e-01 pb",
       "XSecSource": "Applied kNNLO of 1.0929 from https://arxiv.org/pdf/1711.06631.pdf"
     },
     "ZGToLLG-lowMLL-amcatnloFXFX": {
-      "attributes": ["doit", "default", "mc", "check_is_zg"],
+      "attributes": ["mc", "check_is_zg"],
       "inputs": ["ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 98.17,
       "stitching": {
@@ -463,7 +520,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 9.817e+01 +- 2.381e-01 pb"
     },
     "ZGToLLG-amcatnloFXFX-stitched": {
-      "attributes": ["doit", "default", "mc", "check_is_zg"],
+      "attributes": ["default", "mc", "check_is_zg"],
       "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 98.17,
       "stitching": {
@@ -516,34 +573,77 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.344e+02 +- 4.135e-01 pb"
     },
     "GJets_DR-0p4_HT-40To100": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-40To100"],
       "xsec": 17420.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-100To200": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-100To200"],
       "xsec": 5391.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-200To400": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-200To400"],
       "xsec": 1168.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-400To600": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-400To600"],
       "xsec": 132.5,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-600ToInf": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-600ToInf"],
       "xsec": 44.05,
       "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4-stitched": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-40To100", "GJets_DR-0p4_HT-100To200", "GJets_DR-0p4_HT-200To400", "GJets_DR-0p4_HT-400To600", "GJets_DR-0p4_HT-600ToInf"],
+      "xsec": 24155.55,
+      "stitching": {
+        "binned": ["ht"],
+        "GJets_DR-0p4_HT-40To100": {
+          "target": true,
+          "min": [40.0],
+          "max": [100.0],
+          "events": 11551602,
+          "xsec": 17420.0
+        },
+        "GJets_DR-0p4_HT-100To200": {
+          "target": false,
+          "min": [100.0],
+          "max": [200.0],
+          "events": 14821862,
+          "xsec": 5391.0
+        },
+        "GJets_DR-0p4_HT-200To400": {
+          "target": false,
+          "min": [200.0],
+          "max": [400.0],
+          "events": 49101963,
+          "xsec": 1168.0
+        },
+        "GJets_DR-0p4_HT-400To600": {
+          "target": false,
+          "min": [400.0],
+          "max": [600.0],
+          "events": 11702604,
+          "xsec": 132.5
+        },
+        "GJets_DR-0p4_HT-600ToInf": {
+          "target": false,
+          "min": [600.0],
+          "max": [null],
+          "events": 11687048,
+          "xsec": 44.05
+        }
+      }
     },
     "Theorists": {
       "attributes": ["wg_gen"],

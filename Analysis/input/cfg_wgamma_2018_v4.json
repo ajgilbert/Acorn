@@ -22,7 +22,7 @@
       "attributes": ["default", "mc", "check_is_zg", "tp", "scale_weights:1"],
       "inputs": ["DYJetsToLL_M-50-amcatnloFXFX"],
       "xsec": 6225.42,
-      "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
+      "GenXSecAnalyzer": "After filter: final cross section = 6.498e+03 +- 1.912e+01 pb"
     },
     "ST_s-channel_4f-amcatnlo": {
       "attributes": ["default", "mc"],
@@ -109,7 +109,7 @@
       "XSecSource": "Apply NLO k-factor from AN2017-197 of 2.07"
     },
     "WGToLNuG-amcatnloFXFX": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-amcatnloFXFX"],
       "xsec": 191.6,
       "GenXSecAnalyzer": "After filter: final cross section = 1.914e+02 +- 4.441e-01 pb",
@@ -194,7 +194,7 @@
       "XSecSource": "LO * kNNLO (1.32)"
     },
     "WGToLNuG-madgraphMLM-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "no_presel", "mc"],
+      "attributes": ["do_wg_gen_vars", "no_presel", "mc"],
       "inputs": ["WGToLNuG-madgraphMLM", "WGToLNuG-madgraphMLM-PtG-130", "WGToLNuG-madgraphMLM-PtG-500"],
       "xsec": 846.43,
       "stitching": {
@@ -423,13 +423,13 @@
       "GenXSecAnalyzer": "After filter: final cross section = 5.556e+01 +- 1.303e-01 pb"
     },
     "ZGToLLG-lowMLL-amcatnloFXFX": {
-      "attributes": ["default", "mc", "check_is_zg"],
+      "attributes": ["mc", "check_is_zg"],
       "inputs": ["ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 106.0,
       "GenXSecAnalyzer": "After filter: final cross section = 1.060e+02 +- 3.377e-01 pb"
     },
     "ZGToLLG-amcatnloFXFX-stitched": {
-      "attributes": ["default", "mc", "check_is_zg"],
+      "attributes": ["mc", "check_is_zg"],
       "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 106.0,
       "stitching": {
@@ -506,34 +506,77 @@
       "XSecSource": "Applied kNLO of 1.47"
     },
     "GJets_DR-0p4_HT-40To100": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-40To100"],
       "xsec": 20790.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-100To200": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-100To200"],
       "xsec": 5391.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-200To400": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-200To400"],
       "xsec": 1168.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-400To600": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-400To600"],
       "xsec": 132.5,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-600ToInf": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "gjets_binned"],
       "inputs": ["GJets_DR-0p4_HT-600ToInf"],
       "xsec": 44.05,
       "GenXSecAnalyzer": ""
+    },
+    "GJets_DR-0p4-stitched": {
+      "attributes": ["default", "mc"],
+      "inputs": ["GJets_DR-0p4_HT-40To100", "GJets_DR-0p4_HT-100To200", "GJets_DR-0p4_HT-200To400", "GJets_DR-0p4_HT-400To600", "GJets_DR-0p4_HT-600ToInf"],
+      "xsec": 27525.55,
+      "stitching": {
+        "binned": ["ht"],
+        "GJets_DR-0p4_HT-40To100": {
+          "target": true,
+          "min": [40.0],
+          "max": [100.0],
+          "events": 9371217,
+          "xsec": 20790.0
+        },
+        "GJets_DR-0p4_HT-100To200": {
+          "target": false,
+          "min": [100.0],
+          "max": [200.0],
+          "events": 15123387,
+          "xsec": 5391.0
+        },
+        "GJets_DR-0p4_HT-200To400": {
+          "target": false,
+          "min": [200.0],
+          "max": [400.0],
+          "events": 49438028,
+          "xsec": 1168.0
+        },
+        "GJets_DR-0p4_HT-400To600": {
+          "target": false,
+          "min": [400.0],
+          "max": [600.0],
+          "events": 13555421,
+          "xsec": 132.5
+        },
+        "GJets_DR-0p4_HT-600ToInf": {
+          "target": false,
+          "min": [600.0],
+          "max": [null],
+          "events": 12431845,
+          "xsec": 44.05
+        }
+      }
     }
   },
   "config": {
