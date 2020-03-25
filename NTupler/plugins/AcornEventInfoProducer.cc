@@ -76,7 +76,7 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
     std::vector<std::string>::const_iterator iLt = it->begin();
     for (; iLt != it->end(); ++iLt) {
       std::string line = *iLt;
-      std::cout << line;
+      // std::cout << line;
       // Fix for some headers produced with MG 2.6.X, the < and >
       // have been replaced with &lt; and &gt; everywhere
       boost::replace_all(line, "&lt;", "<");

@@ -170,7 +170,7 @@ ele_heep_id = "heepElectronID-HEEPV70"
 process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
     electron_config=cms.PSet(
         ElectronCutValues=cms.InputTag("egmGsfElectronIDs", ele_medium_id),
-        electronSrc=cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess"),
+        electronSrc=(cms.InputTag("updatedElectrons") if year in ['2016'] else cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess")),
     ),
     modifierName=cms.string('EGExtraInfoModifierFromVIDCutFlowResultValueMaps'),
     overrideExistingValues=cms.bool(True),
@@ -491,21 +491,20 @@ prefiring_era_str = {
     "2018": "2017BtoF"
 }
 
-process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
-    ThePhotons=cms.InputTag("slimmedPhotons"),
-    TheJets=cms.InputTag("slimmedJets"),
-    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
-    DataEra=cms.string(prefiring_era_str[year]), #Use 2016BtoH for 2016, 2017BtoF for 2017
-    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
-    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
+from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
+process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
+    DataEra = cms.string(prefiring_era_str[year]), #Use 2016BtoH for 2016
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUncty = cms.double(0.2),
+    SkipWarnings = False
 )
 
 if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
     process.customInitialSeq += cms.Sequence(process.prefiringweight)
     process.acEventInfoProducer.userDoubles += cms.VInputTag(
-        cms.InputTag('prefiringweight:NonPrefiringProb'),
-        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
-        cms.InputTag('prefiringweight:NonPrefiringProbDown')
+        cms.InputTag('prefiringweight:nonPrefiringProb'),
+        cms.InputTag('prefiringweight:nonPrefiringProbUp'),
+        cms.InputTag('prefiringweight:nonPrefiringProbDown')
         )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
