@@ -38,7 +38,8 @@ WGDataAnalysis::WGDataAnalysis(std::string const& name)
       correct_p_energy_(-1),
       correct_m_energy_(-1),
       shift_met_(-1),
-      scale_weights_(0) {}
+      scale_weights_(0),
+      ps_weights_(0) {}
 
 WGDataAnalysis::~WGDataAnalysis() { ; }
 
@@ -115,6 +116,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("l0p0_dr", &l0p0_dr_);
       // tree_->Branch("l0p0_dphi", &l0p0_dphi_);
       tree_->Branch("l0p0_M", &l0p0_M_);
+      tree_->Branch("mt_cluster", &mt_cluster_);
 
       // tree_->Branch("reco_phi", &reco_phi_);
       // tree_->Branch("reco_phi_f", &reco_phi_f_);
@@ -149,6 +151,7 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_met", &gen_met_);
         tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
         tree_->Branch("gen_wg_M", &gen_wg_M_);
+        tree_->Branch("gen_mt_cluster", &gen_mt_cluster_);
 
         tree_->Branch("lhe_frixione", &lhe_frixione_);
       }
@@ -183,6 +186,11 @@ int WGDataAnalysis::PreAnalysis() {
           ++ipdf;
         }
       }
+
+      tree_->Branch("wt_isr_hi", &wt_isr_hi_);
+      tree_->Branch("wt_isr_lo", &wt_isr_lo_);
+      tree_->Branch("wt_fsr_hi", &wt_fsr_hi_);
+      tree_->Branch("wt_fsr_lo", &wt_fsr_lo_);
 
       tree_->Branch("wt_pu_hi", &wt_pu_hi_);
       tree_->Branch("wt_pu_lo", &wt_pu_lo_);
@@ -672,7 +680,7 @@ int WGDataAnalysis::PreAnalysis() {
         true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
         true_phi_f_ = gen_true_sys.SymPhi(parts.gen_lep->charge() > 0);
         gen_wg_M_ = (parts.gen_lep->vector() + parts.gen_neu->vector() + parts.gen_pho->vector()).M();
-
+        gen_mt_cluster_ = ac::MTcluster(parts.gen_lep, parts.gen_pho, gen_met);
         // Now try and match to the reco objects, if they exist
         if (l0 && ac::DeltaR(l0, parts.gen_lep) < 0.3) {
           gen_l0_match_ = true;
@@ -813,6 +821,9 @@ int WGDataAnalysis::PreAnalysis() {
       l0p0_dr_ =  ac::DeltaR(l0, p0);
       l0p0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector());
       l0p0_M_ = (l0->vector() + p0->vector()).M();
+
+      // special transverse mass
+      mt_cluster_ = ac::MTcluster(l0, p0, met);
 
       WGSystem reco_sys = ProduceWGSystem(*l0, *met, *p0, true, rng, false);
       reco_phi_ = reco_sys.Phi(l0->charge());
@@ -1028,7 +1039,18 @@ int WGDataAnalysis::PreAnalysis() {
           ++ipdf;
           // std::cout << " - pdf " << ipdf << "/" << pdf_begin_ + ipdf << "\t" << wt_pdf_[ipdf] << "\n";
         }
+      }
 
+      if (ps_weights_ > 0) {
+        auto const& gen_weights = info->genWeights();
+        if (gen_weights.size() >= 14) {
+          wt_isr_hi_ = gen_weights[6];
+          wt_isr_lo_ = gen_weights[8];
+          wt_fsr_hi_ = gen_weights[7];
+          wt_fsr_lo_ = gen_weights[9];
+        } else {
+          // std::cout << "Not enough elements!\n";
+        }
       }
     }
     CompressVars();
@@ -1100,6 +1122,7 @@ int WGDataAnalysis::PreAnalysis() {
     l0p0_dr_ = 0.;
     l0p0_dphi_ = 0.;
     l0p0_M_ = 0.;
+    mt_cluster_ = 0.;
     reco_phi_ = 0.;
     reco_phi_f_ = 0.;
     reco_tk_phi_ = 0.;
@@ -1124,6 +1147,10 @@ int WGDataAnalysis::PreAnalysis() {
     wt_sc_3_ = 1.;
     wt_sc_4_ = 1.;
     wt_sc_5_ = 1.;
+    wt_isr_hi_ = 1.;
+    wt_isr_lo_ = 1.;
+    wt_fsr_hi_ = 1.;
+    wt_fsr_lo_ = 1.;
     wt_pu_hi_ = 1.;
     wt_pu_lo_ = 1.;
     wt_pf_hi_ = 1.;
@@ -1158,6 +1185,7 @@ int WGDataAnalysis::PreAnalysis() {
     gen_l0_q_ = 0;
     gen_l0_pt_ = 0.;
     gen_wg_M_ = 0.;
+    gen_mt_cluster_ = 0.;
     gen_l0_eta_ = 0.;
     gen_met_ = 0.;
     gen_l0p0_dr_ = 0.;
@@ -1172,9 +1200,10 @@ int WGDataAnalysis::PreAnalysis() {
          {&l0_pt_,     &l0_iso_,    &l0met_mt_,  &l1_pt_,     &l1_iso_,      &met_,
           &puppi_met_, &tk_met_,    &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
           &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_wg_M_,  &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
-          &j0_pt_,
+          &j0_pt_, &mt_cluster_, &gen_mt_cluster_,
           &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_,
-          &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_}) {
+          &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_,
+          &wt_isr_lo_, &wt_isr_hi_, &wt_fsr_lo_, &wt_fsr_hi_}) {
       *var = reduceMantissaToNbitsRounding(*var, 10);
     }
     for (float* var :

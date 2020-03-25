@@ -170,6 +170,9 @@ int main(int argc, char* argv[]) {
         pdf_end = {1214, 1102};
       }
     }
+
+    int ps_weights = ac::ReadAttrValue<int>(jsc["attributes"], "ps_weights");
+
     auto counters = ac::EventCounters("EventCounters").set_fs(wgamma_fs);
     if (scale_weights > 0) {
       counters.AddWeightSet("scale_weights", 6, true);
@@ -229,6 +232,7 @@ int main(int argc, char* argv[]) {
                              .set_shift_met(shift_met)
                              .set_rc_file("wgamma/inputs/muons/RoccoR" + s_year + ".txt")
                              .set_scale_weights(scale_weights)
+                             .set_ps_weights(ps_weights)
                              .set_pdf_begin(pdf_begin)
                              .set_pdf_end(pdf_end)
                              .set_var_set(var_set));

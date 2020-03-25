@@ -602,49 +602,6 @@
       "xsec": 44.05,
       "GenXSecAnalyzer": ""
     },
-    "GJets_DR-0p4-stitched": {
-      "attributes": ["default", "mc"],
-      "inputs": ["GJets_DR-0p4_HT-40To100", "GJets_DR-0p4_HT-100To200", "GJets_DR-0p4_HT-200To400", "GJets_DR-0p4_HT-400To600", "GJets_DR-0p4_HT-600ToInf"],
-      "xsec": 24155.55,
-      "stitching": {
-        "binned": ["ht"],
-        "GJets_DR-0p4_HT-40To100": {
-          "target": true,
-          "min": [40.0],
-          "max": [100.0],
-          "events": 11551602,
-          "xsec": 17420.0
-        },
-        "GJets_DR-0p4_HT-100To200": {
-          "target": false,
-          "min": [100.0],
-          "max": [200.0],
-          "events": 14821862,
-          "xsec": 5391.0
-        },
-        "GJets_DR-0p4_HT-200To400": {
-          "target": false,
-          "min": [200.0],
-          "max": [400.0],
-          "events": 49101963,
-          "xsec": 1168.0
-        },
-        "GJets_DR-0p4_HT-400To600": {
-          "target": false,
-          "min": [400.0],
-          "max": [600.0],
-          "events": 11702604,
-          "xsec": 132.5
-        },
-        "GJets_DR-0p4_HT-600ToInf": {
-          "target": false,
-          "min": [600.0],
-          "max": [null],
-          "events": 11687048,
-          "xsec": 44.05
-        }
-      }
-    },
     "Theorists": {
       "attributes": ["wg_gen"],
       "inputs": ["Theorists"],

@@ -137,7 +137,7 @@
       "XSecSource": "NLO sample xsec * 1.2 kNNLO"
     },
     "WGToLNuG-amcatnloFXFX-stitched": {
-      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "scale_weights:1"],
+      "attributes": ["default", "do_wg_gen_vars", "mc", "no_presel", "scale_weights:1", "ps_weights:1", "doit"],
       "inputs": ["WGToLNuG-amcatnloFXFX", "WGToLNuG-amcatnloFXFX-PtG-130", "WGToLNuG-amcatnloFXFX-PtG-300", "WGToLNuG-amcatnloFXFX-PtG-500"],
       "xsec": 191.6,
       "stitching": {
@@ -534,49 +534,6 @@
       "inputs": ["GJets_DR-0p4_HT-600ToInf"],
       "xsec": 44.05,
       "GenXSecAnalyzer": ""
-    },
-    "GJets_DR-0p4-stitched": {
-      "attributes": ["default", "mc"],
-      "inputs": ["GJets_DR-0p4_HT-40To100", "GJets_DR-0p4_HT-100To200", "GJets_DR-0p4_HT-200To400", "GJets_DR-0p4_HT-400To600", "GJets_DR-0p4_HT-600ToInf"],
-      "xsec": 27525.55,
-      "stitching": {
-        "binned": ["ht"],
-        "GJets_DR-0p4_HT-40To100": {
-          "target": true,
-          "min": [40.0],
-          "max": [100.0],
-          "events": 9371217,
-          "xsec": 20790.0
-        },
-        "GJets_DR-0p4_HT-100To200": {
-          "target": false,
-          "min": [100.0],
-          "max": [200.0],
-          "events": 15123387,
-          "xsec": 5391.0
-        },
-        "GJets_DR-0p4_HT-200To400": {
-          "target": false,
-          "min": [200.0],
-          "max": [400.0],
-          "events": 49438028,
-          "xsec": 1168.0
-        },
-        "GJets_DR-0p4_HT-400To600": {
-          "target": false,
-          "min": [400.0],
-          "max": [600.0],
-          "events": 13555421,
-          "xsec": 132.5
-        },
-        "GJets_DR-0p4_HT-600ToInf": {
-          "target": false,
-          "min": [600.0],
-          "max": [null],
-          "events": 12431845,
-          "xsec": 44.05
-        }
-      }
     }
   },
   "config": {

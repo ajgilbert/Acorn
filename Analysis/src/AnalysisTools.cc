@@ -91,6 +91,19 @@ double MT(Candidate const* cand1, Candidate const* cand2) {
   return 0.0;
 }
 
+double MTcluster(Candidate const* cand1a, Candidate const* cand1b, Candidate const* cand2) {
+  auto cand1 = cand1a->vector() + cand1b->vector();
+  auto full_system = cand1 + cand2->vector();
+  double mTcluster2 = std::pow(std::sqrt(cand1.M2() + cand1.perp2()) + cand2->pt(), 2) - full_system.perp2();
+  if (mTcluster2 > 0) {
+    return std::sqrt(mTcluster2);
+  } else {
+    std::cerr << "Cluster transverse mass would be negative! Returning 0.0" << std::endl;
+  }
+  return 0.0;
+}
+
+
 bool ElectronIsoFall17V2(ac::Electron const* e, unsigned wp) {
   bool eb = std::abs(e->scEta()) < 1.479;
   double iso = e->relativeEAIso();

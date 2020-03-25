@@ -17,6 +17,8 @@ def call(args):
 
 configs = {
     "fid_pt_binned": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         'pt_bins': '[30,50,70,100,150,200,300,500,800,1200]',
         # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
         'phi_var': '0.5',
@@ -26,7 +28,21 @@ configs = {
         'phi_bins_obs': '(1,0.,1.)',
         'task_name': 'fid_region'
     },
+    "fid_p0_eta_binned": {
+        'x_var': 'gen_p0_eta',
+        'x_var_obs': 'p0_eta',
+        'pt_bins': '[-2.5,-1.0,0,1.0,2.5]',
+        # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
     "inclusive_xs": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         'pt_bins': '[30,10000]',
         # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
         'phi_var': '0.5',
@@ -37,6 +53,8 @@ configs = {
         'task_name': 'fid_region'
     },
     "phi_binned": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         'pt_bins': '[150,210,300,420,600,850,1200]',
         'phi_var': 'abs(true_phi)',
         'phi_var_label': '|#phi|',
@@ -46,6 +64,8 @@ configs = {
         'task_name': 'eft_region'
     },
     "phi_f_binned": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         'pt_bins': '[150,210,300,420,600,850,1200]',
         'phi_var': 'abs(true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
@@ -55,6 +75,8 @@ configs = {
         'task_name': 'eft_region'
     },
     "puppi_phi_f_binned": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(true_phi_f)',
@@ -65,6 +87,8 @@ configs = {
         'task_name': 'eft_region'
     },
     "puppi_phi_f_binned_nobin": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(true_phi_f)',
@@ -76,6 +100,8 @@ configs = {
         'using_label': 'puppi_phi_f_binned'
     },
     "pt_binned": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
         'pt_bins': '[150,210,300,420,600,850,1200]',
         'phi_var': 'abs(true_phi)',
         'phi_var_label': '|#phi|',
@@ -91,6 +117,8 @@ label = args.config
 config = configs[label]
 
 using_label = label if 'using_label' not in config else config['using_label']
+x_var = config['x_var']
+x_var_obs = config['x_var_obs']
 pt_bins = config['pt_bins']
 phi_var = config['phi_var']
 phi_var_label = config['phi_var_label']
@@ -152,6 +180,8 @@ if 'makeEFTScaling' in steps:
 
 if 'makeHists' in steps:
     testplot_args = {
+        'x_var': x_var,
+        'x_var_obs': x_var_obs,
         'pt_bins': pt_bins,
         'phi_var': phi_var,
         'phi_var_obs': phi_var_obs,
@@ -165,12 +195,12 @@ if 'makeHists' in steps:
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
-          ('MetJesLo_', '_CMS_scale_met_jesDown'),
-          ('MetJesHi_', '_CMS_scale_met_jesUp'),
-          ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
-          ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
-          ('PScaleLo_', '_CMS_scale_pDown'),
-          ('PScaleHi_', '_CMS_scale_pUp'),
+          # ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          # ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          # ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
+          # ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
+          # ('PScaleLo_', '_CMS_scale_pDown'),
+          # ('PScaleHi_', '_CMS_scale_pUp'),
         ]
         for syst_file, syst_name in do_systs:
             call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
