@@ -20,7 +20,7 @@ plot.ModTDRStyle()
 
 
 mod_cfg = {
-    'hide_data': True,
+    'hide_data': False,
     'global_hist_opts': {
         'draw_opts': 'HIST',
         'legend_opts': 'F',
@@ -72,6 +72,7 @@ config_by_setting = {
         'm/*/l0p0_M': ('m_{#mu#gamma}', 'GeV'),
         'e/*/l0p0_dr': ('#DeltaR(e,#gamma)', ''),
         'e/*/l0p0_M': ('m_{e#gamma}', 'GeV'),
+        '*/*/mt_cluster': ('m_{T}^{cluster}', 'GeV'),
         '*/p0_chiso': ('Photon I_{charged}', 'GeV'),
         '*/p0_neiso': ('Photon I_{neutral}', 'GeV'),
         '*/p0_phiso': ('Photon I_{photon}', 'GeV'),

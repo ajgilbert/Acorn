@@ -712,49 +712,6 @@
       "inputs": ["GJets_DR-0p4_HT-600ToInf"],
       "xsec": 44.05,
       "GenXSecAnalyzer": ""
-    },
-    "GJets_DR-0p4-stitched": {
-      "attributes": ["default", "mc"],
-      "inputs": ["GJets_DR-0p4_HT-40To100", "GJets_DR-0p4_HT-100To200", "GJets_DR-0p4_HT-200To400", "GJets_DR-0p4_HT-400To600", "GJets_DR-0p4_HT-600ToInf"],
-      "xsec": 27525.55,
-      "stitching": {
-        "binned": ["ht"],
-        "GJets_DR-0p4_HT-40To100": {
-          "target": true,
-          "min": [40.0],
-          "max": [100.0],
-          "events": 5570696,
-          "xsec": 20790.0
-        },
-        "GJets_DR-0p4_HT-100To200": {
-          "target": false,
-          "min": [100.0],
-          "max": [200.0],
-          "events": 15961733,
-          "xsec": 5391.0
-        },
-        "GJets_DR-0p4_HT-200To400": {
-          "target": false,
-          "min": [200.0],
-          "max": [400.0],
-          "events": 38536121,
-          "xsec": 1168.0
-        },
-        "GJets_DR-0p4_HT-400To600": {
-          "target": false,
-          "min": [400.0],
-          "max": [600.0],
-          "events": 13367286,
-          "xsec": 132.5
-        },
-        "GJets_DR-0p4_HT-600ToInf": {
-          "target": false,
-          "min": [600.0],
-          "max": [null],
-          "events": 6108439,
-          "xsec": 44.05
-        }
-      }
     }
   },
   "config": {

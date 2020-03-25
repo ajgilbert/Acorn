@@ -137,5 +137,8 @@ bool ElectronIsoFall17V2(ac::Electron const* e, unsigned wp);
 
 // Transverse mass
 double MT(Candidate const* cand1, Candidate const* cand2);
+
+double MTcluster(Candidate const* cand1a, Candidate const* cand1b, Candidate const* cand2);
+
 }  // namespace ac
 #endif

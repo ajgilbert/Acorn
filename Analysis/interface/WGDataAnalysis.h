@@ -35,6 +35,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, int, correct_m_energy)
   CLASS_MEMBER(WGDataAnalysis, int, shift_met)
   CLASS_MEMBER(WGDataAnalysis, int, scale_weights)
+  CLASS_MEMBER(WGDataAnalysis, int, ps_weights)
   CLASS_MEMBER(WGDataAnalysis, std::vector<int>, pdf_begin)
   CLASS_MEMBER(WGDataAnalysis, std::vector<int>, pdf_end)
   CLASS_MEMBER(WGDataAnalysis, std::string, rc_file)
@@ -137,6 +138,7 @@ class WGDataAnalysis : public ModuleBase {
   float l0p0_dr_;
   float l0p0_dphi_;
   float l0p0_M_;
+  float mt_cluster_;
   float reco_phi_;
   float reco_phi_f_;
   float reco_tk_phi_;
@@ -172,6 +174,11 @@ class WGDataAnalysis : public ModuleBase {
 
   std::vector<float> wt_pdf_;
 
+  float wt_isr_hi_;
+  float wt_isr_lo_;
+  float wt_fsr_hi_;
+  float wt_fsr_lo_;
+
   float wt_pu_hi_;
   float wt_pu_lo_;
   float wt_pf_hi_;
@@ -186,6 +193,7 @@ class WGDataAnalysis : public ModuleBase {
   int wt_p0_fake_bin_;
   float wt_p0_e_fake_hi_;
   float wt_p0_e_fake_lo_;
+
 
   // truth variables for Wgamma events
   bool is_wg_gen_;
@@ -215,6 +223,7 @@ class WGDataAnalysis : public ModuleBase {
   float gen_met_;
   float gen_met_phi_;
   float gen_l0p0_dr_;
+  float gen_mt_cluster_;
   // float gen_dy_mll_;
   // float gen_n2_pt_;
 
