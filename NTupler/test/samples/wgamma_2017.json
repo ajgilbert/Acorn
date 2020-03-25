@@ -521,8 +521,7 @@
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
-    "outputDir" : "/store/group/cmst3/group/htautau/",
-    "inputFiles": ["../../L1Prefiring/EventWeightProducer/files/L1PrefiringMaps_new.root"],
+    "outputDir" : "/store/group/phys_smp/agilbert/",
     "allowNonValidInputDataset": true,
     "maxMemoryMB": 3900,
     "numCores": 2
