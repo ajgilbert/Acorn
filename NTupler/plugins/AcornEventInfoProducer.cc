@@ -76,7 +76,7 @@ void AcornEventInfoProducer::beginRun(edm::Run const & run, edm::EventSetup cons
     std::vector<std::string>::const_iterator iLt = it->begin();
     for (; iLt != it->end(); ++iLt) {
       std::string line = *iLt;
-      // std::cout << line;
+      std::cout << line;
       // Fix for some headers produced with MG 2.6.X, the < and >
       // have been replaced with &lt; and &gt; everywhere
       boost::replace_all(line, "&lt;", "<");
@@ -191,6 +191,7 @@ void AcornEventInfoProducer::produce(edm::Event& event,
         if (it != savedLHEWeightIds.end()) {
           double weight = (lhe_handle->weights()[i].wgt / nominalLHEWeight) - 1.0;
           info->setLHEWeight(id, processVar(weight, it->second));
+          // std::cout << weight << "\t" << processVar(weight, it->second) << "\t" << (processVar(weight, it->second) / weight) << "\n";
         }
       }
     }

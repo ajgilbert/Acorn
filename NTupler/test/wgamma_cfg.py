@@ -472,6 +472,7 @@ if year in ['2017', '2018']:
         'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
         'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
         # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
+        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_mc_hessian_pdfas.*=6',  # 7
     )
 
 
