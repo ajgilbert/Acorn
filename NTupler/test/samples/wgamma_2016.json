@@ -611,11 +611,11 @@
     }
   },
   "configs": {
-    "data_reproc": ["year=2016", "isData=1", "globalTag=94X_dataRun2_v10", "cores=2"],
-    "mc":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2"],
-    "mc_no_lhe":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "hasLHE=0", "cores=2"],
-    "mc_old":  ["year=2016_old", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2"],
-    "mc_genonly":  ["year=2016", "isData=0", "globalTag=94X_mcRun2_asymptotic_v3", "cores=2", "genOnly=1"]
+    "data_reproc": ["year=2016", "isData=1", "globalTag=102X_dataRun2_v12", "cores=2"],
+    "mc":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"],
+    "mc_no_lhe":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "hasLHE=0", "cores=2"],
+    "mc_old":  ["year=2016_old", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"],
+    "mc_genonly":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "genOnly=1"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
