@@ -17,6 +17,8 @@ parser.add_argument('--clean', '-c', action='store_true',
                     help='Delete input files if hadd was successful')
 parser.add_argument('--remote-dir', default=None,
                     help='Directory prefix for remote read/copy')
+parser.add_argument('--no-opt', action='store_true',
+                    help='Do not use optimisation flags in hadd')
 
 # root://eoscms.cern.ch//store/cmst3/user/agilbert/190205/wgamma_2016_v3
 # /eos/cms/store/cmst3/user/agilbert/190205 wgamma_2016_v3/WGamma_WGToLNuG-amcatnloFXFX.root
@@ -47,11 +49,15 @@ for root, dirs, files in os.walk(indir):
         break
 # print hadddict
 
+opts = '-O -f6'
+if args.no_opt:
+    opts = '-fk'
+
 for target, inputs in hadddict.items():
     actual_target = target
     if is_remote:
         actual_target = '$TMPDIR/%s' % os.path.basename(target)
-    job = 'hadd -O -f6 %s %s' % (actual_target, ' '.join(inputs))
+    job = 'hadd %s %s %s' % (opts, actual_target, ' '.join(inputs))
     if is_remote:
         job += ' && xrdcp --force %s %s && rm %s' % (actual_target, target, actual_target)
     if args.clean:

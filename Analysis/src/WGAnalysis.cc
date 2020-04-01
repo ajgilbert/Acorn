@@ -46,6 +46,9 @@ namespace ac {
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
       tree_->Branch("wt_def", &wt_def_);
+      tree_->Branch("j1_pt", &j1_pt_);
+      tree_->Branch("j1_eta", &j1_eta_);
+      tree_->Branch("n_jets", &n_jets_);
       tree_->Branch("wt_C3w_0p0", &wt_C3w_0p0_);
       tree_->Branch("wt_C3w_0p1", &wt_C3w_0p1_);
       tree_->Branch("wt_C3w_0p2", &wt_C3w_0p2_);

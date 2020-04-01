@@ -27,6 +27,7 @@ args = parser.parse_args()
 DO_WWG_SPLIT = True
 SWITCH_OFF_P0_WT = False
 DO_W_FAKE_STUDY = True
+DO_FINE_EFAKES = True
 N_FAKE_BINS = 18
 
 tname = 'WGDataAnalysis'
@@ -61,7 +62,7 @@ remaps = {
         'TTG_Had': 'TTGamma_Hadronic-madgraph',
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
-        'GG': 'DiPhotonJetsBox_MGG-80toInf',
+        'GG_LO': 'DiPhotonJetsBox_MGG-80toInf',
         'GG_NLO': 'DiPhotonJets_MGG-80toInf',
         'GG_L': 'DiPhotonJetsBox_MGG-40to80',
         'WWG': 'WWG-amcatnlo'
@@ -162,7 +163,6 @@ if args.task in ['lepton_fakes', 'baseline']:
 
 if year == '2016':
     groups['TT'] = ['TT']
-    groups['GG'] = ['GG_NLO', 'GG_L']
 
 if year == '2018':
     groups['VV'] = ['VVTo2L2Nu', 'WWTo1L1Nu2Q', 'WZTo1L3Nu', 'WZTo2L2Q', 'WZTo3LNu', 'ZZTo2L2Q', 'ZZTo4L', 'ST_s', 'ST_t_antitop', 'ST_t_top', 'ST_tW_antitop', 'ST_tW_top', 'TGJets']
@@ -286,7 +286,13 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
             # elif grp == 'ZG' or grp == 'LowZG':
             #     hlist = ApplyPhotonSplitting(ApplyDYSplitting([(P, sel, wt)], components=['IZG', 'XZG']), components=['R'])
             #     hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['R']))
-            if grp == 'DY':
+            if grp == 'WG':
+                hlist = ApplyPhotonSplitting([(P, sel, wt)], components=['R'])
+            elif grp == 'W':
+                hlist = ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E'])
+            elif grp == 'ZG':
+                hlist = ApplyPhotonSplitting(ApplyDYSplitting([(P, sel, wt)], components=['IZG']), components=['R'])
+            elif grp == 'DY':
                 hlist = ApplyPhotonSplitting(ApplyDYSplitting([(P, sel, wt)], components=['XZG']), components=['R'])
                 hlist.extend(ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E']))
             elif grp == 'ZG':
@@ -307,6 +313,9 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
                 # hlist = ApplyPhotonSplitting([(P, sel, wt)], components=['R', 'J', 'E'])
                 hlist = ApplyPhotonSplitting([(P, sel, wt)], components=['J', 'E'])
                 hlist.extend(ApplyPhotonSplitting([(P, '0', wt)], components=['R']))
+            elif grp == 'GG':
+                # Need to remove phase-space that's covered by the ZG sample
+                hlist = ApplyPhotonSplitting([(P, '(%s) && gen_mll<4.0' % sel, wt)])
             else:
                 hlist = ApplyPhotonSplitting([(P, sel, wt)])
             hlist_fw = []
@@ -624,8 +633,12 @@ if args.task in ['baseline', 'electron_fakes']:
     if args.task == 'electron_fakes':
         pt_bins_min = [30, 35, 40, 60, 100]
         pt_bins_max = [35, 40, 60, 100, 200]
-        eta_bins_min = [0, 1.4442]
-        eta_bins_max = [1.4442, 2.5]
+        if DO_FINE_EFAKES:
+            eta_bins_min = [-2.5, -1.4442, -1.0, -0.5, 0, 0.5, 1.0, 1.4442]
+            eta_bins_max = [-1.4442, -1.0, -0.5, 0, 0.5, 1.0, 1.4442, 2.5]
+        else:
+            eta_bins_min = [0, 1.4442]
+            eta_bins_max = [1.4442, 2.5]
         X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
         wt_systs = {'e': [], 'm': []}
 
@@ -633,17 +646,23 @@ if args.task in ['baseline', 'electron_fakes']:
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
                 label = '%g_%g_%g_%g' % (e_min, e_max, p_min, p_max)
                 label = label.replace('.', 'p')
-                X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
-                X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
-                X['tot_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                label = label.replace('-', 'm')
+                if DO_FINE_EFAKES:
+                    X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && p0_eta >= %g && p0_eta < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                    X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && p0_eta >= %g && p0_eta < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                    X['tot_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && p0_eta >= %g && p0_eta < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                else:
+                    X['fail_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && !$efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                    X['pass_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && $efake_veto_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
+                    X['tot_%s' % label] ='$baseline_e_nopix && $mZ_veto_inv_e && abs(p0_eta) >= %g && abs(p0_eta) < %g && p0_pt >= %g && p0_pt < %g' % (e_min, e_max, p_min, p_max)
                 do_cats['e'].append('fail_%s' % label)
                 do_cats['e'].append('pass_%s' % label)
                 do_cats['e'].append('tot_%s' % label)
 
     # do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
     # do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
-    do_cats['e'].extend(['baseline_e_nopix', 'baseline_e_mZ_veto'])
-    do_cats['m'].extend(['baseline_m_nopix', 'baseline_m_mZ_veto'])
+    do_cats['e'].extend(['baseline_e_mZ_veto'])
+    do_cats['m'].extend(['baseline_m_mZ_veto'])
 
     cat_to_wt = {
         'cr_Zee': '$cr_zll_wt',
@@ -651,61 +670,59 @@ if args.task in ['baseline', 'electron_fakes']:
     }
 
     drawvars = [
-        ('n_vtx', (30, 0., 60.)),
-        ('n_veto_m', (3, -0.5, 2.5)),
-        ('n_veto_e', (3, -0.5, 2.5)),
-        ('l0_pt', (30, 0., 150.)),
-        ('l0_eta', (20, -3.0, 3.0)),
-        ('l0_phi', (20, -3.15, 3.15)),
-        ('l0_iso', (40, 0, 0.5)),
-        ('l1_pt', (40, 0., 150.)),
-        ('l0l1_M', (60, 60, 120)),
-        ('l0l1_pt', (80, 0, 200)),
-        # ('l0l1_dr', (20, 0., 5.)),
-        # ('met', (20, 0., 200.)),
-        # ('tk_met', (40, 0., 200.)),
-        # ('tk_met_phi', (20, -3.15, 3.15)),
-        ('puppi_met', (20, 0., 200.)),
-        ('p0_pt', [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
-        ('p0_eta', (20, -3.0, 3.0)),
-        ('p0_phi', (30, -3.15, 3.15)),
-        ('l0p0_dr', (20, 0., 5.)),
-        ('l0p0_M', (40, 0, 200)),
-        ('mt_cluster', (40, 0, 1000)),
-        ('p0_chiso', (40, 0, 2.0)),
-        # ('p0_neiso', (40, 0, 20.0)),
-        # ('p0_phiso', (40, 0, 20.0)),
-        # ('p0_hovere', (20, 0., 0.5)),
-        ('p0_sigma', (60, 0., 0.06)),
-        ('p0_haspix', (2, -0.5, 1.5)),
-        ('p0_eveto', (2, -0.5, 1.5)),
-        ('p0_truth', (8, -0.5, 7.5)),
-        ('wt_def', (100, 0.8, 1.2)),
-        ('wt_pu', (100, 0.5, 1.5)),
-        ('wt_l0', (100, 0.8, 1.2)),
-        ('wt_l1', (100, 0.8, 1.2)),
-        ('wt_trg_l0', (100, 0.8, 1.2)),
-        ('wt_p0', (100, 0.8, 1.2)),
-        ('wt_p0_e_fake', (100, 0, 4))
+        ('n_vtx',       'n_vtx',        (30, 0., 60.)),
+        ('n_veto_m',    'n_veto_m',     (3, -0.5, 2.5)),
+        ('n_veto_e',    'n_veto_e',     (3, -0.5, 2.5)),
+        ('n_alt_veto_m',    'n_alt_veto_m',     (3, -0.5, 2.5)),
+        ('n_alt_veto_e',    'n_alt_veto_e',     (3, -0.5, 2.5)),
+        ('l0_pt',       'l0_pt',        (30, 0., 150.)),
+        ('l0_eta',      'l0_eta',       (20, -3.0, 3.0)),
+        ('l0p0_deta',    'l0_eta-p0_eta',       (25, -5.0, 5.0)),
+        ('l0_phi',      'l0_phi',       (20, -3.15, 3.15)),
+        ('l0_iso',      'l0_iso',       (40, 0, 0.5)),
+        ('l1_pt',       'l1_pt',        (40, 0., 150.)),
+        ('l0l1_M',      'l0l1_M',       (60, 60, 120)),
+        ('l0l1_pt',     'l0l1_pt',      (80, 0, 200)),
+        ('met',         'met',          (20, 0., 200.)),
+        ('puppi_met',   'puppi_met',    (20, 0., 200.)),
+        ('p0_pt',       'p0_pt',        [0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 160, 200, 250, 300, 400, 500, 600, 850, 1200]),
+        ('p0_eta',      'p0_eta',       (20, -3.0, 3.0)),
+        ('p0_phi',      'p0_phi',       (30, -3.15, 3.15)),
+        ('l0p0_dr',     'l0p0_dr',      (20, 0., 5.)),
+        ('l0p0_M',      'l0p0_M',       (40, 0, 200)),
+        ('mt_cluster_fine',  'mt_cluster',   (80, 0, 2000)),
+        ('p0_chiso',    'p0_chiso',     (40, 0, 2.0)),
+        ('p0_sigma',    'p0_sigma',     (60, 0., 0.06)),
+        ('p0_haspix',   'p0_haspix',    (2, -0.5, 1.5)),
+        ('p0_eveto',    'p0_eveto',     (2, -0.5, 1.5)),
+        ('p0_truth',    'p0_truth',     (8, -0.5, 7.5)),
+        ('wt_def',      'wt_def',       (100, 0.8, 1.2)),
+        ('wt_pu',       'wt_pu',        (100, 0.5, 1.5)),
+        ('wt_l0',       'wt_l0',        (100, 0.8, 1.2)),
+        ('wt_l1',       'wt_l1',        (100, 0.8, 1.2)),
+        ('wt_trg_l0',   'wt_trg_l0',    (100, 0.8, 1.2)),
+        ('wt_p0',       'wt_p0',        (100, 0.8, 1.2)),
+        ('wt_p0_e_fake','wt_p0_e_fake', (100, 0, 4)),
+        ('gen_mll','gen_mll', (100, -2, 98))
     ]
 
     if args.syst == None:
         drawvars.extend([
-            ('l0met_mt', (30, 0., 200.)),
-            ('l1_eta', (20, -3.0, 3.0)),
-            ('met_phi', (20, -3.15, 3.15)),
-            ('puppi_met_phi', (20, -3.15, 3.15))
+            ('l0met_mt',        'l0met_mt',        (30, 0., 200.)),
+            ('l1_eta',          'l1_eta',          (20, -3.0, 3.0)),
+            ('met_phi',         'met_phi',         (20, -3.15, 3.15)),
+            ('puppi_met_phi',   'puppi_met_phi',   (20, -3.15, 3.15))
         ])
 
 
     if args.task == 'electron_fakes':
         drawvars = [
-            ('l0p0_M', (40, 60, 120)),
+            ('l0p0_M', 'l0p0_M', (40, 60, 120)),
         ]
 
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
-            for var, binning in drawvars:
+            for dirname, var, binning in drawvars:
                 wt = '$baseline_wt'
                 if sel in cat_to_wt:
                     wt = cat_to_wt[sel]
@@ -715,10 +732,11 @@ if args.task in ['baseline', 'electron_fakes']:
                     actual_wt_systs = wt_systs[chn]
                 else:
                     actual_wt_systs = list()
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs, doSysts=(args.syst is None))
-            for sample in samples:
-                hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
-                hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
+                actual_wt_systs = list()
+                StandardHists(hists[chn][sel][dirname], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs, doSysts=(args.syst is None))
+            # for sample in samples:
+            #     hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
+            #     hists['2D'][chn][sel]['p0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['p0_eta', 'p0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))
 
 
 if args.task in ['photon_fakes', 'photon_fakes2']:
@@ -860,6 +878,22 @@ if args.task in ['lepton_fakes']:
         for sel in do_cats[chn]:
             for var, binning in drawvars:
                 StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$lepton_fakes_wt', chn=chn, manager=X, wt_systs=[], doFakes=False, doSysts=False)
+
+
+# str_summary = dict()
+# for path, name, obj in hists.ListObjects():
+#     split_path = path.split('/')
+#     curr = str_summary
+#     for p in split_path:
+#         if p not in curr:
+#             curr[p] = dict()
+#         curr = curr[p]
+#     curr[name] = [':'.join(obj.var), obj.sel, obj.wt]
+
+# with open('output_%s_%s_%s.json' % (year, args.task, args.label), 'w') as outfile:
+#     json.dump(str_summary, outfile, sort_keys=True, indent=4, separators=(',', ': '))
+
+# sys.exit(0)
 
 MultiDraw(hists, samples, tname, mt_cores=4, mt_thresh=1)
 

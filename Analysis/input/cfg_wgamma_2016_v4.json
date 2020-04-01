@@ -50,7 +50,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
     },
     "DYJetsToLL_M-50-stitched": {
-      "attributes": ["default", "mc", "check_is_zg", "zjets_binned"],
+      "attributes": ["default", "mc", "check_is_zg", "zjets_binned", "check_gen_mll"],
       "inputs": [
         "DYJetsToLL_M-50-amcatnloFXFX",
         "DY0JetsToLL_M-50-amcatnloFXFX", "DY1JetsToLL_M-50-amcatnloFXFX", "DY2JetsToLL_M-50-amcatnloFXFX"
@@ -520,7 +520,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 9.817e+01 +- 2.381e-01 pb"
     },
     "ZGToLLG-amcatnloFXFX-stitched": {
-      "attributes": ["default", "mc", "check_is_zg"],
+      "attributes": ["default", "mc", "check_is_zg", "check_gen_mll"],
       "inputs": ["ZGToLLG-amcatnloFXFX", "ZGToLLG-lowMLL-amcatnloFXFX"],
       "xsec": 98.17,
       "stitching": {
@@ -554,50 +554,50 @@
       "GenXSecAnalyzer": "After filter: final cross section = 1.256e+00 +- 2.271e-03 pb"
     },
     "DiPhotonJetsBox_MGG-80toInf": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "check_gen_mll"],
       "inputs": ["DiPhotonJetsBox_MGG-80toInf"],
       "xsec": 88.36,
       "GenXSecAnalyzer": ""
     },
     "DiPhotonJetsBox_MGG-40to80": {
-      "attributes": ["default", "mc"],
+      "attributes": ["default", "mc", "check_gen_mll"],
       "inputs": ["DiPhotonJetsBox_MGG-40to80"],
-      "xsec": 454.8,
+      "xsec": 309.4,
       "GenXSecAnalyzer": "After filter: final cross section = 3.094e+02 +- 4.967e-01 pb",
-      "XSecSource": "Applied kNLO of 1.47"
+      "XSecSource": "Applied kNLO of 1.47 - cancelled"
     },
     "DiPhotonJets_MGG-80toInf": {
-      "attributes": ["default", "mc", "scale_weights:3"],
+      "attributes": ["default", "mc", "scale_weights:3", "check_gen_mll"],
       "inputs": ["DiPhotonJets_MGG-80toInf"],
       "xsec": 134.4,
       "GenXSecAnalyzer": "After filter: final cross section = 1.344e+02 +- 4.135e-01 pb"
     },
     "GJets_DR-0p4_HT-40To100": {
-      "attributes": ["default", "mc", "gjets_binned"],
+      "attributes": ["default", "mc", "gjets_binned", "check_gen_mll"],
       "inputs": ["GJets_DR-0p4_HT-40To100"],
       "xsec": 17420.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-100To200": {
-      "attributes": ["default", "mc", "gjets_binned"],
+      "attributes": ["default", "mc", "gjets_binned", "check_gen_mll"],
       "inputs": ["GJets_DR-0p4_HT-100To200"],
       "xsec": 5391.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-200To400": {
-      "attributes": ["default", "mc", "gjets_binned"],
+      "attributes": ["default", "mc", "gjets_binned", "check_gen_mll"],
       "inputs": ["GJets_DR-0p4_HT-200To400"],
       "xsec": 1168.0,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-400To600": {
-      "attributes": ["default", "mc", "gjets_binned"],
+      "attributes": ["default", "mc", "gjets_binned", "check_gen_mll"],
       "inputs": ["GJets_DR-0p4_HT-400To600"],
       "xsec": 132.5,
       "GenXSecAnalyzer": ""
     },
     "GJets_DR-0p4_HT-600ToInf": {
-      "attributes": ["default", "mc", "gjets_binned"],
+      "attributes": ["default", "mc", "gjets_binned", "check_gen_mll"],
       "inputs": ["GJets_DR-0p4_HT-600ToInf"],
       "xsec": 44.05,
       "GenXSecAnalyzer": ""

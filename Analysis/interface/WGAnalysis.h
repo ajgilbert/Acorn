@@ -44,6 +44,9 @@ class WGAnalysis : public ModuleBase {
   float l_g_dr_;
   float l_g_dphi_;
   float w_g_dphi_;
+  float j1_pt_;
+  float j1_eta_;
+  int n_jets_;
   unsigned nparts_;
   bool valid_mt_;
   mutable TRandom3 rng;
