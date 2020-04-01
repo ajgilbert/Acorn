@@ -27,6 +27,7 @@ class WGDataAnalysis : public ModuleBase {
   CLASS_MEMBER(WGDataAnalysis, bool, do_wg_gen_vars)
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_zg)
   CLASS_MEMBER(WGDataAnalysis, bool, check_is_wwg)
+  CLASS_MEMBER(WGDataAnalysis, bool, check_gen_mll)
   CLASS_MEMBER(WGDataAnalysis, bool, do_presel)
   CLASS_MEMBER(WGDataAnalysis, bool, only_wg)
   CLASS_MEMBER(WGDataAnalysis, int, var_set)
@@ -70,6 +71,8 @@ class WGDataAnalysis : public ModuleBase {
   unsigned n_pre_e_; // number of medium/tight electrons
   unsigned n_veto_m_; // number of veto muons
   unsigned n_veto_e_; // number of veto electrons
+  unsigned n_alt_veto_m_; // number of veto muons
+  unsigned n_alt_veto_e_; // number of veto electrons
   unsigned n_qcd_j_; // number of "QCD" jets
 
   // l0: Main muon/electron variables
@@ -224,7 +227,7 @@ class WGDataAnalysis : public ModuleBase {
   float gen_met_phi_;
   float gen_l0p0_dr_;
   float gen_mt_cluster_;
-  // float gen_dy_mll_;
+  float gen_mll_;
   // float gen_n2_pt_;
 
   mutable TRandom3 rng;

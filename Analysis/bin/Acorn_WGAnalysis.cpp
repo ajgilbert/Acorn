@@ -224,6 +224,7 @@ int main(int argc, char* argv[]) {
                              .set_do_wg_gen_vars(ac::contains(jsc["attributes"], "do_wg_gen_vars"))
                              .set_check_is_zg(ac::contains(jsc["attributes"], "check_is_zg"))
                              .set_check_is_wwg(ac::contains(jsc["attributes"], "check_is_wwg"))
+                             .set_check_gen_mll(ac::contains(jsc["attributes"], "check_gen_mll"))
                              .set_do_presel(!ac::contains(jsc["attributes"], "no_presel"))
                              .set_only_wg(only_wg)
                              .set_correct_e_energy(correct_e_energy)
