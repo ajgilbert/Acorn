@@ -513,11 +513,15 @@ if genOnly == 1:
     # Take the full collection for now
     process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
     process.acEventInfoProducer.saveMetFilters = cms.vstring()
+    process.acEventInfoProducer.userDoubles = cms.VInputTag()
+    process.selectedGenJets.src = cms.InputTag("ak4GenJetsNoNu")
     process.acEventInfoProducer.includeNumVertices=cms.bool(False)
     process.p = cms.Path(
         process.acGenMetProducer +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
+        process.selectedGenJets +
+        process.acGenJetProducer +
         process.acEventInfoProducer +
         process.acEventProducer)
 elif genOnly == 2:

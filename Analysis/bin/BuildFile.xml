@@ -1,5 +1,6 @@
 <bin file="Acorn_WGAnalysis.cpp" name="Acorn_WGAnalysis"></bin>
 <bin file="Acorn_HVMAnalysis.cpp" name="Acorn_HVMAnalysis"></bin>
+<bin file="Acorn_ReweightTest.cpp" name="Acorn_ReweightTest"></bin>
 <use name="root"/>
 <use name="rootmath"/>
 <use name="roofit"/>

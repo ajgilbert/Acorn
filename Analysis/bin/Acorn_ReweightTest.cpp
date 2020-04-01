@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   };
   for (unsigned i = 0; i < tin->GetEntries(); ++i) {
   	evt.SetEvent(i);
-  	auto const& lheparts = evt.GetPtrVec<ac::GenParticle>("lheParticles");
+    auto const& lheparts = evt.GetPtrVec<ac::GenParticle>("lheParticles");
 
   	std::vector<std::vector<double>> parts;
   	std::vector<int> pdgs;
@@ -79,7 +79,14 @@ int main(int argc, char* argv[]) {
     auto const* info = evt.GetPtr<ac::EventInfo>("eventInfo");
 
     auto wts = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), false, true);
-    for (auto wt : wts) std::cout << wt << "\t";
-    std::cout << "\n";
+    double w1 = (info->lheWeights().at(100000) + 1.0);
+    double w2 = (info->lheWeights().at(100004) + 1.0);
+    auto wts_hel = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), true, true);
+
+    std::cout << (w2 / w1) << "\t" << (wts[1] / wts[0]) << "\t" << (wts_hel[1] / wts_hel[0]) << "\n";
+    // std::cout << "eventInfo[0]: " << (info->lheWeights().at(100000) + 1.0) << "\n";
+    // std::cout << "eventInfo[1]: " << (info->lheWeights().at(100001) + 1.0) << "\n";
+    // for (auto wt : wts) std::cout << wt << "\t";
+    // std::cout << "\n";
   }
 }
