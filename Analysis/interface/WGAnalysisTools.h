@@ -65,7 +65,7 @@ struct WGGenParticles {
 };
 
 WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
-                                     std::vector<GenParticle*> const& gen_parts);
+                                     std::vector<GenParticle*> const& gen_parts, double photon_dr = 0.7);
 
 bool IsElectron(ac::GenParticle const& p);
 bool IsMuon(ac::GenParticle const& p);

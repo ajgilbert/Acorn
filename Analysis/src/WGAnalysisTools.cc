@@ -148,7 +148,7 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
   }
 
   WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
-                                       std::vector<GenParticle*> const& gen_parts) {
+                                       std::vector<GenParticle*> const& gen_parts, double photon_dr) {
     WGGenParticles info;
 
     for (auto const& part : lhe_parts) {
@@ -188,9 +188,15 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
       }
     }
 
+    // std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
+    //   return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
+    // });
     std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
-      return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
+      return c1->pt() > c2->pt();
     });
+    if (info.viable_leptons.size() > 0) {
+      ac::keep_if(info.viable_photons, [&](ac::GenParticle const* p) { return ac::DeltaR(p, info.viable_leptons.at(0)) > photon_dr; });
+    }
     std::sort(info.viable_photons.begin(), info.viable_photons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
       return c1->pt() > c2->pt();
     });
