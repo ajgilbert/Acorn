@@ -24,6 +24,8 @@ opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('keepLHEWeights', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Store the LHE weights")
+opts.register('doWGammaRivet', 0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Run the WGamma RIVET routine and save output variables")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -38,6 +40,7 @@ year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
 keepLHEWeights = bool(opts.keepLHEWeights)
 updateJECs = bool(opts.updateJECs)
+doWGammaRivet = bool(opts.doWGammaRivet)
 
 ################################################################
 # Standard setup
@@ -324,6 +327,31 @@ process.acGenJetProducer = cms.EDProducer('AcornCandidateProducer',
     select=cms.vstring('keep .* p4=12')
 )
 
+
+if doWGammaRivet:
+    process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+        inputPruned=cms.InputTag("prunedGenParticles"),
+        inputPacked=cms.InputTag("packedGenParticles"),
+    )
+    process.generator = cms.EDProducer("GenParticles2HepMCConverter",
+        genParticles=cms.InputTag("mergedGenParticles"),
+        genEventInfo=cms.InputTag("generator", "", "SIM"),
+        signalParticlePdgIds=cms.vint32()
+    )
+    process.wgammaRivetProducer = cms.EDProducer("WGammaRivetProducer",
+        HepMCCollection=cms.InputTag("generator:unsmeared")
+    )
+    process.acWGammaRivetProducer = cms.EDProducer('AcornWGammaRivetProducer',
+        input=cms.InputTag("wgammaRivetProducer"),
+        branch=cms.string('rivetVariables'),
+        select=cms.vstring('keep .*')
+    )
+    process.acMCSequence += cms.Sequence(
+        process.mergedGenParticles +
+        process.generator +
+        process.wgammaRivetProducer +
+        process.acWGammaRivetProducer
+    )
 
 if isMC:
     process.acMCSequence += cms.Sequence(

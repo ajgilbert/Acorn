@@ -52,45 +52,45 @@
       "dataset": "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_wg"
     },
     "WGToLNuG-madgraphMLM-PtG-130": {
       "dataset": "/WGToLNuG_PtG-130_TuneCP5_13TeV-madgraphMLM-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
+      "config": "mc_wg",
       "inputDBS": "phys03"
     },
     "WGToLNuG-madgraphMLM-PtG-500": {
       "dataset": "/WGToLNuG_PtG-500_TuneCP5_13TeV-madgraphMLM-pythia8/agilbert-RunIIAutumn18MiniAOD-8c47adb282cd21f1ab3845923e388b14/USER",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc",
+      "config": "mc_wg",
       "inputDBS": "phys03"
     },
     "WGToLNuG-amcatnloFXFX": {
       "dataset": "/WGToLNuG_01J_5f_PDFWeights_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit_x"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_wg"
     },
     "WGToLNuG-amcatnloFXFX-PtG-130": {
       "dataset": "/WGToLNuG_01J_5f_PtG_120_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit_x"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_wg"
     },
     "WGToLNuG-amcatnloFXFX-PtG-300": {
       "dataset": "/WGToLNuG_01J_5f_PtG_290_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit_x"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_wg"
     },
     "WGToLNuG-amcatnloFXFX-PtG-500": {
       "dataset": "/WGToLNuG_01J_5f_PtG_490_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM",
       "attributes": ["submit_x"],
       "events": 0,
-      "config": "mc"
+      "config": "mc_wg"
     },
     "ZGToLLG-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM",
@@ -484,6 +484,7 @@
     "data": ["year=2018", "isData=1", "globalTag=102X_dataRun2_v12", "cores=2"],
     "data_prompt": ["year=2018", "isData=1", "globalTag=102X_dataRun2_Prompt_v15", "cores=2"],
     "mc":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v20", "cores=2"],
+    "mc_wg":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v20", "cores=2", "doWGammaRivet=1"],
     "mc_no_lhe":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v20", "hasLHE=0", "cores=2"],
     "mc_no_lheweights":  ["year=2018", "isData=0", "globalTag=102X_upgrade2018_realistic_v20", "keepLHEWeights=0", "cores=2"]
   },
