@@ -20,6 +20,7 @@
 #include "Acorn/NTupler/interface/PileupInfo.h"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/Reduction.h"
+#include "Acorn/NTupler/src/CMS_2020_PAS_SMP_20_005.h"
 
 namespace ac {
 
@@ -704,6 +705,25 @@ int WGDataAnalysis::PreAnalysis() {
           gen_p0_match_ = true;
         }
       }
+
+      // const auto rivet = event->GetPtr<WGammaRivetVariables>("rivetVariables");
+      // bool fid = is_wg_gen_ && gen_l0_pt_ > 30. && std::abs(gen_l0_eta_) < 2.5 && gen_p0_pt_ > 30. && std::abs(gen_p0_eta_) < 2.5 && gen_l0p0_dr_ > 0.7 && lhe_frixione_ && gen_met_ > 40.;
+      // fid = fid && lhe_frixione_;
+      // bool rfid = rivet->is_wg_gen && rivet->l0_pt > 30. && std::abs(rivet->l0_eta) < 2.5 && rivet->p0_pt > 30. && std::abs(rivet->p0_eta) < 2.5 && rivet->l0p0_dr > 0.7 && rivet->p0_frixione && rivet->met_pt > 40.;
+      // if (fid != rfid) {
+      //   std::cout << "is_wg_gen: " << is_wg_gen_ << "\t" << rivet->is_wg_gen << "\n";
+      //   std::cout << "l0_pt: " << gen_l0_pt_ << "\t" << rivet->l0_pt << "\n";
+      //   std::cout << "l0_eta: " << gen_l0_eta_ << "\t" << rivet->l0_eta << "\n";
+      //   std::cout << "l0_q: " << gen_l0_q_ << "\t" << rivet->l0_q << "\n";
+      //   std::cout << "l0_pdgid: " << gen_pdgid_ << "\t" << rivet->l0_abs_pdgid << "\n";
+      //   std::cout << "p0_pt: " << gen_p0_pt_ << "\t" << rivet->p0_pt << "\n";
+      //   std::cout << "l0p0_dr: " << gen_l0p0_dr_ << "\t" << rivet->l0p0_dr << "\n";
+      //   std::cout << "p0_frixione: " << lhe_frixione_ << "\t" << rivet->p0_frixione << "\n";
+      //   std::cout << "met_pt: " << gen_met_ << "\t" << rivet->met_pt << "\n";
+      // }
+      // if (fid && rfid) {
+      //   std::cout << "mt_cluster: " << gen_mt_cluster_ << "\t" << rivet->mt_cluster << "\n";
+      // }
     }
 
     if (reco_event) {
