@@ -661,8 +661,8 @@ if args.task in ['baseline', 'electron_fakes']:
 
     # do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
     # do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
-    do_cats['e'].extend(['baseline_e_mZ_veto'])
-    do_cats['m'].extend(['baseline_m_mZ_veto'])
+    do_cats['e'].extend(['baseline_e_mZ_veto', 'baseline_e_nomet', 'baseline_e'])
+    do_cats['m'].extend(['baseline_m_mZ_veto', 'baseline_m_nomet', 'baseline_m'])
 
     cat_to_wt = {
         'cr_Zee': '$cr_zll_wt',

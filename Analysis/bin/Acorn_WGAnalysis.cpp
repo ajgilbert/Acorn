@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v10.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v11.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(ac::contains(jsc["attributes"], "do_wg_gen_vars"))
@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
     tp_seq.BuildModule(ac::WGTagAndProbe("WGTagAndProbe")
                              .set_fs(tp_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v10.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v11.root")
                              .set_is_data(is_data));
 
     tp_seq.InsertSequence(tp_label, analysis);

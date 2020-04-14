@@ -8,6 +8,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.RooWorkspace.imp = getattr(ROOT.RooWorkspace, 'import')
 ROOT.TH1.AddDirectory(0)
+import CombineHarvester.CombineTools.plotting as plot
 
 
 def TGraphAsymmErrorsToTH1D(graph):
@@ -190,26 +191,116 @@ def HistSystVariations(h_nominal, h_lo, h_hi, keepNominalErr=True, doRelative=Tr
             v_hi = h_hi.GetBinContent(i, j)
             v_lo = h_lo.GetBinContent(i, j)
             v_av_syst = (abs(v_hi - v_nom) + abs(v_lo - v_nom)) / 2.
-            v_err_new = math.sqrt(math.pow(v_err, 2) + math.pow(v_av_syst, 2))
+            if keepNominalErr:
+                v_err_new = math.sqrt(math.pow(v_err, 2) + math.pow(v_av_syst, 2))
+            else:
+                v_err_new = v_av_syst
             res.SetBinError(i, j, v_err_new)
     return res
-# file = ROOT.TFile('input/scale_factors/Muon_SF_spring16temp.root')
-# hists = []
-# hists.append(file.Get('Mu22_Data_Eff'))
-# hists.append(file.Get('Mu19_Data_Eff'))
-# file.Close()
 
 
-# ws = ROOT.RooWorkspace('ws')
+def ZeroErrors(h_nominal):
+    res = h_nominal.Clone()
+    for i in xrange(1, h_nominal.GetNbinsX() + 1):
+        for j in xrange(1, h_nominal.GetNbinsY() + 1):
+            res.SetBinError(i, j, 0.)
+    return res
 
-# for hist in hists:
-#     # Here we are saying that the x-axis lookup is done by taking the the abs
-#     # value of m_eta first, and the y-axis lookup is just done directly with
-#     # the m_pt variable
-#     SafeWrapHist(ws, ['expr::m_abs_eta("TMath::Abs(@0)",m_eta[0])', 'm_pt'], hist)
 
 
-# ws.Print()
-# ws.writeToFile('input/scale_factors/Muon_SF_spring16temp_workspace.root')
-# # I don't know why I need to delete this but it segfaults if I don't
-# ws.Delete()
+
+def MakeProjections(h2d_list, main_label, ix, color, marker, along='X'):
+    res = {}
+    attr = 'Projection%s' % along
+    if len(h2d_list) >= 3:
+        res['total'] = getattr(h2d_list[0], attr)('%s_total_proj%s_%i' % (main_label, along, ix), ix, ix)
+        res['stat'] = getattr(h2d_list[1], attr)('%s_stat_proj%s_%i' % (main_label, along, ix), ix, ix)
+        res['syst'] = getattr(h2d_list[2], attr)('%s_syst_proj%s_%i' % (main_label, along, ix), ix, ix)
+
+        plot.Set(res['total'], FillColorAlpha=(color, 0.1), MarkerSize=0, LineWidth=0)
+        plot.Set(res['syst'], LineColorAlpha=(color, 0.3), MarkerColor=color, LineWidth=8, MarkerSize=0)
+        plot.Set(res['stat'], LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.7, MarkerStyle=marker)
+    else:
+        res['stat'] = getattr(h2d_list[0], attr)('%s_stat_proj%s_%i' % (main_label, along, ix), ix, ix)
+        plot.Set(res['stat'], LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.7, MarkerStyle=marker)
+    return res
+
+
+def SummaryPlots(cfg):
+    h_ref = cfg['h_ref'].Clone()
+    main_label = cfg['main_label']
+    ref_axis = h_ref.GetYaxis() if cfg['proj'] == 'X' else h_ref.GetXaxis()
+    for ix in xrange(1, ref_axis.GetNbins() + 1):
+        bin_label = '%s #in [%g, %g]' % (cfg['y_label'], ref_axis.GetBinLowEdge(ix), ref_axis.GetBinUpEdge(ix))
+        canv = ROOT.TCanvas('%s_%s_%i' % (main_label, cfg['proj'], ix), '%s_%s_%i' % (main_label, cfg['proj'], ix))
+        pads = plot.TwoPadSplit(cfg.get('ratio_split', 0.4), 0.01, 0.01)
+        pads[0].cd()
+
+        text = ROOT.TPaveText(0.17, 0.84, 0.6, 0.93, 'NDC')
+        legend = ROOT.TLegend(0.6, 0.75, 0.94, 0.93, '', 'NDC')
+        data_hists = MakeProjections(cfg['data'], '%s_data' % main_label, ix, color=cfg.get('data_colour', 4), marker=21, along=cfg['proj'])
+        mc_hists = MakeProjections(cfg['mc'], '%s_mc' % main_label, ix, color=cfg.get('mc_colour', 2), marker=20, along=cfg['proj'])
+        ratio_hists = MakeProjections(cfg['ratio'], '%s_ratio' % main_label, ix, color=cfg.get('ratio_colour', 1), marker=21, along=cfg['proj'])
+
+        if 'total' in data_hists:
+            data_hists['total'].Draw('E2SAME')
+        if 'syst' in data_hists:
+            data_hists['syst'].Draw('E0X0SAME')
+        if 'stat' in data_hists:
+            data_hists['stat'].Draw('E1X0SAME')
+        if 'stat' in mc_hists:
+            mc_hists['stat'].Draw('E1X0PSAME')
+
+        if 'syst' in data_hists:
+            legend.AddEntry(data_hists['stat'], 'Data', 'P')
+            legend.AddEntry(data_hists['stat'], '  Statistical', 'E')
+            legend.AddEntry(data_hists['syst'], '  Systematic', 'E')
+            legend.AddEntry(data_hists['total'], '  Total', 'F')
+            legend.AddEntry(mc_hists['stat'], 'Simulation', 'P')
+            legend.AddEntry(mc_hists['stat'], '  Statistical', 'E')
+        else:
+            legend.AddEntry(data_hists['stat'], 'Data', 'PE')
+            legend.AddEntry(mc_hists['stat'], 'Simulation', 'PE')
+
+        axis = plot.GetAxisHist(pads[0])
+        plot.Set(axis, Minimum=cfg['y_range'][0], Maximum=cfg['y_range'][1])
+
+        plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.40)
+
+        axis.GetYaxis().SetTitle('Efficiency')
+
+        pads[1].cd()
+
+        if 'total' in ratio_hists:
+            ratio_hists['total'].Draw('E2SAME')
+        if 'syst' in ratio_hists:
+            ratio_hists['syst'].Draw('E0X0SAME')
+        if 'stat' in ratio_hists:
+            ratio_hists['stat'].Draw('E1X0SAME')
+        plot.SetupTwoPadSplitAsRatio(pads,
+                                     plot.GetAxisHist(pads[0]),
+                                     plot.GetAxisHist(pads[1]),
+                                     'Data/Sim', True, cfg['ratio_range'][0], cfg['ratio_range'][1])
+        r_axis = plot.GetAxisHist(pads[1])
+
+        if cfg['logx']:
+            pads[1].SetLogx(True)
+            r_axis.GetXaxis().SetMoreLogLabels(True)
+            r_axis.GetXaxis().SetNoExponent(True)
+        r_axis.GetXaxis().SetTitle(cfg['x_axis_title'])
+        r_axis.GetXaxis().SetTitleOffset(ROOT.gStyle.GetTitleXOffset())
+        pads[1].SetGrid(1, 1)
+        pads[1].RedrawAxis('g')
+
+        pads[0].cd()
+        legend.Draw()
+        text.AddText(cfg['main_text'])
+        text.AddText(bin_label)
+        text.SetTextAlign(13)
+        text.SetBorderSize(0)
+        text.Draw()
+        pads[0].SetGrid(1, 1)
+        if cfg['logx']:
+            pads[0].SetLogx(True)
+        canv.Print('.png')
+        canv.Print('.pdf')
