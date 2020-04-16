@@ -4,7 +4,9 @@ import ROOT
 import argparse
 from array import array
 from Acorn.Analysis.workspaceTools import *
+import CombineHarvester.CombineTools.plotting as plot
 
+plot.ModTDRStyle()
 
 def GetFromTFile(str):
     f = ROOT.TFile(str.split(':')[0])
@@ -306,6 +308,8 @@ loc = 'wgamma/inputs/photons/%s' % era
 if era == '2016':
     histsToWrap = [
         (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_EffData2D', 'p_id_data', ['p_eta', 'p_pt']),
+        (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
         # (loc + '/EFakesTP_2016_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2016_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
@@ -315,6 +319,8 @@ if era == '2016':
 if era == '2017':
     histsToWrap = [
         (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/2017_PhotonsMedium.root:EGamma_EffData2D', 'p_id_data', ['p_eta', 'p_pt']),
+        (loc + '/2017_PhotonsMedium.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
         # (loc + '/EFakesTP_2017_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2017_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
@@ -324,6 +330,8 @@ if era == '2017':
 if era == '2018':
     histsToWrap = [
         (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio', ['p_eta', 'p_pt']),
+        (loc + '/2018_PhotonsMedium.root:EGamma_EffData2D', 'p_id_data', ['p_eta', 'p_pt']),
+        (loc + '/2018_PhotonsMedium.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
         (loc + '/HasPix_2018.root:eleVeto_SF', 'p_psv_ratio', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2018_data_obs_nominal_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
@@ -335,14 +343,28 @@ h_efake_nominal = GetFromTFile(loc + '/EFakesTP_%s_data_obs_nominal_Fits_EGammaF
 h_efake_hi = GetFromTFile(loc + '/EFakesTP_%s_data_obs_bkgHi_Fits_EGammaFakes.root:EGammaFakes' % era)
 h_efake_lo = GetFromTFile(loc + '/EFakesTP_%s_data_obs_bkgLo_Fits_EGammaFakes.root:EGammaFakes' % era)
 h_efake_mc = GetFromTFile(loc + '/EFakesTP_%s_DY_E_nominal_Fits_EGammaFakes.root:EGammaFakes' % era)
-h_efake_nominal.Print('range')
+
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_nominal, name='e_p_fake_data_stat')
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_mc, name='e_p_fake_mc_stat')
+
+h_efake_ratio_stat = h_efake_nominal.Clone()
+h_efake_ratio_stat.Divide(h_efake_mc)
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_ratio_stat, name='e_p_fake_ratio_stat')
+
+h_efake_data_syst = HistSystVariations(h_efake_nominal, h_efake_lo, h_efake_hi, keepNominalErr=False)
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_data_syst, name='e_p_fake_data_syst')
+
+h_efake_ratio_syst = h_efake_data_syst.Clone()
+h_efake_ratio_syst.Divide(ZeroErrors(h_efake_mc))
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_ratio_syst, name='e_p_fake_ratio_syst')
+
 h_efake_nominal = HistSystVariations(h_efake_nominal, h_efake_lo, h_efake_hi)
-h_efake_nominal.Print('range')
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_nominal, name='e_p_fake_data')
+
 h_efake_ratio = h_efake_nominal.Clone()
 h_efake_ratio.Divide(h_efake_mc)
-h_efake_ratio.Print('range')
-SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'], h_efake_ratio, name='e_p_fake_ratio')
-SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'], HistErr(h_efake_ratio, +1.0), name='e_p_fake_ratio_err')
+SafeWrapHist(w, ['p_pt', 'p_eta'], h_efake_ratio, name='e_p_fake_ratio')
+SafeWrapHist(w, ['p_pt', 'p_eta'], HistErr(h_efake_ratio, +1.0), name='e_p_fake_ratio_err')
 
 for task in histsToWrap:
     if len(task) > 3:
@@ -350,6 +372,51 @@ for task in histsToWrap:
     else:
         SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
+SummaryPlots({
+    "h_ref": w.genobj('hist_p_id_ratio'),
+    "proj": 'Y',
+    "logx": False,
+    "main_label": "p_id_%s" % era,
+    "main_text": "Photon ID efficiency",
+    "x_axis_title": "Photon candidate p_{T} (GeV)",
+    "data": [w.genobj('hist_p_id_data')],
+    "mc": [w.genobj('hist_p_id_mc')],
+    "ratio": [w.genobj('hist_p_id_ratio')],
+    "ratio_range": [0.7, 1.3],
+    "y_range": [0, 0.2],
+    "y_label": '#eta'
+    })
+
+
+SummaryPlots({
+    "h_ref": h_efake_nominal,
+    "proj": 'X',
+    "logx": True,
+    "main_label": "e_p_fake_%s" % era,
+    "main_text": "Misid. e #rightarrow #gamma",
+    "x_axis_title": "Photon candidate p_{T} (GeV)",
+    "data": [w.genobj('hist_e_p_fake_data'), w.genobj('hist_e_p_fake_data_stat'), w.genobj('hist_e_p_fake_data_syst')],
+    "mc": [w.genobj('hist_e_p_fake_mc_stat')],
+    "ratio": [w.genobj('hist_e_p_fake_ratio'), w.genobj('hist_e_p_fake_ratio_stat'), w.genobj('hist_e_p_fake_ratio_syst')],
+    "ratio_range": [0, 3.9],
+    "y_range": [0, 0.2],
+    "y_label": '#eta'
+    })
+
+SummaryPlots({
+    "h_ref": h_efake_nominal,
+    "proj": 'Y',
+    "logx": False,
+    "main_label": "e_p_fake_%s" % era,
+    "main_text": "Misid. e #rightarrow #gamma",
+    "x_axis_title": "Photon candidate #eta",
+    "data": [w.genobj('hist_e_p_fake_data'), w.genobj('hist_e_p_fake_data_stat'), w.genobj('hist_e_p_fake_data_syst')],
+    "mc": [w.genobj('hist_e_p_fake_mc_stat')],
+    "ratio": [w.genobj('hist_e_p_fake_ratio'), w.genobj('hist_e_p_fake_ratio_stat'), w.genobj('hist_e_p_fake_ratio_syst')],
+    "ratio_range": [0, 3.9],
+    "y_range": [0, 0.2],
+    "y_label": 'p_{T}'
+    })
 
 ###############################################################################
 ## Photon fakes
@@ -373,6 +440,6 @@ for task in histsToWrap:
 
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v10.root' % era)
+w.writeToFile('wgamma_corrections_%s_v11.root' % era)
 w.Delete()
 

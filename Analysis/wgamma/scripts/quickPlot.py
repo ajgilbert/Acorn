@@ -118,6 +118,10 @@ variants_by_path = [
     ("*/p0_pt", {
             "prefix": "logy_",
             "logy": True}),
+    ("*/gen_mll", {
+            "prefix": "mask_",
+            "hide_data": True
+        }),
     ("*/p0_chiso", {
             "prefix": "logy_",
             "logy": True}),
@@ -135,6 +139,9 @@ variants_by_path = [
     ("*/p0_eta", {
             "prefix": "wide_",
             "rebinvar": [-3.0, -2.7, -1.5, -0.9, 0, 0.9, 1.5, 2.7, 3.0]}),
+    ("*/l0p0_deta", {
+            "prefix": "fid_",
+            "rebinvar": [-5, -3.4, -2.6, -1.8, -1.4, -1.0, -0.6, -0.2, 0.2, 0.6, 1.0, 1.4, 1.8, 2.6, 3.4, 5]}),
     # ("*/p0_pt", {
     #         "prefix": "fr_barrel_",
     #         "rebinvar": [30, 35, 40, 50, 60, 80, 100, 300],

@@ -146,6 +146,12 @@
       "events": 0,
       "config": "mc"
     },
+    "DYJetsToLL_M-10to50-madgraphMLM": {
+      "dataset": "/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/MINIAODSIM",
+      "attributes": ["submit"],
+      "events": 0,
+      "config": "mc"
+    },
     "DYJetsToLL_M-50-madgraphMLM": {
       "dataset": "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": [],

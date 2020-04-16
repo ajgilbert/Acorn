@@ -31,8 +31,29 @@ configs = {
     "fid_p0_eta_binned": {
         'x_var': 'gen_p0_eta',
         'x_var_obs': 'p0_eta',
-        'pt_bins': '[-2.5,-1.0,0,1.0,2.5]',
-        # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
+        'pt_bins': '[-2.5,-1.9,-1.5,-1.1,-0.75,-0.45,-0.15,0.15,0.45,0.75,1.1,1.5,1.9,2.5]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
+    "fid_mt_cluster_binned": {
+        'x_var': 'gen_mt_cluster',
+        'x_var_obs': 'mt_cluster',
+        'pt_bins': '[0,100,150,200,250,300,400,500,650,800,1000,1200,1700,2500]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
+    "fid_l0p0_dr_binned": {
+        'x_var': 'gen_l0p0_dr',
+        'x_var_obs': 'l0p0_dr',
+        'pt_bins': '[0.7,1.0,1.3,1.6,1.9,2.2,2.5,2.8,3.1,3.4,3.7,4.0,4.5,5.0]',
         'phi_var': '0.5',
         'phi_var_label': '1',
         'phi_var_obs': '0.5',
@@ -190,7 +211,7 @@ if 'makeHists' in steps:
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/user/agilbert/191216-full/wgamma_%s_v4/WGamma_' % yr
+        indir = 'root://eoscms.cern.ch//store/user/agilbert/200408-full/wgamma_%s_v4/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
