@@ -406,6 +406,12 @@ X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t'
 X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 0 && n_veto_m == 0'
 X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 0 && n_veto_e == 0'
 X['lepton_sel'] = 'l0_nominal'
+
+# Added 16/4/20 - can be used in lepton_fakes to emulate tighter iso working points
+X['lepton_iso_t_m'] = '1'
+X['lepton_iso_t_e'] = '1'
+# X['lepton_iso_t_m'] = 'l0_iso < 0.1'
+# X['lepton_iso_t_e'] = '(abs(l0_eta)<1.4442 && l0_iso < (0.0287 + 0.506/l0_pt)) || (abs(l0_eta)>=1.4442 && l0_iso < (0.0445 + 0.963/l0_pt))'
 X['lepton_sdb_m'] = '!l0_nominal && l0_iso > 0.2'
 X['lepton_sdb_e'] = '!l0_nominal && l0_iso > 0.1 && l0_iso < 0.95'
 
@@ -436,6 +442,10 @@ X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
 X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met>40'
 X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
 X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
+# Better selections from studies on 16/4/20:
+# X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0'
+# X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0 && n_alt_veto_e == 0 && l0j0_M < 85'
+
 
 # Control regions
 X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && $lepton_sel && l0_pt>30 && l1_pt>30 && l0l1_os && l0l1_dr > 0.3'
@@ -553,12 +563,16 @@ if args.task == 'eft_region' or args.task == 'fid_region':
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
             for var, binning in drawvars:
+                # Skip the x observable plots if we're in a fiducial bin
+                if (not sel.startswith('fid_')) and var == x_var_obs:
+                    continue
                 xnode = hists[chn][sel][var]
                 StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=main_wt_systs[chn], doSysts=(args.syst is None))
                 wg_scale_hlist = []
                 wg_syst_hlist = []
                 wg_hlist = []
-                for chg in ['p', 'n', 'x']:
+                chgs = ['p', 'n'] if args.task == 'eft_region' else ['x']
+                for chg in chgs:
                     hlist = [
                         ('WG_ooa_%s' % chg, '$' + sel + ' && $%s_gen_ooa' % chg, '$baseline_wt'),
                         ('WG_main_%s' % chg, '$' + sel + ' && $%s_gen_acc' % chg, '$baseline_wt'),
@@ -852,12 +866,12 @@ if args.task in ['lepton_fakes']:
               ('', '1'),
             ] + extra_regions:
                 X['%s_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
-                X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && l0met_mt<30 && (%s)' % (S, EXTRA)
-                X['%s_w_all%s' % (S, POST)] = '$%s && l0_nominal && (%s)' % (S, EXTRA)
+                X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
+                X['%s_w_all%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && (%s)' % (S, chn, EXTRA)
                 if args.year in ['2016']:
-                    X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && l0met_mt>70 && (%s)' % (S, EXTRA)
+                    X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt>70 && (%s)' % (S, chn, EXTRA)
                 else:
-                    X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && l0met_mt>70 && l0met_mt<90 && (%s)' % (S, EXTRA)
+                    X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt>70 && l0met_mt<90 && (%s)' % (S, chn, EXTRA)
                 do_cats[chn].extend(
                     ['%s_iso_l%s' % (S, POST),
                      '%s_iso_t%s' % (S, POST),
@@ -867,11 +881,15 @@ if args.task in ['lepton_fakes']:
     drawvars = [
         ('l0met_mt', (20, 0., 200.)),
         ('l0_pt', (40, 0., 200.)),
-        # ('l0_eta', (20, -3.0, 3.0)),
         ('puppi_met', (20, 0., 200.)),
         ('l0_iso', (40, 0, 2.0)),
         ('l0j0_dphi', (30, -3.15, 3.15)),
-        # ('j0_pt', (30, 0., 150.)),
+        ('l0j0_M', (40, 0, 120)),
+        ('gen_mll', (80, 0, 20)),
+        ('n_alt_veto_e', (4, -0.5, 3.5)),
+        ('n_alt_veto_m', (4, -0.5, 3.5)),
+        ('n_qcd_j', (4, -0.5, 3.5)),
+        ('j0_pt', (30, 0., 150.))
     ]
 
     for chn in ['e', 'm']:

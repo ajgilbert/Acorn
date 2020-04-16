@@ -105,9 +105,10 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("p0_medium", &p0_medium_);
       tree_->Branch("p0_truth", &p0_truth_);
 
-      // tree_->Branch("j0_pt", &j0_pt_);
+      tree_->Branch("j0_pt", &j0_pt_);
       // tree_->Branch("j0_eta", &j0_eta_);
       tree_->Branch("l0j0_dphi", &l0j0_dphi_);
+      tree_->Branch("l0j0_M", &l0j0_M_);
 
       tree_->Branch("met", &met_);
       // tree_->Branch("tk_met", &tk_met_);
@@ -117,6 +118,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("l0met_mt", &l0met_mt_);
 
       tree_->Branch("l0p0_dr", &l0p0_dr_);
+      tree_->Branch("l0p0_deta", &l0p0_deta_);
       // tree_->Branch("l0p0_dphi", &l0p0_dphi_);
       tree_->Branch("l0p0_M", &l0p0_M_);
       tree_->Branch("mt_cluster", &mt_cluster_);
@@ -152,6 +154,7 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_l0_pt", &gen_l0_pt_);
         tree_->Branch("gen_l0_eta", &gen_l0_eta_);
         tree_->Branch("gen_met", &gen_met_);
+        tree_->Branch("gen_l0p0_deta", &gen_l0p0_deta_);
         tree_->Branch("gen_l0p0_dr", &gen_l0p0_dr_);
         tree_->Branch("gen_wg_M", &gen_wg_M_);
         tree_->Branch("gen_mt_cluster", &gen_mt_cluster_);
@@ -509,7 +512,11 @@ int WGDataAnalysis::PreAnalysis() {
              ElectronIPCuts(e);
     });
 
-    auto alt_veto_electrons = veto_electrons;
+    auto alt_veto_electrons = ac::copy_keep_if(electrons, [](ac::Electron const* e) {
+      return e->pt() > 10. && fabs(e->scEta()) < 2.5 && e->isCutBasedVetoElectron() &&
+             ElectronIsoFall17V2(e, 0) && (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) &&
+             ElectronIPCuts(e);
+    });
     auto alt_veto_muons = veto_muons;
 
     auto qcd_jets = ac::copy_keep_if(jets, [](ac::PFJet const* j) {
@@ -692,6 +699,7 @@ int WGDataAnalysis::PreAnalysis() {
         gen_l0_eta_ = parts.gen_lep->eta();
         gen_met_ = gen_met->pt();
         gen_l0p0_dr_ = ac::DeltaR(parts.gen_lep, parts.gen_pho);
+        gen_l0p0_deta_ = parts.gen_lep->eta() - parts.gen_pho->eta();
         true_phi_ = gen_true_sys.Phi(parts.gen_lep->charge() > 0);
         true_phi_f_ = gen_true_sys.SymPhi(parts.gen_lep->charge() > 0);
         gen_wg_M_ = (parts.gen_lep->vector() + parts.gen_neu->vector() + parts.gen_pho->vector()).M();
@@ -829,11 +837,13 @@ int WGDataAnalysis::PreAnalysis() {
       j0_eta_ = j0->eta();
       if (l0) {
         l0j0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), j0->vector());
+        l0j0_M_ = (l0->vector() + j0->vector()).M();
       }
     }
 
     if (p0 && l0) {
       l0p0_dr_ =  ac::DeltaR(l0, p0);
+      l0p0_deta_ = l0->eta() - p0->eta();
       l0p0_dphi_ = ROOT::Math::VectorUtil::DeltaPhi(l0->vector(), p0->vector());
       l0p0_M_ = (l0->vector() + p0->vector()).M();
 
@@ -1143,6 +1153,7 @@ int WGDataAnalysis::PreAnalysis() {
     j0_pt_ = 0.;
     j0_eta_ = 0.;
     l0j0_dphi_ = 0.;
+    l0j0_M_ = 0.;
     met_ = 0.;
     met_phi_ = 0.;
     tk_met_ = 0.;
@@ -1151,6 +1162,7 @@ int WGDataAnalysis::PreAnalysis() {
     puppi_met_phi_ = 0.;
     l0met_mt_ = 0.;
     l0p0_dr_ = 0.;
+    l0p0_deta_ = 0.;
     l0p0_dphi_ = 0.;
     l0p0_M_ = 0.;
     mt_cluster_ = 0.;
@@ -1219,6 +1231,7 @@ int WGDataAnalysis::PreAnalysis() {
     gen_mt_cluster_ = 0.;
     gen_l0_eta_ = 0.;
     gen_met_ = 0.;
+    gen_l0p0_deta_ = 0.;
     gen_l0p0_dr_ = 0.;
     true_phi_ = 0.;
     true_phi_f_ = 0.;
@@ -1231,8 +1244,8 @@ int WGDataAnalysis::PreAnalysis() {
          {&l0_pt_,     &l0_iso_,    &l0met_mt_,  &l1_pt_,     &l1_iso_,      &met_,
           &puppi_met_, &tk_met_,    &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
           &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_wg_M_,  &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
-          &j0_pt_, &mt_cluster_, &gen_mt_cluster_, &gen_mll_,
-          &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_,
+          &j0_pt_, &mt_cluster_, &gen_mt_cluster_, &gen_mll_, &gen_l0p0_deta_, &l0j0_M_,
+          &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_, &l0p0_deta_,
           &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_,
           &wt_isr_lo_, &wt_isr_hi_, &wt_fsr_lo_, &wt_fsr_hi_}) {
       *var = reduceMantissaToNbitsRounding(*var, 10);

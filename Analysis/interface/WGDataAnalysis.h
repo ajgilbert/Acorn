@@ -125,6 +125,7 @@ class WGDataAnalysis : public ModuleBase {
   float j0_pt_;
   float j0_eta_;
   float l0j0_dphi_;
+  float l0j0_M_;
 
   // met
   float met_;
@@ -140,6 +141,7 @@ class WGDataAnalysis : public ModuleBase {
   // composite variables defined inf n_p >= 1
   float l0p0_dr_;
   float l0p0_dphi_;
+  float l0p0_deta_;
   float l0p0_M_;
   float mt_cluster_;
   float reco_phi_;
@@ -226,6 +228,7 @@ class WGDataAnalysis : public ModuleBase {
   float gen_met_;
   float gen_met_phi_;
   float gen_l0p0_dr_;
+  float gen_l0p0_deta_;
   float gen_mt_cluster_;
   float gen_mll_;
   // float gen_n2_pt_;
