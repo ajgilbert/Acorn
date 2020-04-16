@@ -30,6 +30,13 @@ void AcornPFJetProducer::produce(edm::Event& event, const edm::EventSetup& setup
     pat::Jet const& src = jets_handle->at(i);
     ac::PFJet& dest = output()->at(i);
 
+    auto btags = src.getPairDiscri();
+    for (auto const& btag: btags) {
+      if (btag.first == "pfDeepCSVDiscriminatorsJetTags:BvsAll") {
+        dest.setDeepCSVDiscriminatorBvsAll(btag.second);
+      }
+    }
+
     dest.setVector(setVar("p4", src.polarP4()));
     dest.setCharge(setVar("charge", src.charge()));
 

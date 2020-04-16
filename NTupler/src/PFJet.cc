@@ -4,7 +4,8 @@ namespace ac {
 
 PFJet::PFJet()
     : Candidate::Candidate(),
-      passesJetID_(false) {}
+      passesJetID_(false),
+      deepCSVDiscriminatorBvsAll_(0.) {}
 
   PFJet::~PFJet() {}
 
