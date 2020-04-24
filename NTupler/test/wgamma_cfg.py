@@ -23,7 +23,13 @@ opts.register('updateJECs', 1, parser.VarParsing.multiplicity.singleton,
 opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('keepLHEWeights', 1, parser.VarParsing.multiplicity.singleton,
-    parser.VarParsing.varType.int, "Store the LHE weights")
+    parser.VarParsing.varType.int, "Store some LHE weights")
+opts.register('keepLHEParticles', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE particles")
+opts.register('keepScaleWeights', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE scale weights")
+opts.register('keepPDFWeights', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE pdf weights")
 opts.register('doWGammaRivet', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Run the WGamma RIVET routine and save output variables")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
@@ -39,6 +45,9 @@ genOnly = int(opts.genOnly)
 year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
 keepLHEWeights = bool(opts.keepLHEWeights)
+keepScaleWeights = bool(opts.keepScaleWeights)
+keepPDFWeights = bool(opts.keepPDFWeights)
+keepLHEParticles = bool(opts.keepLHEParticles)
 updateJECs = bool(opts.updateJECs)
 doWGammaRivet = bool(opts.doWGammaRivet)
 
@@ -362,7 +371,7 @@ if isMC:
         process.selectedGenJets +
         process.acGenJetProducer
     )
-    if hasLHE:
+    if hasLHE and keepLHEParticles:
         process.acMCSequence += cms.Sequence(
             process.acLHEParticleProducer
         )
@@ -477,31 +486,38 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep .* genWeights=10',
         'drop lheweights:.*',
         'drop lheweightgroups:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6',
-        'keep lheweights:dim6=10',
+        'keep lheweights:dim6=10'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
 
-if year in ['2016', '2016_old']:
+
+if keepScaleWeights:
     process.acEventInfoProducer.select += cms.vstring(
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
-        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
-        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6'
     )
-if year in ['2017', '2018']:
-    process.acEventInfoProducer.select += cms.vstring(
-        # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
-        # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
-        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
-        # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_mc_hessian_pdfas.*=6',  # 7
-    )
+
+
+if keepPDFWeights:
+    if year in ['2016', '2016_old']:
+        process.acEventInfoProducer.select += cms.vstring(
+            'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
+            'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
+            'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
+            'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
+        )
+    if year in ['2017', '2018']:
+        process.acEventInfoProducer.select += cms.vstring(
+            # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
+            # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
+            'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
+            'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
+            # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_mc_hessian_pdfas.*=6',  # 7
+        )
 
 
 if year in ['2017', '2018'] and genOnly == 0:
