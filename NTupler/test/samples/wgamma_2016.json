@@ -179,28 +179,28 @@
     },
     "WGToMuNuG-EFT-madgraphMLM": {
       "dataset": "/WGToMuNuG-EFT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-genonly-miniaod-81a2c693d430d7f96872242e8057cc92/USER",
-      "attributes": [],
+      "attributes": ["submitgenonly"],
       "events": 2091072,
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },
     "WGToMuNuG-EFT_pTA_130_inf-madgraphMLM": {
       "dataset": "/WGToMuNuG-EFT_pTA_130_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-ptA-130-inf-genonly-miniaod-81a2c693d430d7f96872242e8057cc92/USER",
-      "attributes": [],
+      "attributes": ["submitgenonly"],
       "events": 801699,
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },
     "WGToMuNuG-EFT_pTA_300_inf-madgraphMLM": {
       "dataset": "/WGToMuNuG-EFT_pTA_300_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-ptA-300-inf-genonly-miniaod-81a2c693d430d7f96872242e8057cc92/USER",
-      "attributes": [],
+      "attributes": ["submitgenonly"],
       "events": 787537,
       "config": "mc_genonly",
       "inputDBS": "phys03"
     },
     "WGToMuNuG-EFT_pTA_500_inf-madgraphMLM": {
       "dataset": "/WGToMuNuG-EFT_pTA_500_inf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/agilbert-crab_wgamma-ptA-500-inf-genonly-miniaod-81a2c693d430d7f96872242e8057cc92/USER",
-      "attributes": [],
+      "attributes": ["submitgenonly"],
       "events": 768786,
       "config": "mc_genonly",
       "inputDBS": "phys03"

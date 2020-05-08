@@ -486,7 +486,7 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep .* genWeights=10',
         'drop lheweights:.*',
         'drop lheweightgroups:.*',
-        'keep lheweights:dim6=10'
+        'keep lheweights:dim6'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
