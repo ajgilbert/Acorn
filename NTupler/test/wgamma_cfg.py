@@ -32,6 +32,8 @@ opts.register('keepPDFWeights', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Store the LHE pdf weights")
 opts.register('doWGammaRivet', 0, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Run the WGamma RIVET routine and save output variables")
+opts.register('filterLHEPt', 0.0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.float, "Add min LHE pT cut")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -50,7 +52,7 @@ keepPDFWeights = bool(opts.keepPDFWeights)
 keepLHEParticles = bool(opts.keepLHEParticles)
 updateJECs = bool(opts.updateJECs)
 doWGammaRivet = bool(opts.doWGammaRivet)
-
+filterLHEPt = float(opts.filterLHEPt)
 ################################################################
 # Standard setup
 ################################################################
@@ -552,6 +554,16 @@ if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
         )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
+
+if filterLHEPt > 0:
+    print '>> Adding LHE pT filter at %f' % filterLHEPt
+    process.LHEPtFilter = cms.EDFilter("LHEPtFilter",
+        selectedPdgIds = cms.vint32(22),
+        ptMax = cms.double(-1.),
+        ptMin = cms.double(float(filterLHEPt)),
+        src = cms.InputTag("externalLHEProducer")
+    )
+    process.customInitialSeq += cms.Sequence(process.LHEPtFilter)
 
 if genOnly == 1:
     # Take the full collection for now
