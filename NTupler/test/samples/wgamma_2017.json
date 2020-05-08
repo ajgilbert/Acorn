@@ -120,19 +120,19 @@
       "dataset": "/WGToLNuG_01J_5f_PtG_120_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc_wg"
+      "config": "mc_wg_130"
     },
     "WGToLNuG-amcatnloFXFX-PtG-300": {
       "dataset": "/WGToLNuG_01J_5f_PtG_290_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc_wg"
+      "config": "mc_wg_300"
     },
     "WGToLNuG-amcatnloFXFX-PtG-500": {
       "dataset": "/WGToLNuG_01J_5f_PtG_490_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM",
       "attributes": ["submit"],
       "events": 0,
-      "config": "mc_wg"
+      "config": "mc_wg_500"
     },
     "ZGToLLG-amcatnloFXFX": {
       "dataset": "/ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM",
@@ -523,6 +523,9 @@
     "data": ["year=2017", "isData=1", "globalTag=102X_dataRun2_v12", "cores=2"],
     "mc":                           ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2"],
     "mc_wg":                        ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "doWGammaRivet=1"],
+    "mc_wg_130":                    ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "doWGammaRivet=1", "filterLHEPt=130"],
+    "mc_wg_300":                    ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "doWGammaRivet=1", "filterLHEPt=300"],
+    "mc_wg_500":                    ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "doWGammaRivet=1", "filterLHEPt=500"],
     "mc_no_lhe":                    ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "hasLHE=0"],
     "mc_no_lheweights":             ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "keepLHEWeights=0"],
     "mc_no_nopdfweights":           ["year=2017", "isData=0", "globalTag=102X_mc2017_realistic_v7", "cores=2", "keepPDFWeights=0"],
