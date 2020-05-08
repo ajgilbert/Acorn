@@ -109,6 +109,7 @@ class WGDataAnalysis : public ModuleBase {
   float p0_eta_;
   float p0_phi_;
   float p0_chiso_;
+  float p0_worstiso_;
   float p0_neiso_;
   float p0_phiso_;
   float p0_hovere_;

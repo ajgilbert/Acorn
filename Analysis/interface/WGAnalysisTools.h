@@ -78,5 +78,7 @@ bool IsPhoton(ac::GenParticle const& p);
 
 std::vector<double> ExtractScaleVariations(ac::EventInfo const& info, int version);
 
+bool FrixioneIso(ac::Candidate const& photon, std::vector<GenParticle*> const& lhe_parts, double dr);
+
 }
 #endif

@@ -98,6 +98,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("p0_eta", &p0_eta_);
       tree_->Branch("p0_phi", &p0_phi_);
       tree_->Branch("p0_chiso", &p0_chiso_);
+      tree_->Branch("p0_worstiso", &p0_worstiso_);
       tree_->Branch("p0_sigma", &p0_sigma_);
       tree_->Branch("p0_haspix", &p0_haspix_);
       tree_->Branch("p0_eveto", &p0_eveto_);
@@ -148,8 +149,8 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_p0_eta", &gen_p0_eta_);
         tree_->Branch("gen_phi", &gen_phi_);
         tree_->Branch("gen_phi_f", &gen_phi_f_);
-        tree_->Branch("true_phi", &true_phi_);
-        tree_->Branch("true_phi_f", &true_phi_f_);
+        tree_->Branch("gen_true_phi", &true_phi_);
+        tree_->Branch("gen_true_phi_f", &true_phi_f_);
 
         tree_->Branch("gen_l0_q", &gen_l0_q_);
         tree_->Branch("gen_l0_pt", &gen_l0_pt_);
@@ -390,15 +391,8 @@ int WGDataAnalysis::PreAnalysis() {
       PhotonIsoCorrector(p, rho);
     }
     if (correct_p_energy_ >= 0) {
-      if (year_ == 2018) {
-        double corr_fac_2018 = correct_p_energy_ == 1 ? 1.002 : 0.998;
-        for (Photon *p : photons) {
-          p->setVector(p->vector() * corr_fac_2018);
-        }
-      } else {
-        for (Photon *p : photons) {
-          p->setVector(p->vector() * (p->energyCorrections().at(correct_p_energy_) / p->energy()));
-        }
+      for (Photon *p : photons) {
+        p->setVector(p->vector() * (p->energyCorrections().at(correct_p_energy_) / p->energy()));
       }
     }
     if (correct_e_energy_ >= 0) {
@@ -833,6 +827,7 @@ int WGDataAnalysis::PreAnalysis() {
       p0_eta_ = p0->eta();
       p0_phi_ = p0->phi();
       p0_chiso_ = p0->chargedIso();
+      p0_worstiso_ = p0->worstChargedIsolation();
       p0_neiso_ = p0->neutralHadronIso();
       p0_phiso_ = p0->photonIso();
       p0_hovere_ = p0->hadTowOverEm();
@@ -1158,6 +1153,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_eta_ = 0.;
     p0_phi_ = 0.;
     p0_chiso_ = 0.;
+    p0_worstiso_ = 0.;
     p0_neiso_ = 0.;
     p0_phiso_ = 0.;
     p0_hovere_ = 0.;
@@ -1265,7 +1261,7 @@ int WGDataAnalysis::PreAnalysis() {
           &puppi_met_, &tk_met_,    &l0met_mt_,  &l0l1_M_,    &l0l1_pt_,   &l0l1_dr_,     &lhe_l0_pt_,
           &lhe_p0_pt_, &gen_p0_pt_, &gen_l0_pt_, &gen_wg_M_,  &gen_met_,   &gen_l0p0_dr_, &p0_pt_,
           &j0_pt_, &mt_cluster_, &gen_mt_cluster_, &gen_mll_, &gen_l0p0_deta_, &l0j0_M_,
-          &p0_chiso_,  &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_, &l0p0_deta_,
+          &p0_chiso_,  &p0_worstiso_, &p0_neiso_,  &p0_phiso_,  &p0_hovere_, &p0_sigma_,    &l0p0_dr_, &l0p0_deta_,
           &l0p0_dphi_, &l0p0_M_, &wt_sc_0_, &wt_sc_1_, &wt_sc_2_, &wt_sc_3_, &wt_sc_4_, &wt_sc_5_,
           &wt_isr_lo_, &wt_isr_hi_, &wt_fsr_lo_, &wt_fsr_hi_}) {
       *var = reduceMantissaToNbitsRounding(*var, 10);

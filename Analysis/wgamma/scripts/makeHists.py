@@ -706,6 +706,7 @@ if args.task in ['baseline', 'electron_fakes']:
         ('l0p0_M',      'l0p0_M',       (40, 0, 200)),
         ('mt_cluster_fine',  'mt_cluster',   (80, 0, 2000)),
         ('p0_chiso',    'p0_chiso',     (40, 0, 2.0)),
+        ('p0_worstiso',    'p0_worstiso',     (80, 0, 40)),
         ('p0_sigma',    'p0_sigma',     (60, 0., 0.06)),
         ('p0_haspix',   'p0_haspix',    (2, -0.5, 1.5)),
         ('p0_eveto',    'p0_eveto',     (2, -0.5, 1.5)),

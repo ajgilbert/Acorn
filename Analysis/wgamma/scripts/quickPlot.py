@@ -76,6 +76,7 @@ config_by_setting = {
         'e/*/l0p0_dr': ('#DeltaR(e,#gamma)', ''),
         'e/*/l0p0_M': ('m_{e#gamma}', 'GeV'),
         '*/*/mt_cluster*': ('m_{T}^{cluster}', 'GeV'),
+        '*/p0_worstiso': ('Photon I_{worst}', 'GeV'),
         '*/p0_chiso': ('Photon I_{charged}', 'GeV'),
         '*/p0_neiso': ('Photon I_{neutral}', 'GeV'),
         '*/p0_phiso': ('Photon I_{photon}', 'GeV'),
@@ -125,6 +126,10 @@ variants_by_path = [
     ("*/p0_chiso", {
             "prefix": "logy_",
             "logy": True}),
+    ("*/p0_worstiso", {
+            "prefix": "logy_",
+            "logy": True,
+            "rebin": 2}),
     ("*/p0_pt", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),

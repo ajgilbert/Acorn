@@ -273,7 +273,10 @@ int main(int argc, char* argv[]) {
     if (jsc.count("stitching")) {
       wg_gen_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
     }
-    wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("wg_gen").get()));
+    wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis")
+                              .set_fs(fs.at("wg_gen").get())
+                              .set_add_standalone(ac::contains(jsc["attributes"], "add_standalone"))
+                              .set_add_rivet(ac::contains(jsc["attributes"], "add_rivet")));
     wg_gen_seq.InsertSequence("wg_gen", analysis);
   }
 

@@ -100,7 +100,7 @@ configs = {
         'x_var_obs': 'p0_pt',
         # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
-        'phi_var': 'abs(true_phi_f)',
+        'phi_var': 'abs(gen_true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
         'phi_var_obs': 'abs(reco_puppi_phi_f)',
         'phi_bins': '(3,0.,math.pi/2.)',
@@ -169,12 +169,17 @@ years = args.years.split(',')
 # ]
 
 if 'makeEFTScaling' in steps:
+    outdir = 'eft_scaling_new_2018_st'
     for sample, sample_type in [
-        ('/home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
-        ('/home/files/190411-gen/wgamma_2016_v3/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
+        # ('/home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
+        # ('/home/files/190411-gen/wgamma_2016_v3/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
+        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
+        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
+        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
+        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-amcatnloFXFX-stitched.root', 'NLO')
     ]:
 
-        plot_dir = '/eos/user/a/agilbert/www/wgamma/eft_scaling/%s/%s' % (label, sample_type)
+        plot_dir = '/eos/user/a/agilbert/www/wgamma/%s/%s/%s' % (outdir, label, sample_type)
         call(['mkdir', '-p', plot_dir])
 
         standard_cuts = [
@@ -184,19 +189,21 @@ if 'makeEFTScaling' in steps:
             '--plot-dir', plot_dir
         ]
 
+        standard_cuts += ['--pre-wt', 'wt', '--pre-var', 'gen']
+
         for chg in ['+1', '-1']:
             call(['python', 'wgamma/scripts/makeEFTScaling.py',
-                  '--draw-x', 'g_pt', pt_bins, 'p_{T}^{#gamma}',
+                  '--draw-x', 'gen_p0_pt', pt_bins, 'p_{T}^{#gamma}',
                   '--draw-y', phi_var, phi_bins, phi_var_label,
                   '--n_pt', '80.0',
                   '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'main'] + standard_cuts)
             call(['python', 'wgamma/scripts/makeEFTScaling.py',
-                  '--draw-x', 'g_pt', pt_bins, 'p_{T}^{#gamma}',
+                  '--draw-x', 'gen_p0_pt', pt_bins, 'p_{T}^{#gamma}',
                   '--draw-y', phi_var, phi_bins, phi_var_label,
                   '--n_pt', '40.0', '--n_pt_max', '80.0',
                   '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'met1'] + standard_cuts)
 
-    call(['gallery.py', '/eos/user/a/agilbert/www/wgamma/eft_scaling'])
+    call(['gallery.py', '/eos/user/a/agilbert/www/wgamma/%s' % outdir])
 
 
 if 'makeHists' in steps:

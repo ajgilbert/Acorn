@@ -12,6 +12,7 @@
 #include "Acorn/NTupler/interface/json.hpp"
 #include "Acorn/NTupler/interface/EventInfo.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
+#include "Acorn/NTupler/interface/Reduction.h"
 // Modules
 #include "Acorn/Analysis/interface/GenericModule.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
@@ -32,9 +33,9 @@ using std::set;
 
 int main(int argc, char* argv[]) {
 
-  StandaloneReweight rw("Acorn.Analysis.standalone_reweight", "rw_WG-EWDim6");
+  StandaloneReweight rw("Acorn.Analysis.standalone_reweight", "rw_WG-EWDim6-legacy");
 
-  TFile fin("EventTree.root");
+  TFile fin(argc >= 2 ? argv[1] : "EventTree.root");
   TTree *tin = (TTree*)fin.Get("EventTree");
   ac::TreeEvent evt;
   evt.SetTree(tin);
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
     {-15, -13},
     {-16, -14}
   };
-  for (unsigned i = 0; i < tin->GetEntries(); ++i) {
+  for (unsigned i = 0; i < 1000; ++i) {
   	evt.SetEvent(i);
     auto const& lheparts = evt.GetPtrVec<ac::GenParticle>("lheParticles");
 
@@ -56,6 +57,8 @@ int main(int argc, char* argv[]) {
   	std::vector<int> pdgs;
   	std::vector<int> hels;
   	std::vector<int> stats;
+
+    bool skip = false;
 
   	for (auto const& p : lheparts) {
   		if (std::abs(p->status()) != 1) {
@@ -68,6 +71,7 @@ int main(int argc, char* argv[]) {
   			parts.push_back({p->energy(), p->vector().px(), p->vector().py(), p->vector().pz()});
   		}
       if (replace_pdg.count(p->pdgId())) {
+        skip = true;
         pdgs.push_back(replace_pdg[p->pdgId()]);
       } else {
     		pdgs.push_back(p->pdgId());
@@ -76,14 +80,41 @@ int main(int argc, char* argv[]) {
   		stats.push_back(p->status());
   	}
 
-    auto const* info = evt.GetPtr<ac::EventInfo>("eventInfo");
+    if (skip) continue;
 
-    auto wts = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), false, true);
+    auto const* info = evt.GetPtr<ac::EventInfo>("eventInfo");
+    bool verbose = false;
+    auto wts = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), false, verbose);
+    // if (verbose) {
+    //   for (unsigned i = 0; i < wts.size(); ++i) {
+    //     std::cout << "[" << i << "] = " << wts[i] << "\n";
+    //   }
+    // }
     double w1 = (info->lheWeights().at(100000) + 1.0);
     double w2 = (info->lheWeights().at(100004) + 1.0);
-    auto wts_hel = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), true, true);
+    // auto wts_hel = rw.ComputeWeights(parts, pdgs, hels, stats, info->lheAlphaS(), true, verbose);
 
-    std::cout << (w2 / w1) << "\t" << (wts[1] / wts[0]) << "\t" << (wts_hel[1] / wts_hel[0]) << "\n";
+    double emulate_w1 = wts[0] / wts[2];
+    double emulate_w2 = wts[1] / wts[2];
+
+    double round_w1 = reduceMantissaToNbitsRounding(emulate_w1 - 1.0, 10);
+    double round_w2 = reduceMantissaToNbitsRounding(emulate_w2 - 1.0, 10);
+    double round_nosub_w1 = reduceMantissaToNbitsRounding(emulate_w1, 10);
+    double round_nosub_w2 = reduceMantissaToNbitsRounding(emulate_w2, 10);
+    double no_round_w1 = emulate_w1 - 1.0;
+    double no_round_w2 = emulate_w2 - 1.0;
+
+    double relative = ( (wts[1] / wts[0]) / (w2 / w1)  );
+    if (std::abs(relative - 1.0) > 0.05) verbose = true;
+    if (verbose) {
+      std::cout << "Emulate: " << emulate_w1 << "\t" << emulate_w2 << "\t" << (emulate_w2 / emulate_w1) << "\n";
+      std::cout << "Round: " << round_w1 << "\t" << round_w2 << "\t" << ((round_w2 + 1.) / (round_w1 + 1.) ) << "\n";
+      std::cout << "NoRound: " << no_round_w1 << "\t" << no_round_w2 << "\t" << ((no_round_w2 + 1.) / (no_round_w1 + 1.) ) << "\n";
+      std::cout << "RoundNoSub: " << round_nosub_w1 << "\t" << round_nosub_w2 << "\t" << ((round_nosub_w2 ) / (round_nosub_w1) ) << "\n";
+      std::cout << "Actual: " << info->lheWeights().at(100000) << "\t" << info->lheWeights().at(100004) << "\n";
+      std::cout << (w2 / w1) << "\t" << (wts[1] / wts[0]) << "\t" << relative << "\n";
+    }
+
     // std::cout << "eventInfo[0]: " << (info->lheWeights().at(100000) + 1.0) << "\n";
     // std::cout << "eventInfo[1]: " << (info->lheWeights().at(100001) + 1.0) << "\n";
     // for (auto wt : wts) std::cout << wt << "\t";
