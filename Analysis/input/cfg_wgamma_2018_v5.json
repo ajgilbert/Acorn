@@ -79,9 +79,9 @@
       "stitching": {
         "binned": ["photon_pt"],
         "WGToLNuG-amcatnloFXFX":         {"target": true,  "min": [],      "max": [], "events": 17563228, "xsec": 191.4},
-        "WGToLNuG-amcatnloFXFX-PtG-130": {"target": false, "min": [130.0], "max": [], "events": 10580454,  "xsec": 1.028},
-        "WGToLNuG-amcatnloFXFX-PtG-300": {"target": false, "min": [300.0], "max": [], "events": 2777799,   "xsec": 0.07025},
-        "WGToLNuG-amcatnloFXFX-PtG-500": {"target": false, "min": [500.0], "max": [], "events": 2604314,   "xsec": 0.009322}
+        "WGToLNuG-amcatnloFXFX-PtG-130": {"target": false, "min": [130.0], "max": [], "events": 8581121,  "xsec": 1.028},
+        "WGToLNuG-amcatnloFXFX-PtG-300": {"target": false, "min": [300.0], "max": [], "events": 2538901,  "xsec": 0.07025},
+        "WGToLNuG-amcatnloFXFX-PtG-500": {"target": false, "min": [500.0], "max": [], "events": 2491010,  "xsec": 0.009322}
       }
     },
     "ZGToLLG-amcatnloFXFX": {
