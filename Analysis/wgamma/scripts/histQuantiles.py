@@ -31,7 +31,7 @@ quantiles = []
 fracs = []
 running_sum = 0.
 
-h.Print('all')
+# h.Print('all')
 
 for ix in xrange(1, h.GetNbinsX() + 1):
     xlow = h.GetXaxis().GetBinLowEdge(ix)
@@ -58,5 +58,5 @@ if args.apply_quantiles is not None:
 
     h.GetQuantiles(len(quantiles), res_q, array('d', quantiles))
 
-for X in zip(res_q, quantiles):
-    print X
+    for X in zip(res_q, quantiles):
+        print X

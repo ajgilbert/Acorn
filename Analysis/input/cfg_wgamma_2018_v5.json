@@ -355,7 +355,7 @@
       "GenXSecAnalyzer": "After filter: final cross section = 3.299e+00 +- 9.086e-03 pb"
     },
     "WZTo1L1Nu2Q-amcatnloFXFX": {
-      "attributes": [],
+      "attributes": ["default", "mc"],
       "inputs": ["WZTo1L1Nu2Q-amcatnloFXFX"],
       "xsec": 11.69,
       "GenXSecAnalyzer": "After filter: final cross section = 1.169e+01 +- 2.749e-02 pb"

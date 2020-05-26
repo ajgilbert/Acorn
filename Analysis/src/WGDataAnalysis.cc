@@ -51,20 +51,15 @@ int WGDataAnalysis::PreAnalysis() {
     // The default AutoFlush (30MB) seems to cause large
     // memory usage at times (probably due to some branches
     // being basically empty). Reduce it by a factor of 10 here:
-    tree_->SetAutoFlush(-6000000);
+    tree_->SetAutoFlush(-20000000);
     // var sets:
     // 0 = essential
     // 1 = nominal
     // 2 = all
 
     if (var_set_ >= 0) {
+      tree_->Branch("f", &f_);
       tree_->Branch("metfilters", &metfilters_);
-      if (check_is_zg_) {
-        tree_->Branch("gen_is_zg", &gen_is_zg_);
-      }
-      if (check_is_wwg_) {
-        tree_->Branch("gen_proc", &gen_proc_);
-      }
       tree_->Branch("n_vtx", &n_vtx_);
 
       tree_->Branch("n_pre_m", &n_pre_m_);
@@ -74,6 +69,8 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("n_alt_veto_m", &n_alt_veto_m_);
       tree_->Branch("n_alt_veto_e", &n_alt_veto_e_);
       tree_->Branch("n_qcd_j", &n_qcd_j_);
+      tree_->Branch("n_all_j", &n_all_j_);
+      tree_->Branch("n_all_btag_j", &n_all_btag_j_);
 
       tree_->Branch("l0_pt", &l0_pt_);
       tree_->Branch("l0_eta", &l0_eta_);
@@ -103,6 +100,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("p0_haspix", &p0_haspix_);
       tree_->Branch("p0_eveto", &p0_eveto_);
       tree_->Branch("p0_medium_noch", &p0_medium_noch_);
+      tree_->Branch("p0_tight_noch", &p0_tight_noch_);
       tree_->Branch("p0_loose", &p0_loose_);
       tree_->Branch("p0_medium", &p0_medium_);
       tree_->Branch("p0_truth", &p0_truth_);
@@ -132,17 +130,26 @@ int WGDataAnalysis::PreAnalysis() {
       // tree_->Branch("reco_puppi_phi", &reco_puppi_phi_);
       tree_->Branch("reco_puppi_phi_f", &reco_puppi_phi_f_);
 
-      tree_->Branch("wt_def", &wt_def_);
-      tree_->Branch("wt_pf", &wt_pf_);
-      tree_->Branch("wt_pu", &wt_pu_);
-      tree_->Branch("wt_l0", &wt_l0_);
-      tree_->Branch("wt_trg_l0", &wt_trg_l0_);
-      tree_->Branch("wt_l1", &wt_l1_);
-      tree_->Branch("wt_p0", &wt_p0_);
+      tree_->Branch("wt_l0_fake", &wt_l0_fake_);
       tree_->Branch("wt_p0_fake", &wt_p0_fake_);
       tree_->Branch("wt_p0_highpt_fake", &wt_p0_highpt_fake_);
-      tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
-      tree_->Branch("wt_l0_fake", &wt_l0_fake_);
+
+      if (!is_data_) {
+        tree_->Branch("wt_def", &wt_def_);
+        tree_->Branch("wt_pf", &wt_pf_);
+        tree_->Branch("wt_pu", &wt_pu_);
+        tree_->Branch("wt_l0", &wt_l0_);
+        tree_->Branch("wt_trg_l0", &wt_trg_l0_);
+        tree_->Branch("wt_l1", &wt_l1_);
+        tree_->Branch("wt_p0", &wt_p0_);
+        tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
+        if (check_is_zg_) {
+          tree_->Branch("gen_is_zg", &gen_is_zg_);
+        }
+        if (check_is_wwg_) {
+          tree_->Branch("gen_proc", &gen_proc_);
+        }
+      }
 
       if (do_wg_gen_vars_) {
         tree_->Branch("gen_p0_pt", &gen_p0_pt_);
@@ -166,21 +173,23 @@ int WGDataAnalysis::PreAnalysis() {
     }
 
     if (var_set_ >= 1) {
-      tree_->Branch("gen_mll", &gen_mll_);
-
-
       tree_->Branch("l1_eta", &l1_eta_);
       tree_->Branch("l1_phi", &l1_phi_);
 
       tree_->Branch("met_phi", &met_phi_);
       tree_->Branch("puppi_met_phi", &puppi_met_phi_);
 
-      tree_->Branch("wt_sc_0", &wt_sc_0_);
-      tree_->Branch("wt_sc_1", &wt_sc_1_);
-      tree_->Branch("wt_sc_2", &wt_sc_2_);
-      tree_->Branch("wt_sc_3", &wt_sc_3_);
-      tree_->Branch("wt_sc_4", &wt_sc_4_);
-      tree_->Branch("wt_sc_5", &wt_sc_5_);
+      tree_->Branch("gen_mll", &gen_mll_);
+      if (!is_data_) {
+        if (scale_weights_ > 0) {
+          tree_->Branch("wt_sc_0", &wt_sc_0_);
+          tree_->Branch("wt_sc_1", &wt_sc_1_);
+          tree_->Branch("wt_sc_2", &wt_sc_2_);
+          tree_->Branch("wt_sc_3", &wt_sc_3_);
+          tree_->Branch("wt_sc_4", &wt_sc_4_);
+          tree_->Branch("wt_sc_5", &wt_sc_5_);
+        }
+      }
 
       int npdf_tot = 0;
       for (unsigned ipdfset = 0; ipdfset < pdf_begin_.size(); ++ipdfset) {
@@ -197,23 +206,27 @@ int WGDataAnalysis::PreAnalysis() {
         }
       }
 
-      tree_->Branch("wt_isr_hi", &wt_isr_hi_);
-      tree_->Branch("wt_isr_lo", &wt_isr_lo_);
-      tree_->Branch("wt_fsr_hi", &wt_fsr_hi_);
-      tree_->Branch("wt_fsr_lo", &wt_fsr_lo_);
+      if (!is_data_) {
+        if (ps_weights_ > 0) {
+          tree_->Branch("wt_isr_hi", &wt_isr_hi_);
+          tree_->Branch("wt_isr_lo", &wt_isr_lo_);
+          tree_->Branch("wt_fsr_hi", &wt_fsr_hi_);
+          tree_->Branch("wt_fsr_lo", &wt_fsr_lo_);
+        }
 
-      tree_->Branch("wt_pu_hi", &wt_pu_hi_);
-      tree_->Branch("wt_pu_lo", &wt_pu_lo_);
-      tree_->Branch("wt_pf_hi", &wt_pf_hi_);
-      tree_->Branch("wt_pf_lo", &wt_pf_lo_);
-      tree_->Branch("wt_l0_hi", &wt_l0_hi_);
-      tree_->Branch("wt_l0_lo", &wt_l0_lo_);
-      tree_->Branch("wt_trg_l0_hi", &wt_trg_l0_hi_);
-      tree_->Branch("wt_trg_l0_lo", &wt_trg_l0_lo_);
-      tree_->Branch("wt_p0_hi", &wt_p0_hi_);
-      tree_->Branch("wt_p0_lo", &wt_p0_lo_);
-      tree_->Branch("wt_p0_e_fake_hi", &wt_p0_e_fake_hi_);
-      tree_->Branch("wt_p0_e_fake_lo", &wt_p0_e_fake_lo_);
+        tree_->Branch("wt_pu_hi", &wt_pu_hi_);
+        tree_->Branch("wt_pu_lo", &wt_pu_lo_);
+        tree_->Branch("wt_pf_hi", &wt_pf_hi_);
+        tree_->Branch("wt_pf_lo", &wt_pf_lo_);
+        tree_->Branch("wt_l0_hi", &wt_l0_hi_);
+        tree_->Branch("wt_l0_lo", &wt_l0_lo_);
+        tree_->Branch("wt_trg_l0_hi", &wt_trg_l0_hi_);
+        tree_->Branch("wt_trg_l0_lo", &wt_trg_l0_lo_);
+        tree_->Branch("wt_p0_hi", &wt_p0_hi_);
+        tree_->Branch("wt_p0_lo", &wt_p0_lo_);
+        tree_->Branch("wt_p0_e_fake_hi", &wt_p0_e_fake_hi_);
+        tree_->Branch("wt_p0_e_fake_lo", &wt_p0_e_fake_lo_);
+      }
       tree_->Branch("wt_p0_fake_err", &wt_p0_fake_err_);
       tree_->Branch("wt_p0_fake_bin", &wt_p0_fake_bin_);
 
@@ -518,6 +531,11 @@ int WGDataAnalysis::PreAnalysis() {
       return j->pt() > 30. && fabs(j->eta()) < 2.5 && j->passesJetID();
     });
 
+    // For general jet-related study
+    auto all_jets = ac::copy_keep_if(jets, [](ac::PFJet const* j) {
+      return j->pt() > 30. && fabs(j->eta()) < 4.7 && j->passesJetID();
+    });
+
     boost::range::sort(pre_muons, DescendingPt);
     boost::range::sort(pre_electrons, DescendingPt);
     boost::range::sort(pre_muons_loose_iso, DescendingPt);
@@ -525,6 +543,7 @@ int WGDataAnalysis::PreAnalysis() {
     boost::range::sort(pre_photons, DescendingPt);
     boost::range::sort(super_loose_photons, DescendingPt);
     boost::range::sort(qcd_jets, DescendingPt);
+    boost::range::sort(all_jets, DescendingPt);
 
     // Resolve the case where we have at n_m >= 1 and n_e >= 1
     ac::Muon* m0 = pre_muons.size() ? pre_muons[0] : nullptr;
@@ -590,6 +609,9 @@ int WGDataAnalysis::PreAnalysis() {
       ac::keep_if(qcd_jets, [&](ac::PFJet const* j) {
         return DeltaR(j, l0) > 0.7;
       });
+      ac::keep_if(all_jets, [&](ac::PFJet const* j) {
+        return DeltaR(j, l0) > 0.4;
+      });
       ac::keep_if(veto_electrons, [&](ac::Electron const* e) {
         return DeltaR(e, l0) > 0.3;
       });
@@ -609,6 +631,12 @@ int WGDataAnalysis::PreAnalysis() {
     }
 
     ac::Photon* p0 = pre_photons.size() ? pre_photons[0] : nullptr;
+
+    if (p0) {
+      ac::keep_if(all_jets, [&](ac::PFJet const* j) {
+        return DeltaR(j, p0) > 0.4;
+      });
+    }
 
     ac::PFJet* j0 = qcd_jets.size() ? qcd_jets[0] : nullptr;
 
@@ -641,6 +669,10 @@ int WGDataAnalysis::PreAnalysis() {
     n_alt_veto_e_ = alt_veto_electrons.size();
 
     n_qcd_j_ = qcd_jets.size();
+    n_all_j_ = all_jets.size();
+    n_all_btag_j_ = std::count_if(all_jets.begin(), all_jets.end(), [&](ac::PFJet const* j) {
+      return std::abs(j->eta()) < 2.4 && j->deepCSVDiscriminatorBvsAll() > 0.7527;
+    });
 
     // Calculate the truth vars for W+g events
     if (do_wg_gen_vars_) {
@@ -835,6 +867,7 @@ int WGDataAnalysis::PreAnalysis() {
       p0_haspix_ = p0->hasPixelSeed();
       p0_eveto_ = p0->passElectronVeto();
       p0_medium_noch_ = ac::PhotonIDIso(p0, year_, 1, false, false);
+      p0_tight_noch_ = ac::PhotonIDIso(p0, year_, 2, false, false);
       p0_loose_ = p0->isLooseIdPhoton();
       p0_medium_ = p0->isMediumIdPhoton();
       p0_tight_ = p0->isTightIdPhoton();
@@ -1108,15 +1141,19 @@ int WGDataAnalysis::PreAnalysis() {
       }
     }
     CompressVars();
-    //if (nproc == 10000) {
-    //  tree_->OptimizeBaskets(10E6, 1.1, "d");
-    //}
+
+    f_ = f_ | (p0_truth_ == 1 || p0_truth_ == 4 || p0_truth_ == 5) << 0; // p0_isprompt
+    f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 3 || p0_truth_ == 7) << 1; // p0_isjet
+    f_ = f_ | (p0_truth_ == 2) << 2; // p0_iselec
+    f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 2 || p0_truth_ == 3 || p0_truth_ == 7) << 3; //p0_isfake
+    f_ = f_ | (abs(p0_eta_) < 1.4442) << 4; // p0_eb
+    f_ = f_ | (abs(p0_eta_) > 1.4442) << 5; // p0_ee
     tree_->Fill();
-    //++nproc;
     return 0;
   }
 
   void WGDataAnalysis::SetDefaults() {
+    f_ = 0;
     run_ = 0;
     gen_proc_ = 0;
     gen_is_zg_ = false;
@@ -1129,6 +1166,8 @@ int WGDataAnalysis::PreAnalysis() {
     n_alt_veto_m_ = 0;
     n_alt_veto_e_ = 0;
     n_qcd_j_ = 0;
+    n_all_j_ = 0;
+    n_all_btag_j_ = 0;
     l0_pt_ = 0.;
     l0_eta_ = 0.;
     l0_phi_ = 0.;
@@ -1161,6 +1200,7 @@ int WGDataAnalysis::PreAnalysis() {
     p0_haspix_ = false;
     p0_eveto_ = false;
     p0_medium_noch_ = false;
+    p0_tight_noch_ = false;
     p0_medium_ = false;
     p0_loose_ = false;
     p0_fsr_ = false;

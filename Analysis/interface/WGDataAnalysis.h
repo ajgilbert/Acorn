@@ -58,22 +58,27 @@ class WGDataAnalysis : public ModuleBase {
 
   TTree* tree_;
 
+  int f_; // flags
+
   unsigned run_;
 
   // truth properties
   unsigned gen_proc_;
   bool gen_is_zg_; // Event is in the phase space covered by the NLO ZG sample
 
-  unsigned n_vtx_; // number of reco vertices
+  uint16_t n_vtx_; // number of reco vertices
   unsigned metfilters_; // metfilter bits (0 == OK)
 
-  unsigned n_pre_m_; // number of medium/tight muons
-  unsigned n_pre_e_; // number of medium/tight electrons
-  unsigned n_veto_m_; // number of veto muons
-  unsigned n_veto_e_; // number of veto electrons
-  unsigned n_alt_veto_m_; // number of veto muons
-  unsigned n_alt_veto_e_; // number of veto electrons
-  unsigned n_qcd_j_; // number of "QCD" jets
+  uint8_t n_pre_m_; // number of medium/tight muons
+  uint8_t n_pre_e_; // number of medium/tight electrons
+  uint8_t n_veto_m_; // number of veto muons
+  uint8_t n_veto_e_; // number of veto electrons
+  uint8_t n_alt_veto_m_; // number of veto muons
+  uint8_t n_alt_veto_e_; // number of veto electrons
+  uint8_t n_qcd_j_; // number of "QCD" jets
+
+  uint8_t n_all_j_; // number of inclusive jets with |eta| < 4.7
+  uint8_t n_all_btag_j_; // of which the number that are b-tagged
 
   // l0: Main muon/electron variables
   float l0_pt_;
@@ -86,8 +91,8 @@ class WGDataAnalysis : public ModuleBase {
   bool l0_tight_;
   bool l0_trg_; // trigger fired and object matched
   bool l0_trg_2_; // 2nd trigger option
-  int l0_q_;
-  unsigned l0_pdgid_;
+  char l0_q_;
+  uint8_t l0_pdgid_;
 
   // m1: Second muon variables
   float l1_pt_;
@@ -102,7 +107,7 @@ class WGDataAnalysis : public ModuleBase {
   bool l0l1_os_;
 
   // number of reco'd photons (no ID/Iso beyond miniaod presel)
-  unsigned n_pre_p_;
+  uint8_t n_pre_p_;
 
   // p0: Main photon variables, defined if n_p >= 1
   float p0_pt_;
@@ -119,8 +124,9 @@ class WGDataAnalysis : public ModuleBase {
   bool p0_loose_;
   bool p0_medium_noch_;
   bool p0_medium_; // also passes medium ID
+  bool p0_tight_noch_;
   bool p0_tight_; // also passes tight ID
-  unsigned p0_truth_; // 0 = default (assume jet), 1 = prompt photon, 2 = prompt electron
+  uint8_t p0_truth_; // 0 = default (assume jet), 1 = prompt photon, 2 = prompt electron
   bool p0_fsr_; // true if mother is a charged lepton, false otherwise
 
   float j0_pt_;
@@ -196,7 +202,7 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_hi_;
   float wt_p0_lo_;
   float wt_p0_fake_err_;
-  int wt_p0_fake_bin_;
+  char wt_p0_fake_bin_;
   float wt_p0_e_fake_hi_;
   float wt_p0_e_fake_lo_;
 

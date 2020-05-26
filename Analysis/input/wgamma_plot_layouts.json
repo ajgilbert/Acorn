@@ -33,6 +33,12 @@
       "color": [210,248,152]
     },
     {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E", "ST_J"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R"],
       "legend": "Z#rightarrowll (prompt #gamma)",
@@ -86,6 +92,12 @@
       "name": "VV_F",
       "entries": ["VV_R", "VV_E", "VV_J"],
       "legend": "Diboson",
+      "color": [210,248,152]
+    },
+    {
+      "name": "ST_F",
+      "entries": ["ST_R", "ST_E", "ST_J"],
+      "legend": "Single-t + #gamma",
       "color": [210,248,152]
     },
     {
@@ -165,6 +177,12 @@
       "color": [138,201,38]
     },
     {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R", "DY_E"],
       "legend": "Z(ll)#gamma",
@@ -207,6 +225,12 @@
       "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
     },
     {
       "name": "DY_R",
@@ -257,6 +281,12 @@
       "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
     },
     {
       "name": "DY_R",
@@ -315,6 +345,12 @@
       "color": [138,201,38]
     },
     {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R"],
       "legend": "Z(ll)#gamma",
@@ -357,6 +393,12 @@
       "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
     },
     {
       "name": "DY_R",
@@ -409,6 +451,12 @@
       "color": [138,201,38]
     },
     {
+      "name": "ST",
+      "entries": ["ST_R_fw", "ST_E_fw"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
       "name": "DY_R",
       "entries": ["DY_XZG_R_fw", "ZG_IZG_R_fw"],
       "legend": "Z#rightarrowll (prompt #gamma)",
@@ -439,6 +487,12 @@
       "entries": ["VV_R_fwl", "VV_E_fwl"],
       "legend": "Diboson",
       "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R_fwl", "ST_E_fwl"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
     },
     {
       "name": "DY_R",
@@ -485,6 +539,12 @@
       "color": [138,201,38]
     },
     {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
       "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R"],
       "legend": "Z#rightarrowll (prompt #gamma)",
@@ -521,6 +581,12 @@
       "entries": ["VV_R", "VV_E"],
       "legend": "Diboson",
       "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
     },
     {
       "name": "DY_R",

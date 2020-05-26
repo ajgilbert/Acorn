@@ -173,9 +173,9 @@ if 'makeEFTScaling' in steps:
     for sample, sample_type in [
         # ('/home/files/190411-gen/wgamma_2016_v2/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
         # ('/home/files/190411-gen/wgamma_2016_v3/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
-        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
-        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
-        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
+        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
+        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
+        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-amcatnloFXFX-stitched.root', 'NLO')
     ]:
 
