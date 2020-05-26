@@ -26,7 +26,8 @@ WGTagAndProbe::WGTagAndProbe(std::string const& name)
     : ModuleBase(name),
       fs_(nullptr),
       year_(2016),
-      is_data_(true) {}
+      is_data_(true),
+      do_photons_(false) {}
 
 WGTagAndProbe::~WGTagAndProbe() { ; }
 
@@ -100,20 +101,11 @@ int WGTagAndProbe::PreAnalysis() {
 
     // auto muons = event->GetPtrVec<ac::Muon>("muons");
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
+    auto photons = event->GetPtrVec<ac::Photon>("photons");
 
     auto tags = ac::copy_keep_if(electrons, [](ac::Electron *e) {
       return e->pt() > 35. && fabs(e->scEta()) < 2.5 && e->isCutBasedMediumElectron() &&
                    (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) && ElectronIPCuts(e);
-    });
-
-    auto probes = ac::copy_keep_if(electrons, [](ac::Electron *e) {
-      return e->pt() > 35. && fabs(e->scEta()) < 2.5 &&
-                   (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566);
-    });
-
-    auto electron_pairs = ac::MakePairs(tags, probes);
-    ac::keep_if(electron_pairs, [](std::pair<ac::Electron*, ac::Electron*> const& p) {
-      return (p.first->charge() * p.second->charge() == -1) && ac::DeltaR(p.first, p.second) > 0.4;
     });
 
     if (!is_data_) {
@@ -127,32 +119,85 @@ int WGTagAndProbe::PreAnalysis() {
       }
     }
 
-    bool req_pos = rng.Uniform() > 0.5;
 
-    for (auto const& pair : electron_pairs) {
-      ac::Electron const* ele_t = pair.first;
-      ac::Electron const* ele_p = pair.second;
+    if (!do_photons_) {
+      auto probes = ac::copy_keep_if(electrons, [](ac::Electron *e) {
+        return e->pt() > 35. && fabs(e->scEta()) < 2.5 &&
+                     (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566);
+      });
 
-      t_pt_ = ele_t->pt();
-      t_eta_ = ele_t->scEta();
-      t_phi_ = ele_t->phi();
-      t_q_ = ele_t->charge();
-      t_id_ = ele_t->isCutBasedMediumElectron() && ElectronIPCuts(ele_t);
-      t_rand_ = (ele_t->charge() == +1) == req_pos;
+      auto electron_pairs = ac::MakePairs(tags, probes);
+      ac::keep_if(electron_pairs, [](std::pair<ac::Electron*, ac::Electron*> const& p) {
+        return (p.first->charge() * p.second->charge() == -1) && ac::DeltaR(p.first, p.second) > 0.4;
+      });
 
-      p_pt_ = ele_p->pt();
-      p_eta_ = ele_p->scEta();
-      p_phi_ = ele_p->phi();
-      p_q_ = ele_p->charge();
-      p_id_ = ele_p->isCutBasedMediumElectron() && ElectronIPCuts(ele_p);
 
-      m_ll_ = (ele_t->vector() + ele_p->vector()).M();
+      bool req_pos = rng.Uniform() > 0.5;
 
-      t_trg_ = PassesTrigger(ele_t, event);
-      p_trg_ = PassesTrigger(ele_p, event);
+      for (auto const& pair : electron_pairs) {
+        ac::Electron const* ele_t = pair.first;
+        ac::Electron const* ele_p = pair.second;
 
-      tree_->Fill();
+        t_pt_ = ele_t->pt();
+        t_eta_ = ele_t->scEta();
+        t_phi_ = ele_t->phi();
+        t_q_ = ele_t->charge();
+        t_id_ = ele_t->isCutBasedMediumElectron() && ElectronIPCuts(ele_t);
+        t_rand_ = (ele_t->charge() == +1) == req_pos;
+
+        p_pt_ = ele_p->pt();
+        p_eta_ = ele_p->scEta();
+        p_phi_ = ele_p->phi();
+        p_q_ = ele_p->charge();
+        p_id_ = ele_p->isCutBasedMediumElectron() && ElectronIPCuts(ele_p);
+
+        m_ll_ = (ele_t->vector() + ele_p->vector()).M();
+
+        t_trg_ = PassesTrigger(ele_t, event);
+        p_trg_ = PassesTrigger(ele_p, event);
+
+        tree_->Fill();
+      }
+    } else {
+      auto probes = ac::copy_keep_if(photons, [&](ac::Photon const* p) {
+      return p->pt() > 30. && fabs(p->scEta()) < 2.5 &&
+             (fabs(p->scEta()) < 1.4442 || fabs(p->scEta()) > 1.566) && PhotonIDIso(p, year_, 1, true, true);
+      });
+
+      auto electron_pairs = ac::MakePairs(tags, probes);
+      ac::keep_if(electron_pairs, [](std::pair<ac::Electron*, ac::Photon*> const& p) {
+        return ac::DeltaR(p.first, p.second) > 0.4;
+      });
+
+
+      bool req_pos = rng.Uniform() > 0.5;
+
+      for (auto const& pair : electron_pairs) {
+        ac::Electron const* ele_t = pair.first;
+        ac::Photon const* ele_p = pair.second;
+
+        t_pt_ = ele_t->pt();
+        t_eta_ = ele_t->scEta();
+        t_phi_ = ele_t->phi();
+        t_q_ = ele_t->charge();
+        t_id_ = ele_t->isCutBasedMediumElectron() && ElectronIPCuts(ele_t);
+        t_rand_ = (ele_t->charge() == +1) == req_pos;
+
+        p_pt_ = ele_p->pt();
+        p_eta_ = ele_p->scEta();
+        p_phi_ = ele_p->phi();
+        p_q_ = ele_p->charge();
+        p_id_ = ele_p->worstChargedIsolation() < std::min(0.05 * ele_p->pt(), 6.0);
+
+        m_ll_ = (ele_t->vector() + ele_p->vector()).M();
+
+        t_trg_ = PassesTrigger(ele_t, event);
+        p_trg_ = true;
+
+        tree_->Fill();
+      }
     }
+
 
     return 0;
   }

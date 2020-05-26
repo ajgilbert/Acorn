@@ -8,7 +8,7 @@
     },
     "EGamma": {
       "attributes": ["default", "data", "tp"],
-      "sequences": ["WGamma"],
+      "sequences": ["WGamma", "PhotonTP"],
       "inputs": ["EGamma-2018A", "EGamma-2018B", "EGamma-2018C", "EGamma-2018D-v2"],
       "lumi": 59268.357238
     },
@@ -501,7 +501,7 @@
       "GenXSecAnalyzer": ""
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["mc", "check_is_zg", "tp", "jes"],
+      "attributes": ["mc", "check_is_zg", "jes"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM"],
       "xsec": 6077.22,
       "GenXSecAnalyzer": "After filter: final cross section = 5.313e+03 +- 1.450e+01 pb"
