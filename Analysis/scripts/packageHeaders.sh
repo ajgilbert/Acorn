@@ -17,7 +17,10 @@ for DIR in \
   "$(scram tool tag hepmc HEPMC_BASE)/include" \
   "$(scram tool tag heppdt INCLUDE)" \
   "$(scram tool tag fastjet INCLUDE)" \
-  "$(scram tool tag clhep INCLUDE)";
+  "$(scram tool tag clhep INCLUDE)" \
+  "$(scram tool tag rivet INCLUDE)" \
+  "$(scram tool tag yoda INCLUDE)" \
+  "$(scram tool tag python INCLUDE)";
   do
     echo "Adding path: ${DIR/${basedir}/}"
     alldirs+=( "${DIR/${basedir}/}" )

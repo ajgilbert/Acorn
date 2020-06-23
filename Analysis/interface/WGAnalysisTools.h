@@ -65,7 +65,8 @@ struct WGGenParticles {
 };
 
 WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
-                                     std::vector<GenParticle*> const& gen_parts);
+                                     std::vector<GenParticle*> const& gen_parts,
+                                     double photon_dr = 0.7, unsigned version = 0);
 
 bool IsElectron(ac::GenParticle const& p);
 bool IsMuon(ac::GenParticle const& p);
@@ -76,6 +77,8 @@ bool IsLepton(ac::GenParticle const& p);
 bool IsPhoton(ac::GenParticle const& p);
 
 std::vector<double> ExtractScaleVariations(ac::EventInfo const& info, int version);
+
+bool FrixioneIso(ac::Candidate const& photon, std::vector<GenParticle*> const& lhe_parts, double dr);
 
 }
 #endif

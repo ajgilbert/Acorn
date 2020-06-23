@@ -21,6 +21,7 @@ class WGTagAndProbe : public ModuleBase {
   CLASS_MEMBER(WGTagAndProbe, fwlite::TFileService*, fs)
   CLASS_MEMBER(WGTagAndProbe, unsigned, year)
   CLASS_MEMBER(WGTagAndProbe, bool, is_data)
+  CLASS_MEMBER(WGTagAndProbe, bool, do_photons)
   CLASS_MEMBER(WGTagAndProbe, std::string, corrections)
 
   LookupFilter filters_Ele27_;

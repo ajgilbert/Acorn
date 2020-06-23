@@ -30,7 +30,7 @@ def NormTH2InColumns(h):
 parser = argparse.ArgumentParser()
 parser.add_argument('--load', action='store_true')
 parser.add_argument('--years', default='2016,2017,2018')
-parser.add_argument('--input', default='root://eoscms.cern.ch//store/cmst3/user/agilbert/190214-full')
+parser.add_argument('--input', default='root://eoscms.cern.ch//store/user/agilbert/ANv5-200511-full')
 parser.add_argument('--output', default='output/plots')
 args = parser.parse_args()
 
@@ -39,9 +39,9 @@ inprefix = args.input
 outdir = args.output
 # inprefix = '/home/files'
 indirs = {
-    '2016': inprefix + '/wgamma_2016_v4/WGamma_',
-    '2017': inprefix + '/wgamma_2017_v4/WGamma_',
-    '2018': inprefix + '/wgamma_2018_v4/WGamma_',
+    '2016': inprefix + '/wgamma_2016_v5/WGamma_',
+    '2017': inprefix + '/wgamma_2017_v5/WGamma_',
+    '2018': inprefix + '/wgamma_2018_v5/WGamma_',
 }
 
 samples = {
@@ -103,18 +103,19 @@ if not args.load:
     X['eft_core'] = 'gen_l0_pt>80 && abs(gen_l0_eta)<2.5 && gen_met>80 && gen_p0_pt>150 && abs(gen_p0_eta)<2.5 && gen_l0p0_dr>3.0 && lhe_frixione'
     X['baseline_m'] = 'gen_pdgid==13 && is_wg_gen && $gen_core'
     X['baseline_e'] = 'gen_pdgid==11 && is_wg_gen && $gen_core'
-    X['muon_id'] = '$baseline_m && n_pre_m==1 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4'
-    X['elec_id'] = '$baseline_e && n_pre_e==1 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5'
+    X['muon_id'] = '$baseline_m && n_pre_m>=1 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4'
+    X['elec_id'] = '$baseline_e && n_pre_e>=1 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5'
     X['muon_trg'] = '$muon_id && l0_trg'
     # X['muon_trg'] = '$muon_iso && (l0_trg || (l0_pt > 55 && l0_trg_2))'
     X['elec_trg'] = '$elec_id && l0_trg'
     X['photon_id_m'] = '$muon_trg && n_pre_p==1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
-    X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 1 && n_veto_e == 0'
+    X['photon_pix_m'] = '$photon_id_m && !p0_haspix && p0_eveto && n_veto_m == 0 && n_veto_e == 0'
     X['photon_id_e'] = '$elec_trg && n_pre_p>=1 && p0_pt>30 && abs(p0_eta) < 2.5 && p0_medium && l0p0_dr>0.7'
-    X['photon_match_e'] = '$photon_id_e && gen_p0_match'
-    X['photon_pix_e'] = '$photon_match_e && !p0_haspix && p0_eveto && n_veto_e == 1 && n_veto_m == 0'
-    X['mZ_veto_m'] = '$photon_pix_m && (l0p0_M < 70 || l0p0_M > 100)'
-    X['mZ_veto_e'] = '$photon_pix_e && (l0p0_M < 70 || l0p0_M > 110)'
+    X['photon_pix_e'] = '$photon_id_e && !p0_haspix && p0_eveto && n_veto_e == 0 && n_veto_m == 0'
+    X['photon_wi_m'] = '$photon_pix_m && p0_worstiso < min(0.05 * p0_pt, 6.0)'
+    X['photon_wi_e'] = '$photon_pix_e && p0_worstiso < min(0.05 * p0_pt, 6.0)'
+    X['mZ_veto_m'] = '$photon_wi_m && (l0p0_M < 70 || l0p0_M > 100)'
+    X['mZ_veto_e'] = '$photon_wi_e && (l0p0_M < 70 || l0p0_M > 110)'
     X['met_m'] = '$mZ_veto_m && puppi_met>40'
     X['met_e'] = '$mZ_veto_e && puppi_met>40'
     X['eft_m'] = '$photon_pix_m && l0_pt>80 && puppi_met>80 && p0_pt>150 && l0p0_dr>3.0'
@@ -145,11 +146,11 @@ if not args.load:
                 # hists[year]['phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                 # hists[year]['phi_f_tk_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_tk_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                 hists[year]['phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi_f', 'reco_puppi_phi_f'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                hists[year]['a_gen_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(gen_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                # hists[year]['a_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                hists[year]['a_phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(true_phi_f)', 'abs(reco_puppi_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['a_gen_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(gen_true_phi_f)', 'abs(gen_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                # hists[year]['a_phi_f_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(gen_true_phi_f)', 'abs(reco_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['a_phi_f_puppi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['abs(gen_true_phi_f)', 'abs(reco_puppi_phi_f)'], binning=(3, 0, 1.5707, 3, 0, 1.5707), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                 # hists[year]['phi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_phi', 'reco_phi'], binning=(12, -3.142, 3.142, 12, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
-                hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
+                hists[year]['true_gen_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_true_phi', 'gen_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                 # hists[year]['true_reco_phi'][sa][sel] = Hist('TH2F', sample=sa, var=['true_phi', 'reco_phi'], binning=(24, -3.142, 3.142, 24, -3.142, 3.142), sel=X.get('$' + sel), wt='wt_pu*wt_def')
                 # hists[year]['sphi_response'][sa][sel] = Hist('TH2F', sample=sa, var=['gen_sphi', 'reco_sphi'], binning=(6, -1.571, 1.571, 6, -1.571, 1.571), sel=X.get('$' + sel), wt='wt_pu*wt_def')
         for sel in ['eft_core']:
@@ -286,6 +287,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'name': 'muon_trg', 'legend': ' + Muon Trg'},
                           {'name': 'photon_id_m', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_m', 'legend': ' + Photon pix veto'},
+                          {'name': 'photon_wi_m', 'legend': ' + Photon I_{worst}'},
                           {'name': 'mZ_veto_m', 'legend': ' + m_{Z} veto'},
                           {'name': 'met_m', 'legend': ' + p_{T}^{miss} cut'},
                       ],
@@ -294,7 +296,8 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'muon_trg', 'den': 'muon_id', 'type': 'binomial'},
                           {'num': 'photon_id_m', 'den': 'muon_trg', 'type': 'binomial'},
                           {'num': 'photon_pix_m', 'den': 'photon_id_m', 'type': 'binomial'},
-                          {'num': 'mZ_veto_m', 'den': 'photon_pix_m', 'type': 'binomial'},
+                          {'num': 'photon_wi_m', 'den': 'photon_pix_m', 'type': 'binomial'},
+                          {'num': 'mZ_veto_m', 'den': 'photon_wi_m', 'type': 'binomial'},
                           {'num': 'met_m', 'den': 'mZ_veto_m', 'type': 'binomial'},
                       ]
     )
@@ -348,6 +351,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'name': 'photon_id_e', 'legend': ' + Photon ID'},
                           # {'name': 'photon_match_e', 'legend': ' + Photon matched'},
                           {'name': 'photon_pix_e', 'legend': ' + Photon pix veto'},
+                          {'name': 'photon_wi_e', 'legend': ' + Photon I_{worst} veto'},
                           {'name': 'mZ_veto_e', 'legend': ' + m_{Z} veto'},
                           {'name': 'met_e', 'legend': ' + p_{T}^{miss} cut'},
                       ],
@@ -360,7 +364,8 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'photon_id_e', 'den': 'elec_trg', 'type': 'binomial'},
                           # {'num': 'photon_match_e', 'den': 'photon_id_e', 'type': 'binomial'},
                           {'num': 'photon_pix_e', 'den': 'photon_id_e', 'type': 'binomial'},
-                          {'num': 'mZ_veto_e', 'den': 'photon_pix_e', 'type': 'binomial'},
+                          {'num': 'photon_wi_e', 'den': 'photon_pix_e', 'type': 'binomial'},
+                          {'num': 'mZ_veto_e', 'den': 'photon_wi_e', 'type': 'binomial'},
                           {'num': 'met_e', 'den': 'mZ_veto_e', 'type': 'binomial'},
                       ]
     )
@@ -411,6 +416,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'name': 'muon_trg', 'legend': ' + Muon Trg'},
                           {'name': 'photon_id_m', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_m', 'legend': ' + Photon pix veto'},
+                          {'name': 'photon_wi_m', 'legend': ' + Photon I_{worst} veto'},
                           {'name': 'mZ_veto_m', 'legend': ' + m_{Z} veto'},
                           {'name': 'met_m', 'legend': ' + p_{T}^{miss} cut'},
                       ],
@@ -419,6 +425,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           {'num': 'muon_trg', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'photon_id_m', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'photon_pix_m', 'den': 'baseline_m', 'type': 'binomial'},
+                          {'num': 'photon_wi_m', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'mZ_veto_m', 'den': 'baseline_m', 'type': 'binomial'},
                           {'num': 'met_m', 'den': 'baseline_m', 'type': 'binomial'},
                       ]
@@ -440,6 +447,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'name': 'elec_trg_2', 'legend': ' + Electron Trg'},
                           {'name': 'photon_id_e', 'legend': ' + Photon ID'},
                           {'name': 'photon_pix_e', 'legend': ' + Photon pix veto'},
+                          {'name': 'photon_wi_e', 'legend': ' + Photon I_{worst} veto'},
                           {'name': 'mZ_veto_e', 'legend': ' + m_{Z} veto'},
                           {'name': 'met_e', 'legend': ' + p_{T}^{miss} cut'},
                       ],
@@ -450,6 +458,7 @@ for year, var in itertools.product(years, ['l0_pt', 'p0_pt']):
                           # {'num': 'elec_trg_2', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'photon_id_e', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'photon_pix_e', 'den': 'baseline_e', 'type': 'binomial'},
+                          {'num': 'photon_wi_e', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'mZ_veto_e', 'den': 'baseline_e', 'type': 'binomial'},
                           {'num': 'met_e', 'den': 'baseline_e', 'type': 'binomial'},
                       ]

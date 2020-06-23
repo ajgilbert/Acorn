@@ -11,6 +11,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TMath.h"
 #include "boost/lexical_cast.hpp"
+#include "boost/range/algorithm/sort.hpp"
 
 namespace ac {
 
@@ -148,7 +149,8 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
   }
 
   WGGenParticles ProduceWGGenParticles(std::vector<GenParticle*> const& lhe_parts,
-                                       std::vector<GenParticle*> const& gen_parts) {
+                                       std::vector<GenParticle*> const& gen_parts, double photon_dr,
+                                       unsigned version) {
     WGGenParticles info;
 
     for (auto const& part : lhe_parts) {
@@ -188,9 +190,22 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
       }
     }
 
-    std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
-      return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
-    });
+    if (version == 0) {
+      // Take the one closest to the LHE lepton
+      std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
+        return ac::DeltaR(c1, info.lhe_lep) < ac::DeltaR(c2, info.lhe_lep);
+      });
+    } else {
+      // Just sort by pT, take the leading
+      std::sort(info.viable_leptons.begin(), info.viable_leptons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
+        return c1->pt() > c2->pt();
+      });
+      // Drop photons too close to the lepton to be viable
+      if (info.viable_leptons.size() > 0) {
+        ac::keep_if(info.viable_photons, [&](ac::GenParticle const* p) { return ac::DeltaR(p, info.viable_leptons.at(0)) > photon_dr; });
+      }
+    }
+    // Take the leading photon in pT
     std::sort(info.viable_photons.begin(), info.viable_photons.end(), [&](ac::GenParticle const* c1, ac::GenParticle const* c2) {
       return c1->pt() > c2->pt();
     });
@@ -332,6 +347,30 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
       res[5] = 2. * (1.0 + info.lheWeights().at(1113));  // 0.5  0.5
     }
     return res;
+  }
+
+  bool FrixioneIso(ac::Candidate const& photon, std::vector<GenParticle*> const& lhe_parts, double dr) {
+    bool ok = true;
+    auto lhe_partons = ac::copy_keep_if(lhe_parts, [](ac::GenParticle *p) {
+      unsigned apdgid = std::abs(p->pdgId());
+      return p->status() == 1 && ((apdgid >= 1 && apdgid <= 6) || apdgid == 21);
+    });
+    boost::range::sort(lhe_partons, [&](ac::GenParticle* x1, ac::GenParticle* x2) {
+      return DeltaR(x1, &photon) < DeltaR(x2, &photon);
+    });
+    double frixione_sum = 0.;
+    double frixione_dr = dr;
+    for (auto const& ip : lhe_partons) {
+      double dr = DeltaR(ip, &photon);
+      if (dr >= frixione_dr) {
+        break;
+      }
+      frixione_sum += ip->pt();
+      if (frixione_sum > (photon.pt() * ((1. - std::cos(dr)) / (1. - std::cos(frixione_dr))))) {
+        ok = false;
+      }
+    }
+    return ok;
   }
 
 

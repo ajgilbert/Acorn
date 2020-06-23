@@ -21,6 +21,7 @@ class StandaloneReweight {
                                      std::vector<int> const& stats, double alphas, bool doHelicity,
                                      bool verb);
 
+  std::vector<double> TransformWeights(std::vector<double> const& in) const;
 };
 
 template <class T>

@@ -46,11 +46,15 @@ fout = ROOT.TFile(args.output, 'RECREATE')
 res = {}
 
 
-def DoMCRatio(num, den):
+def DoMCRatio(num, den, rebin=None):
     num.Print('range')
     den.Print('range')
     h_fr_mc = num.Clone()
-    h_fr_mc.Divide(den)
+    h_den = den.Clone()
+    if rebin is not None:
+        h_fr_mc.Rebin(rebin)
+        h_den.Rebin(rebin)
+    h_fr_mc.Divide(h_den)
     # print '>> MC'
     for ib in xrange(1, h_fr_mc.GetNbinsX() + 1):
         frac_err = 0.
@@ -64,7 +68,7 @@ def DoMCRatio(num, den):
 
 # for eb in ['barrel_%s' % args.channel, 'barrel1_%s' % args.channel, 'barrel2_%s' % args.channel, 'endcap_%s' % args.channel, 'endcap1_%s' % args.channel, 'endcap2_%s' % args.channel]:
 for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
-    for sel in ['%s_iso_t_sig_t%s' % (eb, post), '%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post)]:
+    for sel in ['%s_iso_t_sig_t%s' % (eb, post), '%s_iso_t_sig_l%s' % (eb, post), '%s_iso_l_sig_l%s' % (eb, post), '%s_iso_l_sig_t%s' % (eb, post), '%s_sig_l%s' % (eb, post), '%s_sig_t%s' % (eb, post)]:
         node = hists[args.channel][sel][var]
         sel_alt = sel.replace(eb, eb.replace('_%s' % args.channel, '_%s' % add_channel))
         print sel_alt
@@ -88,12 +92,12 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
 
         # Subtract off the background
         node['data_sub'] = node['data_obs'] - (node['Total_R'] + node['Total_E'])
-        if add_channel is not None:
+        if add_channel is not None: 
             node['data_sub'] += (node_alt['data_obs'] - (node_alt['Total_R'] + node_alt['Total_E']))
 
     # Now take the ratio between regions
-    h_fr = hists[args.channel]['%s_iso_l_sig_t%s' % (eb, post)][var]['data_sub'].Clone()
-    h_fr.Divide(hists[args.channel]['%s_iso_l_sig_l%s' % (eb, post)][var]['data_sub'])
+    h_fr = hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['data_sub'].Clone()
+    h_fr.Divide(hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['data_sub'])
     hint = None
     if var == 'p0_chiso':
         h_fr.Fit('pol1')
@@ -104,7 +108,7 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         hint.SetStats(False)
         hint.SetMarkerSize(0)
         hint.SetFillColorAlpha(2, 0.2)
-        hint.Print('range')
+        # hint.Print('range')
         # h_fr.GetFunction('pol2').Draw('E3SAME')
 
     # Print the results
@@ -117,18 +121,19 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
             )
     if args.mc:
         print '>> MC'
-        h_fr_mc = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_J'])
-        h_fr_mc_all = DoMCRatio(hists[args.channel]['%s_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_sig_l' % eb][var]['W_J'])
+        h_fr_mc = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t%s' % (eb, post)][var]['W_J'], hists[args.channel]['%s_iso_l_sig_l%s' % (eb, post)][var]['W_J'], rebin=1)
+        h_fr_mc_all = DoMCRatio(hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['W_J'], hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['W_J'], rebin=2)
         print '>> MC (h)'
-        h_fr_mc_h = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t' % eb][var]['W_H'], hists[args.channel]['%s_iso_l_sig_l' % eb][var]['W_H'])
+        h_fr_mc_h = DoMCRatio(hists[args.channel]['%s_iso_l_sig_t%s' % (eb, post)][var]['W_H'], hists[args.channel]['%s_iso_l_sig_l%s' % (eb, post)][var]['W_H'])
         print '>> MC (truth)'
-        h_fr_mc_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_J'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_J'])
+        h_fr_mc_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t%s' % (eb, post)][var]['W_J'], hists[args.channel]['%s_iso_t_sig_l%s' % (eb, post)][var]['W_J'])
+        h_fr_mc_truth_all = DoMCRatio(hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['Total_J'], hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['Total_J'], rebin=1)
         print '>> MC (h - truth)'
-        h_fr_mc_h_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_H'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_H'])
+        h_fr_mc_h_truth = DoMCRatio(hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['W_H'], hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['W_H'], rebin=2)
         print '>> MC (p - truth)'
-        h_fr_mc_p_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_P'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_P'])
+        h_fr_mc_p_truth = DoMCRatio(hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['W_P'], hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['W_P'], rebin=2)
         print '>> MC (m - truth)'
-        h_fr_mc_m_truth = DoMCRatio(hists[args.channel]['%s_iso_t_sig_t' % eb][var]['W_M'], hists[args.channel]['%s_iso_t_sig_l' % eb][var]['W_M'])
+        h_fr_mc_m_truth = DoMCRatio(hists[args.channel]['%s_sig_t%s' % (eb, post)][var]['W_M'], hists[args.channel]['%s_sig_l%s' % (eb, post)][var]['W_M'], rebin=2)
     plot.Set(h_fr, MarkerSize=0.5)
     canv = ROOT.TCanvas('photon_fakes_%s_%s%s' % (args.year, eb, post), 'photon_fakes_%s_%s%s' % (args.year, eb, post))
     pads = plot.OnePad()
@@ -140,12 +145,34 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         plot.Set(h_fr_mc, LineColor=2, MarkerColor=2, MarkerSize=0.5)
         plot.Set(h_fr_mc_all, LineColor=2, MarkerColor=2, MarkerSize=0.5)
         plot.Set(h_fr_mc_truth, LineColor=4, MarkerColor=4, MarkerSize=0.5)
+        plot.Set(h_fr_mc_truth_all, LineColor=4, MarkerColor=4, MarkerSize=0.5)
         plot.Set(h_fr_mc_h, LineColor=30, MarkerColor=30, MarkerSize=0.5)
         plot.Set(h_fr_mc_h_truth, LineColor=6, MarkerColor=6, MarkerSize=0.5)
         plot.Set(h_fr_mc_p_truth, LineColor=8, MarkerColor=8, MarkerSize=0.5)
         plot.Set(h_fr_mc_m_truth, LineColor=28, MarkerColor=28, MarkerSize=0.5)
+
+        # hint_mc = None
+        # if var == 'p0_chiso':
+        #     h_fr_mc_truth_all.Fit('pol1')
+        #     # func = ROOT.TF1('func', '[0]*TMath::Exp([1]*([2]-x))')
+        #     # h_fr.Fit('func')
+        #     hint_mc = ROOT.TH1D("hint_mc", "Fitted gaussian with .95 conf.band", 100, 0, 20)
+        #     ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(hint_mc, 0.68)
+        #     hint_mc.SetStats(False)
+        #     hint_mc.SetMarkerSize(0)
+        #     hint_mc.SetFillColorAlpha(4, 0.2)
+        #     hint_mc.SetLineColor(4)
+        #     # hint_mc.Print('range')
+        # if hint_mc is not None:
+        #     hint_mc.Draw("E3SAME")
+        #     h_fr.Draw('ESAME')
+
         h_fr_mc.Draw('SAMEE')
         # h_fr_mc_truth.Draw('SAMEE')
+        # h_fr_mc_all.Draw('SAMEE')
+        # h_fr_mc_truth_all.Rebin(2)
+        # h_fr_mc_truth_all.Scale(0.5)
+        h_fr_mc_truth_all.Draw('SAMEE')
         # h_fr_mc_h.Draw('SAMEE')
         # h_fr_mc_h_truth.Draw('SAMEE')
         # h_fr_mc_p_truth.Draw('SAMEE')
@@ -161,6 +188,8 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         legend.AddEntry(h_fr, 'Data', 'L')
         # legend.AddEntry(h_fr_mc, 'W+jets (anti-iso)', 'L')
         # legend.AddEntry(h_fr_mc_truth, 'W+jets (iso)', 'L')
+        # legend.AddEntry(h_fr_mc_all, 'W+jets (anti-iso)', 'L')
+        legend.AddEntry(h_fr_mc_truth_all, 'W+jets (iso)', 'L')
         # legend.AddEntry(h_fr_mc_h, 'W+jets [H] (anti-iso)', 'L')
         # legend.AddEntry(h_fr_mc_h_truth, 'W+jets [H] (iso)', 'L')
         # legend.AddEntry(h_fr_mc_p_truth, 'W+jets [P] (iso)', 'L')

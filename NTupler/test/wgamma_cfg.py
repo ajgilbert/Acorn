@@ -23,7 +23,17 @@ opts.register('updateJECs', 1, parser.VarParsing.multiplicity.singleton,
 opts.register('hasLHE', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Assume MC sample has LHE info")
 opts.register('keepLHEWeights', 1, parser.VarParsing.multiplicity.singleton,
-    parser.VarParsing.varType.int, "Store the LHE weights")
+    parser.VarParsing.varType.int, "Store some LHE weights")
+opts.register('keepLHEParticles', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE particles")
+opts.register('keepScaleWeights', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE scale weights")
+opts.register('keepPDFWeights', 1, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Store the LHE pdf weights")
+opts.register('doWGammaRivet', 0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.int, "Run the WGamma RIVET routine and save output variables")
+opts.register('filterLHEPt', 0.0, parser.VarParsing.multiplicity.singleton,
+    parser.VarParsing.varType.float, "Add min LHE pT cut")
 opts.register('cores', 1, parser.VarParsing.multiplicity.singleton,
     parser.VarParsing.varType.int, "Number of cores/threads")
 opts.register('input', 'root://xrootd.unl.edu//store/data/Run2016H/Tau/MINIAOD/PromptReco-v3/000/284/036/00000/36B9BD65-5B9F-E611-820B-02163E0126D3.root', parser.VarParsing.multiplicity.singleton, parser.VarParsing.varType.string, "input file")
@@ -37,8 +47,12 @@ genOnly = int(opts.genOnly)
 year = str(opts.year)
 hasLHE = bool(opts.hasLHE)
 keepLHEWeights = bool(opts.keepLHEWeights)
+keepScaleWeights = bool(opts.keepScaleWeights)
+keepPDFWeights = bool(opts.keepPDFWeights)
+keepLHEParticles = bool(opts.keepLHEParticles)
 updateJECs = bool(opts.updateJECs)
-
+doWGammaRivet = bool(opts.doWGammaRivet)
+filterLHEPt = float(opts.filterLHEPt)
 ################################################################
 # Standard setup
 ################################################################
@@ -170,7 +184,7 @@ ele_heep_id = "heepElectronID-HEEPV70"
 process.slimmedElectrons.modifierConfig.modifications.append(cms.PSet(
     electron_config=cms.PSet(
         ElectronCutValues=cms.InputTag("egmGsfElectronIDs", ele_medium_id),
-        electronSrc=cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess"),
+        electronSrc=(cms.InputTag("updatedElectrons") if year in ['2016'] else cms.InputTag("slimmedElectrons", "", "@skipCurrentProcess")),
     ),
     modifierName=cms.string('EGExtraInfoModifierFromVIDCutFlowResultValueMaps'),
     overrideExistingValues=cms.bool(True),
@@ -325,6 +339,31 @@ process.acGenJetProducer = cms.EDProducer('AcornCandidateProducer',
 )
 
 
+if doWGammaRivet:
+    process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+        inputPruned=cms.InputTag("prunedGenParticles"),
+        inputPacked=cms.InputTag("packedGenParticles"),
+    )
+    process.generator = cms.EDProducer("GenParticles2HepMCConverter",
+        genParticles=cms.InputTag("mergedGenParticles"),
+        genEventInfo=cms.InputTag("generator", "", "SIM"),
+        signalParticlePdgIds=cms.vint32()
+    )
+    process.wgammaRivetProducer = cms.EDProducer("WGammaRivetProducer",
+        HepMCCollection=cms.InputTag("generator:unsmeared")
+    )
+    process.acWGammaRivetProducer = cms.EDProducer('AcornWGammaRivetProducer',
+        input=cms.InputTag("wgammaRivetProducer"),
+        branch=cms.string('rivetVariables'),
+        select=cms.vstring('keep .*')
+    )
+    process.acMCSequence += cms.Sequence(
+        process.mergedGenParticles +
+        process.generator +
+        process.wgammaRivetProducer +
+        process.acWGammaRivetProducer
+    )
+
 if isMC:
     process.acMCSequence += cms.Sequence(
         process.selectedGenParticles +
@@ -334,7 +373,7 @@ if isMC:
         process.selectedGenJets +
         process.acGenJetProducer
     )
-    if hasLHE:
+    if hasLHE and keepLHEParticles:
         process.acMCSequence += cms.Sequence(
             process.acLHEParticleProducer
         )
@@ -449,31 +488,38 @@ process.acEventInfoProducer = cms.EDProducer('AcornEventInfoProducer',
         'keep .* genWeights=10',
         'drop lheweights:.*',
         'drop lheweightgroups:.*',
-        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6',
-        'keep lheweights:dim6=10',
+        'keep lheweights:dim6'
         ),
     includeNumVertices=cms.bool(True),
     inputVertices=cms.InputTag('offlineSlimmedPrimaryVertices')
 )
 
-if year in ['2016', '2016_old']:
+
+if keepScaleWeights:
     process.acEventInfoProducer.select += cms.vstring(
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
-        'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
-        'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
-        'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
+        'keep lheweights:(renscfact|facscfact|muR|muF|mur|muf|MUR|MUF).*=6'
     )
-if year in ['2017', '2018']:
-    process.acEventInfoProducer.select += cms.vstring(
-        # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
-        # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
-        'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
-        'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
-        # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
-        'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_mc_hessian_pdfas.*=6',  # 7
-    )
+
+
+if keepPDFWeights:
+    if year in ['2016', '2016_old']:
+        process.acEventInfoProducer.select += cms.vstring(
+            'keep lheweightgroups:.*NNPDF30_lo_as_0130.LHgrid.*=6',  # 1
+            'keep lheweightgroups:.*NNPDF30_lo_as_0130_nf_4.LHgrid.*=6',  # 2
+            'keep lheweightgroups:.*NNPDF30_nlo_nf_5_pdfas.*=6',  # 3
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118.*=6',  # 4
+            'keep lheweights:.*PDF.set...260[0-9][0-9][0-9].*=6',  # 5
+        )
+    if year in ['2017', '2018']:
+        process.acEventInfoProducer.select += cms.vstring(
+            # 'keep lheweightgroups:.*NNPDF31_nlo_as_0118_nf_4.*=6',  # 1
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_nf_4.*=6',  # 2
+            # 'keep lheweightgroups:.*NNPDF31_nlo_hessian_pdfas.*=6',  # 3
+            'keep lheweightgroups:.*NNPDF31_nnlo_hessian_pdfas.*=6',  # 4
+            'keep lheweights:.*lhapdf.306[0-9][0-9][0-9].*=6',  # 5
+            # 'keep lheweights:.*lhapdf.305[0-9][0-9][0-9].*=6',  # 6
+            'keep lheweightgroups:.*NNPDF31_nnlo_as_0118_mc_hessian_pdfas.*=6',  # 7
+        )
 
 
 if year in ['2017', '2018'] and genOnly == 0:
@@ -491,34 +537,47 @@ prefiring_era_str = {
     "2018": "2017BtoF"
 }
 
-process.prefiringweight = cms.EDProducer("L1ECALPrefiringWeightProducer",
-    ThePhotons=cms.InputTag("slimmedPhotons"),
-    TheJets=cms.InputTag("slimmedJets"),
-    L1Maps=cms.string("L1PrefiringMaps_new.root"), # update this line with the location of this file
-    DataEra=cms.string(prefiring_era_str[year]), #Use 2016BtoH for 2016, 2017BtoF for 2017
-    UseJetEMPt=cms.bool(False), #can be set to true to use jet prefiring maps parametrized vs pt(em) instead of pt
-    PrefiringRateSystematicUncty=cms.double(0.2) #Minimum relative prefiring uncty per object
+from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
+process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
+    DataEra = cms.string(prefiring_era_str[year]), #Use 2016BtoH for 2016
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUncty = cms.double(0.2),
+    SkipWarnings = False
 )
 
 if isMC and year in ['2016_old', '2016', '2017'] and genOnly == 0:
     process.customInitialSeq += cms.Sequence(process.prefiringweight)
     process.acEventInfoProducer.userDoubles += cms.VInputTag(
-        cms.InputTag('prefiringweight:NonPrefiringProb'),
-        cms.InputTag('prefiringweight:NonPrefiringProbUp'),
-        cms.InputTag('prefiringweight:NonPrefiringProbDown')
+        cms.InputTag('prefiringweight:nonPrefiringProb'),
+        cms.InputTag('prefiringweight:nonPrefiringProbUp'),
+        cms.InputTag('prefiringweight:nonPrefiringProbDown')
         )
 
 process.acEventProducer = cms.EDProducer('AcornEventProducer')
+
+if filterLHEPt > 0:
+    print '>> Adding LHE pT filter at %f' % filterLHEPt
+    process.LHEPtFilter = cms.EDFilter("LHEPtFilter",
+        selectedPdgIds = cms.vint32(22),
+        ptMax = cms.double(-1.),
+        ptMin = cms.double(float(filterLHEPt)),
+        src = cms.InputTag("externalLHEProducer")
+    )
+    process.customInitialSeq += cms.Sequence(process.LHEPtFilter)
 
 if genOnly == 1:
     # Take the full collection for now
     process.acGenParticleProducer.input = cms.InputTag("prunedGenParticles")
     process.acEventInfoProducer.saveMetFilters = cms.vstring()
+    process.acEventInfoProducer.userDoubles = cms.VInputTag()
+    process.selectedGenJets.src = cms.InputTag("ak4GenJetsNoNu")
     process.acEventInfoProducer.includeNumVertices=cms.bool(False)
     process.p = cms.Path(
         process.acGenMetProducer +
         process.acGenParticleProducer +
         process.acLHEParticleProducer +
+        process.selectedGenJets +
+        process.acGenJetProducer +
         process.acEventInfoProducer +
         process.acEventProducer)
 elif genOnly == 2:

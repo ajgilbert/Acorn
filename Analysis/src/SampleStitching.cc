@@ -177,8 +177,7 @@ int SampleStitching::Execute(TreeEvent* event) {
   // std::cout << " => " << target_lumi << "/" << eff_lumi << "\n";
   weight_ =  target_lumi / eff_lumi;
   info->setWeight("stitching", weight_);
-
-  if (tree_) {
+  if (fs_ &&  tree_) {
     tree_->Fill();
   }
   return 0;

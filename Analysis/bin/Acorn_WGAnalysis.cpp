@@ -266,6 +266,32 @@ int main(int argc, char* argv[]) {
     tp_seq.InsertSequence(tp_label, analysis);
   }
 
+  ac::Sequence photp_seq;
+  std::string photp_label = "PhotonTP";
+  if (sequences.count(photp_label)) {
+    auto tp_fs = fs.at(photp_label).get();
+
+    if (jsc.count("stitching")) {
+      photp_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+    }
+
+    photp_seq.BuildModule(ac::EventCounters("EventCounters").set_fs(tp_fs));
+
+    if (is_data) {
+      photp_seq.BuildModule(
+          ac::LumiMask("LumiMask").set_fs(tp_fs).set_input_file(jsc["data_json"]));
+    }
+
+    photp_seq.BuildModule(ac::WGTagAndProbe("WGTagAndProbe")
+                             .set_fs(tp_fs)
+                             .set_year(jsc["year"])
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v11.root")
+                             .set_is_data(is_data)
+                             .set_do_photons(true));
+
+    photp_seq.InsertSequence(photp_label, analysis);
+  }
+
 
   ac::Sequence wg_gen_seq;
 
@@ -273,7 +299,10 @@ int main(int argc, char* argv[]) {
     if (jsc.count("stitching")) {
       wg_gen_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
     }
-    wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis").set_fs(fs.at("wg_gen").get()));
+    wg_gen_seq.BuildModule(ac::WGAnalysis("WGAnalysis")
+                              .set_fs(fs.at("wg_gen").get())
+                              .set_add_standalone(ac::contains(jsc["attributes"], "add_standalone"))
+                              .set_add_rivet(ac::contains(jsc["attributes"], "add_rivet")));
     wg_gen_seq.InsertSequence("wg_gen", analysis);
   }
 

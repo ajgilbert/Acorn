@@ -14,6 +14,8 @@
 #include "Acorn/NTupler/interface/Track.h"
 #include "Acorn/NTupler/interface/Electron.h"
 #include "Acorn/NTupler/interface/PFJet.h"
+#include "Acorn/NTupler/src/CMS_2020_PAS_SMP_20_005.h"
+#include "DataFormats/Common/interface/Wrapper.h"
 
 namespace { struct dictionary {
   ac::Candidate dummy1;
@@ -40,7 +42,8 @@ namespace { struct dictionary {
   std::vector<ac::Electron> dummy22;
   ac::PFJet dummy23;
   std::vector<ac::PFJet> dummy24;
-
+  WGammaRivetVariables dummy25;
+  edm::Wrapper<WGammaRivetVariables> dummy26;
 };
 }
 

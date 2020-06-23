@@ -4,6 +4,7 @@ import CombineHarvester.CombineTools.plotting as plot
 from Acorn.Analysis.analysis import *
 from array import array
 import argparse
+import math
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
@@ -13,7 +14,7 @@ plot.ModTDRStyle()
 tname = 'WGAnalysis'
 
 
-def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=False, dropInt=False, wsp=None, binStr=''):
+def ParametrizeBin(x_vals, y_vals, y_val_errs, sumw2, sA, sB, sA_2, sB_2, label, makePlots=False, dropBSM=False, dropInt=False, wsp=None, binStr=''):
     if y_vals[0] == 0.:
         print '>> Skipping bin %s due to zero content' % label
         return
@@ -31,7 +32,28 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=F
     y_0p2 = y_vals_rel[2]
     sig_BSM = (y_0p2 - 2. * y_0p1 + y_0) / 0.02
     sig_int = (y_0p1 - y_0 - 0.01 * sig_BSM) / 0.1
-    print '%.2g, %.2g, %.2g' % (sig_SM, sig_int, sig_BSM)
+    A = sA / y_vals[0]
+    B = sB / y_vals[0]
+
+    neff = math.pow(y_vals[0], 2) / sumw2[0]
+    print 'neff: %g' % neff
+    stddev2_A = (sA_2 / y_vals[0]) - A * A
+    stddev2_B = (sB_2 / y_vals[0]) - B * B
+    if stddev2_A < 0.:
+        print 'Error, stddev2_A = %g' % stddev2_A
+        stddev_A = 0.
+    else:
+        stddev_A = math.sqrt(stddev2_A)
+    if stddev2_B < 0.:
+        print 'Error, stddev2_B = %g' % stddev2_B
+        stddev_B = 0.
+    else:
+        stddev_B = math.sqrt(stddev2_B)
+    stderr_A = stddev_A / math.sqrt(neff)
+    stderr_B = stddev_B / math.sqrt(neff)
+
+    print 'Nom: %.2g, %.2g, %.2g' % (sig_SM, sig_int, sig_BSM)
+    print 'Alt: %.2g, %.2g +/- %.2g, %.2g +/- %2.g' % (sig_SM, A, stderr_A, B, stderr_B)
     if makePlots:
         fn_full = ROOT.TF1("fn_full", "([0] + x*[1] + x*x*[2])/[0]", 0, 1)
         fn_lin = ROOT.TF1("fn_lin", "([0] + x*[1])/[0]", 0, 1)
@@ -78,11 +100,13 @@ def ParametrizeBin(x_vals, y_vals, y_val_errs, label, makePlots=False, dropBSM=F
         sig_BSM = 0.
     if wsp is not None:
         wsp.factory('expr::%s("%.3g+@0*%.3g+@1*@0*@0*%.3g",c3w[0,0,10],withBSM[1])' % (label, sig_SM, sig_int, sig_BSM))
-    return (sig_SM, sig_int, sig_BSM)
+    return (sig_SM, sig_int, sig_BSM, stderr_A, stderr_B)
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sample', default='')
+parser.add_argument('--pre-wt', default='wt')
+parser.add_argument('--pre-var', default='gen')
 parser.add_argument('--draw-x', default='gen_phi', nargs=3)
 parser.add_argument('--draw-y', default=None, nargs=3)
 parser.add_argument('--unit-norm', action='store_true')
@@ -134,27 +158,41 @@ compute = [
     ('X_1p0', 1.0),
 ]
 
+pre_wt = args.pre_wt
+gen = args.pre_var
+
+
 for name, sa, wt in [
-        ('nominal', 'WG', 'wt_C3w_0p0*wt_def'),
-        ('C3w_0p1', 'WG', 'wt_C3w_0p1*wt_def'),
-        ('C3w_0p2', 'WG', 'wt_C3w_0p2*wt_def'),
-        ('C3w_0p4', 'WG', 'wt_C3w_0p4*wt_def'),
-        ('C3w_0p67', 'WG', 'wt_C3w_0p67*wt_def'),
-        ('C3w_1p0', 'WG', 'wt_C3w_1p0*wt_def'),
+        ('nominal', 'WG', '%s_C3w_0p0 * wt_def' % pre_wt),
+        ('A', 'WG', '(20*(%s_C3w_0p1/%s_C3w_0p0) - 5*(%s_C3w_0p2/%s_C3w_0p0) - 15) * %s_C3w_0p0 * wt_def' % (pre_wt, pre_wt, pre_wt, pre_wt, pre_wt)),
+        ('B', 'WG', '(-100*(%s_C3w_0p1/%s_C3w_0p0) + 50*(%s_C3w_0p2/%s_C3w_0p0) + 50) * %s_C3w_0p0 * wt_def' % (pre_wt, pre_wt, pre_wt, pre_wt, pre_wt)),
+        ('A_2', 'WG', '(20*(%s_C3w_0p1/%s_C3w_0p0) - 5*(%s_C3w_0p2/%s_C3w_0p0) - 15) * (20*(%s_C3w_0p1/%s_C3w_0p0) - 5*(%s_C3w_0p2/%s_C3w_0p0) - 15) * %s_C3w_0p0  * wt_def' % (pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt)),
+        ('B_2', 'WG', '(-100*(%s_C3w_0p1/%s_C3w_0p0) + 50*(%s_C3w_0p2/%s_C3w_0p0) + 50) * (-100*(%s_C3w_0p1/%s_C3w_0p0) + 50*(%s_C3w_0p2/%s_C3w_0p0) + 50) * %s_C3w_0p0  * wt_def' % (pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt, pre_wt)),
+        ('C3w_0p1', 'WG', '%s_C3w_0p1 * wt_def' % pre_wt),
+        ('C3w_0p2', 'WG', '%s_C3w_0p2 * wt_def' % pre_wt),
+        ('C3w_0p4', 'WG', '%s_C3w_0p4 * wt_def' % pre_wt),
+        ('C3w_0p67', 'WG', '%s_C3w_0p67 * wt_def' % pre_wt),
+        ('C3w_1p0', 'WG', '%s_C3w_1p0 * wt_def' % pre_wt),
+        ('nominal_2', 'WG', '%s_C3w_0p0 * %s_C3w_0p0 * wt_def' % (pre_wt, pre_wt)),
+        ('C3w_0p1_2', 'WG', '%s_C3w_0p1 * %s_C3w_0p1 * wt_def' % (pre_wt, pre_wt)),
+        ('C3w_0p2_2', 'WG', '%s_C3w_0p2 * %s_C3w_0p2 * wt_def' % (pre_wt, pre_wt)),
+        ('C3w_0p4_2', 'WG', '%s_C3w_0p4 * %s_C3w_0p4 * wt_def' % (pre_wt, pre_wt)),
+        ('C3w_0p67_2', 'WG', '%s_C3w_0p67 * %s_C3w_0p67 * wt_def' % (pre_wt, pre_wt)),
+        ('C3w_1p0_2', 'WG', '%s_C3w_1p0 * %s_C3w_1p0 * wt_def' % (pre_wt, pre_wt)),
 ]:
     if args.charge == '0':
         charge_sel = '1'
     else:
-        charge_sel = 'l_charge==%s' % args.charge
-    sel = '%s && nparts>=1 && nparts <=%s && g_pt>%s && g_pt<%s && l_pt>%s && n_pt>%s && n_pt<%s && fabs(l_eta) < %s && fabs(n_eta) < %s && fabs(g_eta) < %s && l_g_dr > %s' % (
-        charge_sel, args.nparts_max, args.g_pt, args.g_pt_max, args.l_pt, args.n_pt, args.n_pt_max, args.l_eta, args.n_eta, args.g_eta, args.dr)
+        charge_sel = '%s_l0_q==%s' % (gen, args.charge)
+    sel = '%s_pdgid==13 && %s && nparts>=1 && nparts <=%s && %s_p0_pt>%s && %s_p0_pt<%s && %s_l0_pt>%s && %s_n0_pt>%s && %s_n0_pt<%s && fabs(%s_l0_eta) < %s && fabs(%s_n0_eta) < %s && fabs(%s_p0_eta) < %s && %s_l0p0_dr > %s && %s_p0_frixione' % (
+        gen, charge_sel, args.nparts_max, gen, args.g_pt, gen, args.g_pt_max, gen, args.l_pt, gen, args.n_pt, gen, args.n_pt_max, gen, args.l_eta, gen, args.n_eta, gen, args.g_eta, gen, args.dr, gen)
     print sel
 
     if is2D:
         hists[name] = Hist('TH2D', binning_x + binning_y, sa, [drawvar_x, drawvar_y], sel=sel, wt=wt)
     else:
         hists[name] = Hist('TH1D', binning_x, sa, [drawvar_x], sel=sel, wt=wt)
-    hists[name + '_phi_reco'] = Hist('TH2D', (40, -3.15, 3.15, 40, -3.15, 3.15), sa, ['true_phi', 'gen_phi'], sel=sel, wt=wt)
+    hists[name + '_phi_reco'] = Hist('TH2D', (40, -3.15, 3.15, 40, -3.15, 3.15), sa, ['gen_true_phi', 'gen_phi'], sel=sel, wt=wt)
 
 samples = {
     'WG': args.sample
@@ -171,8 +209,14 @@ if not is2D:
     for ib in xrange(1, hists['nominal'].GetNbinsX() + 1):
         y_vals = [hists[h].GetBinContent(ib) for h in y_labels]
         y_vals_err = [hists[h].GetBinError(ib) for h in y_labels]
+        sumw2 = [hists[h].GetSumw2()[ib] for h in y_labels]
+        sumwx2 = [hists['%s_2' % h].GetBinContent(ib) for h in y_labels]
+        A = hists['A'].GetBinContent(ib)
+        B = hists['B'].GetBinContent(ib)
+        A_2 = hists['A_2'].GetBinContent(ib)
+        B_2 = hists['B_2'].GetBinContent(ib)
         bin_str = '%g #leq %s < %g' % (hists[h].GetXaxis().GetBinLowEdge(ib), label_x, hists[h].GetXaxis().GetBinUpEdge(ib))
-        bin_scalings.append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i' % (args.label, pm_label, ib - 1), wsp=wsp, binStr=bin_str))
+        bin_scalings.append(ParametrizeBin(x_vals, y_vals, y_vals_err, sumw2, A, B, A_2, B_2, '%s_%s_%i' % (args.label, pm_label, ib - 1), wsp=wsp, binStr=bin_str))
         scale = bin_scalings[ib - 1]
         for label, val in compute:
             if args.int_only:
@@ -181,23 +225,32 @@ if not is2D:
                 scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
             hists[label].SetBinContent(ib, hists[label].GetBinContent(ib) * scale_factor)
 
+    for ib in xrange(0, hists['nominal'].GetNbinsX()):
+        print '%-10i %-20.2f %15.2f +/- %-15.2f  %15.2f +/- %-15.2f' % (ib, bin_scalings[ib][0], bin_scalings[ib][1], bin_scalings[ib][3], bin_scalings[ib][2], bin_scalings[ib][4])
+
 else:
     for ib in xrange(1, hists['nominal'].GetNbinsX() + 1):
         bin_scalings.append(list())
         for jb in xrange(1, hists['nominal'].GetNbinsY() + 1):
             y_vals = [hists[h].GetBinContent(ib, jb) for h in y_labels]
             y_vals_err = [hists[h].GetBinError(ib, jb) for h in y_labels]
+            sumw2 = [hists[h].GetSumw2()[hists[h].GetBin(ib, jb)] for h in y_labels]
+            sumwx2 = [hists['%s_2' % h].GetBinContent(ib, jb) for h in y_labels]
+            A = hists['A'].GetBinContent(ib, jb)
+            B = hists['B'].GetBinContent(ib, jb)
+            A_2 = hists['A_2'].GetBinContent(ib, jb)
+            B_2 = hists['B_2'].GetBinContent(ib, jb)
             bin_str = '%.4g #leq %s < %.4g' % (hists[h].GetXaxis().GetBinLowEdge(ib), label_x, hists[h].GetXaxis().GetBinUpEdge(ib))
             bin_str +=', %.4g #leq %s < %.4g' % (hists[h].GetYaxis().GetBinLowEdge(jb), label_y, hists[h].GetYaxis().GetBinUpEdge(jb))
-            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, '%s_%s_%i_%i' % (args.label, pm_label, ib - 1, jb - 1), makePlots=True, wsp=wsp, binStr=bin_str))
+            bin_scalings[ib - 1].append(ParametrizeBin(x_vals, y_vals, y_vals_err, sumw2, A, B, A_2, B_2, '%s_%s_%i_%i' % (args.label, pm_label, ib - 1, jb - 1), makePlots=True, wsp=wsp, binStr=bin_str))
             scale = bin_scalings[ib - 1][jb - 1]
             for label, val in compute:
                 scale_factor = (scale[0] + val * scale[1] + val * val * scale[2])
                 hists[label].SetBinContent(ib, jb, hists[label].GetBinContent(ib, jb) * scale_factor)
 
-for ib in xrange(0, hists['nominal'].GetNbinsX()):
-    for jb in xrange(0, hists['nominal'].GetNbinsY()):
-        print '%-10i %-10i %-20.2f %-20.2f %-20.2f' % (ib, jb, bin_scalings[ib][jb][0], bin_scalings[ib][jb][1], bin_scalings[ib][jb][2])
+    for ib in xrange(0, hists['nominal'].GetNbinsX()):
+        for jb in xrange(0, hists['nominal'].GetNbinsY()):
+            print '%-10i %-10i %-20.2f %15.2f +/- %-15.2f  %15.2f +/- %-15.2f' % (ib, jb, bin_scalings[ib][jb][0], bin_scalings[ib][jb][1], bin_scalings[ib][jb][3], bin_scalings[ib][jb][2], bin_scalings[ib][jb][4])
 
 if not is2D:
     if args.unit_norm:

@@ -13,11 +13,14 @@ class PFJet : public Candidate {
   virtual void Print() const;
 
   inline bool passesJetID() const { return passesJetID_; }
+  inline float deepCSVDiscriminatorBvsAll() const { return deepCSVDiscriminatorBvsAll_; }
 
   inline void setPassesJetID(bool const& passesJetID) { passesJetID_ = passesJetID; }
+  inline void setDeepCSVDiscriminatorBvsAll(float const& deepCSVDiscriminatorBvsAll) { deepCSVDiscriminatorBvsAll_ = deepCSVDiscriminatorBvsAll; }
 
  private:
   bool passesJetID_;
+  float deepCSVDiscriminatorBvsAll_;
 
 };
 
