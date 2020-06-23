@@ -146,7 +146,8 @@ int main(int argc, char* argv[]) {
     }));
 
     if (jsc.count("stitching")) {
-      wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]).set_fs(wgamma_fs));
+      wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]));
+      // wgamma_seq.BuildModule(ac::SampleStitching("SampleStitching", jsc["stitching"]).set_fs(wgamma_fs));
     }
 
 
@@ -187,7 +188,7 @@ int main(int argc, char* argv[]) {
     // Keep baseline set of vars
     int var_set = 1;
     // Unless this is some systematic variation - in which case keep only the core ones
-    bool only_wg = false;
+    bool only_wg = true;
     if (subseq != "") {
       var_set = 0;
       only_wg = true;
@@ -218,7 +219,7 @@ int main(int argc, char* argv[]) {
     wgamma_seq.BuildModule(ac::WGDataAnalysis("WGDataAnalysis")
                              .set_fs(wgamma_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v11.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v12.root")
                              .set_is_data(is_data)
                              .set_gen_classify("")
                              .set_do_wg_gen_vars(ac::contains(jsc["attributes"], "do_wg_gen_vars"))
@@ -260,7 +261,7 @@ int main(int argc, char* argv[]) {
     tp_seq.BuildModule(ac::WGTagAndProbe("WGTagAndProbe")
                              .set_fs(tp_fs)
                              .set_year(jsc["year"])
-                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v11.root")
+                             .set_corrections("wgamma/inputs/wgamma_corrections_" + s_year + "_v12.root")
                              .set_is_data(is_data));
 
     tp_seq.InsertSequence(tp_label, analysis);

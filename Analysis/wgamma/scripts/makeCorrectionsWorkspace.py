@@ -194,7 +194,7 @@ if era == '2016':
         (loc + '/iso/RunGH_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_gh_ratio', wrapvars_new),
         (loc + '/iso/RunBCDEF_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_bf_ratio_err', wrapvars_new, +1.0),
         (loc + '/iso/RunGH_SF_ISO.root:NUM_TightRelIso_DEN_MediumID_eta_pt', 'm_iso_gh_ratio_err', wrapvars_new, +1.0),
-        (loc + '/output_2016_lepton_fakes_ratios_m.root:lepton_fakes', 'm_fake_ratio', wrapvars_def),
+        (loc + '/output_2016_lepton_fakes_ratios_m_200511.root:lepton_fakes', 'm_fake_ratio', wrapvars_def + ['l0met_mt']),
     ]
 
     muon_trk_eff_hist = TGraphAsymmErrorsToTH1D(GetFromTFile(loc + '/track/Tracking_EfficienciesAndSF_BCDEFGH.root:ratio_eff_eta3_dr030e030_corr'))
@@ -208,7 +208,7 @@ if era == '2017':
         (loc + '/RunBCDEF_SF_ID_syst.root:NUM_MediumID_DEN_genTracks_pt_abseta', 'm_id_ratio_err', wrapvars_def, +1.0),
         (loc + '/RunBCDEF_SF_ISO_syst.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio', wrapvars_def),
         (loc + '/RunBCDEF_SF_ISO_syst.root:NUM_TightRelIso_DEN_MediumID_pt_abseta', 'm_iso_ratio_err', wrapvars_def, +1.0),
-        (loc + '/output_2017_lepton_fakes_ratios_m.root:lepton_fakes', 'm_fake_ratio', wrapvars_def),
+        (loc + '/output_2017_lepton_fakes_ratios_m_200511.root:lepton_fakes', 'm_fake_ratio', wrapvars_def + ['l0met_mt']),
     ]
 
 if era == '2018':
@@ -221,7 +221,7 @@ if era == '2018':
         (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_BeforeMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_early_ratio_err', wrapvars_def, +1.0),
         (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio', wrapvars_def),
         (loc + '/EfficienciesStudies_2018_trigger_EfficienciesAndSF_2018Data_AfterMuonHLTUpdate.root:IsoMu24_PtEtaBins/pt_abseta_ratio', 'm_trg_late_ratio_err', wrapvars_def, +1.0),
-        (loc + '/output_2018_lepton_fakes_ratios_m.root:lepton_fakes', 'm_fake_ratio', wrapvars_def),
+        (loc + '/output_2018_lepton_fakes_ratios_m_200511.root:lepton_fakes', 'm_fake_ratio', wrapvars_def + ['l0met_mt']),
     ]
 
 for task in histsToWrap:
@@ -266,7 +266,7 @@ if era == '2016':
         (loc + '/2016LegacyReReco_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio_err', ['e_eta', 'e_pt'], +1.0),
         (loc + '/ZeeTP_2016_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
         (loc + '/ZeeTP_2016_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
-        (loc + '/output_2016_lepton_fakes_ratios_e.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/output_2016_lepton_fakes_ratios_e_200511.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])', 'l0met_mt']),
     ]
 if era == '2017':
     histsToWrap = [
@@ -276,7 +276,7 @@ if era == '2017':
         (loc + '/2017_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio_err', ['e_eta', 'e_pt'], +1.0),
         (loc + '/ZeeTP_2017_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
         (loc + '/ZeeTP_2017_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
-        (loc + '/output_2017_lepton_fakes_ratios_e.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/output_2017_lepton_fakes_ratios_e_200511.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])', 'l0met_mt']),
     ]
 
 if era == '2018':
@@ -287,7 +287,7 @@ if era == '2018':
         (loc + '/2018_ElectronMedium.root:EGamma_SF2D', 'e_id_ratio_err', ['e_eta', 'e_pt'], +1.0),
         (loc + '/ZeeTP_2018_Data_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_data', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
         (loc + '/ZeeTP_2018_DYJetsToLL_Fits_Trg_pt_eta_bins.root:Trg_pt_eta_bins', 'e_trg_mc', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
-        (loc + '/output_2018_lepton_fakes_ratios_e.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])']),
+        (loc + '/output_2018_lepton_fakes_ratios_e_200511.root:lepton_fakes', 'e_fake_ratio', ['e_pt', 'expr::e_abs_eta("TMath::Abs(@0)",e_eta[0])', 'l0met_mt']),
     ]
 
 for task in histsToWrap:
@@ -311,6 +311,8 @@ if era == '2016':
         (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_EffData2D', 'p_id_data', ['p_eta', 'p_pt']),
         (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/Fall17V2_2016_Medium_photons.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
+        (loc + '/PhotonTP_2016_Data_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/PhotonTP_2016_DYJetsToLL_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2016_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2016_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
     ]
@@ -322,6 +324,8 @@ if era == '2017':
         (loc + '/2017_PhotonsMedium.root:EGamma_EffData2D', 'p_id_data', ['p_eta', 'p_pt']),
         (loc + '/2017_PhotonsMedium.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/2017_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
+        (loc + '/PhotonTP_2017_Data_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/PhotonTP_2017_DYJetsToLL_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2017_data_obs_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2017_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
     ]
@@ -334,6 +338,8 @@ if era == '2018':
         (loc + '/2018_PhotonsMedium.root:EGamma_EffMC2D', 'p_id_mc', ['p_eta', 'p_pt']),
         (loc + '/2018_PhotonsMedium.root:EGamma_SF2D', 'p_id_ratio_err', ['p_eta', 'p_pt'], +1.0),
         (loc + '/HasPix_2018.root:eleVeto_SF', 'p_psv_ratio', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/PhotonTP_2018_Data_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
+        (loc + '/PhotonTP_2018_DYJetsToLL_Fits_WorstIso_pt_eta_bins.root:WorstIso_pt_eta_bins', 'p_swi_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2018_data_obs_nominal_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_data', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])']),
         # (loc + '/EFakesTP_2018_DY_E_Fits_EGammaFakes.root:EGammaFakes', 'e_p_fake_mc', ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'])
 
@@ -372,6 +378,9 @@ for task in histsToWrap:
     else:
         SafeWrapHist(w, task[2], GetFromTFile(task[0]), name=task[1])
 
+
+w.factory('expr::p_swi_ratio("@0/@1", p_swi_data, p_swi_mc)')
+
 SummaryPlots({
     "h_ref": w.genobj('hist_p_id_ratio'),
     "proj": 'Y',
@@ -403,6 +412,7 @@ SummaryPlots({
     "y_label": '#eta'
     })
 
+
 SummaryPlots({
     "h_ref": h_efake_nominal,
     "proj": 'Y',
@@ -428,6 +438,14 @@ histsToWrap = [
     (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio'),
     (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_index' % era, 'p_fake_index'),
     (loc + '/output_%s_photon_fakes_ratios_m.root:photon_fakes_stat_syst' % era, 'p_fake_ratio_err', +1.0),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes' % era, 'p_fake_ratio_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_stat' % era, 'p_fake_ratio_stat_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_bkg_syst' % era, 'p_fake_ratio_bkg_syst_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_const_syst' % era, 'p_fake_ratio_const_syst_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_index' % era, 'p_fake_index_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes' % era, 'p_fake_ratio_err_new', +1.0),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_mc' % era, 'p_fake_ratio_mc_new'),
+    (loc + '/output_%s_photon_fakes_ratios_SWI.root:photon_fakes_mc_true' % era, 'p_fake_ratio_mc_true_new'),
     (loc + '/high_pt_photon_fakes_MC.root:photon_fakes', 'p_highpt_fake_ratio'),
     (loc + '/high_pt_photon_fakes_MC.root:photon_fakes', 'p_highpt_fake_ratio_err', +1.0),
 ]
@@ -438,8 +456,39 @@ for task in histsToWrap:
     else:
         SafeWrapHist(w, ['p_pt', 'expr::p_abs_eta("TMath::Abs(@0)",p_eta[0])'], GetFromTFile(task[0]), name=task[1])
 
+SummaryPlotsPhotonFakes({
+    "h_ref": w.genobj('hist_p_fake_ratio_new'),
+    "proj": 'X',
+    "logx": False,
+    "main_label": "p_fake_%s" % era,
+    "main_text": "Misid. j #rightarrow #gamma",
+    "x_axis_title": "Photon candidate p_{T} (GeV)",
+    "data": [w.genobj('hist_p_fake_ratio_new'), w.genobj('hist_p_fake_ratio_stat_new'), w.genobj('hist_p_fake_ratio_const_syst_new'), w.genobj('hist_p_fake_ratio_bkg_syst_new')],
+    "data_labels": ['total', 'stat', 'const_syst', 'bkg_syst'],
+    "mc": [],
+    "ratio": [],
+    "ratio_range": [0, 3.9],
+    "y_range": [0, 0.2],
+    "y_label": 'p_{T}'
+    })
+
+SummaryPlotsPhotonFakes({
+    "h_ref": w.genobj('hist_p_fake_ratio_mc_new'),
+    "proj": 'X',
+    "logx": False,
+    "main_label": "p_fake_mc_%s" % era,
+    "main_text": "Misid. j #rightarrow #gamma",
+    "x_axis_title": "Photon candidate p_{T} (GeV)",
+    "data": [w.genobj('hist_p_fake_ratio_mc_new'), w.genobj('hist_p_fake_ratio_mc_true_new')],
+    "data_labels": ['mc', 'mc_true'],
+    "mc": [],
+    "ratio": [],
+    "ratio_range": [0, 3.9],
+    "y_range": [0, 0.2],
+    "y_label": 'p_{T}'
+    })
 
 w.Print()
-w.writeToFile('wgamma_corrections_%s_v11.root' % era)
+w.writeToFile('wgamma_corrections_%s_v12.root' % era)
 w.Delete()
 

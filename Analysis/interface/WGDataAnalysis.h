@@ -78,6 +78,7 @@ class WGDataAnalysis : public ModuleBase {
   uint8_t n_qcd_j_; // number of "QCD" jets
 
   uint8_t n_all_j_; // number of inclusive jets with |eta| < 4.7
+  uint8_t n_cen_j_; // number of inclusive jets with |eta| < 2.5
   uint8_t n_all_btag_j_; // of which the number that are b-tagged
 
   // l0: Main muon/electron variables
@@ -171,7 +172,11 @@ class WGDataAnalysis : public ModuleBase {
   float wt_trg_l0_; // trigger weight for l0
   float wt_l1_; // trk/ID/Iso weight for m1
   float wt_p0_; // ID/iso weight for p0
+  float wt_p0_swi_; // ID/iso weight for p0
   float wt_p0_fake_; // Photon fake factor
+  float wt_p0_fake_new_; // Photon fake factor
+  float wt_p0_fake_mc_new_; // Photon fake factor
+  float wt_p0_fake_mc_true_new_; // Photon fake factor
   float wt_p0_highpt_fake_; // Photon fake factor for high pT photons
   float wt_p0_e_fake_; // Electron -> photon fake factor
   float wt_l0_fake_; // Lepton fake factor
@@ -202,7 +207,9 @@ class WGDataAnalysis : public ModuleBase {
   float wt_p0_hi_;
   float wt_p0_lo_;
   float wt_p0_fake_err_;
+  float wt_p0_fake_err_new_;
   char wt_p0_fake_bin_;
+  char wt_p0_fake_bin_new_;
   float wt_p0_e_fake_hi_;
   float wt_p0_e_fake_lo_;
 
@@ -238,12 +245,10 @@ class WGDataAnalysis : public ModuleBase {
   float gen_l0p0_deta_;
   float gen_mt_cluster_;
   float gen_mll_;
+  uint8_t gen_n_cen_j_; // number of inclusive jets with |eta| < 2.5
   // float gen_n2_pt_;
 
   mutable TRandom3 rng;
-
-  void PhotonIsoCorrector(ac::Photon *p, double rho);
-
 
  public:
   WGDataAnalysis(std::string const& name);

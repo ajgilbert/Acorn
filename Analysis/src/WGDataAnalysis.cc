@@ -70,6 +70,7 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("n_alt_veto_e", &n_alt_veto_e_);
       tree_->Branch("n_qcd_j", &n_qcd_j_);
       tree_->Branch("n_all_j", &n_all_j_);
+      tree_->Branch("n_cen_j", &n_cen_j_);
       tree_->Branch("n_all_btag_j", &n_all_btag_j_);
 
       tree_->Branch("l0_pt", &l0_pt_);
@@ -132,6 +133,9 @@ int WGDataAnalysis::PreAnalysis() {
 
       tree_->Branch("wt_l0_fake", &wt_l0_fake_);
       tree_->Branch("wt_p0_fake", &wt_p0_fake_);
+      tree_->Branch("wt_p0_fake_new", &wt_p0_fake_new_);
+      tree_->Branch("wt_p0_fake_mc_new", &wt_p0_fake_mc_new_);
+      tree_->Branch("wt_p0_fake_mc_true_new", &wt_p0_fake_mc_true_new_);
       tree_->Branch("wt_p0_highpt_fake", &wt_p0_highpt_fake_);
 
       if (!is_data_) {
@@ -142,6 +146,7 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("wt_trg_l0", &wt_trg_l0_);
         tree_->Branch("wt_l1", &wt_l1_);
         tree_->Branch("wt_p0", &wt_p0_);
+        tree_->Branch("wt_p0_swi", &wt_p0_swi_);
         tree_->Branch("wt_p0_e_fake", &wt_p0_e_fake_);
         if (check_is_zg_) {
           tree_->Branch("gen_is_zg", &gen_is_zg_);
@@ -169,6 +174,7 @@ int WGDataAnalysis::PreAnalysis() {
         tree_->Branch("gen_mt_cluster", &gen_mt_cluster_);
 
         tree_->Branch("lhe_frixione", &lhe_frixione_);
+        tree_->Branch("gen_n_cen_j", &gen_n_cen_j_);
       }
     }
 
@@ -229,6 +235,8 @@ int WGDataAnalysis::PreAnalysis() {
       }
       tree_->Branch("wt_p0_fake_err", &wt_p0_fake_err_);
       tree_->Branch("wt_p0_fake_bin", &wt_p0_fake_bin_);
+      tree_->Branch("wt_p0_fake_err_new", &wt_p0_fake_err_new_);
+      tree_->Branch("wt_p0_fake_bin_new", &wt_p0_fake_bin_new_);
 
       if (do_wg_gen_vars_) {
         tree_->Branch("is_wg_gen", &is_wg_gen_);
@@ -339,7 +347,7 @@ int WGDataAnalysis::PreAnalysis() {
   fns_["m_trg_ratio_err"] = std::shared_ptr<RooFunctor>(
     ws_->function("m_trg_ratio_err")->functor(ws_->argSet("m_pt,m_eta")));
   fns_["m_fake_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("m_fake_ratio")->functor(ws_->argSet("m_pt,m_eta")));
+    ws_->function("m_fake_ratio")->functor(ws_->argSet("m_pt,m_eta,l0met_mt")));
 
   fns_["e_gsfidiso_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_gsfidiso_ratio")->functor(ws_->argSet("e_pt,e_eta")));
@@ -348,10 +356,12 @@ int WGDataAnalysis::PreAnalysis() {
   fns_["e_trg_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("e_trg_ratio")->functor(ws_->argSet("e_pt,e_eta")));
   fns_["e_fake_ratio"] = std::shared_ptr<RooFunctor>(
-    ws_->function("e_fake_ratio")->functor(ws_->argSet("e_pt,e_eta")));
+    ws_->function("e_fake_ratio")->functor(ws_->argSet("e_pt,e_eta,l0met_mt")));
 
   fns_["p_id_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_id_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_swi_ratio"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_swi_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_psv_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_psv_ratio")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_id_ratio_err"] = std::shared_ptr<RooFunctor>(
@@ -368,6 +378,18 @@ int WGDataAnalysis::PreAnalysis() {
     ws_->function("p_fake_ratio_err")->functor(ws_->argSet("p_pt,p_eta")));
   fns_["p_highpt_fake_ratio"] = std::shared_ptr<RooFunctor>(
     ws_->function("p_highpt_fake_ratio")->functor(ws_->argSet("p_pt,p_eta")));
+
+  fns_["p_fake_ratio_new"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_new")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_index_new"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_index_new")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_err_new"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_err_new")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_mc_new"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_mc_new")->functor(ws_->argSet("p_pt,p_eta")));
+  fns_["p_fake_ratio_mc_true_new"] = std::shared_ptr<RooFunctor>(
+    ws_->function("p_fake_ratio_mc_true_new")->functor(ws_->argSet("p_pt,p_eta")));
+
 
   if (rc_file_ != "") {
     rc_.init(rc_file_);
@@ -448,32 +470,6 @@ int WGDataAnalysis::PreAnalysis() {
     }
     auto mets = event->GetPtrVec<ac::Met>("pfType1Met");
     auto puppi_mets = event->GetPtrVec<ac::Met>("puppiMet");
-    // auto tk_mets = event->GetPtrVec<ac::Met>("trackMet");
-
-    // Sub-process classification - maybe move this into a separate module
-    /*
-    if (gen_classify_ == "DY") {
-      auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
-      unsigned n_ele = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
-        return std::abs(p->pdgId()) == 11;
-      });
-      unsigned n_muo = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
-        return std::abs(p->pdgId()) == 13;
-      });
-      unsigned n_tau = std::count_if(lhe_parts.begin(), lhe_parts.end(), [](ac::GenParticle *p) {
-        return std::abs(p->pdgId()) == 15;
-      });
-      if (n_ele == 2) {
-        gen_proc_ = 1;
-      }
-      if (n_muo == 2) {
-        gen_proc_ = 2;
-      }
-      if (n_tau == 2) {
-        gen_proc_ = 3;
-      }
-    }
-    */
 
     auto pre_muons = ac::copy_keep_if(muons, [](ac::Muon const* m) {
       return m->pt() > 30. && fabs(m->eta()) < 2.4 && m->isMediumMuon() && MuonPFIso(m) < 0.15 &&
@@ -670,6 +666,9 @@ int WGDataAnalysis::PreAnalysis() {
 
     n_qcd_j_ = qcd_jets.size();
     n_all_j_ = all_jets.size();
+    n_cen_j_ = std::count_if(all_jets.begin(), all_jets.end(), [&](ac::PFJet const* j) {
+      return std::abs(j->eta()) < 2.5;
+    });
     n_all_btag_j_ = std::count_if(all_jets.begin(), all_jets.end(), [&](ac::PFJet const* j) {
       return std::abs(j->eta()) < 2.4 && j->deepCSVDiscriminatorBvsAll() > 0.7527;
     });
@@ -679,6 +678,8 @@ int WGDataAnalysis::PreAnalysis() {
       auto gen_parts = event->GetPtrVec<ac::GenParticle>("genParticles");
       auto lhe_parts = event->GetPtrVec<ac::GenParticle>("lheParticles");
       auto gen_met = event->GetPtrVec<ac::Met>("genMet")[0];
+      auto gen_jets = event->GetPtrVec<ac::Candidate>("genJets");
+
       WGGenParticles parts = ProduceWGGenParticles(lhe_parts, gen_parts);
       gen_nparts_ = parts.nparts;
       if (parts.lhe_lep) {
@@ -713,10 +714,54 @@ int WGDataAnalysis::PreAnalysis() {
           }
         }
       }
+
       if (parts.ok) {
+        ac::keep_if(gen_jets, [&](ac::Candidate const* j) {
+          return j->pt() > 30.0 && std::abs(j->eta()) < 2.5 &&
+                 ac::DeltaR(j, parts.gen_lep) > 0.4 &&
+                 ac::DeltaR(j, parts.gen_pho) > 0.4;
+        });
+      }
+      gen_n_cen_j_ = gen_jets.size();
+
+      bool use_rivet = true;
+      if (use_rivet) {
+        WGammaRivetVariables const* rivet = event->GetPtr<WGammaRivetVariables>("rivetVariables");
+        is_wg_gen_ = rivet->is_wg_gen;
+        gen_p0_pt_ = rivet->p0_pt;
+        gen_p0_eta_ = rivet->p0_eta;
+        gen_l0_q_ = rivet->l0_q;
+        gen_l0_pt_ = rivet->l0_pt;
+        gen_l0_eta_ =rivet->l0_eta;
+        gen_met_ = rivet->met_pt;
+        gen_l0p0_dr_ = rivet->l0p0_dr;
+        gen_l0p0_deta_ = rivet->l0_eta - rivet->p0_eta;
+        true_phi_ = rivet->true_phi;
+        true_phi_f_ = rivet->true_phi_f;
+
+        ac::Candidate riv_l0;
+        riv_l0.setVector(ROOT::Math::PtEtaPhiMVector(rivet->l0_pt, rivet->l0_eta, rivet->l0_phi, rivet->l0_M));
+        riv_l0.setCharge(rivet->l0_q);
+        ac::Candidate riv_p0;
+        riv_p0.setVector(ROOT::Math::PtEtaPhiMVector(rivet->p0_pt, rivet->p0_eta, rivet->p0_phi, rivet->p0_M));
+        ac::Candidate riv_n0;
+        riv_n0.setVector(ROOT::Math::PtEtaPhiMVector(rivet->n0_pt, rivet->n0_eta, rivet->n0_phi, rivet->n0_M));
+        ac::Candidate riv_met;
+        riv_met.setVector(ROOT::Math::PtEtaPhiMVector(rivet->met_pt, 0.0, rivet->met_phi, 0));
+
+        WGSystem gen_sys = ProduceWGSystem(riv_l0, riv_met, riv_p0, true, rng, false);
+        gen_phi_ = gen_sys.Phi(riv_l0.charge() > 0);
+        gen_phi_f_ = gen_sys.SymPhi(riv_l0.charge() > 0);
+
+        gen_wg_M_ = (riv_p0.vector() + riv_p0.vector() + riv_n0.vector()).M();
+        gen_mt_cluster_ = rivet->mt_cluster;
+
+        gen_pdgid_ = rivet->l0_abs_pdgid; // we overwrite the value from the lhe above
+        lhe_frixione_ = rivet->p0_frixione; // and also override the LHE frixione with the particle-level
+      } else if (parts.ok) {
         is_wg_gen_ = true;
-        WGSystem gen_sys = ProduceWGSystem(*parts.gen_lep, *gen_met, *parts.gen_pho, true, rng, false);
         WGSystem gen_true_sys = ProduceWGSystem(*parts.gen_lep, *parts.gen_neu, *parts.gen_pho, false, rng, false);
+        WGSystem gen_sys = ProduceWGSystem(*parts.gen_lep, *gen_met, *parts.gen_pho, true, rng, false);
         gen_p0_pt_ = parts.gen_pho->pt();
         gen_p0_eta_ = parts.gen_pho->eta();
         gen_l0_q_ = parts.gen_lep->charge();
@@ -911,6 +956,9 @@ int WGDataAnalysis::PreAnalysis() {
       reco_puppi_phi_f_ = reco_puppi_sys.SymPhi(l0->charge());
 
       wt_p0_fake_ = RooFunc(fns_["p_fake_ratio"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_new_ = RooFunc(fns_["p_fake_ratio_new"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_mc_new_ = RooFunc(fns_["p_fake_ratio_mc_new"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_mc_true_new_ = RooFunc(fns_["p_fake_ratio_mc_true_new"], {p0_pt_, p0->scEta()});
       if (super_loose && p0_pt_ > super_loose_threshold) {
         wt_p0_highpt_fake_ = RooFunc(fns_["p_highpt_fake_ratio"], {p0_pt_, p0->scEta()});
       } else {
@@ -918,12 +966,14 @@ int WGDataAnalysis::PreAnalysis() {
       }
       wt_p0_fake_err_ = RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
       wt_p0_fake_bin_ = RooFunc(fns_["p_fake_index"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_err_new_ = RooFunc(fns_["p_fake_ratio_err_new"], {p0_pt_, p0->scEta()});
+      wt_p0_fake_bin_new_ = RooFunc(fns_["p_fake_index_new"], {p0_pt_, p0->scEta()});
       // wt_p0_fake_lo_ = 1.0 - RooFunc(fns_["p_fake_ratio_err"], {p0_pt_, p0->scEta()});
       if (e0) {
-        wt_l0_fake_ = RooFunc(fns_["e_fake_ratio"], {l0_pt_, l0_eta_});
+        wt_l0_fake_ = RooFunc(fns_["e_fake_ratio"], {l0_pt_, l0_eta_, l0met_mt_});
       }
       if (m0) {
-        wt_l0_fake_ = RooFunc(fns_["m_fake_ratio"], {l0_pt_, l0_eta_});
+        wt_l0_fake_ = RooFunc(fns_["m_fake_ratio"], {l0_pt_, l0_eta_, l0met_mt_});
       }
     }
 
@@ -1059,6 +1109,7 @@ int WGDataAnalysis::PreAnalysis() {
         // }
         if (ac::contains({1, 2, 4, 5}, p0_truth_)) {
           wt_p0_ = RooFunc(fns_["p_id_ratio"], {p0_pt_, p0->scEta()});
+          wt_p0_swi_ = RooFunc(fns_["p_swi_ratio"], {p0_pt_, p0->scEta()});
           wt_p0_hi_ = 1.0 + RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
           wt_p0_lo_ = 1.0 - RooFunc(fns_["p_id_ratio_err"], {p0_pt_, p0->scEta()});
         }
@@ -1146,8 +1197,32 @@ int WGDataAnalysis::PreAnalysis() {
     f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 3 || p0_truth_ == 7) << 1; // p0_isjet
     f_ = f_ | (p0_truth_ == 2) << 2; // p0_iselec
     f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 2 || p0_truth_ == 3 || p0_truth_ == 7) << 3; //p0_isfake
+
     f_ = f_ | (abs(p0_eta_) < 1.4442) << 4; // p0_eb
     f_ = f_ | (abs(p0_eta_) > 1.4442) << 5; // p0_ee
+    f_ = f_ | ((abs(p0_eta_) < 1.4442 && p0_chiso_ < 1.141) || (abs(p0_eta_) > 1.4442 && p0_chiso_ < 1.051)) << 6; // iso_t
+    f_ = f_ | (p0_chiso_ > 4 && p0_chiso_ < 10) << 7; // iso_l
+    f_ = f_ | ((abs(p0_eta_) < 1.4442 && p0_sigma_ < 0.01015) || (abs(p0_eta_) > 1.4442 && p0_sigma_ < 0.0272)) << 8; // sig_t
+    f_ = f_ | ((abs(p0_eta_) < 1.4442 && p0_sigma_ > 0.01100) || (abs(p0_eta_) > 1.4442 && p0_sigma_ > 0.0300)) << 9; // sig_l
+
+    f_ = f_ | (p0_medium_noch_) << 10;
+    f_ = f_ | ((p0_worstiso_ - p0_chiso_) < std::min(0.05 * p0_pt_, 6.0)) << 11;
+
+    f_ = f_ | (!p0_haspix_) << 12;
+    f_ = f_ | (p0_eveto_) << 13;
+    f_ = f_ | (n_veto_e_ == 0) << 14;
+    f_ = f_ | (n_veto_m_ == 0) << 15;
+    f_ = f_ | (l0_nominal_) << 16;
+
+    f_ = f_ | (l0p0_M_ < 70 || l0p0_M_ > 100) << 17; // mZ_veto_m
+    f_ = f_ | (l0p0_M_ < 70 || l0p0_M_ > 110) << 18; // mZ_veto_e
+    f_ = f_ | (l0p0_M_ >= 70 && l0p0_M_ <= 100) << 19; // mZ_veto_inv_m
+    f_ = f_ | (l0p0_M_ >= 75 && l0p0_M_ <= 105) << 20; // mZ_veto_inv_e
+
+    f_ = f_ | (p0_phi_ > 2.268 && p0_phi_ < 2.772 && p0_eta_ > -2.04 && p0_eta_ < 0.84) << 21; // p0_phi_veto_2016
+    f_ = f_ | (p0_phi_ > 2.646 && p0_phi_ < 3.15 && p0_eta_ > -0.60 && p0_eta_ < 1.68) << 22; // p0_phi_veto_2017
+    f_ = f_ | (p0_phi_ > 0.504 && p0_phi_ < 0.882 && p0_eta_ > -1.44 && p0_eta_ < 1.44) << 23; // p0_phi_veto_2018
+
     tree_->Fill();
     return 0;
   }
@@ -1167,6 +1242,7 @@ int WGDataAnalysis::PreAnalysis() {
     n_alt_veto_e_ = 0;
     n_qcd_j_ = 0;
     n_all_j_ = 0;
+    n_cen_j_ = 0;
     n_all_btag_j_ = 0;
     l0_pt_ = 0.;
     l0_eta_ = 0.;
@@ -1237,7 +1313,11 @@ int WGDataAnalysis::PreAnalysis() {
     wt_trg_l0_ = 1.;
     wt_l1_ = 1.;
     wt_p0_ = 1.;
+    wt_p0_swi_ = 1.;
     wt_p0_fake_ = 1.;
+    wt_p0_fake_new_ = 1.;
+    wt_p0_fake_mc_new_ = 1.;
+    wt_p0_fake_mc_true_new_ = 1.;
     wt_l0_fake_ = 1.;
     wt_p0_e_fake_ = 1.;
     wt_sc_0_ = 1.;
@@ -1264,6 +1344,8 @@ int WGDataAnalysis::PreAnalysis() {
     wt_p0_e_fake_lo_ = 1.;
     wt_p0_fake_err_ = 1.;
     wt_p0_fake_bin_ = 0;
+    wt_p0_fake_err_new_ = 1.;
+    wt_p0_fake_bin_new_ = 0;
     is_wg_gen_ = false;
     gen_pdgid_ = 0;
     gen_nparts_ = 0;
@@ -1292,6 +1374,7 @@ int WGDataAnalysis::PreAnalysis() {
     true_phi_ = 0.;
     true_phi_f_ = 0.;
     gen_mll_ = -1.0;
+    gen_n_cen_j_ = 0;
     // gen_n2_pt_ = 0.;
   }
 
@@ -1322,51 +1405,4 @@ int WGDataAnalysis::PreAnalysis() {
   }
 
   void WGDataAnalysis::PrintInfo() {}
-
-  void WGDataAnalysis::PhotonIsoCorrector(ac::Photon *p, double rho) {
-    double a_eta = std::abs(p->scEta());
-    double chiso = p->chargedIso();
-    double neiso = p->neutralHadronIso();
-    double phiso = p->photonIso();
-
-    double ch_ea = 0.;
-    double ne_ea = 0.;
-    double ph_ea = 0.;
-
-    if (a_eta < 1.0) {
-      ch_ea = 0.0112;
-      ne_ea = 0.0668;
-      ph_ea = 0.1113;
-    } else if (a_eta < 1.479) {
-      ch_ea = 0.0108;
-      ne_ea = 0.1054;
-      ph_ea = 0.0953;
-    } else if (a_eta < 2.0) {
-      ch_ea = 0.0106;
-      ne_ea = 0.0786;
-      ph_ea = 0.0619;
-    } else if (a_eta < 2.2) {
-      ch_ea = 0.01002;
-      ne_ea = 0.0233;
-      ph_ea = 0.0837;
-    } else if (a_eta < 2.3) {
-      ch_ea = 0.0098;
-      ne_ea = 0.0078;
-      ph_ea = 0.1070;
-    } else if (a_eta < 2.4) {
-      ch_ea = 0.0089;
-      ne_ea = 0.0028;
-      ph_ea = 0.1212;
-    } else {
-      ch_ea = 0.0087;
-      ne_ea = 0.0137;
-      ph_ea = 0.1466;
-    }
-    chiso = std::max(chiso - ch_ea * rho, 0.);
-    neiso = std::max(neiso - ne_ea * rho, 0.);
-    phiso = std::max(phiso - ph_ea * rho, 0.);
-    p->setChargedIso(chiso);
-    p->setNeutralHadronIso(neiso);
-    p->setPhotonIso(phiso);
-  }
 }

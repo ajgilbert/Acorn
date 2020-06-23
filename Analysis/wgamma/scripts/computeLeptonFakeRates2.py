@@ -1,16 +1,15 @@
-import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gROOT.SetBatch(ROOT.kTRUE)
-
-import CombineHarvester.CombineTools.plotting as plot
-# import json
-# import sys
-import math
-from pprint import pprint
-from collections import defaultdict
 import argparse
 from array import array
 from Acorn.Analysis.analysis import *
+import CombineHarvester.CombineTools.plotting as plot
+import ROOT
+
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
+
+# import math
+# from pprint import pprint
+# from collections import defaultdict
 
 ROOT.TH1.SetDefaultSumw2(True)
 plot.ModTDRStyle(height=300)
@@ -85,10 +84,13 @@ res = {}
 
 bins = [30, 50, 100]
 
+x_bins = [30, 40, 50, 60, 70, 80, 90, 100]
+z_bins = [0, 10, 20, 30, 40, 50, 60, 70, 80]
 if args.channel == 'e':
-    h2d = ROOT.TH2F('lepton_fakes', '', 14, 30, 100, 2, array('d', [0., 1.4442, 2.5]))
+    y_bins = [0., 1.4442, 2.5]
 else:
-    h2d = ROOT.TH2F('lepton_fakes', '', 14, 30, 100, 2, array('d', [0., 1.5, 2.5]))
+    y_bins = [0., 1.5, 2.5]
+h2d = ROOT.TH3F('lepton_fakes', '', len(x_bins) - 1, array('d', x_bins), len(y_bins) - 1, array('d', y_bins), len(z_bins) - 1, array('d', z_bins))
 
 for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
     print '\n'
@@ -108,31 +110,19 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         var_w_ctl = 'l0j0_dphi'
         node_w_ctl_dphi = hists[args.channel][region_w_ctl][var_w_ctl]
         node_w_ctl_muons = hists['m'][region_w_ctl.replace('_e_', '_m_')][var_w_ctl]
+        # node_w_ctl_muons = hists[args.channel][region_w_ctl][var_w_ctl]
 
         w_sf, gjets_sf = ComputeSFs(node_w_ctl_dphi, strategy=2, var=var_w_ctl, node_m=node_w_ctl_muons)
         if args.channel == 'm':
             gjets_sf = 1.0
+        gjets_sf = 1.0
 
         if args.syst == 1:
             w_sf = ((w_sf - 1.0) / 2.) + 1.0
-            gjets_sf = ((gjets_sf - 1.0) / 2.) + 1.0
+            # gjets_sf = ((gjets_sf - 1.0) / 2.) + 1.0
         if args.syst == 2:
             w_sf = ((w_sf - 1.0) / 2.) + w_sf
-            gjets_sf = ((gjets_sf - 1.0) / 2.) + gjets_sf
-
-
-        # gjets_sf_ref_2016 = [
-        #     2.654239,
-        #     1.132372,
-        #     1.512585,
-        #     3.521884,
-        #     2.615963,
-        #     2.764810
-        # ]
-        # if 'barrel' in eb:
-        #     gjets_sf = gjets_sf_ref_2016[ib]
-        # else:
-        #     gjets_sf = gjets_sf_ref_2016[3 + ib]
+            # gjets_sf = ((gjets_sf - 1.0) / 2.) + gjets_sf
 
         print '>> dphi SFs: %.2f, %.2f' % (w_sf, gjets_sf)
 
@@ -147,43 +137,37 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
         node_iso_t['data_sub'] = node_iso_t['data_obs'] - (node_iso_t['Total_R'] + node_iso_t['Total_E'] + node_iso_t['Total_J'] + node_iso_t['W_J'] + node_iso_t['GJets_J'])
         node_iso_l['data_sub'] = node_iso_l['data_obs'] - (node_iso_l['Total_R'] + node_iso_l['Total_E'] + node_iso_l['Total_J'])
 
+        h_ratio = node_iso_t['data_sub'].Clone()
+        h_ratio.Divide(node_iso_l['data_sub'])
+        h_ratio.Print("range")
+
         h_data_sub_norm_iso_t = VariableRebin(node_iso_t['data_sub'], [node_iso_t['data_sub'].GetXaxis().GetXmin(), node_iso_t['data_sub'].GetXaxis().GetXmax()])
         h_data_sub_norm_iso_l = VariableRebin(node_iso_l['data_sub'], [node_iso_l['data_sub'].GetXaxis().GetXmin(), node_iso_l['data_sub'].GetXaxis().GetXmax()])
         h_data_sub_norm_iso_t.Divide(h_data_sub_norm_iso_l)
         fake_factor = h_data_sub_norm_iso_t.GetBinContent(1)
         fake_factor_err = h_data_sub_norm_iso_t.GetBinError(1)
 
-        # data_sub_norm_iso_t = node_iso_t['data_sub'].Integral()
-        # data_sub_norm_iso_l = node_iso_l['data_sub'].Integral()
-        # fake_factor = (data_sub_norm_iso_t / data_sub_norm_iso_l)
         print '>> Fake factor: %.2f +/- %.2f' % (fake_factor, fake_factor_err)
 
         iy = 1 if 'barrel' in eb else 2
         for ix in xrange(1, h2d.GetNbinsX() + 1):
-            xcenter = h2d.GetXaxis().GetBinCenter(ix)
-            if xcenter > bins[ib] and xcenter < bins[ib + 1]:
-                h2d.SetBinContent(ix, iy, fake_factor)
+            for iz in xrange(1, h2d.GetNbinsZ() + 1):
+                xcenter = h2d.GetXaxis().GetBinCenter(ix)
+                if xcenter > bins[ib] and xcenter < bins[ib + 1]:
+                    if args.channel == 'e':
+                        # take the FFs from h_ratio vs mT
+                        h_ratio_bin = h_ratio.GetXaxis().FindFixBin(h2d.GetZaxis().GetBinCenter(iz))
+                        h2d.SetBinContent(ix, iy, iz, h_ratio.GetBinContent(h_ratio_bin))
+                    else:
+                        h2d.SetBinContent(ix, iy, iz, fake_factor)
         # node_iso_t['data_sub'].Divide(node_iso_l['data_sub'])
 
-# h2d.Print('range')
 
+h2d.Print('range')
 
-#     ROOT.gDirectory.WriteTObject(h_fr, eb)
+plot_name = 'lepton_fakes' if args.syst == 0 else 'lepton_fakes_%i' % args.syst
 
-
-# h2d = ROOT.TH2F('lepton_fakes', '', 34, 30, 200, 2, array('d', [0., 1.4442, 2.5]))
-
-# for i in xrange(1, h2d.GetNbinsX() + 1):
-#     x = h2d.GetXaxis().GetBinCenter(i)
-#     h2d.SetBinContent(i, 1, res['barrel_%s' % args.channel].GetBinContent(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
-#     h2d.SetBinContent(i, 2, res['endcap_%s' % args.channel].GetBinContent(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
-#     h2d.SetBinError(i, 1, res['barrel_%s' % args.channel].GetBinError(res['barrel_%s' % args.channel].GetXaxis().FindFixBin(x)))
-#     h2d.SetBinError(i, 2, res['endcap_%s' % args.channel].GetBinError(res['endcap_%s' % args.channel].GetXaxis().FindFixBin(x)))
-
-# h2d_syst_extrap = h2d.Clone()
-# h2d_stat_syst = h2d.Clone()
-
-ROOT.gDirectory.WriteTObject(h2d, 'lepton_fakes')
+ROOT.gDirectory.WriteTObject(h2d, plot_name)
 
 
 fout.Close()

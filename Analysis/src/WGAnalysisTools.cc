@@ -373,5 +373,52 @@ double WGSystem::SymPhi(unsigned lepton_charge) {
     return ok;
   }
 
+  void PhotonIsoCorrector(ac::Photon *p, double rho) {
+    double a_eta = std::abs(p->scEta());
+    double chiso = p->chargedIso();
+    double neiso = p->neutralHadronIso();
+    double phiso = p->photonIso();
+
+    double ch_ea = 0.;
+    double ne_ea = 0.;
+    double ph_ea = 0.;
+
+    if (a_eta < 1.0) {
+      ch_ea = 0.0112;
+      ne_ea = 0.0668;
+      ph_ea = 0.1113;
+    } else if (a_eta < 1.479) {
+      ch_ea = 0.0108;
+      ne_ea = 0.1054;
+      ph_ea = 0.0953;
+    } else if (a_eta < 2.0) {
+      ch_ea = 0.0106;
+      ne_ea = 0.0786;
+      ph_ea = 0.0619;
+    } else if (a_eta < 2.2) {
+      ch_ea = 0.01002;
+      ne_ea = 0.0233;
+      ph_ea = 0.0837;
+    } else if (a_eta < 2.3) {
+      ch_ea = 0.0098;
+      ne_ea = 0.0078;
+      ph_ea = 0.1070;
+    } else if (a_eta < 2.4) {
+      ch_ea = 0.0089;
+      ne_ea = 0.0028;
+      ph_ea = 0.1212;
+    } else {
+      ch_ea = 0.0087;
+      ne_ea = 0.0137;
+      ph_ea = 0.1466;
+    }
+    chiso = std::max(chiso - ch_ea * rho, 0.);
+    neiso = std::max(neiso - ne_ea * rho, 0.);
+    phiso = std::max(phiso - ph_ea * rho, 0.);
+    p->setChargedIso(chiso);
+    p->setNeutralHadronIso(neiso);
+    p->setPhotonIso(phiso);
+  }
+
 
 }  // namespace ac

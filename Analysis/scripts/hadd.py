@@ -13,7 +13,7 @@ parser.add_argument('path',
                     help='root directory')
 parser.add_argument('--recursive', '-r', action='store_true',
                     help='hadd recursively in subdirectories')
-parser.add_argument('--clean', '-c', action='store_true',
+parser.add_argument('--clean', '-c', nargs='?', const='rm', type=str,
                     help='Delete input files if hadd was successful')
 parser.add_argument('--remote-dir', default=None,
                     help='Directory prefix for remote read/copy')
@@ -60,8 +60,11 @@ for target, inputs in hadddict.items():
     job = 'hadd %s %s %s' % (opts, actual_target, ' '.join(inputs))
     if is_remote:
         job += ' && xrdcp --force %s %s && rm %s' % (actual_target, target, actual_target)
-    if args.clean:
-        job += ' && rm %s' % (' '.join(cleandict[target]))
+    if args.clean is not None:
+        if args.clean == 'eos':
+            job += ' && %s' % (' && '.join(['eos rm %s' % X for X in cleandict[target]]))
+        else:
+            job += ' && rm %s' % (' '.join(cleandict[target]))
     job_mgr.job_queue.append(job)
 
 job_mgr.flush_queue()

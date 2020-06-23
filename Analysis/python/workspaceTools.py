@@ -209,21 +209,115 @@ def ZeroErrors(h_nominal):
 
 
 
-def MakeProjections(h2d_list, main_label, ix, color, marker, along='X'):
+def MakeProjections(h2d_list, main_label, ix, color, marker, along='X', sublabels=['total', 'stat', 'syst']):
     res = {}
     attr = 'Projection%s' % along
-    if len(h2d_list) >= 3:
-        res['total'] = getattr(h2d_list[0], attr)('%s_total_proj%s_%i' % (main_label, along, ix), ix, ix)
-        res['stat'] = getattr(h2d_list[1], attr)('%s_stat_proj%s_%i' % (main_label, along, ix), ix, ix)
-        res['syst'] = getattr(h2d_list[2], attr)('%s_syst_proj%s_%i' % (main_label, along, ix), ix, ix)
+    if len(h2d_list) >= 2:
+        for i in xrange(len(h2d_list)):
+            res[sublabels[i]] = getattr(h2d_list[i], attr)('%s_%s_proj%s_%i' % (main_label, sublabels[i], along, ix), ix, ix)
 
-        plot.Set(res['total'], FillColorAlpha=(color, 0.1), MarkerSize=0, LineWidth=0)
-        plot.Set(res['syst'], LineColorAlpha=(color, 0.3), MarkerColor=color, LineWidth=8, MarkerSize=0)
-        plot.Set(res['stat'], LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.7, MarkerStyle=marker)
+        plot.Set(res[sublabels[0]], MarkerSize=0, LineWidth=2, LineColor=color)
+        plot.Set(res[sublabels[1]], LineColorAlpha=(color, 0.3), MarkerColor=color, LineWidth=8, MarkerSize=0)
+        # plot.Set(res[sublabels[2]], LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.7, MarkerStyle=marker)
+        if len(h2d_list) >= 3:
+            plot.Set(res[sublabels[2]], FillColorAlpha=(0, 0), LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.0, MarkerStyle=marker)
     else:
         res['stat'] = getattr(h2d_list[0], attr)('%s_stat_proj%s_%i' % (main_label, along, ix), ix, ix)
         plot.Set(res['stat'], LineColor=color, MarkerColor=color, LineWidth=2, MarkerSize=0.7, MarkerStyle=marker)
     return res
+
+
+def SummaryPlotsPhotonFakes(cfg):
+    h_ref = cfg['h_ref'].Clone()
+    main_label = cfg['main_label']
+    ref_axis = h_ref.GetYaxis() if cfg['proj'] == 'X' else h_ref.GetXaxis()
+    for ix in xrange(1, ref_axis.GetNbins() + 1):
+        bin_label = '%s #in [%g, %g]' % (cfg['y_label'], ref_axis.GetBinLowEdge(ix), ref_axis.GetBinUpEdge(ix))
+        canv = ROOT.TCanvas('%s_%s_%i' % (main_label, cfg['proj'], ix), '%s_%s_%i' % (main_label, cfg['proj'], ix))
+        pads = plot.OnePad()
+        pads[0].cd()
+
+        text = ROOT.TPaveText(0.17, 0.84, 0.6, 0.93, 'NDC')
+        legend = ROOT.TLegend(0.6, 0.75, 0.94, 0.93, '', 'NDC')
+        data_hists = MakeProjections(cfg['data'], '%s_data' % main_label, ix, color=cfg.get('data_colour', 4), marker=21, along=cfg['proj'], sublabels=cfg['data_labels'])
+        # mc_hists = MakeProjections(cfg['mc'], '%s_mc' % main_label, ix, color=cfg.get('mc_colour', 2), marker=20, along=cfg['proj'])
+        # ratio_hists = MakeProjections(cfg['ratio'], '%s_ratio' % main_label, ix, color=cfg.get('ratio_colour', 1), marker=21, along=cfg['proj'])
+
+        if 'const_syst' in data_hists:
+            data_hists['total_err'] = data_hists['total'].Clone()
+            plot.Set(data_hists['total_err'], FillColorAlpha=(data_hists['total_err'].GetLineColor(), 0.3), MarkerColor=data_hists['total_err'].GetLineColor(), LineWidth=0, MarkerSize=0)
+            plot.Set(data_hists['bkg_syst'], FillColorAlpha=(0, 0), LineColor=2, LineWidth=2, MarkerSize=0)
+            plot.Set(data_hists['const_syst'], FillColorAlpha=(0, 0), LineColor=1, LineWidth=2, MarkerSize=0)
+            plot.Set(data_hists['stat'], FillColorAlpha=(0, 0), LineColor=4, LineWidth=2, LineStyle=2)
+            for h in ['stat', 'const_syst', 'bkg_syst']:
+                data_hists[h + '_hi'] = data_hists[h].Clone()
+                data_hists[h + '_lo'] = data_hists[h].Clone()
+            for ib in xrange(1, data_hists['const_syst'].GetNbinsX() + 1):
+                for h in ['stat', 'const_syst', 'bkg_syst']:
+                    data_hists[h + '_hi'].SetBinContent(ib, data_hists[h].GetBinContent(ib) + data_hists[h].GetBinError(ib))
+                    data_hists[h + '_lo'].SetBinContent(ib, data_hists[h].GetBinContent(ib) - data_hists[h].GetBinError(ib))
+                    data_hists[h + '_hi'].SetBinError(ib, 1E-6)
+                    data_hists[h + '_lo'].SetBinError(ib, 1E-6)
+                data_hists['total'].SetBinError(ib, 1E-6)
+                data_hists['total'].SetBinError(ib, 1E-6)
+
+            data_hists['total'].Draw('ESAME')
+            data_hists['total_err'].Draw('E2SAME')
+            data_hists['const_syst_hi'].Draw('ESAME')
+            data_hists['const_syst_lo'].Draw('ESAME')
+            data_hists['bkg_syst_hi'].Draw('ESAME')
+            data_hists['bkg_syst_lo'].Draw('ESAME')
+            data_hists['stat_hi'].Draw('ESAME')
+            data_hists['stat_lo'].Draw('ESAME')
+
+            legend.AddEntry(data_hists['total'], 'Data', 'L')
+            legend.AddEntry(data_hists['stat'], '  Statistical', 'L')
+            legend.AddEntry(data_hists['const_syst'], '  Non-closure syst.', 'L')
+            legend.AddEntry(data_hists['bkg_syst'], '  Prompt subtraction syst.', 'L')
+            legend.AddEntry(data_hists['total_err'], '  Total', 'F')
+            # legend.AddEntry(mc_hists['stat'], 'Simulation', 'P')
+            # legend.AddEntry(mc_hists['stat'], '  Statistical', 'E')
+        elif 'mc' in data_hists:
+            plot.Set(data_hists['mc'], LineColor=13, LineWidth=2, MarkerSize=0)
+            plot.Set(data_hists['mc_true'], LineColor=9, LineWidth=2, MarkerSize=0)
+            data_hists['mc_err'] = data_hists['mc'].Clone()
+            plot.Set(data_hists['mc_err'], FillColorAlpha=(data_hists['mc_err'].GetLineColor(), 0.3), LineWidth=0, MarkerSize=0)
+            data_hists['mc_true_err'] = data_hists['mc_true'].Clone()
+            plot.Set(data_hists['mc_true_err'], FillColorAlpha=(data_hists['mc_true_err'].GetLineColor(), 0.3), LineWidth=0, MarkerSize=0)
+            for ib in xrange(1, data_hists['mc'].GetNbinsX() + 1):
+                data_hists['mc'].SetBinError(ib, 1E-6)
+                data_hists['mc_true'].SetBinError(ib, 1E-6)
+
+            data_hists['mc'].Draw('ESAME')
+            data_hists['mc_err'].Draw('E2SAME')
+            data_hists['mc_true'].Draw('ESAME')
+            data_hists['mc_true_err'].Draw('E2SAME')
+
+            legend.AddEntry(data_hists['mc'], 'Simulation - fit', 'LF')
+            legend.AddEntry(data_hists['mc_true'], 'Simulation - truth', 'LF')
+            # legend.AddEntry(mc_hists['stat'], 'Simulation', 'PE')
+
+        axis = plot.GetAxisHist(pads[0])
+        plot.Set(axis, Minimum=cfg['y_range'][0], Maximum=cfg['y_range'][1])
+
+        plot.FixTopRange(pads[0], plot.GetPadYMax(pads[0]), 0.40)
+
+        axis.GetYaxis().SetTitle('#sigma_{i#etai#eta} extrapolation')
+        axis.GetXaxis().SetTitle(cfg['x_axis_title'])
+
+
+        pads[0].cd()
+        legend.Draw()
+        text.AddText(cfg['main_text'])
+        text.AddText(bin_label)
+        text.SetTextAlign(13)
+        text.SetBorderSize(0)
+        text.Draw()
+        pads[0].SetGrid(1, 1)
+        if cfg['logx']:
+            pads[0].SetLogx(True)
+        canv.Print('.png')
+        canv.Print('.pdf')
 
 
 def SummaryPlots(cfg):

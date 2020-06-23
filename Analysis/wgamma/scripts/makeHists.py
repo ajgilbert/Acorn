@@ -30,7 +30,9 @@ DO_W_FAKE_STUDY = True
 DO_FINE_EFAKES = True
 N_FAKE_BINS = 18
 USE_BITFLAGS = True
-DO_WORST_ISO = False
+DO_WORST_ISO = 2  # 0 = No, 1 = Only the cut for photon fakes, 2 = full
+if DO_WORST_ISO >= 2:
+    N_FAKE_BINS = 16
 
 tname = 'WGDataAnalysis'
 prefix = args.indir
@@ -40,6 +42,7 @@ year = args.year
 remaps = {
     "2016": {
         'DY': 'DYJetsToLL_M-50-stitched',
+        'LM_DY': 'DYJetsToLL_M-10to50-madgraphMLM',
         'ZG': 'ZGToLLG-amcatnloFXFX-stitched',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
@@ -65,12 +68,13 @@ remaps = {
         'TTG_SL_T': 'TTGamma_SingleLeptFromT-madgraph',
         'TTG_SL_Tbar': 'TTGamma_SingleLeptFromTbar-madgraph',
         'GG_LO': 'DiPhotonJetsBox_MGG-80toInf',
-        'GG_NLO': 'DiPhotonJets_MGG-80toInf',
+        # 'GG_NLO': 'DiPhotonJets_MGG-80toInf',
         'GG_L': 'DiPhotonJetsBox_MGG-40to80',
         'WWG': 'WWG-amcatnlo'
     },
     "2017": {
         'DY': 'DYJetsToLL_M-50-stitched',
+        'LM_DY': 'DYJetsToLL_M-10to50-madgraphMLM',
         'ZG': 'ZGToLLG-amcatnloFXFX-stitched',
         'data_obs_m': 'SingleMuon',
         'data_obs_e': 'SingleElectron',
@@ -280,6 +284,13 @@ def ApplyPostFix(hlist, postfix):
 
 def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], doFakes=True, doSysts=True, doData=True):
     # Standard treatment for most MC samples
+    wt_p0_fake = ''
+    wt_p0_fake_unc = ''
+    if DO_WORST_ISO >= 2:
+        wt_p0_fake = '_new'
+        # wt_p0_fake = '_mc_new'
+        wt_p0_fake_unc = '_new'
+
     for grp in groups:
         for P in groups[grp]:
             # if grp == 'DY':
@@ -335,7 +346,7 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
             for H in hlist:
                 node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1]), wt=X.get(H[2]))
             for H in hlist_fw:
-                node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"sig_t": "$sig_l"}), wt=X.get('(%s) * wt_p0_fake' % H[2]))
+                node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"sig_t": "$sig_l"}), wt=X.get('(%s) * wt_p0_fake%s' % (H[2], wt_p0_fake)))
             for H in hlist_fwl:
                 node[H[0]] = Hist('TH1F', sample=P, var=var_list, binning=binning, sel=X.get(H[1], override={"lepton_sel": "$lepton_sdb_%s" % chn}), wt=X.get('(%s) * wt_l0_fake' % H[2]))
 
@@ -343,14 +354,14 @@ def StandardHists(node, var_list, binning, sel, wt, chn, manager, wt_systs=[], d
         node['data_obs'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel), wt='1')
     if doData and doFakes:
         fake_sel = X.get(sel, override={"sig_t": "$sig_l"})
-        node['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake')
+        node['data_fakes'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake%s' % wt_p0_fake)
         node['data_fakes_lep'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"lepton_sel": "$lepton_sdb_%s" % chn}), wt='wt_l0_fake')
-        node['data_fakes_double'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"lepton_sel": "$lepton_sdb_%s" % chn, "sig_t": "$sig_l"}), wt='wt_l0_fake*wt_p0_fake')
+        node['data_fakes_double'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=X.get(sel, override={"lepton_sel": "$lepton_sdb_%s" % chn, "sig_t": "$sig_l"}), wt='wt_l0_fake*wt_p0_fake%s' % wt_p0_fake)
         loose_fake_sel = X.get(sel, override={"photon_sel": "!p0_loose"})
         node['data_fakes_highpt'] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=loose_fake_sel, wt='wt_p0_highpt_fake')
         for ifake in xrange(1, N_FAKE_BINS + 1):
-            node['data_fakes_WeightStatSystBin%iUp' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. + wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
-            node['data_fakes_WeightStatSystBin%iDown' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake * (1. - wt_p0_fake_err * (wt_p0_fake_bin == %i))' % ifake)
+            node['data_fakes_WeightStatSystBin%iUp' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake%s * (1. + wt_p0_fake_err%s * (wt_p0_fake_bin%s == %i))' % (wt_p0_fake, wt_p0_fake_unc, wt_p0_fake_unc, ifake))
+            node['data_fakes_WeightStatSystBin%iDown' % ifake] = Hist('TH1F', sample='data_obs_%s' % chn, var=var_list, binning=binning, sel=fake_sel, wt='wt_p0_fake%s * (1. - wt_p0_fake_err%s * (wt_p0_fake_bin%s == %i))' % (wt_p0_fake, wt_p0_fake_unc, wt_p0_fake_unc, ifake))
 
 def HistSum(label_list):
     return sum([node[X] for X in label_list[1:]], node[label_list[0]])
@@ -393,7 +404,7 @@ def Bits(var, *args):
     x = 0
     for v in args:
         x = x | 1 << int(v)
-    return '%s & %i' % (var, x)
+    return '(%s & %i) == %i' % (var, x, x)
 
 """
 0    f_ = f_ | (p0_truth_ == 1 || p0_truth_ == 4 || p0_truth_ == 5) << 0; // p0_isprompt
@@ -402,61 +413,63 @@ def Bits(var, *args):
 3    f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 2 || p0_truth_ == 3 || p0_truth_ == 7) << 3; //p0_isfake
 """
 
-if USE_BITFLAGS:
-    X['p0_isprompt'] = Bits('f', 0)
-    X['p0_isjet'] = Bits('f', 1)
-    X['p0_iselec'] = Bits('f', 2)
-    X['p0_isfake'] = Bits('f', 3)
-else:
-# Selections for photon truth
-    X['p0_isprompt'] = 'p0_truth == 1 || p0_truth == 4 || p0_truth == 5'
-    X['p0_isjet'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 3 || p0_truth == 7'
-    X['p0_iselec'] = 'p0_truth == 2'
-    X['p0_isfake'] = 'p0_truth == 6 || p0_truth == 0 || p0_truth == 2 || p0_truth == 3 || p0_truth == 7'
+bitflag_rules = [
+    # Selections for photon truth
+    [1, 'p0_isprompt',   Bits('f', 0), 'p0_truth == 1 || p0_truth == 4 || p0_truth == 5'],
+    [1, 'p0_isjet',      Bits('f', 1), 'p0_truth == 6 || p0_truth == 0 || p0_truth == 3 || p0_truth == 7'],
+    [1, 'p0_iselec',     Bits('f', 2), 'p0_truth == 2'],
+    [1, 'p0_isfake',     Bits('f', 3), 'p0_truth == 6 || p0_truth == 0 || p0_truth == 2 || p0_truth == 3 || p0_truth == 7'],
+    # Selecting barrel or endcap photons
+    [1, 'p0_eb',         Bits('f', 4), 'abs(p0_eta) < 1.4442'],
+    [1, 'p0_ee',         Bits('f', 5), 'abs(p0_eta) > 1.4442'],
+    # Selections for photon isolation and sigma_ietaieta
+    [1, 'iso_t',         Bits('f', 6), '(abs(p0_eta) < 1.4442 && p0_chiso < 1.141) || (abs(p0_eta) > 1.4442 && p0_chiso < 1.051)'],
+    [1, 'iso_l',         Bits('f', 7), 'p0_chiso > 4 && p0_chiso < 10'],
+    [1, 'sig_t',         Bits('f', 8), '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.0272)'],
+    [1, 'sig_l',         Bits('f', 9), '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01100) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.0300)'],
+    [1, 'photon_sel',    '%s && $iso_t && $sig_t' % Bits('f', 10), 'p0_medium_noch && $iso_t && $sig_t'],
+    # Selections for vetoing e->photon fakes
+    [1, 'efake_veto_e',         Bits('f', 12, 13, 14, 15), '!p0_haspix && p0_eveto && n_veto_e == 0 && n_veto_m == 0'],
+    [1, 'efake_veto_m',         Bits('f', 12, 13, 14, 15), '!p0_haspix && p0_eveto && n_veto_m == 0 && n_veto_e == 0'],
+    [1, 'lepton_sel',           Bits('f', 16), 'l0_nominal'],
+    # Selection to veto (or select) mZ region
+    [1, 'mZ_veto_m',            Bits('f', 17), '(l0p0_M < 70 || l0p0_M > 100)'],
+    [1, 'mZ_veto_e',            Bits('f', 18), '(l0p0_M < 70 || l0p0_M > 110)'],
+    [1, 'mZ_veto_inv_m',         Bits('f', 19), '(l0p0_M >= 70 && l0p0_M <= 100)'],
+    [1, 'mZ_veto_inv_e',         Bits('f', 20), '(l0p0_M >= 75 && l0p0_M <= 105)'],
+    # Veto specific boxes in photon phi-eta where we have e->gamma spikes
+    [1, 'p0_phi_veto_2016',      Bits('f', 21), 'p0_phi > 2.268 && p0_phi < 2.772 && p0_eta > -2.04 && p0_eta < 0.84'],
+    [1, 'p0_phi_veto_2017',      Bits('f', 22), 'p0_phi > 2.646 && p0_phi < 3.15 && p0_eta > -0.60 && p0_eta < 1.68'],
+    [1, 'p0_phi_veto_2018',      Bits('f', 23), 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'],
+]
 
-# Selecting barrel or endcap photons
-X['p0_eb'] = 'abs(p0_eta) < 1.4442'
-X['p0_ee'] = 'abs(p0_eta) > 1.4442'
+for enable, key, faststr, fullstr in bitflag_rules:
+    if enable == 1 and USE_BITFLAGS:
+        X[key] = faststr
+    else:
+        X[key] = fullstr
 
-# Selections for photon isolation and sigma_ietaieta
-X['iso_t'] = '(abs(p0_eta) < 1.4442 && p0_chiso < 1.141) || (abs(p0_eta) > 1.4442 && p0_chiso < 1.051)'
-X['iso_l'] = 'p0_chiso > 4 && p0_chiso < 10'
-X['sig_t'] = '(abs(p0_eta) < 1.4442 && p0_sigma < 0.01015) || (abs(p0_eta) > 1.4442 && p0_sigma < 0.0272)'
-X['sig_l'] = '(abs(p0_eta) < 1.4442 && p0_sigma > 0.01100) || (abs(p0_eta) > 1.4442 && p0_sigma > 0.0300)'
-X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t'
-if DO_WORST_ISO:
-    X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t && p0_worstiso < min(0.05 * p0_pt, 6.0)'
 
-# Selections for vetoing e->photon fakes
-X['efake_veto_e'] = '!p0_haspix && p0_eveto && n_veto_e == 0 && n_veto_m == 0'
-X['efake_veto_m'] = '!p0_haspix && p0_eveto && n_veto_m == 0 && n_veto_e == 0'
-X['lepton_sel'] = 'l0_nominal'
+if DO_WORST_ISO == 1:
+    # Only cut on worst iso if it is worse than chiso
+    X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t && ((p0_worstiso - p0_chiso) < min(0.05 * p0_pt, 6.0))'
+if DO_WORST_ISO >= 2:
+    X['photon_sel'] = 'p0_medium_noch && $iso_t && $sig_t && ((p0_worstiso) < min(0.05 * p0_pt, 6.0))'
 
 # Added 16/4/20 - can be used in lepton_fakes to emulate tighter iso working points
-X['lepton_iso_t_m'] = '1'
-X['lepton_iso_t_e'] = '1'
-# X['lepton_iso_t_m'] = 'l0_iso < 0.1'
-# X['lepton_iso_t_e'] = '(abs(l0_eta)<1.4442 && l0_iso < (0.0287 + 0.506/l0_pt)) || (abs(l0_eta)>=1.4442 && l0_iso < (0.0445 + 0.963/l0_pt))'
+# X['lepton_iso_t_m'] = '1'
+# X['lepton_iso_t_e'] = '1'
+X['lepton_iso_t_m'] = 'l0_iso < 0.1'
+X['lepton_iso_t_e'] = '(abs(l0_eta)<1.4442 && l0_iso < (0.0287 + 0.506/l0_pt)) || (abs(l0_eta)>=1.4442 && l0_iso < (0.0445 + 0.963/l0_pt))'
 X['lepton_sdb_m'] = '!l0_nominal && l0_iso > 0.2'
 X['lepton_sdb_e'] = '!l0_nominal && l0_iso > 0.1 && l0_iso < 0.95'
 
-# Selection to veto (or select) mZ region
-X['mZ_veto_m'] = '(l0p0_M < 70 || l0p0_M > 100)'
-X['mZ_veto_e'] = '(l0p0_M < 70 || l0p0_M > 110)'
-X['mZ_veto_inv_m'] = '(l0p0_M >= 70 && l0p0_M <= 100)'
-X['mZ_veto_inv_e'] = '(l0p0_M >= 75 && l0p0_M <= 105)'
-
 # Veto specific boxes in photon phi-eta where we have e->gamma spikes
-if args.year == '2016':
-    X['p0_phi_veto'] = 'p0_phi > 2.268 && p0_phi < 2.772 && p0_eta > -2.04 && p0_eta < 0.84'
-if args.year == '2017':
-    X['p0_phi_veto'] = 'p0_phi > 2.646 && p0_phi < 3.15 && p0_eta > -0.60 && p0_eta < 1.68'
-if args.year == '2018':
-    X['p0_phi_veto'] = 'p0_phi > 0.504 && p0_phi < 0.882 && p0_eta > -1.44 && p0_eta < 1.44'
+X['p0_phi_veto'] = X['p0_phi_veto_%s' % args.year]
 
 # Analysis selection levels:
-X['baseline_m_nopix'] ='metfilters==0 && l0_pdgid == 13 && l0_trg && $lepton_sel && n_pre_m>=1 && n_pre_p==1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
-X['baseline_e_nopix'] ='metfilters==0 && l0_pdgid == 11 && l0_trg && $lepton_sel && n_pre_e>=1 && n_pre_p==1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto'
+X['baseline_m_nopix'] ='n_pre_p==1 && l0_pdgid == 13 && l0_trg && $lepton_sel && n_pre_m>=1 && $photon_sel && l0_pt>30 && abs(l0_eta) < 2.4 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto && metfilters==0'
+X['baseline_e_nopix'] ='n_pre_p==1 && l0_pdgid == 11 && l0_trg && $lepton_sel && n_pre_e>=1 && $photon_sel && l0_pt>35 && abs(l0_eta) < 2.5 && p0_pt>30 && abs(p0_eta) < 2.5 && l0p0_dr>0.7 && !$p0_phi_veto && metfilters==0'
 X['baseline_m'] ='$baseline_m_nopix && $efake_veto_m'
 X['baseline_e'] ='$baseline_e_nopix && $efake_veto_e'
 X['baseline_m_met'] ='$baseline_m && puppi_met>40'
@@ -467,12 +480,11 @@ X['baseline_m_mZ_veto'] ='$baseline_m && $mZ_veto_m && puppi_met>40'
 X['baseline_e_mZ_veto'] ='$baseline_e && $mZ_veto_e && puppi_met>40'
 X['baseline_m_mZ_veto_tG'] ='$baseline_m_mZ_veto && n_all_j==2 && n_all_btag_j == 1'
 X['baseline_e_mZ_veto_tG'] ='$baseline_e_mZ_veto && n_all_j==2 && n_all_btag_j == 1'
-X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
-X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
+# X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
+# X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j>=1 && n_veto_e == 0 && n_veto_m == 0'
 # Better selections from studies on 16/4/20:
-# X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0'
-# X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0 && n_alt_veto_e == 0 && l0j0_M < 85'
-
+X['lepton_fakes_m'] = 'metfilters==0 && l0_pdgid == 13 && l0_pt>30 && abs(l0_eta) < 2.4 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_m>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0'
+X['lepton_fakes_e'] = 'metfilters==0 && l0_pdgid == 11 && l0_pt>35 && abs(l0_eta) < 2.5 && !(n_pre_p==1 && p0_medium) && l0_trg && $lepton_sel && n_pre_e>=1 && n_qcd_j==1 && n_veto_e == 0 && n_veto_m == 0 && n_alt_veto_e == 0 && (l0j0_M < 95 || l0j0_M > 105)'
 
 # Control regions
 X['cr_Zmm'] ='l0_pdgid == 13 && l0_trg && n_pre_m==2 && $lepton_sel && l0_pt>30 && l1_pt>30 && l0l1_os && l0l1_dr > 0.3'
@@ -501,6 +513,8 @@ if args.task == 'fid_region':
 
 # Event weights
 X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf'
+if DO_WORST_ISO >= 2:
+    X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_p0_e_fake*wt_pf*wt_p0_swi'
 X['lepton_fakes_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_pf'
 X['cr_zll_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_l1*wt_pf'
 
@@ -801,9 +815,11 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
     if args.task == 'photon_fakes':
         extra_regions = [
             ('_pt_30_40', 'p0_pt>30 && p0_pt<=40'),
-            ('_pt_40_60', 'p0_pt>40 && p0_pt<=60'),
-            ('_pt_60_100', 'p0_pt>60 && p0_pt<=100'),
-            ('_pt_100_300', 'p0_pt>100 && p0_pt<=300'),
+            ('_pt_40_50', 'p0_pt>40 && p0_pt<=50'),
+            ('_pt_50_70', 'p0_pt>50 && p0_pt<=70'),
+            ('_pt_70_100', 'p0_pt>70 && p0_pt<=100'),
+            ('_pt_100_150', 'p0_pt>100 && p0_pt<=150'),
+            ('_pt_150_300', 'p0_pt>150 && p0_pt<=300'),
         ]
 
 
@@ -847,24 +863,29 @@ if args.task in ['photon_fakes', 'photon_fakes2']:
                      '%s_iso_t_sig_t%s' % (S, POST)])
 
     drawvars = [
-        ('p0_pt', (120, 0, 600.)),
-        ('p0_chiso', (40, 0, 20.0)),
-        ('p0_worstiso',  (200, 0, 200)),
-        ('p0_sigma', (60, 0., 0.06)),
+        ('p0_chiso', 'p0_chiso', (40, 0, 20.0)),
+        ('p0_pt', 'p0_pt', (120, 0, 600.)),
+        # ('p0_worstiso', 'p0_worstiso', (200, 0, 100)),
+        ('p0_worstiso', 'p0_worstiso-p0_chiso', (80, 0, 40)),
+        ('p0_sigma', 'p0_sigma', (60, 0., 0.06)),
     ]
 
     for chn in ['e', 'm']:
         for sel in do_cats[chn]:
-            for var, binning in drawvars:
-                doFakes = ('iso_t_sig_t' in sel)
-                StandardHists(hists[chn][sel][var], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=doFakes, doSysts=False)
+            for dirname, var, binning in drawvars:
+                # doFakes = ('iso_t_sig_t' in sel)
+                doFakes = False
+                # Only need a basic plot for these
+                if '_pt_' in sel and dirname != 'p0_chiso':
+                    continue
+                StandardHists(hists[chn][sel][dirname], var_list=[var], binning=binning, sel=('$' + sel), wt='$baseline_wt', chn=chn, manager=X, wt_systs=[], doFakes=True, doSysts=False)
 
 
 if args.task in ['lepton_fakes']:
     extra_regions = [
         ('_pt_30_50', 'l0_pt>30 && l0_pt<=50'),
         ('_pt_50_100', 'l0_pt>50 && l0_pt<=100'),
-        ('_pt_100_200', 'l0_pt>100 && l0_pt<=200'),
+        # ('_pt_100_200', 'l0_pt>100 && l0_pt<=200'),
         # ('_pt_30_40', 'l0_pt>30 && l0_pt<=40'),
         # ('_pt_40_50', 'l0_pt>40 && l0_pt<=50'),
         # ('_pt_50_60', 'l0_pt>50 && l0_pt<=60'),
@@ -883,33 +904,41 @@ if args.task in ['lepton_fakes']:
     for chn in ['e', 'm']:
         for S in ['barrel_%s' % chn, 'endcap_%s' % chn]:
             for POST, EXTRA in [
-              ('', '1'),
+              # ('', '1'),
             ] + extra_regions:
-                X['%s_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
-                X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
-                X['%s_w_all%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && (%s)' % (S, chn, EXTRA)
+                if chn == 'e':
+                    X['%s_w_all_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && (%s)' % (S, chn, EXTRA)
+                    X['%s_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && puppi_met<30 && fabs(l0j0_dphi) > 2.5 && (%s)' % (S, chn, EXTRA)
+                    X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && puppi_met<30 && fabs(l0j0_dphi) > 2.5 && (%s)' % (S, chn, EXTRA)
+                    X['%s_w_all%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && (%s)' % (S, chn, EXTRA)
+                else:
+                    X['%s_w_all_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && (%s)' % (S, chn, EXTRA)
+                    X['%s_iso_l%s' % (S, POST)] = '$%s && ($lepton_sdb_%s) && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
+                    X['%s_iso_t%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt<30 && (%s)' % (S, chn, EXTRA)
+                    X['%s_w_all%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && (%s)' % (S, chn, EXTRA)
                 if args.year in ['2016']:
                     X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt>70 && (%s)' % (S, chn, EXTRA)
                 else:
                     X['%s_w_ctl%s' % (S, POST)] = '$%s && l0_nominal && $lepton_iso_t_%s && l0met_mt>70 && l0met_mt<90 && (%s)' % (S, chn, EXTRA)
                 do_cats[chn].extend(
-                    ['%s_iso_l%s' % (S, POST),
+                    ['%s_w_all_iso_l%s' % (S, POST),
+                     '%s_iso_l%s' % (S, POST),
                      '%s_iso_t%s' % (S, POST),
                      '%s_w_ctl%s' % (S, POST),
                      '%s_w_all%s' % (S, POST),
                      ])
     drawvars = [
         ('l0met_mt', (20, 0., 200.)),
-        ('l0_pt', (40, 0., 200.)),
+        # ('l0_pt', (40, 0., 200.)),
         ('puppi_met', (20, 0., 200.)),
-        ('l0_iso', (40, 0, 2.0)),
+        ('l0_iso', (40, 0, 1.0)),
         ('l0j0_dphi', (30, -3.15, 3.15)),
         ('l0j0_M', (40, 0, 120)),
         ('gen_mll', (80, 0, 20)),
-        ('n_alt_veto_e', (4, -0.5, 3.5)),
-        ('n_alt_veto_m', (4, -0.5, 3.5)),
+        # ('n_alt_veto_e', (4, -0.5, 3.5)),
+        # ('n_alt_veto_m', (4, -0.5, 3.5)),
         ('n_qcd_j', (4, -0.5, 3.5)),
-        ('j0_pt', (30, 0., 150.))
+        # ('j0_pt', (30, 0., 150.))
     ]
 
     for chn in ['e', 'm']:

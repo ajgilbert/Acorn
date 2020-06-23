@@ -618,11 +618,14 @@
   },
   "configs": {
     "data_reproc": ["year=2016", "isData=1", "globalTag=102X_dataRun2_v12", "cores=2"],
-    "mc":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"],
-    "mc_wg":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "doWGammaRivet=1"],
-    "mc_no_lhe":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "hasLHE=0", "cores=2"],
-    "mc_old":  ["year=2016_old", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"],
-    "mc_genonly":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "genOnly=1"]
+    "mc":                           ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"],
+    "mc_wg":                        ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "doWGammaRivet=1"],
+    "mc_no_lhe":                    ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "hasLHE=0"],
+    "mc_no_lheweights":             ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "keepLHEWeights=0"],
+    "mc_no_nopdfweights":           ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "keepPDFWeights=0"],
+    "mc_no_lheparts_nopdfweights":  ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "keepLHEParticles=0", "keepPDFWeights=0"],
+    "mc_genonly": ["year=2016", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2", "genOnly=1"],
+    "mc_old":     ["year=2016_old", "isData=0", "globalTag=102X_mcRun2_asymptotic_v7", "cores=2"]
   },
   "crabSettings": {
     "storageSite": "T2_CH_CERN",
