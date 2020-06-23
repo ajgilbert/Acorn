@@ -28,14 +28,15 @@ parser = argparse.ArgumentParser()
 args = parser.parse_args()
 plot.ModTDRStyle()
 
-fin = ROOT.TFile('output_2018_photon_fakes_200511.root')
+fin = ROOT.TFile('output_2018_photon_fakes_200511-test.root')
 # barrel_m_iso_t_sig_t_pt_30_40
+var = 'p0_worstiso'
 
 def MakeCurve(file, barrel, cat, maxiso=1000.):
-    h_WG = fin.Get('/m/%s_m_iso_t_sig_t_pt_%s/p0_worstiso/WG_R' % (barrel, cat))
-    h_WJ = fin.Get('/m/%s_m_iso_t_sig_t_pt_%s/p0_worstiso/W_J' % (barrel, cat))
-    h_WG_e = fin.Get('/e/%s_e_iso_t_sig_t_pt_%s/p0_worstiso/WG_R' % (barrel, cat))
-    h_WJ_e = fin.Get('/e/%s_e_iso_t_sig_t_pt_%s/p0_worstiso/W_J' % (barrel, cat))
+    h_WG = fin.Get('/m/%s_m_iso_t_sig_t_pt_%s/%s/WG_R' % (barrel, cat, var))
+    h_WJ = fin.Get('/m/%s_m_iso_t_sig_t_pt_%s/%s/W_J' % (barrel, cat, var))
+    h_WG_e = fin.Get('/e/%s_e_iso_t_sig_t_pt_%s/%s/WG_R' % (barrel, cat, var))
+    h_WJ_e = fin.Get('/e/%s_e_iso_t_sig_t_pt_%s/%s/W_J' % (barrel, cat, var))
     h_WG.Add(h_WG_e)
     h_WJ.Add(h_WJ_e)
     i_WG = h_WG.Integral(0, h_WG.GetNbinsX() + 1)
@@ -56,6 +57,8 @@ def MakeCurve(file, barrel, cat, maxiso=1000.):
         print '>> %f, %f, %f' % (edge, eff_WG, rej_WJ)
 
     gr = ROOT.TGraph(len(xvals), array('d', xvals), array('d', yvals))
+    for test in [0.6, 0.7, 0.8, 0.9]:
+        print '>> Test %f, %f' % (test, gr.Eval(test))
     return gr
 
 
@@ -92,9 +95,9 @@ pads = plot.OnePad()
 
 targets = [
     ('30_40', 1, '30-40 GeV'),
-    ('40_60', 2, '40-60 GeV'),
-    ('60_100', 4, '60-100 GeV'),
-    ('100_200', 8, '100-200 GeV'),
+    ('70_100', 2, '70-100 GeV'),
+    # ('50_70', 4, '50-70 GeV'),
+    ('150_300', 8, '150-300 GeV'),
 ]
 
 legend = ROOT.TLegend(0.6, 0.86 - 0.04 * 3, 0.90, 0.91, '', 'NBNDC')
@@ -107,6 +110,10 @@ for t in targets:
     legend.AddEntry(grs[-1], t[2], 'LP')
 
 grs[0].Draw('APL')
+axis = plot.GetAxisHist(pads[0])
+axis.SetMinimum(0.1)
+axis.SetMaximum(1.1)
+axis.GetXaxis().SetRangeUser(0.5, 1.1)
 for gr in grs:
     gr.Draw('LPSAME')
 

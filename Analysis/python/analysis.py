@@ -133,11 +133,10 @@ class SelectionManager:
         self.varregex = re.compile('\\$[_a-zA-Z][_a-zA-Z0-9]*')
 
     def __getitem__(self, key):
-        if key in self.d:
-            return self.d[key]
+        if key in self.storage:
+            return self.storage[key]
         else:
-            self.d[key] = Node()
-            return self.d[key]
+            return None
 
     def __setitem__(self, key, val):
         self.storage[key] = val

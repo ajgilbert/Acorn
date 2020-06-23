@@ -103,6 +103,10 @@ int WGTagAndProbe::PreAnalysis() {
     auto electrons = event->GetPtrVec<ac::Electron>("electrons");
     auto photons = event->GetPtrVec<ac::Photon>("photons");
 
+    for (Photon *p : photons) {
+      PhotonIsoCorrector(p, info->userDoubles().at(0));
+    }
+
     auto tags = ac::copy_keep_if(electrons, [](ac::Electron *e) {
       return e->pt() > 35. && fabs(e->scEta()) < 2.5 && e->isCutBasedMediumElectron() &&
                    (fabs(e->scEta()) < 1.4442 || fabs(e->scEta()) > 1.566) && ElectronIPCuts(e);
@@ -187,7 +191,7 @@ int WGTagAndProbe::PreAnalysis() {
         p_eta_ = ele_p->scEta();
         p_phi_ = ele_p->phi();
         p_q_ = ele_p->charge();
-        p_id_ = ele_p->worstChargedIsolation() < std::min(0.05 * ele_p->pt(), 6.0);
+        p_id_ = (ele_p->worstChargedIsolation() - ele_p->chargedIso()) < std::min(0.05 * ele_p->pt(), 6.0);
 
         m_ll_ = (ele_t->vector() + ele_p->vector()).M();
 

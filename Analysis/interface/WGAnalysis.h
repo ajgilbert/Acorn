@@ -69,8 +69,8 @@ class WGAnalysis : public ModuleBase {
   float gen_W_pt_;
   float gen_l0p0_dphi_;
   float gen_Wp0_dphi_;
-  float j1_pt_;
-  float j1_eta_;
+  float j0_pt_;
+  float j0_eta_;
   int n_jets_;
   unsigned nparts_;
   bool valid_mt_;

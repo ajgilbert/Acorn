@@ -8,7 +8,7 @@
     },
     "SingleElectron": {
       "attributes": ["default", "data", "tp"],
-      "sequences": ["WGamma"],
+      "sequences": ["WGamma", "PhotonTP"],
       "inputs": ["SingleElectron-2017B", "SingleElectron-2017C", "SingleElectron-2017D", "SingleElectron-2017E", "SingleElectron-2017F"],
       "lumi": 41525.685252
     },
@@ -84,14 +84,12 @@
       "xsec": 191.4,
       "stitching": {
         "binned": ["photon_pt"],
-        "WGToLNuG-amcatnloFXFX":         {"target": true,  "min": [],      "max": [],"events": 15589532,"xsec": 191.4},
-        "WGToLNuG-amcatnloFXFX-PtG-130": {"target": false, "min": [130.0], "max": [],"events": 1241759, "xsec": 1.028},
-        "WGToLNuG-amcatnloFXFX-PtG-300": {"target": false, "min": [300.0], "max": [],"events": 298141,  "xsec": 0.07025},
-        "WGToLNuG-amcatnloFXFX-PtG-500": {"target": false, "min": [500.0], "max": [],"events": 326882, "xsec": 0.009322}
+        "WGToLNuG-amcatnloFXFX":         {"target": true,  "min": [],      "max": [],"events": 15914288,"xsec": 191.4},
+        "WGToLNuG-amcatnloFXFX-PtG-130": {"target": false, "min": [130.0], "max": [],"events": 7450794, "xsec": 1.028},
+        "WGToLNuG-amcatnloFXFX-PtG-300": {"target": false, "min": [300.0], "max": [],"events": 2135168, "xsec": 0.07025},
+        "WGToLNuG-amcatnloFXFX-PtG-500": {"target": false, "min": [500.0], "max": [],"events": 2493434, "xsec": 0.009322}
       }
     },
-
-
     "ZGToLLG-amcatnloFXFX": {
       "attributes": ["to_count", "mc", "check_is_zg", "scale_weights:1"],
       "inputs": ["ZGToLLG-amcatnloFXFX"],
@@ -203,17 +201,17 @@
       "xsec": 6077.22,
       "stitching": {
         "binned": ["nlo_njet", "ptv"],
-        "DYJetsToLL_M-50-amcatnloFXFX":                 {"target": true,  "min": [],           "max": [],           "events": 141434795, "xsec": 6498.0},
+        "DYJetsToLL_M-50-amcatnloFXFX":                 {"target": true,  "min": [],           "max": [],           "events": 142142566, "xsec": 6498.0},
         "DY0JetsToLL_M-50-amcatnloFXFX":                {"target": false, "min": [0.0, null],  "max": [1.0, null],  "events": 70905027,  "xsec": 5330.0},
         "DY1JetsToLL_M-50-amcatnloFXFX":                {"target": false, "min": [1.0, null],  "max": [2.0, null],  "events": 42871083,  "xsec": 966.5},
         "DY2JetsToLL_M-50-amcatnloFXFX":                {"target": false, "min": [2.0, null],  "max": [3.0, null],  "events": 16404501,  "xsec": 359.3},
         "DY1JetsToLL_M-50_LHEZpT_50-150-amcatnloFXFX":  {"target": false, "min": [1.0, 50.0],  "max": [2.0, 150.0], "events": 4854549,   "xsec": 313.2},
-        "DY1JetsToLL_M-50_LHEZpT_150-250-amcatnloFXFX": {"target": false, "min": [1.0, 150.0], "max": [2.0, 250.0], "events": 3789517,   "xsec": 9.516},
+        "DY1JetsToLL_M-50_LHEZpT_150-250-amcatnloFXFX": {"target": false, "min": [1.0, 150.0], "max": [2.0, 250.0], "events": 3876212,   "xsec": 9.516},
         "DY1JetsToLL_M-50_LHEZpT_250-400-amcatnloFXFX": {"target": false, "min": [1.0, 250.0], "max": [2.0, 400.0], "events": 2118148,   "xsec": 1.096},
         "DY1JetsToLL_M-50_LHEZpT_400-inf-amcatnloFXFX": {"target": false, "min": [1.0, 400.0], "max": [2.0, null],  "events": 284146,    "xsec": 0.1199},
         "DY2JetsToLL_M-50_LHEZpT_50-150-amcatnloFXFX":  {"target": false, "min": [2.0, 50.0],  "max": [3.0, 150.0], "events": 6697274,   "xsec": 169.7},
         "DY2JetsToLL_M-50_LHEZpT_150-250-amcatnloFXFX": {"target": false, "min": [2.0, 150.0], "max": [3.0, 250.0], "events": 8582825,   "xsec": 15.45},
-        "DY2JetsToLL_M-50_LHEZpT_250-400-amcatnloFXFX": {"target": false, "min": [2.0, 250.0], "max": [3.0, 400.0], "events": 7087728,   "xsec": 2.737},
+        "DY2JetsToLL_M-50_LHEZpT_250-400-amcatnloFXFX": {"target": false, "min": [2.0, 250.0], "max": [3.0, 400.0], "events": 7302458,   "xsec": 2.737},
         "DY2JetsToLL_M-50_LHEZpT_400-inf-amcatnloFXFX": {"target": false, "min": [2.0, 400.0], "max": [3.0, null],  "events": 1480609,   "xsec": 0.4486}
       }
     },
@@ -307,7 +305,7 @@
         "binned": ["njet", "ht"],
         "WJetsToLNu-madgraphMLM":   {"target": true,  "min": [],             "max": [],             "events": 77631180, "xsec": 52720.0},
         "W1JetsToLNu-madgraphMLM":  {"target": false, "min": [1.0, null],    "max": [2.0, null],    "events": 54946509, "xsec": 8090.0},
-        "W2JetsToLNu-madgraphMLM":  {"target": false, "min": [2.0, null],    "max": [3.0, null],    "events": 32184688, "xsec": 2799.0},
+        "W2JetsToLNu-madgraphMLM":  {"target": false, "min": [2.0, null],    "max": [3.0, null],    "events": 32333413, "xsec": 2799.0},
         "W3JetsToLNu-madgraphMLM":  {"target": false, "min": [3.0, null],    "max": [4.0, null],    "events": 19669693, "xsec": 993.6},
         "W4JetsToLNu-madgraphMLM":  {"target": false, "min": [4.0, null],    "max": [5.0, null],    "events": 11074019, "xsec": 543.2},
         "WJetsToLNu_HT-70To100":    {"target": false, "min": [null, 70.0],   "max": [null, 100.0],  "events": 22229710, "xsec": 1292.0},
@@ -512,7 +510,7 @@
       "GenXSecAnalyzer": ""
     },
     "DYJetsToLL_M-50-madgraphMLM": {
-      "attributes": ["mc", "check_is_zg", "tp"],
+      "attributes": ["mc", "check_is_zg"],
       "inputs": ["DYJetsToLL_M-50-madgraphMLM", "DYJetsToLL_M-50-madgraphMLM-ext1"],
       "xsec": 6077.22
     }

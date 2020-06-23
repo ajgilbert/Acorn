@@ -6,6 +6,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "boost/functional/hash.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/range/algorithm/sort.hpp"
 #include "RooRealVar.h"
 #include "Acorn/Analysis/interface/WGAnalysis.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
@@ -71,8 +72,8 @@ namespace ac {
       tree_->Branch("nparts", &nparts_);
       tree_->Branch("valid_mt", &valid_mt_);
       tree_->Branch("wt_def", &wt_def_);
-      tree_->Branch("j1_pt", &j1_pt_);
-      tree_->Branch("j1_eta", &j1_eta_);
+      tree_->Branch("j0_pt", &j0_pt_);
+      tree_->Branch("j0_eta", &j0_eta_);
       tree_->Branch("n_jets", &n_jets_);
       tree_->Branch("wt_C3w_0p0", &wt_C3w_0p0_);
       tree_->Branch("wt_C3w_0p1", &wt_C3w_0p1_);
@@ -237,6 +238,22 @@ namespace ac {
       // Define the lhe_true_phi (using LHE particles)
       lhe_true_phi_ = lhe_sys.Phi(parts.lhe_lep->pdgId() < 0);
       lhe_true_phi_f_ = lhe_sys.SymPhi(parts.lhe_lep->pdgId() < 0);
+
+      auto gen_jets = event->GetPtrVec<ac::Candidate>("genJets");
+
+      ac::keep_if(gen_jets, [&](ac::Candidate const* j) {
+        return j->pt() > 30.0 && std::abs(j->eta()) < 2.5 &&
+               ROOT::Math::VectorUtil::DeltaR(j->vector(), gen_sys.charged_lepton) > 0.4 &&
+               ROOT::Math::VectorUtil::DeltaR(j->vector(), gen_sys.photon) > 0.4;
+      });
+      boost::range::sort(gen_jets, DescendingPt);
+
+
+      n_jets_ = gen_jets.size();
+      if (gen_jets.size() >= 1) {
+        j0_pt_ = gen_jets[0]->pt();
+        j0_eta_ = gen_jets[0]->eta();
+      }
     }
 
     if (add_rivet_) {
@@ -314,8 +331,8 @@ namespace ac {
     gen_W_pt_ = 0.;
     gen_l0p0_dphi_ = 0.;
     gen_Wp0_dphi_ = 0.;
-    j1_pt_ = 0.;
-    j1_eta_ = 0.;
+    j0_pt_ = 0.;
+    j0_eta_ = 0.;
     n_jets_ = 0;
     nparts_ = 0;
     valid_mt_ = false;

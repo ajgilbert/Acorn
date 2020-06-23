@@ -175,7 +175,8 @@ if 'makeEFTScaling' in steps:
         # ('/home/files/190411-gen/wgamma_2016_v3/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
-        ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
+        # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
+        ('/eos/cms/store/user/agilbert/ANv5-200622-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-amcatnloFXFX-stitched.root', 'NLO')
     ]:
 
@@ -218,7 +219,7 @@ if 'makeHists' in steps:
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/user/agilbert/200408-full/wgamma_%s_v4/WGamma_' % yr
+        indir = 'root://eoscms.cern.ch//store/user/agilbert/ANv5-200617-full/wgamma_%s_v5/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])

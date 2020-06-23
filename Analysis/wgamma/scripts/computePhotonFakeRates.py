@@ -92,7 +92,7 @@ for eb in ['barrel_%s' % args.channel, 'endcap_%s' % args.channel]:
 
         # Subtract off the background
         node['data_sub'] = node['data_obs'] - (node['Total_R'] + node['Total_E'])
-        if add_channel is not None: 
+        if add_channel is not None:
             node['data_sub'] += (node_alt['data_obs'] - (node_alt['Total_R'] + node_alt['Total_E']))
 
     # Now take the ratio between regions

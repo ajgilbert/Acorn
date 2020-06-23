@@ -80,5 +80,7 @@ std::vector<double> ExtractScaleVariations(ac::EventInfo const& info, int versio
 
 bool FrixioneIso(ac::Candidate const& photon, std::vector<GenParticle*> const& lhe_parts, double dr);
 
+void PhotonIsoCorrector(ac::Photon *p, double rho);
+
 }
 #endif

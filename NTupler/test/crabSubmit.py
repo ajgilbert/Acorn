@@ -1,7 +1,7 @@
 import argparse
 import json
 import sys
-from WMCore.Configuration import Configuration
+from CRABClient.UserUtilities import config as Configuration
 from multiprocessing import Process
 from CRABAPI.RawCommand import crabCommand
 from httplib import HTTPException
