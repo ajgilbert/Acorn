@@ -47,6 +47,8 @@ struct WGammaRivetVariables {
   double true_phi;
   double true_phi_f;
 
+  int n_jets;
+
   WGammaRivetVariables();
   void resetVars();
 };
@@ -92,6 +94,10 @@ class CMS_2020_PAS_SMP_20_005 : public Analysis {
   double eft_photon_pt_cut_ = 150.;
   double eft_missing_pt_cut_ = 80.;
   double eft_lepton_photon_dr_cut_ = 3.0;
+
+  double jet_pt_cut_ = 30.;
+  double jet_abs_eta_cut_ = 2.5;
+  double jet_dr_cut_ = 0.4;
 
   struct WGSystem {
     int lepton_charge;

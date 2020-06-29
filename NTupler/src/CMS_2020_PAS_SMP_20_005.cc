@@ -43,6 +43,7 @@ void WGammaRivetVariables::resetVars() {
   true_phi_f = 0.;
   l0p0_dr = 0.;
   mt_cluster = 0.;
+  n_jets = 0;
 }
 
 namespace Rivet {
@@ -52,6 +53,12 @@ void CMS_2020_PAS_SMP_20_005::init() {
   vars_.resetVars();
 
   FinalState fs;
+
+  // Jets - all final state particles excluding neutrinos
+  VetoedFinalState vfs;
+  vfs.vetoNeutrinos();
+  FastJets fastjets(vfs, FastJets::ANTIKT, 0.4);
+  declare(fastjets, "Jets");
 
   // Non-prompt particles for photon isolation
   NonPromptFinalState nonprompt(fs);
@@ -99,6 +106,8 @@ void CMS_2020_PAS_SMP_20_005::init() {
   book(_h["baseline_photon_pt"], "baseline_photon_pt", std::vector<double>{30., 50., 70., 100., 150., 200., 300., 500., 800., 1200.});
   book(_h2d["eft_p_photon_pt_phi"], "eft_p_photon_pt_phi", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
   book(_h2d["eft_n_photon_pt_phi"], "eft_n_photon_pt_phi", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
+  book(_h2d["eft_p_photon_pt_phi_jveto"], "eft_p_photon_pt_phi_jveto", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
+  book(_h2d["eft_n_photon_pt_phi_jveto"], "eft_n_photon_pt_phi_jveto", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
 }
 
 /// Perform the per-event analysis
@@ -146,6 +155,11 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
   // Redefine the MET
   met = FourMomentum(met.pt(), met.px(), met.py(), 0.);
 
+  // Filter jets on pT, eta and DR with lepton and photon
+  const Jets jets = applyProjection<FastJets>(event, "Jets").jetsByPt([&](Jet const& j) {
+    return j.pt() > jet_pt_cut_ && std::abs(j.eta()) < jet_abs_eta_cut_ && deltaR(j, l0) > jet_dr_cut_ && deltaR(j, p0) > jet_dr_cut_;
+  });
+
   if (leptons.size() >= 1 && photons.size() >= 1 && neutrinos.size() >= 1) {
     // Populate variables
     vars_.is_wg_gen = true;
@@ -161,6 +175,8 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
     vars_.p0_eta = p0.eta();
     vars_.p0_phi = p0.phi(PhiMapping::MINUSPI_PLUSPI);
     vars_.p0_M = p0.mass();
+
+    vars_.n_jets = jets.size();
 
     vars_.p0_frixione = true;
     double frixione_sum = 0.;
@@ -224,8 +240,14 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
         vars_.l0p0_dr > eft_lepton_photon_dr_cut_ && vars_.met_pt > eft_missing_pt_cut_) {
       if (vars_.l0_q == +1) {
         _h2d["eft_p_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+        if (vars_.n_jets == 0) {
+          _h2d["eft_p_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+        }
       } else {
         _h2d["eft_n_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+        if (vars_.n_jets == 0) {
+          _h2d["eft_n_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+        }
       }
     }
   }
@@ -234,9 +256,15 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
 /// Normalise histograms etc., after the run
 void CMS_2020_PAS_SMP_20_005::finalize() {
   // Scale according to cross section
-  scale({_h["baseline_photon_pt"]},
+  scale(_h["baseline_photon_pt"],
         crossSection() / picobarn / sumOfWeights());
-  scale({_h2d["eft_p_photon_pt_phi"], _h2d["eft_n_photon_pt_phi"]},
+  scale(_h2d["eft_p_photon_pt_phi"],
+        crossSection() / picobarn / sumOfWeights());
+  scale(_h2d["eft_n_photon_pt_phi"],
+        crossSection() / picobarn / sumOfWeights());
+  scale(_h2d["eft_p_photon_pt_phi_jveto"],
+        crossSection() / picobarn / sumOfWeights());
+  scale(_h2d["eft_n_photon_pt_phi_jveto"],
         crossSection() / picobarn / sumOfWeights());
 }
 
