@@ -103,11 +103,17 @@ void CMS_2020_PAS_SMP_20_005::init() {
   declare(MissingMomentum(fs), "MET");
 
   // Booking of histograms
+  std::vector<double> eft_pt_binning = {150., 200., 300., 500., 800., 1200.};
+  std::vector<double> eft_phi_binning = {0., PI / 6., PI / 3., PI / 2.};
   book(_h["baseline_photon_pt"], "baseline_photon_pt", std::vector<double>{30., 50., 70., 100., 150., 200., 300., 500., 800., 1200.});
-  book(_h2d["eft_p_photon_pt_phi"], "eft_p_photon_pt_phi", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
-  book(_h2d["eft_n_photon_pt_phi"], "eft_n_photon_pt_phi", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
-  book(_h2d["eft_p_photon_pt_phi_jveto"], "eft_p_photon_pt_phi_jveto", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
-  book(_h2d["eft_n_photon_pt_phi_jveto"], "eft_n_photon_pt_phi_jveto", std::vector<double>{150., 200., 300., 500., 800., 1200.}, std::vector<double>{0., PI / 6., PI / 3., PI / 2.});
+  book(_h2d["eft_main_p_photon_pt_phi"], "eft_main_p_photon_pt_phi", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_main_n_photon_pt_phi"], "eft_main_n_photon_pt_phi", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_main_p_photon_pt_phi_jveto"], "eft_main_p_photon_pt_phi_jveto", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_main_n_photon_pt_phi_jveto"], "eft_main_n_photon_pt_phi_jveto", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_met1_p_photon_pt_phi"], "eft_met1_p_photon_pt_phi", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_met1_n_photon_pt_phi"], "eft_met1_n_photon_pt_phi", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_met1_p_photon_pt_phi_jveto"], "eft_met1_p_photon_pt_phi_jveto", eft_pt_binning, eft_phi_binning);
+  book(_h2d["eft_met1_n_photon_pt_phi_jveto"], "eft_met1_n_photon_pt_phi_jveto", eft_pt_binning, eft_phi_binning);
 }
 
 /// Perform the per-event analysis
@@ -237,18 +243,22 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
 
     if (vars_.l0_pt > eft_lepton_pt_cut_ && std::abs(vars_.l0_eta) < lepton_abs_eta_cut_ &&
         vars_.p0_pt > eft_photon_pt_cut_ && std::abs(vars_.p0_eta) < photon_abs_eta_cut_ && vars_.p0_frixione &&
-        vars_.l0p0_dr > eft_lepton_photon_dr_cut_ && vars_.met_pt > eft_missing_pt_cut_) {
-      if (vars_.l0_q == +1) {
-        _h2d["eft_p_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+        vars_.l0p0_dr > eft_lepton_photon_dr_cut_ && vars_.met_pt > eft_missing_pt_met1_cut_) {
+
+      std::string chg = vars_.l0_q == +1 ? "p" : "n";
+
+      _h2d["eft_met1_" + chg + "_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+      if (vars_.n_jets == 0) {
+        _h2d["eft_met1_" + chg + "_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+      }
+
+      if (vars_.met_pt > eft_missing_pt_cut_) {
+        _h2d["eft_main_" + chg + "_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
         if (vars_.n_jets == 0) {
-          _h2d["eft_p_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
-        }
-      } else {
-        _h2d["eft_n_photon_pt_phi"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
-        if (vars_.n_jets == 0) {
-          _h2d["eft_n_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
+          _h2d["eft_main_" + chg + "_photon_pt_phi_jveto"]->fill(vars_.p0_pt / GeV, vars_.true_phi_f);
         }
       }
+
     }
   }
 }
@@ -256,16 +266,13 @@ void CMS_2020_PAS_SMP_20_005::analyze(const Event& event) {
 /// Normalise histograms etc., after the run
 void CMS_2020_PAS_SMP_20_005::finalize() {
   // Scale according to cross section
-  scale(_h["baseline_photon_pt"],
-        crossSection() / picobarn / sumOfWeights());
-  scale(_h2d["eft_p_photon_pt_phi"],
-        crossSection() / picobarn / sumOfWeights());
-  scale(_h2d["eft_n_photon_pt_phi"],
-        crossSection() / picobarn / sumOfWeights());
-  scale(_h2d["eft_p_photon_pt_phi_jveto"],
-        crossSection() / picobarn / sumOfWeights());
-  scale(_h2d["eft_n_photon_pt_phi_jveto"],
-        crossSection() / picobarn / sumOfWeights());
+  scale(_h["baseline_photon_pt"], crossSection() / picobarn / sumOfWeights());
+  for (std::string const& x :
+       {"eft_main_p_photon_pt_phi", "eft_main_n_photon_pt_phi", "eft_main_p_photon_pt_phi_jveto",
+        "eft_main_n_photon_pt_phi_jveto", "eft_met1_p_photon_pt_phi", "eft_met1_n_photon_pt_phi",
+        "eft_met1_p_photon_pt_phi_jveto", "eft_met1_n_photon_pt_phi_jveto"}) {
+    scale(_h2d[x], crossSection() / picobarn / sumOfWeights());
+  }
 }
 
 CMS_2020_PAS_SMP_20_005::WGSystem::WGSystem(Particle const& lep, Particle const& neu, Particle const& pho, bool verbose) {

@@ -93,6 +93,7 @@ class CMS_2020_PAS_SMP_20_005 : public Analysis {
   double eft_lepton_pt_cut_ = 80.;
   double eft_photon_pt_cut_ = 150.;
   double eft_missing_pt_cut_ = 80.;
+  double eft_missing_pt_met1_cut_ = 40.;
   double eft_lepton_photon_dr_cut_ = 3.0;
 
   double jet_pt_cut_ = 30.;
