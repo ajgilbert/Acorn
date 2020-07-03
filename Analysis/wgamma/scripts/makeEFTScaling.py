@@ -184,7 +184,7 @@ for name, sa, wt in [
         charge_sel = '1'
     else:
         charge_sel = '%s_l0_q==%s' % (gen, args.charge)
-    sel = '%s_pdgid==13 && %s && nparts>=1 && nparts <=%s && %s_p0_pt>%s && %s_p0_pt<%s && %s_l0_pt>%s && %s_n0_pt>%s && %s_n0_pt<%s && fabs(%s_l0_eta) < %s && fabs(%s_n0_eta) < %s && fabs(%s_p0_eta) < %s && %s_l0p0_dr > %s && %s_p0_frixione && n_jets==0' % (
+    sel = '%s_pdgid==13 && %s && nparts>=1 && nparts <=%s && %s_p0_pt>%s && %s_p0_pt<%s && %s_l0_pt>%s && %s_n0_pt>%s && %s_n0_pt<%s && fabs(%s_l0_eta) < %s && fabs(%s_n0_eta) < %s && fabs(%s_p0_eta) < %s && %s_l0p0_dr > %s && %s_p0_frixione' % (
         gen, charge_sel, args.nparts_max, gen, args.g_pt, gen, args.g_pt_max, gen, args.l_pt, gen, args.n_pt, gen, args.n_pt_max, gen, args.l_eta, gen, args.n_eta, gen, args.g_eta, gen, args.dr, gen)
     print sel
 

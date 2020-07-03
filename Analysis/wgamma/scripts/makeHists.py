@@ -406,12 +406,6 @@ def Bits(var, *args):
         x = x | 1 << int(v)
     return '(%s & %i) == %i' % (var, x, x)
 
-"""
-0    f_ = f_ | (p0_truth_ == 1 || p0_truth_ == 4 || p0_truth_ == 5) << 0; // p0_isprompt
-1    f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 3 || p0_truth_ == 7) << 1; // p0_isjet
-2    f_ = f_ | (p0_truth_ == 2) << 2; // p0_iselec
-3    f_ = f_ | (p0_truth_ == 6 || p0_truth_ == 0 || p0_truth_ == 2 || p0_truth_ == 3 || p0_truth_ == 7) << 3; //p0_isfake
-"""
 
 bitflag_rules = [
     # Selections for photon truth
@@ -532,11 +526,19 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         'phi_var_obs': 'abs(reco_sphi)',
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(6,0.,math.pi/2.)',
+        'jet_veto': False
     }
 
     if args.extra_cfg is not None:
         eft_defaults.update(json.loads(args.extra_cfg))
     pprint(eft_defaults)
+
+    if eft_defaults['jet_veto']:
+        X['fid_m'] += ' && n_cen_j==0'
+        X['fid_e'] += ' && n_cen_j==0'
+        X['gen_core'] += ' && gen_n_cen_j==0'
+    print X['fid_m']
+
     x_var = eft_defaults['x_var']
     x_var_obs = eft_defaults['x_var_obs']
     pt_bins = BinEdgesFromStr(eft_defaults['pt_bins'])

@@ -23,6 +23,11 @@ n_pt_bins = args.pt_bins
 n_phi_bins = args.phi_bins
 alt_shapes = True
 
+N_FAKE_BINS = 18
+DO_WORST_ISO = 2  # 0 = No, 1 = Only the cut for photon fakes, 2 = full
+if DO_WORST_ISO >= 2:
+    N_FAKE_BINS = 16
+
 charges = ['p', 'n']
 fakes_name = 'data_fakes_highpt'
 if args.type == 'fid_region':
@@ -34,7 +39,7 @@ for c in charges:
     for ptbin in range(n_pt_bins):
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
-        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', fakes_name], [cat], False)
+        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'ST_R', 'ST_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', fakes_name], [cat], False)
         if args.type in ['fid_region']:
             cb.AddProcesses(['*'], ['wg'], [era], [chn], ['data_fakes_lep_sub'], [cat], False)
         if args.type in ['eft_region', 'pt_phi_diff']:
@@ -132,7 +137,7 @@ cb_no_fakes.cp().AddSyst(
 
 ##### Photon fake estimation (low pT method only)
 if fakes_name == 'data_fakes_sub':
-    for ix in xrange(1, 19):
+    for ix in xrange(1, N_FAKE_BINS + 1):
         cb.cp().process(['data_fakes_sub']).AddSyst(
             cb, 'WeightStatSystBin%i' % ix, 'shape', ch.SystMap()(1.0))
 
@@ -229,6 +234,9 @@ par = cb.GetParameter('lumiscale').set_frozen(True)
 
 print '>> Extracting histograms from input root files...'
 file = 'output_%s_%s_%s_merged.root' % (args.year, args.type, args.label)
+if not alt_shapes:
+    file = 'output_%s_%s_%s.root' % (args.year, args.type, args.label)
+
 cb.cp().ExtractShapes(
     file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 

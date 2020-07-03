@@ -138,6 +138,8 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("wt_p0_fake_mc_true_new", &wt_p0_fake_mc_true_new_);
       tree_->Branch("wt_p0_highpt_fake", &wt_p0_highpt_fake_);
 
+      tree_->Branch("gen_mll", &gen_mll_);
+
       if (!is_data_) {
         tree_->Branch("wt_def", &wt_def_);
         tree_->Branch("wt_pf", &wt_pf_);
@@ -185,7 +187,6 @@ int WGDataAnalysis::PreAnalysis() {
       tree_->Branch("met_phi", &met_phi_);
       tree_->Branch("puppi_met_phi", &puppi_met_phi_);
 
-      tree_->Branch("gen_mll", &gen_mll_);
       if (!is_data_) {
         if (scale_weights_ > 0) {
           tree_->Branch("wt_sc_0", &wt_sc_0_);

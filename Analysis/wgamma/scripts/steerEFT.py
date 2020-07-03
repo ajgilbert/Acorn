@@ -105,7 +105,21 @@ configs = {
         'phi_var_obs': 'abs(reco_puppi_phi_f)',
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(3,0.,math.pi/2.)',
-        'task_name': 'eft_region'
+        'task_name': 'eft_region',
+        'jet_veto': False
+    },
+    "puppi_phi_f_binned_jetveto": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
+        # 'pt_bins': '[150,210,300,420,600,850,1200]',
+        'pt_bins': '[150,200,300,500,800,1200]',
+        'phi_var': 'abs(gen_true_phi_f)',
+        'phi_var_label': '|#phi_{f}|',
+        'phi_var_obs': 'abs(reco_puppi_phi_f)',
+        'phi_bins': '(3,0.,math.pi/2.)',
+        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'task_name': 'eft_region',
+        'jet_veto': True
     },
     "puppi_phi_f_binned_nobin": {
         'x_var': 'gen_p0_pt',
@@ -176,8 +190,10 @@ if 'makeEFTScaling' in steps:
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG-EFT-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
-        ('/eos/cms/store/user/agilbert/ANv5-200622-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
+        # ('/eos/cms/store/user/agilbert/ANv5-200622-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-amcatnloFXFX-stitched.root', 'NLO')
+        ('/eos/cms/store/user/agilbert/ANv5-200624-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
+
     ]:
 
         plot_dir = '/eos/user/a/agilbert/www/wgamma/%s/%s/%s' % (outdir, label, sample_type)
@@ -215,21 +231,22 @@ if 'makeHists' in steps:
         'phi_var': phi_var,
         'phi_var_obs': phi_var_obs,
         'phi_bins': phi_bins,
-        'phi_bins_obs': phi_bins_obs
+        'phi_bins_obs': phi_bins_obs,
+        'jet_veto': config['jet_veto']
     }
     print json.dumps(testplot_args)
     for yr in years:
-        indir = 'root://eoscms.cern.ch//store/user/agilbert/ANv5-200617-full/wgamma_%s_v5/WGamma_' % yr
+        indir = 'root://eoscms.cern.ch//store/user/agilbert/ANv5-200623-full/wgamma_%s_v5/WGamma_' % yr
         call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
               '--indir', indir,
               '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label])
         do_systs = [
-          # ('MetJesLo_', '_CMS_scale_met_jesDown'),
-          # ('MetJesHi_', '_CMS_scale_met_jesUp'),
-          # ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
-          # ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
-          # ('PScaleLo_', '_CMS_scale_pDown'),
-          # ('PScaleHi_', '_CMS_scale_pUp'),
+          ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
+          ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
+          ('PScaleLo_', '_CMS_scale_pDown'),
+          ('PScaleHi_', '_CMS_scale_pUp'),
         ]
         for syst_file, syst_name in do_systs:
             call(['python', 'wgamma/scripts/makeHists.py', '--task', config['task_name'],
@@ -252,7 +269,8 @@ if 'T2W' in steps:
     infiles = []
     for region in ['main', 'met1']:
         for sgn in ['p', 'n']:
-            infiles.append('%s_NLO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
+            # infiles.append('%s_NLO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
+            infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi.json:%s:%s' % (region, sgn, region, sgn))
 
 
     if label == 'fid_pt_binned' or label == 'inclusive_xs':
@@ -290,7 +308,7 @@ if 'limitsVsPtMax' in steps:
             call(['combine', '-M', 'MultiDimFit', '-t', '-1', '-n', '.%s.%s' % (label, bsm_label),
                   '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
                   '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',
-                  '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
+                  '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
             # call(['combine', '-M', 'MultiDimFit', '-t', '1', '-s', '1', '-n', '.%s.%s.toy' % (label, bsm_label),
             #       '--algo', 'grid', '-m', '%i' % i, '--setParameters', setpars, 'combined_%s.root' % label,
             #       '--setParameterRanges', 'c3w=%f,%f' % (-1. * par_range, par_range), '--points', '40', '--alignEdges', '1',

@@ -1,4 +1,5 @@
 from HiggsAnalysis.CombinedLimit.PhysicsModel import *
+import json
 import ROOT
 
 
@@ -37,6 +38,11 @@ class WGModel(PhysicsModel):
                 self.doConstVar("c3w_%s" % chn, "[0,-10,10]")
             for sgn in self.signs:
                 self.doConstVar("c3w_%s" % sgn, "[0,-10,10]")
+            for yr in self.years:
+                for chn in self.channels:
+                    for c in self.signs:
+                        self.modelBuilder.factory_('sum::c3w_scale_%s_%s_%s(c3w,c3w_%s,c3w_%s,c3w_%s)' % (yr, chn, c, yr, chn, c))
+
             pois = ['c3w']
             for filename, label, sgn in self.files:
                 print filename, label, sgn
@@ -61,26 +67,46 @@ class WGModel(PhysicsModel):
         self.modelBuilder.doSet("POI", ",".join(pois))
 
     def ImportFile(self, filename, sign, sublabel=''):
-        fin = ROOT.TFile(filename)
-        w = fin.Get('w')
-        # w.Print()
-        for yr in self.years:
-            for chn in self.channels:
-                for c in [sign]:
-                    self.modelBuilder.factory_('sum::c3w_scale_%s_%s_%s(c3w,c3w_%s,c3w_%s,c3w_%s)' % (yr, chn, c, yr, chn, c))
-                    for ptbin in range(self.ptBins):
-                        for phibin in range(self.phiBins):
-                            name = '%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
-                            # gr = fin.Get(name)
-                            # print 'scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
-                            obj = w.function(name)
-                            # obj.SetName('scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin))
-                            # spline = ROOT.RooSpline1D('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin), '', self.modelBuilder.out.var('c3w'), gr.GetN(), gr.GetX(), gr.GetY(), 'CSPLINE')
-                            self.modelBuilder.out._import(obj,
-                                                          ROOT.RooFit.RenameVariable(name, 'scale_%s_%s_%s_%s_%i_%i' % (yr, sublabel, chn, c, ptbin, phibin)),
-                                                          ROOT.RooFit.RenameVariable('c3w', 'c3w_scale_%s_%s_%s' % (yr, chn, c)),
-                                                          ROOT.RooFit. RecycleConflictNodes())
-        fin.Close()
+        if filename.endswith('.json'):
+            with open(filename) as jsonfile:
+                cfg = json.load(jsonfile)
+                for ib in xrange(len(cfg['bins'])):
+                    name = cfg['bin_labels'][ib]
+                    terms = cfg['bins'][ib]
+                    a = 0.0
+                    b = 0.0
+                    for term in terms:
+                        if len(term) == 3 and term[2] == 'cwwwl2':
+                            a = term[0] * 15
+                        if len(term) == 4 and (term[2] == term[3] == 'cwwwl2'):
+                            b = term[0] * 15 * 15
+                    # print name, a, b
+                    proc, sublabel, c, ptbin, phibin = name.split('_')
+                    for yr in self.years:
+                        for chn in self.channels:
+                            self.modelBuilder.factory_('expr::scale_%s_%s_%s_%s_%i_%i("1.0+@0*%.3g+@1*@0*@0*%.3g",%s,withBSM[1])' % (
+                                yr, sublabel, chn, c, int(ptbin), int(phibin), a, b, 'c3w_scale_%s_%s_%s' % (yr, chn, c)))
+        else:
+            fin = ROOT.TFile(filename)
+            w = fin.Get('w')
+            # w.Print()
+            for yr in self.years:
+                for chn in self.channels:
+                    for c in [sign]:
+                        # self.modelBuilder.factory_('sum::c3w_scale_%s_%s_%s(c3w,c3w_%s,c3w_%s,c3w_%s)' % (yr, chn, c, yr, chn, c))
+                        for ptbin in range(self.ptBins):
+                            for phibin in range(self.phiBins):
+                                name = '%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
+                                # gr = fin.Get(name)
+                                # print 'scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin)
+                                obj = w.function(name)
+                                # obj.SetName('scale_%s_%s_%i_%i' % (sublabel, c, ptbin, phibin))
+                                # spline = ROOT.RooSpline1D('scale_%s%s_%i_%i' % (c, sub, ptbin, phibin), '', self.modelBuilder.out.var('c3w'), gr.GetN(), gr.GetX(), gr.GetY(), 'CSPLINE')
+                                self.modelBuilder.out._import(obj,
+                                                              ROOT.RooFit.RenameVariable(name, 'scale_%s_%s_%s_%s_%i_%i' % (yr, sublabel, chn, c, ptbin, phibin)),
+                                                              ROOT.RooFit.RenameVariable('c3w', 'c3w_scale_%s_%s_%s' % (yr, chn, c)),
+                                                              ROOT.RooFit. RecycleConflictNodes())
+            fin.Close()
 
     def getYieldScale(self, bin, process):
         "Return the name of a RooAbsReal to scale this yield by or the two special values 1 and 0 (don't scale, and set to zero)"
