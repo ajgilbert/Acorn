@@ -2,17 +2,26 @@ import subprocess
 import json
 import glob
 import argparse
+import os
 from Acorn.Analysis.analysis import *
+from Acorn.Analysis.jobs import Jobs
 
+job_mgr = Jobs()
 parser = argparse.ArgumentParser()
+job_mgr.attach_job_args(parser)
 parser.add_argument('--config', default='fid_pt_binned')
 parser.add_argument('--steps', default='')
 parser.add_argument('--years', default='2016,2017,2018')
 args = parser.parse_args()
+job_mgr.set_args(args)
 
-def call(args):
+
+def call(args, noSub=False):
     print subprocess.list2cmdline(args)
-    subprocess.call(args)
+    if noSub:
+        subprocess.call(args)
+    else:
+        job_mgr.job_queue.append(subprocess.list2cmdline(args))
 
 
 configs = {
@@ -98,7 +107,6 @@ configs = {
     "puppi_phi_f_binned": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
-        # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(gen_true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
@@ -106,12 +114,25 @@ configs = {
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(3,0.,math.pi/2.)',
         'task_name': 'eft_region',
-        'jet_veto': False
+        'jet_veto': False,
+        'split_charge': True
+    },
+    "puppi_phi_f_binned_nochg": {
+        'x_var': 'gen_p0_pt',
+        'x_var_obs': 'p0_pt',
+        'pt_bins': '[150,200,300,500,800,1200]',
+        'phi_var': 'abs(gen_true_phi_f)',
+        'phi_var_label': '|#phi_{f}|',
+        'phi_var_obs': 'abs(reco_puppi_phi_f)',
+        'phi_bins': '(3,0.,math.pi/2.)',
+        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'task_name': 'eft_region',
+        'jet_veto': False,
+        'split_charge': False
     },
     "puppi_phi_f_binned_jetveto": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
-        # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(gen_true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
@@ -124,7 +145,6 @@ configs = {
     "puppi_phi_f_binned_nobin": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
-        # 'pt_bins': '[150,210,300,420,600,850,1200]',
         'pt_bins': '[150,200,300,500,800,1200]',
         'phi_var': 'abs(true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
@@ -193,7 +213,6 @@ if 'makeEFTScaling' in steps:
         # ('/eos/cms/store/user/agilbert/ANv5-200622-gen/wgamma_2018_v5/wg_gen_WGToLNuG-madgraphMLM-stitched.root', 'LO'),
         # ('/eos/cms/store/user/agilbert/ANv5-200430-gen/wgamma_2018_v5/wg_gen_WGToLNuG-amcatnloFXFX-stitched.root', 'NLO')
         ('/eos/cms/store/user/agilbert/ANv5-200624-gen/wgamma_2016_v5/wg_gen_WGToMuNuG_01J_5f_EFT-stitched.root', 'NLO')
-
     ]:
 
         plot_dir = '/eos/user/a/agilbert/www/wgamma/%s/%s/%s' % (outdir, label, sample_type)
@@ -208,20 +227,23 @@ if 'makeEFTScaling' in steps:
 
         standard_cuts += ['--pre-wt', 'wt', '--pre-var', 'gen']
 
-        for chg in ['+1', '-1']:
+        charges = ['0']
+        if 'split_charge' in config and config['split_charge']:
+            charges = ['+1', '-1']
+
+        for chg in charges:
             call(['python', 'wgamma/scripts/makeEFTScaling.py',
                   '--draw-x', 'gen_p0_pt', pt_bins, 'p_{T}^{#gamma}',
                   '--draw-y', phi_var, phi_bins, phi_var_label,
                   '--n_pt', '80.0',
-                  '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'main'] + standard_cuts)
+                  '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'main'] + standard_cuts, noSub=True)
             call(['python', 'wgamma/scripts/makeEFTScaling.py',
                   '--draw-x', 'gen_p0_pt', pt_bins, 'p_{T}^{#gamma}',
                   '--draw-y', phi_var, phi_bins, phi_var_label,
                   '--n_pt', '40.0', '--n_pt_max', '80.0',
-                  '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'met1'] + standard_cuts)
+                  '--charge', chg, '--o', '%s_%s' % (label, sample_type), '--label', 'met1'] + standard_cuts, noSub=True)
 
-    call(['gallery.py', '/eos/user/a/agilbert/www/wgamma/%s' % outdir])
-
+    call(['gallery.py', '/eos/user/a/agilbert/www/wgamma/%s' % outdir], noSub=True)
 
 if 'makeHists' in steps:
     testplot_args = {
@@ -232,7 +254,8 @@ if 'makeHists' in steps:
         'phi_var_obs': phi_var_obs,
         'phi_bins': phi_bins,
         'phi_bins_obs': phi_bins_obs,
-        'jet_veto': config['jet_veto']
+        'jet_veto': config['jet_veto'],
+        'split_charge': config['split_charge']
     }
     print json.dumps(testplot_args)
     for yr in years:
@@ -263,35 +286,40 @@ if 'setupDatacards' in steps:
                   '--year', yr, '--channel', chn, '--type', config['task_name'],
                   '--pt-bins', '%i' % n_pt_bins,
                   '--phi-bins', '%i' % n_phi_bins
-                  ])
+                  ], noSub=True)
 
 if 'T2W' in steps:
     infiles = []
     for region in ['main', 'met1']:
-        for sgn in ['p', 'n']:
+        charges = ['x']
+        if config['split_charge']:
+            charges = ['p', 'n']
+        for sgn in [charges]:
             # infiles.append('%s_NLO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
-            infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi.json:%s:%s' % (region, sgn, region, sgn))
-
+            if label == 'puppi_phi_f_binned_jetveto':
+                infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi_jveto.json:%s:%s' % (region, sgn, region, sgn))
+            else:
+                infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi.json:%s:%s' % (region, sgn, region, sgn))
 
     if label == 'fid_pt_binned' or label == 'inclusive_xs':
-        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
              ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=pt_diff', '-o', 'combined_pt_diff_%s.root' % label])
+              '--PO', 'type=pt_diff', '-o', '%s/combined_pt_diff_%s.root' % (os.getcwd(), label)], noSub=True)
     else:
-        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
-             ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
+             ['--cc', 'combined_EFT.txt', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
               '--PO', 'type=eft', '--PO',
-              'files=%s' % ','.join(infiles), '--channel-masks', '-o', 'combined_%s.root' % label])
+              'files=%s' % ','.join(infiles), '--channel-masks', '-o', '%s/combined_%s.root' % (os.getcwd(), label)], noSub=True)
 
-        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s/*.txt' % label)) +
+        call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
              ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=pt_phi_diff', '-o', 'combined_pt_phi_diff_%s.root' % label])
+              '--PO', 'type=pt_phi_diff', '-o', '%s/combined_pt_phi_diff_%s.root' % (os.getcwd(), label)], noSub=False)
 
 if 'limitsVsPtMax' in steps:
     for bsm_label, bsm_setting, fit_range in [
@@ -387,3 +415,5 @@ if 'C3WPlot' in steps:
 """
 python wgamma/scripts/theoryLimitPlot.py limits_phi_binned_noBSM.json limits_pt_binned_noBSM.json:exp0:'MarkerSize=0,LineWidth=2,LineColor=4,Title="No #phi binning"' --show exp --limit-on "C_{3W} (TeV^{-2})" --x-title "Maximum p_{T}^{#gamma} (GeV)"
 """
+
+job_mgr.flush_queue()

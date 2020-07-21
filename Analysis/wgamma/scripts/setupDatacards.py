@@ -29,6 +29,8 @@ if DO_WORST_ISO >= 2:
     N_FAKE_BINS = 16
 
 charges = ['p', 'n']
+if args.type == 'eft_region' and 'nochg' in args.label:
+    charges = ['x']
 fakes_name = 'data_fakes_highpt'
 if args.type == 'fid_region':
     charges = ['x']
@@ -320,7 +322,20 @@ def CorrectionNegativeYield(proc):
         proc.set_rate(0.)
 
 
+
+def CollectZeroYields(proc, res):
+    if proc.rate() == 0.:
+        res.add((proc.bin(), proc.process()))
+
 cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
+
+zero_yields = set()
+cb.ForEachProc(lambda x: CollectZeroYields(x, zero_yields))
+print zero_yields
+cb.FilterProcs(lambda x: (x.bin(), x.process()) in zero_yields)
+cb.FilterSysts(lambda x: (x.bin(), x.process()) in zero_yields)
+
+
 cb.SetAutoMCStats(cb, 0., True)
 # cb.PrintAll()
 

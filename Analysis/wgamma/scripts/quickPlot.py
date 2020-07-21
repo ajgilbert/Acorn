@@ -15,6 +15,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 plot.ModTDRStyle()
 
 
+# for ix in xrange(50):
+#     plot.CreateTransparentColor(12, 0.0 + 0.001 * ix)
 # def HistSum(hdict, label_list):
 #     return sum([hdict[X] for X in label_list[1:]], hdict[label_list[0]])
 

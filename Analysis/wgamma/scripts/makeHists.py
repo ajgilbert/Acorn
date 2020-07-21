@@ -526,7 +526,8 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         'phi_var_obs': 'abs(reco_sphi)',
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(6,0.,math.pi/2.)',
-        'jet_veto': False
+        'jet_veto': False,
+        'split_charge': True
     }
 
     if args.extra_cfg is not None:
@@ -574,8 +575,12 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         X['p_m_%i' % i] = '$fid_m && l0_q==+1 && %s>=%f && %s<%f' % (x_var_obs, pt_bins_min[i], x_var_obs, pt_bins_max[i])
         X['n_m_%i' % i] = '$fid_m && l0_q==-1 && %s>=%f && %s<%f' % (x_var_obs, pt_bins_min[i], x_var_obs, pt_bins_max[i])
         if args.task == 'eft_region':
-            do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
-            do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
+            if eft_defaults['split_charge']:
+                do_cats['e'].extend(['p_e_%i' % i, 'n_e_%i' % i])
+                do_cats['m'].extend(['p_m_%i' % i, 'n_m_%i' % i])
+            else:
+                do_cats['e'].extend(['x_e_%i' % i])
+                do_cats['m'].extend(['x_m_%i' % i])
         if args.task == 'fid_region':
             do_cats['e'].extend(['x_e_%i' % i])
             do_cats['m'].extend(['x_m_%i' % i])
@@ -614,7 +619,9 @@ if args.task == 'eft_region' or args.task == 'fid_region':
                 wg_scale_hlist = []
                 wg_syst_hlist = []
                 wg_hlist = []
-                chgs = ['p', 'n'] if args.task == 'eft_region' else ['x']
+                chgs = ['x']
+                if args.task == 'eft_region' and eft_defaults['split_charge']:
+                    chgs = ['p', 'n']
                 for chg in chgs:
                     hlist = [
                         ('WG_ooa_%s' % chg, '$' + sel + ' && $%s_gen_ooa' % chg, '$baseline_wt'),

@@ -143,7 +143,7 @@ if args.draw_y is not None:
     binning_y = BinningFromStr(args.draw_y[1])
     label_y = args.draw_y[2]
 
-pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'pn'
+pm_label = 'p' if args.charge == '+1' else 'n' if args.charge == '-1' else 'x'
 
 
 fout = ROOT.TFile('%s_%s_%s.root' % (args.output, args.label, pm_label), 'RECREATE')

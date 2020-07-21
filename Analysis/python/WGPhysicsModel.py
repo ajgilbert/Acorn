@@ -24,8 +24,11 @@ class WGModel(PhysicsModel):
         self.channels = ['e', 'm']
         self.signs = ['x']
         """Create POI and other parameters, and define the POI set."""
-        if self.type in ['eft']:
-            self.signs = ['p', 'n']
+        if self.type in ['eft', 'eftX']:
+            if self.type == 'eftX':
+                self.signs = ['x']
+            else:
+                self.signs = ['p', 'n']
             # Could measure c3w separately in:
             # fully combined
             # 2016, 2017, 2018

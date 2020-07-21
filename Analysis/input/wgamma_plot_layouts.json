@@ -337,6 +337,68 @@
       "color": [108,190,237]
     }
   ],
+  "data_fakes_EFT_X": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R"],
+      "legend": "Z(ll)#gamma",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z(ll) (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
+      "legend": "t#bar{t}#gamma",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_highpt"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [119,127,160]
+    },
+    {
+      "name": "GG",
+      "entries": ["GG_R", "GG_E"],
+      "legend": "#gamma#gamma",
+      "color": [72, 74, 71]
+    },
+    {
+      "name": "WG_OOA",
+      "entries": ["WG_ooa_x"],
+      "legend": "W(l#nu)#gamma (out)",
+      "color": 12
+    },
+    {
+      "name": "WG_MET1",
+      "entries": ["WG_met1_x"],
+      "legend": "W(l#nu)#gamma (met sdb.)",
+      "color": 11
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_main_x"],
+      "legend": "W(l#nu)#gamma (in)",
+      "color": [108,190,237]
+    }
+  ],
   "data_fakes_EFT_simple": [
     {
       "name": "VV",

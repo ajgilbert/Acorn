@@ -46,7 +46,7 @@ DEFAULT_CFG = {
     'logx': False,              # Draw x-axis in log-scale
     'logy': False,              # Draw y-axis in log-scale
     'logy_min': 1E-3,
-    'ratio': True,             # Draw the ratio plot?
+    'ratio': False,             # Draw the ratio plot?
     'fraction': False,             # Draw the ratio plot?
     'purity': False,
     'ratio_pad_frac': 0.27,
@@ -96,6 +96,7 @@ DEFAULT_CFG = {
 
 
 def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
+    js_workaround = False
     copyhists = {}
     for hname, h in hists.iteritems():
         if len(cfg['rebinvar']):
@@ -117,7 +118,21 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         if cfg['purity']:
             pads = plot.MultiRatioSplit([0.27, 0.13], [0.005, 0.005], [0.005, 0.005])
         else:
+            # if js_workaround:
+            #     upper = ROOT.TPad('upper', 'upper', 0., cfg['ratio_pad_frac'], 1., 1.)
+            #     upper.SetBottomMargin(0.01)
+            #     # upper.SetFillStyle(4000)
+            #     upper.Draw()
+            #     lower = ROOT.TPad('lower', 'lower', 0., 0., 1., cfg['ratio_pad_frac'])
+            #     lower.SetTopMargin(0.01)
+            #     # lower.SetFillStyle(4000)
+            #     lower.Draw()
+            #     upper.cd()
+            #     pads = [upper, lower]
+            # else:
+            #     pads = plot.TwoPadSplit(cfg['ratio_pad_frac'], 0.01, 0.01)
             pads = plot.TwoPadSplit(cfg['ratio_pad_frac'], 0.01, 0.01)
+
     else:
         canv = ROOT.TCanvas(name, name)
         pads = plot.OnePad()
@@ -144,6 +159,7 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
     h_axes = [h_data.Clone() for x in pads]
     for h in h_axes:
+        h.SetTitle("")
         if len(cfg['x_range']):
             h.GetXaxis().SetRangeUser(*cfg['x_range'])
         h.Reset()
@@ -333,6 +349,9 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         plot.SetupTwoPadSplitAsRatio(
             pads, plot.GetAxisHist(
                 pads[0]), plot.GetAxisHist(pads[rpad_idx]), cfg['ratio_y_title'], True, *(cfg['ratio_y_range']))
+        if js_workaround:
+            # This makes the ticks way too large
+            plot.GetAxisHist(pads[rpad_idx]).GetYaxis().SetTickLength(ROOT.gStyle.GetTickLength())
 
     if cfg['purity']:
         pads[1].cd()
@@ -349,8 +368,9 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
     # Go back and tidy up the axes and frame
     pads[0].cd()
-    pads[0].GetFrame().Draw()
-    pads[0].RedrawAxis()
+    if not js_workaround:
+        pads[0].GetFrame().Draw()
+        pads[0].RedrawAxis()
 
     # CMS logo
     plot.DrawCMSLogo(pads[0], cfg['main_logo'], cfg['sub_logo'], 11, 0.045, 0.05, 1.0, '', 1.0)
@@ -369,6 +389,9 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     if cfg['pads'] is None:
         canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.png')
         canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.pdf')
+        # canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.root')
+        # canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.svg')
+        # canv.Print(outdir + '/' + cfg['prefix'] + name + cfg['postfix'] + '.json')
 
     outobjs = {}
     outobjs['axes'] = h_axes
