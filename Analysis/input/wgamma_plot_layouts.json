@@ -22,32 +22,26 @@
   "pure_mc": [
     {
       "name": "VV_R",
-      "entries": ["VV_R", "VV_E"],
-      "legend": "Diboson (prompt #gamma)",
+      "entries": ["ST_R", "VV_R", "VV_E", "ST_E"],
+      "legend": "Diboson/ST (prompt #gamma)",
       "color": [138,201,38]
     },
     {
       "name": "VV_F",
-      "entries": ["VV_J"],
-      "legend": "Diboson (fake #gamma)",
-      "color": [210,248,152]
-    },
-    {
-      "name": "ST",
-      "entries": ["ST_R", "ST_E", "ST_J"],
-      "legend": "Single-t + #gamma",
+      "entries": ["VV_J", "ST_J"],
+      "legend": "Diboson/ST (fake #gamma)",
       "color": [210,248,152]
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R", "ZG_IZG_R"],
-      "legend": "Z#rightarrowll (prompt #gamma)",
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "GG_R"],
+      "legend": "Z/#gamma*(ll)#gamma",
       "color": [250,169,22]
     },
     {
       "name": "DY_E",
       "entries": ["DY_E"],
-      "legend": "Z#rightarrowll (e#rightarrow#gamma)",
+      "legend": "Z(ll) (e#rightarrow#gamma)",
       "color": [255,202,58]
     },
     {
@@ -61,12 +55,6 @@
       "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
       "legend": "t#bar{t} (prompt #gamma)",
       "color": [187,10,33]
-    },
-    {
-      "name": "GG",
-      "entries": ["GG_R"],
-      "legend": "#gamma#gamma",
-      "color": [72, 74, 71]
     },
     {
       "name": "TT_J",
@@ -83,7 +71,7 @@
     {
       "name": "WG",
       "entries": ["WG_R"],
-      "legend": "W(#rightarrowl#nu)#gamma",
+      "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }
   ],
@@ -184,6 +172,50 @@
     },
     {
       "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "DY_E", "GG_R"],
+      "legend": "Z/#gamma*(ll)#gamma",
+      "color": [250,169,22]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
+      "legend": "t#bar{t}#gamma",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes_lep",
+      "entries": ["data_fakes_lep_sub"],
+      "legend": "Non-prompt/misid. #mu",
+      "color": [68, 29, 73]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_sub"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [119,127,160]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_R"],
+      "legend": "W(l#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "data_fakes_m_old": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
+      "name": "DY_R",
       "entries": ["DY_XZG_R", "ZG_IZG_R", "DY_E"],
       "legend": "Z(ll)#gamma",
       "color": [250,169,22]
@@ -220,6 +252,56 @@
     }
   ],
   "data_fakes_e": [
+    {
+      "name": "VV",
+      "entries": ["VV_R", "VV_E"],
+      "legend": "Diboson",
+      "color": [138,201,38]
+    },
+    {
+      "name": "ST",
+      "entries": ["ST_R", "ST_E"],
+      "legend": "Single-t + #gamma",
+      "color": [210,248,152]
+    },
+    {
+      "name": "DY_R",
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "GG_R"],
+      "legend": "Z/#gamma*(ll)#gamma",
+      "color": [250,169,22]
+    },
+    {
+      "name": "DY_E",
+      "entries": ["DY_E"],
+      "legend": "Z(ll) (e#rightarrow#gamma)",
+      "color": [255,202,58]
+    },
+    {
+      "name": "TT",
+      "entries": ["TTG_ITTG_R", "TT_XTTG_R", "TT_E"],
+      "legend": "t#bar{t}#gamma",
+      "color": [187,10,33]
+    },
+    {
+      "name": "data_fakes_lep",
+      "entries": ["data_fakes_lep_sub"],
+      "legend": "Non-prompt/misid. e",
+      "color": [68, 29, 73]
+    },
+    {
+      "name": "data_fakes",
+      "entries": ["data_fakes_sub"],
+      "legend": "Non-prompt/misid. #gamma",
+      "color": [119,127,160]
+    },
+    {
+      "name": "WG",
+      "entries": ["WG_R"],
+      "legend": "W(l#nu)#gamma",
+      "color": [108,190,237]
+    }
+  ],
+  "data_fakes_e_old": [
     {
       "name": "VV",
       "entries": ["VV_R", "VV_E"],
@@ -444,7 +526,7 @@
     },
     {
       "name": "WG",
-      "entries": ["WG_main_p", "WG_main_n", "WG_met1_p", "WG_met1_n", "WG_ooa_p", "WG_ooa_n"],
+      "entries": ["WG_main_x", "WG_met1_x", "WG_ooa_x"],
       "legend": "W(l#nu)#gamma",
       "color": [108,190,237]
     }
@@ -464,8 +546,8 @@
     },
     {
       "name": "DY_R",
-      "entries": ["DY_XZG_R", "ZG_IZG_R"],
-      "legend": "Z(ll)#gamma",
+      "entries": ["DY_XZG_R", "ZG_IZG_R", "GG_R"],
+      "legend": "Z/#gamma*(ll)#gamma",
       "color": [250,169,22]
     },
     {
@@ -481,16 +563,10 @@
       "color": [187,10,33]
     },
     {
-      "name": "GG",
-      "entries": ["GG_R", "GG_E"],
-      "legend": "#gamma#gamma",
-      "color": [72, 74, 71]
-    },
-    {
       "name": "data_fakes_lep",
       "entries": ["data_fakes_lep_sub"],
       "legend": "Non-prompt/misid. l",
-      "color": [186, 193, 184]
+      "color": [68, 29, 73]
     },
     {
       "name": "data_fakes",

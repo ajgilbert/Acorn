@@ -18,7 +18,11 @@ parser.add_argument('--selection', default='eft_region')
 parser.add_argument('--channel', default='l')
 parser.add_argument('--charge', default='x')
 parser.add_argument('--year', default='total')
+parser.add_argument('--label', default='fid_pt_binned')
 parser.add_argument('--output', '-o', default='postfit_plot')
+parser.add_argument('--x-title', default='Photon p_{T} (GeV)')
+parser.add_argument('--binning', default='[30,50,70,100,150,200,300,500,800,1200]')
+parser.add_argument('--logy', action='store_true')
 # parser.add_argument('--scheme', default='phi_f_binned')
 # parser.add_argument('--years', default='2016,2017,2018')
 # parser.add_argument('--ratio', action='store_true')
@@ -90,15 +94,15 @@ chg = args.charge
 chn = args.channel
 
 if args.selection == 'eft_region':
-    f_fits = ROOT.TFile('shapes_combined_puppi_phi_f_binned.root')
+    f_fits = ROOT.TFile('shapes_combined_puppi_phi_f_binned_jetveto.root')
     h_fits = Node()
     TDirToNode(f_fits, '/', h_fits)
 
-    f_fits_c3w_p1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_p1.root')
+    f_fits_c3w_p1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_jetveto_c3w_p1.root')
     h_fits_c3w_p1 = Node()
     TDirToNode(f_fits_c3w_p1, '/', h_fits_c3w_p1)
 
-    f_fits_c3w_m1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_c3w_m1.root')
+    f_fits_c3w_m1 = ROOT.TFile('shapes_combined_puppi_phi_f_binned_jetveto_c3w_m1.root')
     h_fits_c3w_m1 = Node()
     TDirToNode(f_fits_c3w_m1, '/', h_fits_c3w_m1)
 
@@ -108,19 +112,19 @@ if args.selection == 'eft_region':
     pt_bins = BinEdgesFromStr('[150,200,300,500,800,1200]')
     phi_bins = BinEdgesFromStr('(3,0.,math.pi/2.)')
 
-    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_highpt" , "GG_R", "GG_E" , "WG_ooa_p", "WG_ooa_n" , "WG_met1_p", "WG_met1_n" , "WG_main_p", "WG_main_n"]
+    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", 'ST_R', 'ST_E', "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_highpt" , "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x", "WG_main_x"]
 
 if args.selection == 'fid_region':
-    f_fits = ROOT.TFile('shapes_combined_pt_diff_fid_pt_binned.root')
+    f_fits = ROOT.TFile('shapes_combined_%s.root' % args.label)
     h_fits = Node()
     TDirToNode(f_fits, '/', h_fits)
     year = args.year
     fit = 'prefit'
 
-    pt_bins = BinEdgesFromStr('[30,50,70,100,150,200,300,500,800,1200]')
+    pt_bins = BinEdgesFromStr(args.binning)
     phi_bins = BinEdgesFromStr('(1,0.,1.)')
 
-    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_sub" , "data_fakes_lep_sub", "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x" , "WG_main_x"]
+    h_names = ["TotalProcs", "data_obs", "VV_R", "VV_E", 'ST_R', 'ST_E', "DY_XZG_R", "ZG_IZG_R", "DY_E", "TTG_ITTG_R", "TT_XTTG_R", "TT_E" , "data_fakes_sub" , "data_fakes_lep_sub", "GG_R", "GG_E" , "WG_ooa_x", "WG_met1_x" , "WG_main_x"]
 
 
 
@@ -171,17 +175,29 @@ plotcfg.update({
         'draw_opts': 'HIST',
         'legend_opts': 'F',
         'marker_size': 0.6,
-        'line_width': 1
+        'line_width': 1,
+        'line_style': 1
     },
-    'legend_pos': [0.80, 0.60, 0.95, 0.88],
+    'legend_pos': [0.39, 0.78, 0.93, 0.93],
+    'legend_cols': 2,
     'main_logo': '',
     'sub_logo': '',
     'top_title_right': '',
-    'ratio_y_range': [0.31, 1.79]
+    'ratio_y_range': [0.31, 1.79],
+    'hide_stat_band': True
 })
 if args.selection == 'fid_region':
-    plotcfg['legend_pos'] = [0.65, 0.62, 0.95, 0.93]
-    plotcfg['ratio_y_range'] = [0.61, 1.39]
+    # plotcfg['legend_pos'] = [0.65, 0.62, 0.95, 0.93]
+    plotcfg['ratio_y_range'] = [0.81, 1.19]
+    plotcfg['logy'] = args.logy
+    plotcfg['logy_min'] = 1E-2
+    # if args.selection == 'fid_region':
+    #     h.SetMinimum(1E-2)
+    #     h.SetMaximum(1E+5)
+if args.selection == 'eft_region':
+    plotcfg['legend_pos'] = [0.70, 0.76, 0.96, 0.90]
+    plotcfg['legend_cols'] = 2
+    plotcfg['logy'] = args.logy
 
 print plotcfg
 
@@ -230,16 +246,17 @@ for i in xrange(n_bins_phi):
     # h_dicts_c3w_p1[i]['TotalProcs'].Draw('HISTSAME')
 
     pads[i].cd()
-    pads[i].SetLogy(True)
+    # pads[i].SetLogy(False)
 
     h = plot.GetAxisHist(pads[i])
     hr = plot.GetAxisHist(ratio_pads[i])
+    hf = plot.GetAxisHist(purity_pads[i])
     if args.selection == 'eft_region':
         h.SetMinimum(1E-4)
-        h.SetMaximum(1E+2)
-    if args.selection == 'fid_region':
-        h.SetMinimum(1E-2)
-        h.SetMaximum(1E+5)
+        h.SetMaximum(1E+4)
+    # if args.selection == 'fid_region':
+    #     h.SetMinimum(1E-2)
+    #     h.SetMaximum(1E+5)
 
     # h.Draw()
     h.GetXaxis().SetNdivisions(510)
@@ -252,10 +269,12 @@ for i in xrange(n_bins_phi):
     if i > 0:
         h.GetYaxis().SetLabelSize(0)
         hr.GetYaxis().SetLabelSize(0)
+        hf.GetYaxis().SetLabelSize(0)
         h.GetYaxis().SetTitle('')
         hr.GetYaxis().SetTitle('')
+        hf.GetYaxis().SetTitle('')
     if i == n_bins_phi - 1:
-        hr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
+        hr.GetXaxis().SetTitle(args.x_title)
 
 
     pad_width = 1. - pads[i].GetLeftMargin() - pads[i].GetRightMargin()

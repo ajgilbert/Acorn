@@ -46,11 +46,11 @@ DEFAULT_CFG = {
     'logx': False,              # Draw x-axis in log-scale
     'logy': False,              # Draw y-axis in log-scale
     'logy_min': 1E-3,
-    'ratio': False,             # Draw the ratio plot?
+    'ratio': True,             # Draw the ratio plot?
     'fraction': False,             # Draw the ratio plot?
     'purity': False,
     'ratio_pad_frac': 0.27,
-    'ratio_y_range': [0.61, 1.39],  # Range of the ratio y-axis
+    'ratio_y_range': [0.81, 1.19],  # Range of the ratio y-axis
     'ratio_y_title': 'Obs/Exp',
     'x_range': [],                  # Restrict the x-axis range shown
     'rebin': 0,                     # Rebin by this factor
@@ -59,7 +59,8 @@ DEFAULT_CFG = {
     'y_title': 'Events',         # Title on the y-axis
     'divwidth': True,           # Divide all histogram contents by their bin widths
     'layout': 'data_fakes',
-    'legend_pos': [0.67, 0.66, 0.90, 0.91], # Legend position in NDC (x1, y1, x2, y2)
+    'legend_pos': [0.67, 0.66, 0.90, 0.91], # Legend position in NDC (x1, y1, x2, y2),
+    'legend_cols': 1,
     'legend_padding': 0.05,      # Automatically increase the y-axis range to ensure the legend does not overlap the histograms (argument is fraction of frame height to pad)
     'legend_show_yields': False,  # Add the yields to the legends
     'data_name': 'data_obs',     # Name of the TH1 to take for data
@@ -68,14 +69,17 @@ DEFAULT_CFG = {
     'top_title_right': '35.9 fb^{-1} (13 TeV)',
     'top_title_left': '',
     'hide_data': False,
+    'hide_stat_band': False,
     'auto_top_title_right': True,
     'global_hist_opts': {
         'draw_opts': 'E0',
         'legend_opts': 'L',
         'marker_size': 0.6,
-        'line_width': 3
+        'line_width': 3,
+        'line_style': 1
     },
     'norm_to': 0,
+    'combine_clean': True,    # remove h_tot bin contents less than 1E-8
     'overlays': [
         # {
         #     "name": "systUp",
@@ -166,9 +170,10 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
     build_h_tot = True
     h_tot = None
+    h_ext_tot = None
     if 'TotalProcs' in hists:
-        h_tot = hists['TotalProcs']
-        build_h_tot = False
+        h_ext_tot = hists['TotalProcs']
+        build_h_tot = True
     if cfg['type'] != 'datamc':
         build_h_tot = False
 
@@ -203,11 +208,15 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     p_store = {}
 
     legend = ROOT.TLegend(*(cfg['legend_pos'] + ['', 'NBNDC']))
+    legend.SetNColumns(cfg['legend_cols'])
     stack = ROOT.THStack()
     purity_stack = ROOT.THStack()
 
     curr_auto_colour = 0
+    all_input_hists = []
     for info in layout:
+        for X in info['entries']:
+            all_input_hists.append(X)
         hist = hists[info['entries'][0]]
         if 'color' in info:
             col = info['color']
@@ -222,9 +231,9 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             col = ROOT.TColor.GetColor(*col)
         # print info['line_width']
         if cfg['type'] == 'multihist':
-            plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+            plot.Set(hist, FillColor=col, MarkerColor=col, LineColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'], LineStyle=info['line_style'])
         else:
-            plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'])
+            plot.Set(hist, FillColor=col, MarkerColor=col, Title=info['legend'], MarkerSize=info['marker_size'], LineWidth=info['line_width'], LineStyle=info['line_style'])
         if len(info['entries']) > 1:
             for other in info['entries'][1:]:
                 hist.Add(hists[other])
@@ -241,13 +250,27 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
             hist.Draw('SAME%s' % info['draw_opts'])
 
     # h_tot_purity = h_tot.Clone()
-    for info in layout:
-        p_store[info['name']].Divide(h_tot)
-        purity_stack.Add(p_store[info['name']])
+    if cfg['type'] == 'datamc':
+        for info in layout:
+            p_store[info['name']].Divide(h_tot)
+            purity_stack.Add(p_store[info['name']])
 
     if cfg['type'] == 'datamc':
+        if cfg['combine_clean']:
+            for ib in xrange(1, h_tot.GetNbinsX() + 1):
+                if h_tot.GetBinContent(ib) < 1E-8:
+                    h_tot.SetBinContent(ib, 0.)
+                    h_tot.SetBinError(ib, 0.)
+                    if h_ext_tot is not None:
+                        h_ext_tot.SetBinContent(ib, 0.)
+                        h_ext_tot.SetBinError(ib, 0.)
         h_tot.SetFillColor(plot.CreateTransparentColor(12, 0.3))
         h_tot.SetMarkerSize(0)
+        if h_ext_tot is not None:
+            # h_tot.Print("range")
+            # h_ext_tot.Print("range")
+            h_ext_tot.SetFillColor(plot.CreateTransparentColor(38, 0.4))
+            h_ext_tot.SetMarkerSize(0)
         legend.AddEntry(h_data, 'Observed', 'PL')
 
     # Build overlays
@@ -288,10 +311,17 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         bkg_uncert_label = 'Stat. Uncertainty'
         if not build_h_tot:
             bkg_uncert_label = 'Uncertainty'
-        legend.AddEntry(h_tot, bkg_uncert_label, 'F')
+        if not cfg['hide_stat_band']:
+            legend.AddEntry(h_tot, bkg_uncert_label, 'F')
+        if h_ext_tot is not None:
+            legend.AddEntry(h_ext_tot, 'Stat.+Syst. Uncertainty', 'F')
+
 
         stack.Draw('HISTSAME')
-        h_tot.Draw("E2SAME")
+        if h_ext_tot is not None:
+            h_ext_tot.Draw("E2SAME")
+        if not cfg['hide_stat_band']:
+            h_tot.Draw("E2SAME")
 
         for info in cfg['overlays']:
             h_store[info['name']].Draw('HISTSAME')
@@ -312,6 +342,7 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     r_store = {}
     r_data = None
     r_tot = None
+    r_ext_tot = None
     if cfg['ratio'] or cfg['fraction']:
         pads[rpad_idx].cd()
         pads[rpad_idx].SetGrid(0, 1)
@@ -319,8 +350,12 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
 
         if cfg['type'] == 'datamc' and cfg['ratio']:
             r_data = plot.MakeRatioHist(h_data, h_tot, True, False)
+            if h_ext_tot is not None:
+                r_ext_tot = plot.MakeRatioHist(h_ext_tot, h_ext_tot, True, False)
+                r_ext_tot.Draw('E2SAME')
             r_tot = plot.MakeRatioHist(h_tot, h_tot, True, False)
-            r_tot.Draw('E2SAME')
+            if not cfg['hide_stat_band']:
+                r_tot.Draw('E2SAME')
             for info in cfg['overlays']:
                 r_store[info['name']] = plot.MakeRatioHist(h_store[info['name']], h_tot, False, False)
                 r_store[info['name']].Draw('SAME')
@@ -379,6 +414,9 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
         title_right = h_data.GetTitle()
         if title_right.startswith('lumi:'):
             plot.DrawTitle(pads[0], title_right.replace('lumi:', ''), 3)
+    else:
+        plot.DrawTitle(pads[0], cfg['top_title_right'], 3)
+
 
     latex = ROOT.TLatex()
     plot.Set(latex, NDC=None, TextFont=42, TextSize=0.03)
@@ -399,11 +437,13 @@ def MakeMultiHistPlot(name, outdir, hists, cfg, layout, ratios=None):
     outobjs['stack'] = stack
     outobjs['purity_stack'] = purity_stack
     outobjs['h_tot'] = h_tot
+    outobjs['h_ext_tot'] = h_ext_tot
     outobjs['legend'] = legend
     outobjs['r_store'] = r_store
     outobjs['p_store'] = p_store
     outobjs['r_data'] = r_data
     outobjs['r_tot'] = r_tot
+    outobjs['r_ext_tot'] = r_ext_tot
     return outobjs
 
 # def MakeDataMCPlot(name, outdir, hists, cfg, layouts):

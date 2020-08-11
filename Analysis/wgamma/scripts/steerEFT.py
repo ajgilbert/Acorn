@@ -28,6 +28,7 @@ configs = {
     "fid_pt_binned": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
+        'x_title': 'Photon p_{T} (GeV)',
         'pt_bins': '[30,50,70,100,150,200,300,500,800,1200]',
         # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
         'phi_var': '0.5',
@@ -40,6 +41,7 @@ configs = {
     "fid_p0_eta_binned": {
         'x_var': 'gen_p0_eta',
         'x_var_obs': 'p0_eta',
+        'x_title': 'Photon #eta',
         'pt_bins': '[-2.5,-1.9,-1.5,-1.1,-0.75,-0.45,-0.15,0.15,0.45,0.75,1.1,1.5,1.9,2.5]',
         'phi_var': '0.5',
         'phi_var_label': '1',
@@ -48,9 +50,36 @@ configs = {
         'phi_bins_obs': '(1,0.,1.)',
         'task_name': 'fid_region'
     },
+    "fid_l0p0_deta_binned": {
+        'x_var': 'gen_l0p0_deta',
+        'x_var_obs': 'l0p0_deta',
+        'x_title': '#Delta#eta(l,#gamma)',
+        'pt_bins': '[-5,-3.4,-2.6,-1.8,-1.4,-1.0,-0.6,-0.2,0.2,0.6,1.0,1.4,1.8,2.6,3.4,5]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region'
+    },
+    "fid_l0p0_deta_binned_jvetomt": {
+        'x_var': 'gen_l0p0_deta',
+        'x_var_obs': 'l0p0_deta',
+        'x_title': '#Delta#eta(l,#gamma)',
+        'pt_bins': '[-5,-3.4,-2.6,-1.8,-1.4,-1.0,-0.6,-0.2,0.2,0.6,1.0,1.4,1.8,2.6,3.4,5]',
+        'phi_var': '0.5',
+        'phi_var_label': '1',
+        'phi_var_obs': '0.5',
+        'phi_bins': '(1,0.,1.)',
+        'phi_bins_obs': '(1,0.,1.)',
+        'task_name': 'fid_region',
+        'jet_veto': True,
+        'high_mt_cluster': True
+    },
     "fid_mt_cluster_binned": {
         'x_var': 'gen_mt_cluster',
         'x_var_obs': 'mt_cluster',
+        'x_title': 'm_{T}^{cluster} (GeV)',
         'pt_bins': '[0,100,150,200,250,300,400,500,650,800,1000,1200,1700,2500]',
         'phi_var': '0.5',
         'phi_var_label': '1',
@@ -62,6 +91,7 @@ configs = {
     "fid_l0p0_dr_binned": {
         'x_var': 'gen_l0p0_dr',
         'x_var_obs': 'l0p0_dr',
+        'x_title': '#DeltaR(l,#gamma)',
         'pt_bins': '[0.7,1.0,1.3,1.6,1.9,2.2,2.5,2.8,3.1,3.4,3.7,4.0,4.5,5.0]',
         'phi_var': '0.5',
         'phi_var_label': '1',
@@ -73,6 +103,7 @@ configs = {
     "inclusive_xs": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
+        'x_title': 'X',
         'pt_bins': '[30,10000]',
         # 'pt_bins': '[30,40,50,60,80,100,120,160,200,250,300,500]',
         'phi_var': '0.5',
@@ -82,29 +113,7 @@ configs = {
         'phi_bins_obs': '(1,0.,1.)',
         'task_name': 'fid_region'
     },
-    "phi_binned": {
-        'x_var': 'gen_p0_pt',
-        'x_var_obs': 'p0_pt',
-        'pt_bins': '[150,210,300,420,600,850,1200]',
-        'phi_var': 'abs(true_phi)',
-        'phi_var_label': '|#phi|',
-        'phi_var_obs': 'abs(reco_phi)',
-        'phi_bins': '(5,0.,math.pi)',
-        'phi_bins_obs': '(5,0.,math.pi)',
-        'task_name': 'eft_region'
-    },
-    "phi_f_binned": {
-        'x_var': 'gen_p0_pt',
-        'x_var_obs': 'p0_pt',
-        'pt_bins': '[150,210,300,420,600,850,1200]',
-        'phi_var': 'abs(true_phi_f)',
-        'phi_var_label': '|#phi_{f}|',
-        'phi_var_obs': 'abs(reco_phi_f)',
-        'phi_bins': '(3,0.,math.pi/2.)',
-        'phi_bins_obs': '(3,0.,math.pi/2.)',
-        'task_name': 'eft_region'
-    },
-    "puppi_phi_f_binned": {
+    "puppi_phi_f_binned_chg": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
         'pt_bins': '[150,200,300,500,800,1200]',
@@ -117,7 +126,7 @@ configs = {
         'jet_veto': False,
         'split_charge': True
     },
-    "puppi_phi_f_binned_nochg": {
+    "puppi_phi_f_binned": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
         'pt_bins': '[150,200,300,500,800,1200]',
@@ -140,19 +149,22 @@ configs = {
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(3,0.,math.pi/2.)',
         'task_name': 'eft_region',
-        'jet_veto': True
+        'jet_veto': True,
+        'split_charge': False
     },
     "puppi_phi_f_binned_nobin": {
         'x_var': 'gen_p0_pt',
         'x_var_obs': 'p0_pt',
         'pt_bins': '[150,200,300,500,800,1200]',
-        'phi_var': 'abs(true_phi_f)',
+        'phi_var': 'abs(gen_true_phi_f)',
         'phi_var_label': '|#phi_{f}|',
-        'phi_var_obs': 'p0_pt',
+        'phi_var_obs': 'abs(reco_puppi_phi_f)',
         'phi_bins': '(3,0.,math.pi/2.)',
-        'phi_bins_obs': '(3,0.,math.pi/2.)',
+        'phi_bins_obs': '(1,0.,math.pi/2.)',
         'task_name': 'eft_region',
-        'using_label': 'puppi_phi_f_binned'
+        'using_label': 'puppi_phi_f_binned',
+        'jet_veto': False,
+        'split_charge': False
     },
     "pt_binned": {
         'x_var': 'gen_p0_pt',
@@ -254,8 +266,9 @@ if 'makeHists' in steps:
         'phi_var_obs': phi_var_obs,
         'phi_bins': phi_bins,
         'phi_bins_obs': phi_bins_obs,
-        'jet_veto': config['jet_veto'],
-        'split_charge': config['split_charge']
+        'jet_veto': config.get('jet_veto', False),
+        'split_charge': config.get('split_charge', False),
+        'high_mt_cluster': config.get('high_mt_cluster', False)
     }
     print json.dumps(testplot_args)
     for yr in years:
@@ -278,6 +291,49 @@ if 'makeHists' in steps:
                   '--year', yr, '--extra-cfg', json.dumps(testplot_args), '--label', label + syst_name])
 
 
+baseline_label = '200623'
+if 'baselineHists' in steps:
+    for yr in years:
+        indir = 'root://eoscms.cern.ch//store/user/agilbert/ANv5-%s-full/wgamma_%s_v5/WGamma_' % (baseline_label, yr)
+        call(['python', 'wgamma/scripts/makeHists.py', '--task', 'baseline',
+              '--indir', indir,
+              '--year', yr, '--label', baseline_label])
+        do_systs = [
+          ('MetJesLo_', '_CMS_scale_met_jesDown'),
+          ('MetJesHi_', '_CMS_scale_met_jesUp'),
+          ('MetUncLo_', '_CMS_scale_met_unclusteredDown'),
+          ('MetUncHi_', '_CMS_scale_met_unclusteredUp'),
+          ('PScaleLo_', '_CMS_scale_pDown'),
+          ('PScaleHi_', '_CMS_scale_pUp'),
+        ]
+        for syst_file, syst_name in do_systs:
+            call(['python', 'wgamma/scripts/makeHists.py', '--task', 'baseline',
+                  '--indir-data', indir,
+              '--indir', indir + syst_file, '--syst', syst_name,
+                  '--year', yr, '--label', baseline_label + syst_name])
+
+if 'baselineDatacards' in steps:
+    # for var in ['l0_pt', 'l0_eta', 'p0_pt', 'p0_eta', 'puppi_met', 'puppi_met_phi', 'l0p0_dr', 'l0met_mt']:
+    for var in ['l0_pt', 'l0_eta', 'p0_pt', 'p0_eta', 'puppi_met', 'l0p0_dr', 'l0met_mt']:
+        for yr in years:
+            for chn in ['e', 'm']:
+                call(['python', 'wgamma/scripts/setupDatacards.py', '--var', var,
+                      '--output', 'output/cards/%s' % var, '--label', baseline_label,
+                      '--year', yr, '--channel', chn, '--type', 'baseline',
+                      '--pt-bins', '1'
+                      ], noSub=True)
+        call(['combineTool.py', '-M', 'T2W', '-i', 'output/cards/%s' % var, '--cc', '-o', '%s.root' % var], noSub=True)
+        call(['PostFitShapesFromWorkspace', '-w', 'output/cards/%s/%s.root' % (var, var), '-d', 'output/cards/%s/combined.txt.cmb' % var, '-o', 'output/cards/%s/prefit_shapes.root' % var, '--skip-proc-errs', '--merged-bins', 'm_%s_total=m_%s_201.' % (var, var), 'e_%s_total=e_%s_201.' % (var, var)], noSub=True)
+        for chn in ['e', 'm']:
+            for yr in years + ['total']:
+                core_args = ['python', 'wgamma/scripts/quickPlot.py', '-i', 'output/cards/%s/prefit_shapes.root:%s_%s_%s_prefit' % (var, chn, var, yr),
+                  '-c', 'wgamma', '-o', '/eos/user/a/agilbert/www/wgamma/ANv5-baseline-syst-%s/%s' % (baseline_label, yr),
+                  '-l', 'input/wgamma_plot_layouts.json', '--layout', 'data_fakes_%s' % chn]
+                if yr == 'total':
+                    call(core_args + ['--lumi', '137 fb^{-1} (13 TeV)'], noSub=True)
+                else:
+                    call(core_args, noSub=True)
+
 if 'setupDatacards' in steps:
     for yr in years:
         for chn in ['e', 'm']:
@@ -292,27 +348,27 @@ if 'T2W' in steps:
     infiles = []
     for region in ['main', 'met1']:
         charges = ['x']
-        if config['split_charge']:
+        if config.get('split_charge', False):
             charges = ['p', 'n']
-        for sgn in [charges]:
+        for sgn in charges:
             # infiles.append('%s_NLO_%s_%s.root:%s:%s' % (using_label, region, sgn, region, sgn))
             if label == 'puppi_phi_f_binned_jetveto':
                 infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi_jveto.json:%s:%s' % (region, sgn, region, sgn))
             else:
                 infiles.append('CMS_2020_PAS_SMP_20_005_eft_%s_%s_photon_pt_phi.json:%s:%s' % (region, sgn, region, sgn))
 
-    if label == 'fid_pt_binned' or label == 'inclusive_xs':
+    if config['task_name'] == 'fid_region':
         call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
              ['--cc', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=pt_diff', '-o', '%s/combined_pt_diff_%s.root' % (os.getcwd(), label)], noSub=True)
+              '--PO', 'type=pt_diff', '-o', '%s/combined_%s.root' % (os.getcwd(), label)], noSub=True)
     else:
         call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
              ['--cc', 'combined_EFT.txt', '-P', 'Acorn.Analysis.WGPhysicsModel:wgModel',
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
-              '--PO', 'type=eft', '--PO',
+              '--PO', 'type=eftX', '--PO',
               'files=%s' % ','.join(infiles), '--channel-masks', '-o', '%s/combined_%s.root' % (os.getcwd(), label)], noSub=True)
 
         call(['combineTool.py', '-M', 'T2W', '-i'] + list(glob.glob('output/cards/%s' % label)) +
@@ -320,6 +376,22 @@ if 'T2W' in steps:
               '--PO', 'ptBins=%i' % n_pt_bins,
               '--PO', 'phiBins=%i' % n_phi_bins,
               '--PO', 'type=pt_phi_diff', '-o', '%s/combined_pt_phi_diff_%s.root' % (os.getcwd(), label)], noSub=False)
+
+
+if 'PostFitShapes' in steps:
+    merge_bins = []
+    for i in xrange(n_pt_bins):
+        merge_bins.append('x_l_%i_total=x_._%i_201.' % (i, i))
+        merge_bins.append('x_e_%i_total=x_e_%i_201.' % (i, i))
+        merge_bins.append('x_m_%i_total=x_m_%i_201.' % (i, i))
+    # call(['PostFitShapesFromWorkspace', '-w', 'combined_%s_with_asimov.root' % label, '--dataset', 'data_asimov',
+    #     '-o', 'shapes_combined_%s.root ' % label, '--skip-proc-errs', '--merged-bins'] + merge_bins, noSub=True)
+    call(['python', 'wgamma/scripts/plotUnrolled.py', '--selection', 'fid_region', '--label', label, '--charge', 'x',
+        '--channel', 'l', '--output', 'unrolled_fid_region_%s_prefit_l' % label, '--binning', config['pt_bins'],
+        '--x-title', config['x_title']], noSub=True)
+    call(['python', 'wgamma/scripts/plotUnrolled.py', '--selection', 'fid_region', '--label', label, '--charge', 'x',
+        '--channel', 'l', '--output', 'unrolled_fid_region_%s_prefit_l_log' % label, '--binning', config['pt_bins'],
+        '--x-title', config['x_title'], '--logy'], noSub=True)
 
 if 'limitsVsPtMax' in steps:
     for bsm_label, bsm_setting, fit_range in [
@@ -345,7 +417,7 @@ if 'limitsVsPtMax' in steps:
 
 allPOIs = []
 for i in range(n_pt_bins):
-    if label == 'fid_pt_binned' or label == 'inclusive_xs':
+    if config['task_name'] == 'fid_region':
         allPOIs.append('r_x_%i' % i)
     else:
         for j in range(n_phi_bins):
@@ -355,21 +427,21 @@ for i in range(n_pt_bins):
 if 'xsec2D' in steps:
     initPOIs = ','.join([('%s=1' % X) for X in allPOIs])
     genStr = 'P;n;;' + ';'.join(['%s,%s' % (X, X) for X in allPOIs])
-    if label == 'fid_pt_binned' or label == 'inclusive_xs':
-        wsp = 'pt_diff'
+    if config['task_name'] == 'fid_region':
+        wsp = ''
         rangePOIs = ':'.join([('%s=0.5,1.5' % X) for X in allPOIs])
         grpStr = 'freezeNuisanceGroups;n;;!,,nominal;th,fr.th;th,expt,,fr.expt;all,fr.all;all,autoMCStats,,fr.mcstats'
     else:
-        wsp = 'pt_phi_diff'
+        wsp = 'pt_phi_diff_'
         rangePOIs = ':'.join([('%s=0,10' % X) for X in allPOIs])
         # Only do a more basic breakdown for the 2D
         grpStr = 'freezeNuisanceGroups;n;;sig_inc,,nominal;all,autoMCStats,,fr.mcstats'
 
-    call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
+    call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s%s.root' % (wsp, label), '-t', '-1',
           '--algo', 'grid', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
           '--generate', genStr, grpStr,
           '-n', '.%s' % label, '--points', '30', '--alignEdges', '1', '--parallel', '4',
-          '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'])
+          '--cminDefaultMinimizerStrategy', '0', '--X-rtd', 'MINIMIZER_analytic', '--X-rtd', 'OPTIMIZE_BOUNDS=0'], noSub=True)
     # call(['combineTool.py', '-M', 'MultiDimFit', 'combined_%s_%s.root' % (wsp, label), '-t', '-1',
     #       '--algo', 'none', '--setParameters', initPOIs, '--setParameterRanges', rangePOIs, '--floatOtherPOIs', '1',
     #       '-n', '.%s.corr' % label, '--parallel', '4', '--saveFitResult', '--robustHesse', '0', '-v', '3',
@@ -389,7 +461,7 @@ if 'xsec2DPlot' in steps:
             "higgsCombine.%s.%s.fr.mcstats.MultiDimFit.mH120.root:Freeze all:2" % (label, POI),
             '--breakdown', 'Syst,Stat'])
 
-        if label == 'fid_pt_binned' or label == 'inclusive_xs':
+        if config['task_name'] == 'fid_region':
             call(['python', 'wgamma/scripts/plot1DScan.py',
                   '--main', 'higgsCombine.%s.%s.nominal.MultiDimFit.mH120.root' % (label, POI), '--POI', POI,
                   '--model', 'xsec2D', '--output', 'scan_%s_%s_breakdown' % (label, POI),

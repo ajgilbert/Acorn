@@ -114,7 +114,7 @@ class WGModel(PhysicsModel):
     def getYieldScale(self, bin, process):
         "Return the name of a RooAbsReal to scale this yield by or the two special values 1 and 0 (don't scale, and set to zero)"
         if self.DC.isSignal[process]:
-            if self.type in ['eft']:
+            if self.type in ['eft', 'eftX']:
                 sgn, chn, ptbin, yr = bin.split('_')
                 proc, region, sgn, ptbin, phibin = process.split('_')
                 scaler = 'scale_%s_%s_%s_%s_%s_%s' % (yr, region, chn, sgn, ptbin, phibin)

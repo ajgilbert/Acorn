@@ -48,29 +48,100 @@ settings = {
         'legend': [0.74, 0.72, 0.97, 0.88]
     },
     'fid_region': {
-        'canvas_width': 600,
-        'y_axis_title': '#Delta#sigma/#Deltap_{T}^{#gamma} (fb/GeV)',
-        'show_matrix': True,
-        'y_axis_min': 1E-4,
-        'y_axis_max': 1E+4,
-        'ratio_min': -0.38,
-        'ratio_max': +0.38,
-        'legend': [0.5, 0.72, 0.94, 0.88]
+        'fid_pt_binned': {
+            'canvas_width': 600,
+            'x_axis_title': 'Photon p_{T} (GeV)',
+            'y_axis_title': '#Delta#sigma/#Deltap_{T}^{#gamma} (fb/GeV)',
+            'show_matrix': True,
+            'matrix_hist': 'pT_gamma__NNLO_QCD',
+            'y_axis_min': 1E-4,
+            'y_axis_max': 1E+4,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': True,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'fid_mt_cluster_binned': {
+            'canvas_width': 600,
+            'x_axis_title': 'm_{T}^{cluster} (GeV)',
+            'y_axis_title': '#Delta#sigma/#Deltam_{T}^{cluster} (fb/GeV)',
+            'show_matrix': True,
+            'matrix_hist': 'mTcluster_CMS__NNLO_QCD',
+            'y_axis_min': 1E-4,
+            'y_axis_max': 1E+4,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': True,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'fid_p0_eta_binned': {
+            'canvas_width': 600,
+            'x_axis_title': 'Photon #eta',
+            'y_axis_title': '#Delta#sigma/#Delta#eta^{#gamma} (1/GeV)',
+            'show_matrix': True,
+            'matrix_hist': 'eta_gamma_CMS__NNLO_QCD',
+            'y_axis_min': 0,
+            'y_axis_max': 2E+3,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': False,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'fid_l0p0_deta_binned': {
+            'canvas_width': 600,
+            'x_axis_title': '#Delta#eta(l,#gamma)',
+            'y_axis_title': '#Delta#sigma/#Delta(#Delta#eta(l,#gamma)) (1/GeV)',
+            'show_matrix': True,
+            'matrix_hist': 'deta_gamma_CMS__NNLO_QCD',
+            'y_axis_min': 0,
+            'y_axis_max': 2E+3,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': False,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'fid_l0p0_deta_binned_jvetomt': {
+            'canvas_width': 600,
+            'x_axis_title': '#Delta#eta(l,#gamma)',
+            'y_axis_title': '#Delta#sigma/#Delta(#Delta#eta(l,#gamma)) (1/GeV)',
+            'show_matrix': False,
+            'matrix_hist': 'deta_gamma_CMS__NNLO_QCD',
+            'y_axis_min': 0,
+            'y_axis_max': 5E+2,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': False,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'fid_l0p0_dr_binned': {
+            'canvas_width': 600,
+            'x_axis_title': '#DeltaR(l,#gamma)',
+            'y_axis_title': '#Delta#sigma/#Delta(#DeltaR(l,#gamma)) (1/GeV)',
+            'show_matrix': True,
+            'matrix_hist': 'dReta_gamma_CMS__NNLO_QCD',
+            'y_axis_min': 0,
+            'y_axis_max': 4E+3,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'logy': False,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        },
+        'inclusive_xs': {
+            'canvas_width': 600,
+            'y_axis_title': '#Delta#sigma/#Deltap_{T}^{#gamma} (fb/GeV)',
+            'show_matrix': False,
+            'y_axis_min': 1E-4,
+            'y_axis_max': 1E+4,
+            'ratio_min': -0.38,
+            'ratio_max': +0.38,
+            'legend': [0.5, 0.72, 0.94, 0.88]
+        }
     },
-    'inclusive_xs': {
-        'canvas_width': 600,
-        'y_axis_title': '#Delta#sigma/#Deltap_{T}^{#gamma} (fb/GeV)',
-        'show_matrix': True,
-        'y_axis_min': 1E-4,
-        'y_axis_max': 1E+4,
-        'ratio_min': -0.38,
-        'ratio_max': +0.38,
-        'legend': [0.5, 0.72, 0.94, 0.88]
-    }
 }
 
+opts = settings[args.selection][args.scheme]
 
-plot.ModTDRStyle(width=settings[args.selection]['canvas_width'])
+plot.ModTDRStyle(width=opts['canvas_width'])
 ROOT.gStyle.SetEndErrorSize(0)
 
 def DoScaleEnvelope(node, nominal):
@@ -158,7 +229,7 @@ canv = ROOT.TCanvas(args.output, args.output)
 ratio = None
 if args.ratio:
     ratio = 0.2
-pads, ratio_pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0], ratio=ratio)
+pads, ratio_pads, other_pads = SetupPads([width] * (n_bins_phi - 1), [0, 0], [0, 0], ratio=ratio)
 
 xsec_results = {}
 with open('%s.json' % args.scheme) as jsonfile:
@@ -219,7 +290,7 @@ for i in range(n_bins_phi):
 h_axes = [h.Clone() for h in ref_hists_1D]
 r_h_axes = [h.Clone() for h in ref_hists_1D]
 
-legend = ROOT.TLegend(*(settings[args.selection]['legend'] + ['', 'NBNDC']))
+legend = ROOT.TLegend(*(opts['legend'] + ['', 'NBNDC']))
 
 h_obs = ROOT.TH1F('h_obs', '', 1, 0, 1)
 plot.Set(h_obs, LineWidth=2)
@@ -241,7 +312,7 @@ for i, h in enumerate(h_axes):
     hr.Reset()
 
     pads[i].cd()
-    pads[i].SetLogy(True)
+    pads[i].SetLogy(opts['logy'])
     h.Draw()
 
     ratio_pads[i].cd()
@@ -249,10 +320,10 @@ for i, h in enumerate(h_axes):
 
     pads[i].cd()
     plot.SetupTwoPadSplitAsRatio(
-        [pads[i], ratio_pads[i]], h, hr, '(Obs-Exp)/Exp', True, settings[args.selection]['ratio_min'], settings[args.selection]['ratio_max'])
+        [pads[i], ratio_pads[i]], h, hr, '(Obs-Exp)/Exp', True, opts['ratio_min'], opts['ratio_max'])
 
-    h.SetMinimum(settings[args.selection]['y_axis_min'])
-    h.SetMaximum(settings[args.selection]['y_axis_max'])
+    h.SetMinimum(opts['y_axis_min'])
+    h.SetMaximum(opts['y_axis_max'])
 
     h.GetXaxis().SetNdivisions(510)
     hr.GetXaxis().SetNdivisions(510)
@@ -260,14 +331,14 @@ for i, h in enumerate(h_axes):
     h.GetYaxis().SetTickLength(h.GetYaxis().GetTickLength() * 0.5)
     hr.GetYaxis().SetTickLength(hr.GetYaxis().GetTickLength() * 0.5)
     if i == 0:
-        h.GetYaxis().SetTitle(settings[args.selection]['y_axis_title'])
+        h.GetYaxis().SetTitle(opts['y_axis_title'])
     if i > 0:
         h.GetYaxis().SetLabelSize(0)
         hr.GetYaxis().SetLabelSize(0)
         h.GetYaxis().SetTitle('')
         hr.GetYaxis().SetTitle('')
     if i == n_bins_phi - 1:
-        hr.GetXaxis().SetTitle('Photon p_{T} (GeV)')
+        hr.GetXaxis().SetTitle(opts['x_axis_title'])
 
     plot.Set(ref_hists_1D[i], LineWidth=1, LineColor=2, MarkerSize=0, FillColor=plot.CreateTransparentColor(2, 0.2))
     h_store['ref_hists_1D_%i_line' % i] = ZeroErrors(ref_hists_1D[i].Clone())
@@ -286,14 +357,14 @@ for i, h in enumerate(h_axes):
 
 
     ##### THIS PART ONLY FOR THE diff XSEC
-    if settings[args.selection]['show_matrix']:
+    if opts['show_matrix']:
         pt_binning = []
         for ib in xrange(1, ref_hists_1D[i].GetNbinsX() + 1):
             pt_binning.append(ref_hists_1D[i].GetXaxis().GetBinLowEdge(ib))
             if ib == ref_hists_1D[i].GetNbinsX():
                 pt_binning.append(ref_hists_1D[i].GetXaxis().GetBinUpEdge(ib))
-        matrix_p = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppexnea03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/pT_gamma_CMS__NNLO_QCD.hist"
-        matrix_m = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppenexa03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/pT_gamma_CMS__NNLO_QCD.hist"
+        matrix_p = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppexnea03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/%s.hist" % opts['matrix_hist']
+        matrix_m = "/afs/cern.ch/work/a/agilbert/matrix/MATRIX_v1.0.3/run/ppenexa03_MATRIX/result/run_NNLO_iso_met/gnuplot/histograms/%s.hist" % opts['matrix_hist']
         h_matrix_p = ReadTxtHist(matrix_p)
         h_matrix_m = ReadTxtHist(matrix_m)
         h_matrix_p_sc_lo = ReadTxtHist(matrix_p, column=3)
@@ -369,7 +440,7 @@ if args.ratio:
         r_ref_hists_1D[i].Draw('E2SAME')
         h_store['r_ref_hists_1D_%i_line' % i] = ZeroErrors(r_ref_hists_1D[i].Clone())
         h_store['r_ref_hists_1D_%i_line' % i].Draw('LSAME')
-        if settings[args.selection]['show_matrix']:
+        if opts['show_matrix']:
             h_store['r_matrix'] = plot.MakeRatioHist(h_matrix, ref_hists_1D[i], True, False)
             for ib in xrange(1, h_store['r_matrix'].GetNbinsX() + 1):
                 h_store['r_matrix'].SetBinContent(ib, h_store['r_matrix'].GetBinContent(ib) - 1.0)
@@ -400,7 +471,7 @@ pads[0].cd()
 # plot.DrawCMSLogo(pads[0], 'CMS', 'Internal', 0, 0.24, 0.035, 1.2, cmsTextSize=0.9)
 plot.DrawCMSLogo(pads[0], 'CMS', 'Internal', 11, 0.045, 0.05, 1.0, '', 1.0)
 
-plot.DrawTitle(pads[-1], '136.9 fb^{-1} (13 TeV)', 3)
+plot.DrawTitle(pads[-1], '137 fb^{-1} (13 TeV)', 3)
 plot.DrawTitle(pads[0], 'W^{%s}(l^{%s}#nu)#gamma' % (chg_labels[args.charge], chg_labels[args.charge]), 1)
 
 canv.Print('.png')

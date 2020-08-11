@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import ROOT
 import CombineHarvester.CombineTools.ch as ch
 # import os
 import argparse
@@ -10,7 +10,7 @@ parser.add_argument('--year', default='2016')
 parser.add_argument('--label', default='default')
 parser.add_argument('--channel', default='m')
 parser.add_argument('--output', default='output/cards')
-parser.add_argument('--type', default='eft_region', choices=['eft_region', 'pt_diff', 'fid_region'])
+parser.add_argument('--type', default='eft_region', choices=['baseline', 'eft_region', 'pt_diff', 'fid_region'])
 parser.add_argument('--pt-bins', type=int, default=6)
 parser.add_argument('--phi-bins', type=int, default=5)
 args = parser.parse_args()
@@ -28,11 +28,11 @@ DO_WORST_ISO = 2  # 0 = No, 1 = Only the cut for photon fakes, 2 = full
 if DO_WORST_ISO >= 2:
     N_FAKE_BINS = 16
 
-charges = ['p', 'n']
-if args.type == 'eft_region' and 'nochg' in args.label:
-    charges = ['x']
+charges = ['x']
+if args.type == 'eft_region' and 'chg' in args.label:
+    charges = ['p', 'n']
 fakes_name = 'data_fakes_highpt'
-if args.type == 'fid_region':
+if args.type in ['baseline', 'fid_region']:
     charges = ['x']
     fakes_name = 'data_fakes_sub'
 
@@ -41,8 +41,12 @@ for c in charges:
     for ptbin in range(n_pt_bins):
         cat = (ptbin, '%s_%s_%i' % (c, chn, ptbin))
         cb.AddObservations(['*'], ['wg'], [era], [chn], [cat])
-        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c, 'DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'ST_R', 'ST_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', fakes_name], [cat], False)
-        if args.type in ['fid_region']:
+        cb.AddProcesses(['*'], ['wg'], [era], [chn], ['DY_XZG_R', 'ZG_IZG_R', 'DY_E', 'VV_R', 'VV_E', 'ST_R', 'ST_E', 'TT_XTTG_R', 'TTG_ITTG_R', 'TT_E', 'GG_R', 'GG_E', fakes_name], [cat], False)
+        if args.type in ['baseline']:
+            cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_R'], [cat], True)
+        if args.type in ['fid_region', 'eft_region']:
+            cb.AddProcesses(['*'], ['wg'], [era], [chn], ['WG_ooa_%s' % c], [cat], False)
+        if args.type in ['baseline', 'fid_region']:
             cb.AddProcesses(['*'], ['wg'], [era], [chn], ['data_fakes_lep_sub'], [cat], False)
         if args.type in ['eft_region', 'pt_phi_diff']:
             if ptbin == 0:
@@ -154,6 +158,10 @@ cb.cp().process(['data_fakes_lep_sub']).AddSyst(
     (['m'], ['2018'], 1.18)
     )
 
+if args.type in ['baseline']:
+    cb.cp().process(['WG_R']).AddSyst(
+        cb, 'QCDScale', 'shape', ch.SystMap()(1.0))
+
 ##### QCD scale uncertainty
 if args.type in ['fid_region']:
     cb.cp().process(['WG_main_.*']).AddSyst(
@@ -239,8 +247,12 @@ file = 'output_%s_%s_%s_merged.root' % (args.year, args.type, args.label)
 if not alt_shapes:
     file = 'output_%s_%s_%s.root' % (args.year, args.type, args.label)
 
-cb.cp().ExtractShapes(
-    file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
+if args.type == 'baseline':
+    cb.cp().ExtractShapes(
+        file, '%s/baseline_%s_mZ_veto/%s/$PROCESS' % (args.channel, args.channel, args.var), '%s/baseline_%s_mZ_veto/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.channel, args.var))
+else:
+    cb.cp().ExtractShapes(
+        file, '%s/$BIN/%s/$PROCESS' % (args.channel, args.var), '%s/$BIN/%s/$PROCESS_$SYSTEMATIC' % (args.channel, args.var))
 
 cb.ForEachObj(lambda x: x.set_bin(x.bin() + '_' + args.year))
 
@@ -257,7 +269,7 @@ decorrelate_years = [
     'CMS_scale_met_unclustered'
 ]
 
-if args.type in ['fid_region']:
+if args.type in ['fid_region', 'baseline']:
     decorrelate_proc = [
         'QCDScale',
         'QCDScaleAccept',
@@ -322,18 +334,31 @@ def CorrectionNegativeYield(proc):
         proc.set_rate(0.)
 
 
-
 def CollectZeroYields(proc, res):
     if proc.rate() == 0.:
         res.add((proc.bin(), proc.process()))
+
+
+def SetDummyTemplate(proc):
+    if proc.rate() == 0.:
+        h = proc.ShapeAsTH1F()
+        h.SetBinContent(int(h.GetNbinsX() / 2), 1E-7)
+        h.Print('range')
+        proc.set_shape(h, True)
+
 
 cb.ForEachProc(lambda x: CorrectionNegativeYield(x))
 
 zero_yields = set()
 cb.ForEachProc(lambda x: CollectZeroYields(x, zero_yields))
 print zero_yields
-cb.FilterProcs(lambda x: (x.bin(), x.process()) in zero_yields)
-cb.FilterSysts(lambda x: (x.bin(), x.process()) in zero_yields)
+if args.type in 'baseline':
+    cb.ForEachProc(lambda x: SetDummyTemplate(x))
+    cb.FilterSysts(lambda x: (x.bin(), x.process()) in zero_yields)
+    cb.ForEachObj(lambda x: x.set_bin('%s_%s_%s' % (args.channel, args.var, args.year)))
+else:
+    cb.FilterSysts(lambda x: (x.bin(), x.process()) in zero_yields)
+    cb.FilterProcs(lambda x: (x.bin(), x.process()) in zero_yields)
 
 
 cb.SetAutoMCStats(cb, 0., True)

@@ -27,8 +27,13 @@ mod_cfg = {
         'draw_opts': 'HIST',
         'legend_opts': 'F',
         'marker_size': 0.6,
-        'line_width': 1
-    }
+        'line_width': 1,
+        'line_style': 1
+    },
+    'legend_pos': [0.39, 0.78, 0.93, 0.93],
+    'legend_cols': 2,
+    'ratio': True,
+    # 'purity': True
 }
 
 config_by_setting = {
@@ -41,9 +46,13 @@ config_by_setting = {
         ('m/*/l0met_mt', ('m_{T}(#mu,p_{T}^{miss})', 'GeV')),
         ('e/*/l0met_mt', ('m_{T}(e,p_{T}^{miss})', 'GeV')),
         ('m/*/l0_pt', ('Muon p_{T}', 'GeV')),
+        ('m_l0_pt_*', ('Muon p_{T}', 'GeV')),
         ('e/*/l0_pt', ('Electron p_{T}', 'GeV')),
+        ('e_l0_pt_*', ('Electron p_{T}', 'GeV')),
         ('m/*/l0_eta', ('Muon #eta', '')),
+        ('m_l0_eta_*', ('Muon #eta', '')),
         ('e/*/l0_eta', ('Electron #eta', '')),
+        ('e_l0_eta_*', ('Electron #eta', '')),
         ('m/*/l0_phi', ('Muon #phi', '')),
         ('e/*/l0_phi', ('Electron #phi', '')),
         ('m/*/l0_iso', ('Muon Iso', 'GeV')),
@@ -66,16 +75,21 @@ config_by_setting = {
         ('*/tk_met', ('Track p_{T}^{miss}', 'GeV')),
         ('*/tk_met_phi', ('Track p_{T}^{miss} #phi', '')),
         ('*/puppi_met', ('PUPPI p_{T}^{miss}', 'GeV')),
+        ('*_puppi_met_*', ('PUPPI p_{T}^{miss}', 'GeV')),
         ('*/puppi_met_phi', ('PUPPI p_{T}^{miss} #phi', '')),
         ('*/gen_p0_pt', ('Gen. Photon p_{T}', 'GeV')),
         ('*/p0_pt', ('Photon p_{T}', 'GeV')),
+        ('*_p0_pt_*', ('Photon p_{T}', 'GeV')),
         ('*/p0_eta', ('Photon #eta', '')),
+        ('*_p0_eta_*', ('Photon #eta', '')),
         ('*/p0_phi', ('Photon #phi', '')),
         ('*/p0_truth', ('Photon truth match', '')),
         ('m/*/l0p0_dr', ('#DeltaR(#mu,#gamma)', '')),
+        ('m_l0p0_dr_*', ('#DeltaR(#mu,#gamma)', '')),
         ('*/*/l0p0_deta', ('#Delta#eta(l,#gamma)', '')),
         ('m/*/l0p0_M', ('m_{#mu#gamma}', 'GeV')),
         ('e/*/l0p0_dr', ('#DeltaR(e,#gamma)', '')),
+        ('e_l0p0_dr_*', ('#DeltaR(e,#gamma)', '')),
         ('e/*/l0p0_M', ('m_{e#gamma}', 'GeV')),
         ('*/*/mt_cluster*', ('m_{T}^{cluster}', 'GeV')),
         ('*/p0_worstiso', ('Photon I_{worst}', 'GeV')),
@@ -143,6 +157,9 @@ variants_by_path = [
             "logy": True,
             "rebin": 2}),
     ("*/p0_pt", {
+            "prefix": "zoom_",
+            "x_range": (0, 200)}),
+    ("*_p0_pt_*", {
             "prefix": "zoom_",
             "x_range": (0, 200)}),
     ("*/l0l1_M", {

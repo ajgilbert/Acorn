@@ -326,8 +326,8 @@ r_nom.Draw('HISTE')
 r_hi.Draw('HISTSAME')
 r_lo.Draw('HISTSAME')
 
-r_nom.SetMinimum(0.9)
-r_nom.SetMaximum(1.1)
+r_nom.SetMinimum(0.7)
+r_nom.SetMaximum(1.3)
 
 canv.Print('test.pdf')
 # made_dirs = set()

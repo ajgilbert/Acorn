@@ -469,7 +469,7 @@ SummaryPlotsPhotonFakes({
     "ratio": [],
     "ratio_range": [0, 3.9],
     "y_range": [0, 0.2],
-    "y_label": 'p_{T}'
+    "y_label": '|#eta|'
     })
 
 SummaryPlotsPhotonFakes({

@@ -527,7 +527,8 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         'phi_bins': '(3,0.,math.pi/2.)',
         'phi_bins_obs': '(6,0.,math.pi/2.)',
         'jet_veto': False,
-        'split_charge': True
+        'split_charge': True,
+        'high_mt_cluster': False
     }
 
     if args.extra_cfg is not None:
@@ -538,6 +539,10 @@ if args.task == 'eft_region' or args.task == 'fid_region':
         X['fid_m'] += ' && n_cen_j==0'
         X['fid_e'] += ' && n_cen_j==0'
         X['gen_core'] += ' && gen_n_cen_j==0'
+    if eft_defaults['high_mt_cluster']:
+        X['fid_m'] += ' && mt_cluster > 150'
+        X['fid_e'] += ' && mt_cluster > 150'
+        X['gen_core'] += ' && gen_mt_cluster > 150'
     print X['fid_m']
 
     x_var = eft_defaults['x_var']
@@ -704,7 +709,7 @@ if args.task in ['baseline', 'electron_fakes']:
             eta_bins_min = [0, 1.4442]
             eta_bins_max = [1.4442, 2.5]
         X['baseline_wt'] = 'wt_def*wt_pu*wt_l0*wt_trg_l0*wt_p0*wt_pf'
-        wt_systs = {'e': [], 'm': []}
+        # wt_systs = {'e': [], 'm': []}
 
         for e_min, e_max in zip(eta_bins_min, eta_bins_max):
             for p_min, p_max in zip(pt_bins_min, pt_bins_max):
@@ -725,8 +730,10 @@ if args.task in ['baseline', 'electron_fakes']:
 
     # do_cats['e'].extend(['baseline_e_nopix', 'baseline_e', 'baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'cr_Zee'])
     # do_cats['m'].extend(['baseline_m_nopix', 'baseline_m', 'baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'cr_Zmm'])
-    do_cats['e'].extend(['baseline_e_mZ_veto', 'baseline_e_nomet', 'baseline_e'])
-    do_cats['m'].extend(['baseline_m_mZ_veto', 'baseline_m_nomet', 'baseline_m'])
+    # do_cats['e'].extend(['baseline_e_mZ_veto', 'baseline_e_met', 'baseline_e_nomet', 'baseline_e'])
+    # do_cats['m'].extend(['baseline_m_mZ_veto', 'baseline_m_met', 'baseline_m_nomet', 'baseline_m'])
+    do_cats['e'].extend(['baseline_e_mZ_veto'])
+    do_cats['m'].extend(['baseline_m_mZ_veto'])
 
     cat_to_wt = {
         'cr_Zee': '$cr_zll_wt',
@@ -770,12 +777,12 @@ if args.task in ['baseline', 'electron_fakes']:
         ('wt_p0_e_fake','wt_p0_e_fake', (100, 0, 4)),
         ('gen_mll','gen_mll', (100, -2, 98)),
         ('n_all_j','n_all_j', (5, -0.5, 4.5)),
+        ('l0met_mt',        'l0met_mt',        (30, 0., 200.)),
         ('n_all_btag_j','n_all_btag_j', (5, -0.5, 4.5))
     ]
 
     if args.syst == None:
         drawvars.extend([
-            ('l0met_mt',        'l0met_mt',        (30, 0., 200.)),
             ('l1_eta',          'l1_eta',          (20, -3.0, 3.0)),
             ('met_phi',         'met_phi',         (20, -3.15, 3.15)),
             ('puppi_met_phi',   'puppi_met_phi',   (20, -3.15, 3.15))
@@ -801,7 +808,6 @@ if args.task in ['baseline', 'electron_fakes']:
                     actual_wt_systs = wt_systs[chn]
                 else:
                     actual_wt_systs = list()
-                actual_wt_systs = list()
                 StandardHists(hists[chn][sel][dirname], var_list=[var], binning=binning, sel=('$' + sel), wt=wt, chn=chn, manager=X, wt_systs=actual_wt_systs, doSysts=(args.syst is None), doData=doData)
             # for sample in samples:
             #     hists['2D'][chn][sel]['l0_eta_phi'][sample] = Hist('TH2F', sample=sample, var=['l0_eta', 'l0_phi'], binning=(50, -3, 3, 50, -3.15, 3.15), sel=X.get('$' + sel), wt=X.get(wt))

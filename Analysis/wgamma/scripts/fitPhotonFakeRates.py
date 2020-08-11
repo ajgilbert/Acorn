@@ -9,7 +9,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 ROOT.TH1.SetDefaultSumw2(True)
-plot.ModTDRStyle(height=400)
+plot.ModTDRStyle(height=300)
 
 parser = argparse.ArgumentParser()
 
@@ -106,6 +106,13 @@ config = {
     ],
 }
 
+eta_ranges = {
+    'barrel1': ('0', '1.0'),
+    'barrel2': ('1.0', '1.4442'),
+    'endcap1': ('1.556', '2.1'),
+    'endcap2': ('2.1', '2.5'),
+}
+
 
 reslines = []
 
@@ -113,6 +120,8 @@ eta_regions = ['barrel1', 'barrel2', 'endcap1', 'endcap2']
 
 allresults = list()
 bkg_subtract = [1.0, 0.8, 1.2]
+
+ROOT.gStyle.SetOptFit(0)
 
 for bkg_sub in bkg_subtract:
     allresults.append(list())
@@ -179,6 +188,7 @@ for bkg_sub in bkg_subtract:
                 res['err'].SetStats(False)
                 res['err'].SetMarkerSize(0)
                 res['err'].SetFillColorAlpha(2, 0.3)
+                res['err'].SetLineColor(2)
                 fitres = results[proc]['func'].Eval(results[proc]['mean'])
                 fiterr = res['err'].GetBinError(res['err'].GetXaxis().FindFixBin(res['mean']))
                 res['fit_ratio'] = (fitres, fiterr)
@@ -186,7 +196,7 @@ for bkg_sub in bkg_subtract:
                 plot.Set(res['ratio'], MarkerSize=0.5)
                 res['ratio_cropped'] = res['ratio'].Clone()
                 for ib in xrange(1, res['ratio_cropped'].GetNbinsX() + 1):
-                    if res['ratio_cropped'].GetXaxis().GetBinCenter(ib) < 0:
+                    if res['ratio_cropped'].GetXaxis().GetBinCenter(ib) < fitmin:
                         res['ratio_cropped'].SetBinContent(ib, 0)
                         res['ratio_cropped'].SetBinError(ib, 0)
 
@@ -194,6 +204,7 @@ for bkg_sub in bkg_subtract:
                     plot.Set(res['ratio'], LineColor=14, MarkerColor=14, MarkerStyle=22)
                     plot.Set(res['func'], LineColor=15)
                     res['err'].SetFillColorAlpha(15, 0.2)
+                    res['err'].SetLineColor(14)
 
             res_MC = results['Total_J']
             res_data = results['data_sub']
@@ -224,12 +235,32 @@ for bkg_sub in bkg_subtract:
             axis = results['data_sub']['ratio_cropped'].Clone()
             axis.Clear()
             axis.SetMinimum(0.0)
-            axis.SetMaximum(5.0)
+            axis.SetMaximum(4.0)
+            plot.Set(axis.GetXaxis(), Title='Photon I_{charged} [GeV]')
+            plot.Set(axis.GetYaxis(), Title='#sigma_{i#etai#eta} extrapolation')
             axis.Draw()
             results['data_sub']['ratio_cropped'].Draw('ESAME')
             results['Total_J']['ratio'].Draw('ESAME')
             results['data_sub']['err'].Draw('E3SAME')
             results['Total_J']['err'].Draw('E3SAME')
+
+            legend = ROOT.TLegend(0.7, 0.70, 0.94, 0.93, '', 'NDC')
+            legend.AddEntry(results['data_sub']['ratio_cropped'], 'Data', 'EP')
+            legend.AddEntry(results['data_sub']['err'], 'Data (fit)',  'LF')
+            legend.AddEntry(results['Total_J']['ratio'], 'Simulation', 'EP')
+            legend.AddEntry(results['Total_J']['err'], 'Simulation (fit)', 'LF')
+            legend.Draw()
+
+            text = ROOT.TPaveText(0.50, 0.76, 0.65, 0.93, 'NDC')
+            # text.AddText(args.year)
+            text.AddText('p_{T} #in [%s, %s] GeV' % (pt_range[0].split('_')[0], pt_range[0].split('_')[1]))
+            text.AddText('|#eta| #in [%s, %s]' % eta_ranges[region])
+            text.SetTextAlign(13)
+            text.SetTextFont(42)
+            text.SetBorderSize(0)
+            text.Draw()
+            plot.DrawTitle(pads[0], args.year, 1)
+
 
             canv.Print('.pdf')
             canv.Print('.png')
@@ -280,12 +311,13 @@ for iy in xrange(1, h2d.GetNbinsY() + 1):
                 h2d_mc.SetBinError(ix, iy, math.sqrt(math.pow(val_mc[1], 2) + math.pow(common_syst * val_mc[0], 2)))
                 h2d_mc_true.SetBinContent(ix, iy, val_mc_true[0])
                 h2d_mc_true.SetBinError(ix, iy, val_mc_true[1])
-                print ptmin, ptmax, err_stat, err_const, err_bkg, err_tot
                 h2d_stat.SetBinError(ix, iy, err_stat)
                 h2d_const_syst.SetBinError(ix, iy, err_const)
                 h2d_bkg_syst.SetBinError(ix, iy, err_bkg)
                 h2d.SetBinError(ix, iy, err_tot)
                 h2d_index.SetBinContent(ix, iy, curr_index)
+                if (ix == 1) or (ipt + 1) > curr_x_bin:
+                    print '%-10.0f %-10.0f %-10.2f %-10.2f %-10.2f %-10.2f' % (ptmin, ptmax, err_stat, err_const, err_bkg, err_tot)
                 if (ipt + 1) > curr_x_bin:
                     curr_index += 1
                     curr_x_bin = ipt + 1
@@ -295,8 +327,8 @@ for iy in xrange(1, h2d.GetNbinsY() + 1):
 fout = ROOT.TFile(args.output, 'RECREATE')
 
 
-h2d.Print('range')
-h2d_index.Print('range')
+# h2d.Print('range')
+# h2d_index.Print('range')
 
 ROOT.gDirectory.WriteTObject(h2d, 'photon_fakes')
 ROOT.gDirectory.WriteTObject(h2d_index, 'photon_fakes_index')
