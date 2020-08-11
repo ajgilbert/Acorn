@@ -23,6 +23,4 @@
   <class name="std::vector<ac::PFJet>"/>
   <class name="std::map<unsigned, std::set<unsigned>>"/>
   <class name="RunLumiMap"/>
-  <class name="WGammaRivetVariables"/>
-  <class name="edm::Wrapper<WGammaRivetVariables>"/>
 </lcgdict>
