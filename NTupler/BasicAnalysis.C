@@ -7,28 +7,28 @@
 #include <string>
 #include <iostream>
 
-
 #include "Acorn/NTupler/interface/GenParticle.h"
 
 int BasicAnalysis() {
 	std::vector<std::string> inputFiles = {
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_1.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_10.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_11.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_12.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_13.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_14.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_15.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_16.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_17.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_2.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_3.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_4.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_5.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_6.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_7.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_8.root",
-		"root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_9.root"
+					       "/home/mmackenz/storage/TGJets/EventTree_1.root"
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_1.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_10.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_11.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_12.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_13.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_14.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_15.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_16.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_17.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_2.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_3.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_4.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_5.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_6.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_7.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_8.root",
+		// "root://eoscms.cern.ch//store/group/phys_smp/agilbert/wgamma_2018_v5/TGJets_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/TGJets_leptonDecays-amcatnlo/200427_185831/0000/EventTree_9.root"
 	};
 
 	unsigned maxEvents = 10;

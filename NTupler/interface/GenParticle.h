@@ -4,7 +4,7 @@
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
 #include "Acorn/NTupler/interface/Candidate.h"
-#include "DataFormats/HepMCCandidate/interface/GenStatusFlags.h"
+#include "Acorn/NTupler/interface/GenStatusFlags.h"
 #include "Rtypes.h"
 
 
