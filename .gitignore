@@ -1,6 +1,14 @@
 __init__.py
+
+*.log
+*.tmp
+*.o
+*~
+
 *.pyc
 *.root
+*.hist
+*.tree
 *.pdf
 *.png
 *.csv
