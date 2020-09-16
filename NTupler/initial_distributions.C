@@ -10,6 +10,7 @@
 
 #include "Acorn/NTupler/interface/Candidate.h"
 #include "Acorn/NTupler/interface/GenParticle.h"
+#include "Acorn/NTupler/interface/Met.h"
 
 //TString outfile_ = "basic_analysis_3.hist";
 
@@ -53,7 +54,7 @@ bool check_overlap_bjet(ac::Candidate const& jet_1, ac::Candidate const* jet_2){
 }
 
 
-//Functions to select next highest pT particle
+//Functions to select highest pT particle; Not used
 
 
 ac::GenParticle const* select_highest_particle(std::vector<ac::GenParticle> particles){
@@ -118,6 +119,8 @@ ac::Candidate const* select_jet(std::vector<ac::Candidate> jets, ac::Candidate c
         return jet;
 }
 
+
+//Functions used for sorting by descending pT
 bool compare_pt_parts(ac::GenParticle const& part_1, ac::GenParticle const& part_2){
 	TLorentzVector part_lv_1, part_lv_2;
         part_lv_1.SetPtEtaPhiM(part_1.pt(), part_1.eta(), part_1.phi(), part_1.M());
@@ -223,20 +226,23 @@ int initial_distributions(){
 		TTreeReader reader("EventTree", f);
 		TTreeReaderValue<std::vector<ac::GenParticle>> genParts(reader, "genParticles");
 		TTreeReaderValue<std::vector<ac::Candidate>> genJets(reader, "genJets");
-
+		TTreeReaderValue<std::vector<ac::Met>> genMet(reader, "genMet");
+		
+		
 		while (reader.Next()) {
 			if(iEvt % 10000 == 0) std::cout << "Processing event " << iEvt << "...\n";
 			++iEvt; //increment
 			
 			ac::GenParticle const* neutrino = nullptr;
 
-			ROOT::Math::PtEtaPhiMVector met; //Define MET vector
 			
 			std::vector<ac::GenParticle> bquarks;
 			
 			std::vector<ac::GenParticle> photons;
                         std::vector<ac::GenParticle> leptons;
-
+	
+			ac::Candidate const* met = nullptr;
+			
 			//for (auto const& part : *genParts){
 			for(ac::GenParticle const& part : *genParts){
 				//part.Print();
@@ -270,7 +276,7 @@ int initial_distributions(){
 
 					
 
-					met += neutrino->vector();
+				
 				}
 				//look for b quarks
 				if(abs(part.pdgId()) == 5) {
@@ -281,6 +287,10 @@ int initial_distributions(){
 
 
 			
+			for(auto const& m : *genMet){
+				met = &m;
+			}
+				
 
 			//end gen particle loop
 			//begin b-jet identification
@@ -304,15 +314,10 @@ int initial_distributions(){
 				
 
 
-			//SORT VECTORS BY PT
-				ac::GenParticle const* temp_lepton = nullptr;
-				ac::GenParticle const* temp_photon = nullptr;
-				ac::Candidate const* temp_bjet = nullptr;
-				ac::Candidate const* temp_jet = nullptr;
-				
-
-				
-				
+				//ac::GenParticle const* temp_lepton = nullptr;
+				//ac::GenParticle const* temp_photon = nullptr;
+				//ac::Candidate const* temp_bjet = nullptr;
+				//ac::Candidate const* temp_jet = nullptr;
 				
 				
 				
@@ -320,7 +325,9 @@ int initial_distributions(){
 	                        ac::Candidate const* jet = nullptr;
         	                ac::GenParticle const* photon = nullptr;
                        		ac::GenParticle const* lepton = nullptr;
-
+		
+				//Sort vectors from highest pT to lowest, then select particles
+				//that pass overlap test
 
 				if(leptons.size() != 0 && photons.size() != 0 && bjets.size() != 0 && jets.size() != 0){
 					sort(leptons.begin(), leptons.end(), compare_pt_parts);
@@ -351,19 +358,6 @@ int initial_distributions(){
 						if(jet){break;}
 					}
 				}
-
-
-							
-								
-					
-					
-		
-
-
-			
-
-
-
 	
 			
 
@@ -372,9 +366,8 @@ int initial_distributions(){
 						
 			
 
-			//implement basic event selection
-			//Require each object
-			if(photon && lepton && bjet && jet && met.pt()>ET_miss){			
+			//implement final cuts. Require objects and MET cut
+			if(photon && lepton && bjet && jet && met->pt()>ET_miss){			
 			
 
 				hPhotonPt->Fill(photon->pt());
@@ -396,7 +389,7 @@ int initial_distributions(){
 				hNBJets->Fill(bjets.size());
 				hNJets->Fill(jets.size());
 
-				hMET->Fill(met.pt());
+				hMET->Fill(met->pt());
 				       
 		
 			
@@ -412,17 +405,7 @@ int initial_distributions(){
 	}
 
 
-
-
-        //TCanvas* c6 = new TCanvas("c6", "c6", 1000, 1000);
-        //phi_hists_s->Draw();
-
-        //gPad->BuildLegend(0.75, 0.75, 0.95, 0.95, "");
-
-	//TCanvas* c7 = new TCanvas("c7", "c7", 1000, 1000);
-	//njets_hists->Draw();
-
-	//gPad->BuildLegend(0.75, 0.75, 0.95, 0.95, "");
+	//Draw histograms
 	
 	//TCanvas* c8 = new TCanvas("c8", "c8", 1000,1000);
 	//hLeptonPt_s->Draw();
@@ -510,7 +493,6 @@ int initial_distributions(){
 
         //TCanvas* c29 = new TCanvas("c29", "c29", 1000,1000);
         //hBJetPhi->Draw();
-
 	//hBJetPhi->GetXaxis()->SetTitle("phi");
 
         //TCanvas* c30 = new TCanvas("c30", "c30", 1000,1000);
