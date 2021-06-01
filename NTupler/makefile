@@ -1,7 +1,9 @@
 CXX      := g++
 LD       := g++
-CXXFLAGS := -Wall -Wextra -Werror -O2 -std=c++1y -g -I../../ $(shell root-config --cflags)
-LDFLAGS  := -shared -Wall -Wextra $(shell root-config --libs)
+BOOSTDIR := /cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/boost/1.63.0-gnimlf
+PYDIR := /cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/python/2.7.14-omkpbe4
+CXXFLAGS := -Wall -Wextra -O2 -std=c++1y -g -I../../ $(shell root-config --cflags) -I$(BOOSTDIR)/include -I$(PYDIR)/include/python2.7
+LDFLAGS  := -shared -Wall -Wextra $(shell root-config --libs) -L $(BOOSTDIR)/lib -lboost_python -L$(PYDIR)/lib -lpython2.7
 SRC 	 := $(wildcard src/*.cc)
 BINSRC 	 := $(wildcard test/*.cpp)
 OBJS     := $(SRC:src/%.cc=obj/lib/%.o)
